@@ -482,4 +482,44 @@ Use recursive method. We apply the function at $t_1$'s left with $t_2$'s left, a
 	\clearpage
 \end{CJK*}
 
+\subsection{639 -- Decode Ways II}
+\begin{figure}[H]
+	\begin{center}
+		\includegraphics[width=18cm]{639.png}
+	\end{center}
+\end{figure}
+\textbf{\large{Note:}}
+\par
+\vspace{0.5em}
+\begin{CJK*}{UTF8}{gbsn}
+	\begin{itemize}
+		\item 基于\textbf{Dynamic Programming}，假设当前字符\texttt{index}为$i$。 
+		\item 如果$i=0$， 如果当前字符为$\star$，则有\textbf{9 ways}， 否则为\textbf{1 way}。
+		\item 从第二个字符开始循环，分为三种情形。用$n_0$代表decode $S[0\mathellipsis i-2]$的ways， $n_1$代表decode $S[0\mathellipsis i-1]$的ways， $n_2$代表decode $S[0\mathellipsis i]$的ways
+		\begin{enumerate}
+			\item 如果为$\star$， 如果只decode这个字符，那么有9 ways，那么这时候产生的$n_2 = 9\times n_1$。但如果需要把当前这个字符和前一个字符结合起来一起decode，则有以下几种情形。
+				\begin{enumerate}
+					\item 如果前一个字符是2，那么因为最多只能decode 从$21\rightarrow 26$，所以总共有6 ways。所以$n2 = n_2 + n_0 \times 6$。
+					\item 如果前一个字符是1,那么可以decode 从$11\rightarrow 19$， 有9 ways， 所以$n_2 = n_2 + n_0\times 9$。
+					\item 如果前一个字符也是$\star$， 那么可以decode 从$11\rightarrow 19$ 和 $21\rightarrow 26$，总共$6+9=15$。 注意不会产生$20$，因为$\star$不能decode为zero。所 以$n_2 = n_2 + n_0\times 15$
+					\item 如果是剩下的其他字符，都不可能decode，所以为$n_2$不变。
+				\end{enumerate}		
+			\item 如果为0， 那么因为0本身是不能被decode的，所以必须结合前一个字符一起进行decode。类似的，也有如下情形。
+				\begin{enumerate}
+					\item 前一个字符为2或者为1，只能decode $20$或者$10$，都只有one way， 所以$n_2 = n_0 \times 1$。
+					\item 前一个字符为$\star$，那么$\star$能够给出的也只有1和2， 所以有2 ways， 于是$n_2 = n_0 \times 2$。
+					\item 在其他情形下，都不可能decode，这时候$n_2 = n_0 \times 0 = 0$。
+				\end{enumerate}
+			\item 如果为其他字符，那么decode这个字符本身只有one way， 所以$n_2 = n_1 \times 1$。然后把当前这个字符和前一个字符结合起来一起decode，则一样会有以下几种情形。
+				\begin{enumerate}
+					\item 前一个字符为1，可以decode，但只有 one way， 所以$n_2 = n_2 + n_0 \times 1$。
+					\item 前一个字符为2，这时候要看当前字符了，如果当前字符是$1 \rightarrow 6$， 那么可以decode，也是只有one way。 于是$n_2 = n_2 + n_0 \times 1$。
+					\item 如果前一个字符是$\star$，同样也要看当前字符，如果当前字符也是$1 \rightarrow 6$，那么$\star$可以是1或者2，总共是2 ways，所以这时候$n_2=n_2 + n_0\times 2$。但是，如果当前字符是$ 7 \rightarrow 9$，$\star$只能是1，总共有1 way，这时候$n_2 = n_2 + n_0\times 1$。
+				\end{enumerate}
+		\end{enumerate}
+	\item 继续到下一个字符之前，$n_0=n_1$， $n_1 = n_2$。因为只需要考虑当前的三个计数值。
+	\item 最后返回$n_2$
+	\end{itemize}
+	\clearpage
+	\end{CJK*}
 \end{document}
