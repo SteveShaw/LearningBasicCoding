@@ -557,6 +557,79 @@ The implementation is similar to previous one. We still use the same insert func
 \end{algorithm}
 Search function $f$ is straightforward. It will search words by the prefix $\alpha$ and suffix $\beta$ through the combined string $\alpha + \texttt{\#} + \beta$. Skip the code here. 
 
+\section{744 --- Find Smallest Letter Greater Than Target}
+Given a list of sorted characters letters $A$ containing only lowercase letters, and given a target letter target $T$, find the smallest element in the list that is larger than the given target.
+\par
+Letters also wrap around. For example, if the target $T$ is $z$ and letters $A = [a, b]$, the answer is $a$.
+\paragraph{Examples:}
+\begin{flushleft}
+\textbf{Input:} $A=(c,f,j), T=a$
+\\
+\textbf{Output:} $c$
+\\
+\textbf{Input:} $A=(c,f,j), T=k$
+\\
+\textbf{Output:} $c$
+\end{flushleft}
+\paragraph{Note:}
+\begin{flushleft}
+letters has a length in range $[2, 10000]$.
+\\
+letters consists of lowercase letters, and contains at least 2 unique letters.
+\\
+target is a lowercase letter.
+\end{flushleft}
+\subsection{Binary Search}
+This is the rightmost binary search. If the found index pass the end of $A$, we wrap it into the first letter of $A$
+
+
+\section{746 --- Min Cost Climbing Stairs}
+On a staircase, the $i$--th step has some non-negative cost $\nu[i]$ assigned (0 indexed).
+\par
+Once you pay the cost, you can either climb one or two steps. You need to find minimum cost to reach the top of the floor, and you can either start from the step with index 0, or the step with index 1.
+\paragraph{Example 1:}
+\begin{flushleft}
+\textbf{Input}: $\nu = [10, 15, 20]$
+\\
+\textbf{Output}: 15
+\\
+\textbf{Explanation}: Cheapest is start on $\nu[1]$, pay that cost and go to the top.
+\end{flushleft}
+\paragraph{Example 2:}
+\begin{flushleft}
+\textbf{Input}: $\nu = [1, 100, 1, 1, 1, 100, 1, 1, 100, 1]$
+\\
+\textbf{Output}: 6
+\\
+\textbf{Explanation}: Cheapest is start on $\nu[0]$, and only step on 1s, skipping $\nu[3]$.
+\end{flushleft}
+\paragraph{Note:}
+cost $\nu$ will have a length in the range $[2, 1000]$.
+\\
+Every cost $\nu[i]$ will be an integer in the range $[0, 999]$.
+\subsection{Dynamic Programming}
+This is a typical problem can be solved using dynamic programming approach. Suppose $F[i]$ is the minimum cost to reach index $i$. Given that we can either take 1 step or 2 steps, the recursive relationship is $F[i] = \min(F[i-1]+\nu[i-1], F[i-2]+\nu[i-2]$. At start, $F[0]$ and $F[1]$ both are zeros because we do not need to pay to go index $0$ and $1$.
+\subsubsection{Code}
+In real implementation, since $F[i]$ only depends on $F[i-1]$ and $F[i-2]$, we only need two variables $\alpha$ and $\beta$ to record $F[i-2]$ and $F[i-1]$.
+\par
+The procedure \texttt{MinCostClimbingStairs} get minimum cost to reach index $N-1$ from the input cost array $\nu$ with length $N$
+\setcounter{algorithm}{0}
+\begin{algorithm}[H]
+\caption{Dynamic Programming Approach}
+\begin{algorithmic}[1]
+\Procedure{MinCostClimbingStairs}{$\nu, N$}
+\State $\alpha:=0,\beta:=0$ \Comment $F[i-2]$ and $F[i-1]$.
+\State $F:=0$
+\For{$i:=2$ \textbf{to} $N-1$}
+\State $F\gets \min(\alpha + \nu[i-2], \beta + \nu[i-1])$ \Comment The recursive relationship
+\State $\alpha\gets \beta$ \Comment $F[i-2]\gets F[i-1]$
+\State $\beta\gets F$ \Comment $F[i-1]\gets F$
+\EndFor
+\State \Return $F$
+\EndProcedure
+\end{algorithmic}
+\end{algorithm}
+
 \section{749 --- Contain Virus}
 A virus is spreading rapidly, and your task is to quarantine the infected area by installing walls.
 \par
@@ -638,29 +711,7 @@ Notice that walls are only built on the shared boundary of two different cells.
 
 
 
-
-\section{744 --- Find Smallest Letter Greater Than Target}
-Given a list of sorted characters letters $A$ containing only lowercase letters, and given a target letter target $T$, find the smallest element in the list that is larger than the given target.
-\par
-Letters also wrap around. For example, if the target $T$ is $z$ and letters $A = [a, b]$, the answer is $a$.
-\paragraph{Examples:}
-\begin{flushleft}
-\textbf{Input:} $A=(c,f,j), T=a$
-\\
-\textbf{Output:} $c$
-\\
-\textbf{Input:} $A=(c,f,j), T=k$
-\\
-\textbf{Output:} $c$
-\end{flushleft}
-\paragraph{Note:}
-\begin{flushleft}
-letters has a length in range $[2, 10000]$.
-\\
-letters consists of lowercase letters, and contains at least 2 unique letters.
-\\
-target is a lowercase letter.
-\end{flushleft}
-\subsection{Binary Search}
-This is the rightmost binary search. If the found index pass the end of $A$, we wrap it into the first letter of $A$
 \end{document}
+
+
+
