@@ -557,6 +557,88 @@ The implementation is similar to previous one. We still use the same insert func
 \end{algorithm}
 Search function $f$ is straightforward. It will search words by the prefix $\alpha$ and suffix $\beta$ through the combined string $\alpha + \texttt{\#} + \beta$. Skip the code here. 
 
+\section{749 --- Contain Virus}
+A virus is spreading rapidly, and your task is to quarantine the infected area by installing walls.
+\par
+The world is modeled as a 2-D array of cells $M$, where 0 represents uninfected cells, and 1 represents cells contaminated with the virus. A wall (and only one wall) can be installed between any two 4-directionally adjacent cells, on the shared boundary.
+\par
+Every night, the virus spreads to all neighboring cells in all four directions unless blocked by a wall. Resources are limited. Each day, you can install walls around only one region -- the affected area (continuous block of infected cells) that threatens the most uninfected cells the following night. There will never be a tie.
+\par
+Can you save the day? If so, what is the number of walls required? If not, and the world becomes fully infected, return the number of walls used.
+\paragraph{Example 1:}
+\begin{flushleft}
+\textbf{Input}:
+\begin{figure}[H]
+\begin{tikzpicture}
+\matrix[matrix of nodes]
+{
+0 & 1 & 0 & 0 & 0 & 0 & 0 & 1\\
+0 & 1 & 0 & 0 & 0 & 0 & 0 & 1\\
+0 & 0 & 0 & 0 & 0 & 0 & 0 & 1\\
+0 & 0 & 0 & 0 & 0 & 0 & 0 & 0\\
+};
+\end{tikzpicture}
+\end{figure}
+\textbf{Output}: 10
+\\
+\textbf{Explanation}:
+\\
+There are 2 contaminated regions. On the first day, add 5 walls to quarantine the viral region on the left. The board after the virus spreads is:
+\begin{figure}[H]
+\begin{tikzpicture}
+\matrix[matrix of nodes]
+{
+0 & 1 & 0 & 0 & 0 & 0 & 1 & 1\\
+ 0 & 1 & 0 & 0 & 0 & 0 & 1 & 1\\
+ 0 & 0 & 0 & 0 & 0 & 0 & 1 & 1\\
+ 0 & 0 & 0 & 0 & 0 & 0 & 0 & 1\\
+};
+\end{tikzpicture}
+\end{figure}
+On the second day, add 5 walls to quarantine the viral region on the right. The virus is fully contained.
+\end{flushleft}
+\paragraph{Example 2:}
+\begin{flushleft}
+\textbf{Input}:
+\begin{figure}[H]
+\begin{tikzpicture}
+\matrix[matrix of nodes]
+{
+1 & 1 & 1\\
+1 & 0 & 1\\
+1 & 1 & 1\\
+};
+\end{tikzpicture}
+\end{figure}
+\textbf{Output}: 4
+\\
+\textbf{Explanation}: 
+\\
+Even though there is only one cell saved, there are 4 walls built.
+\\
+Notice that walls are only built on the shared boundary of two different cells.
+\end{flushleft}
+\paragraph{Example 3:}
+\begin{flushleft}
+\textbf{Input}:
+\begin{figure}[H]
+\begin{tikzpicture}
+\matrix[matrix of nodes]
+{
+1 & 1 & 1 & 0 & 0 & 0 & 0 & 0 & 0\\
+1 & 0 & 1 & 0 & 1 & 1 & 1 & 1 & 1\\
+1 & 1 & 1 & 0 & 0 & 0 & 0 & 0 & 0\\
+};
+\end{tikzpicture}
+\end{figure}
+\textbf{Output}: 13
+\\
+\textbf{Explanation}: The region on the left only builds two new walls.
+\end{flushleft}
+
+
+
+
 \section{744 --- Find Smallest Letter Greater Than Target}
 Given a list of sorted characters letters $A$ containing only lowercase letters, and given a target letter target $T$, find the smallest element in the list that is larger than the given target.
 \par
