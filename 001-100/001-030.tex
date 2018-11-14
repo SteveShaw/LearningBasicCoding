@@ -103,17 +103,17 @@ Given a string $S$, find the length of the longest substring without repeating c
 \\
 \textbf{Explanation}: The answer is \texttt{wke}, with the length of 3. Note that the answer must be a substring, \texttt{pwke} is a subsequence and not a substring.
 \end{flushleft}
-\subsection{hash map}
+\subsection{Hash Map Approach}
 \begin{CJK*}{UTF8}{gbsn}
 用一个\texttt{hashmap}来记录每个字符出现的位置，并逐步更新最新的位置。这是因为如果字符$s[j]$在$s[\alpha\ldots j-1]$中在$k$处重复，那么只需要把$\alpha$更新到$k+1$就可以了。
-\clearpage
 \end{CJK*}
+\subsubsection{Code}
+Procedure \texttt{GetLongestSubstring} returns the longest slide window for input string $S$.
 \begin{algorithm}[H]
 \caption{Get longest substring without duplicates}
 \begin{algorithmic}[1]
-\Statex
 \Procedure{GetLongestSubstring}{$S$}
-\State \textbf{initialize} $M$ as $M[0]=\ldots=M[255]:=-1$.
+\State $M$ as $M[0]=\ldots=M[255]:=-1$.
 \State $\alpha := 0 $
 \State $\beta := 0$ \Comment The maximum length so far
 \For{$i := 0$ \textbf{to} $|S|$}
@@ -125,16 +125,28 @@ Given a string $S$, find the length of the longest substring without repeating c
 \EndFor
 \State \Return $\beta$
 \EndProcedure
-\Statex
 \end{algorithmic}
 \end{algorithm}
 
 \section{4 --- Median of Two Sorted Arrays}
-\begin{figure}[H]
-	\begin{center}
-		\includegraphics[width=18cm]{004.png}
-	\end{center}
-\end{figure}
+There are two sorted arrays $A$ and $B$ of size $m$ and $n$ respectively.
+\par
+Find the median of the two sorted arrays. The overall run time complexity should be $O(\log (m+n))$.
+\par
+You may assume $A$ and $B$ cannot be both empty.
+\paragraph{Example 1:}
+\begin{flushleft}
+\textbf{Input}: $A = [1, 3]$, $B = [2]$
+\\
+The median is 2.0
+\end{flushleft}
+\paragraph{Example 2:}
+\begin{flushleft}
+\textbf{Input}: $A = [1, 2]$, $B = [3, 4]$
+\\
+The median is $(2 + 3)/2 = 2.5$
+\end{flushleft}
+\subsection{Binary Search Approach}
 \textbf{\large{Note:}}
 \par
 \vspace{0.5em}
@@ -152,34 +164,26 @@ A[P_A - 1] \leq B[P_B] \quad \mathtt{and} \quad B[P_B - 1] \leq A[P_A]
 这是因为$A[P_A-1]$个和$B[P_B-1]$是处于两个数组合并后处于\texttt{median}处的元素，如果不能满足以上关系，$A[P_A-1]$个或者$B[P_B-1]$就不再是处于\texttt{median}处的元素了。
 \item 由于$P_A$的取值范围是$0\to L_A$，所以$P_B$的取值范围就是$(L_B-L_A+1)/2 \to (L_A+L_B+1)/2$。为了保证$P_B$的最小值仍然大于等于0，可以强制设定$L_B$为$A$, $B$中的较长数组。
 \end{itemize}
-\clearpage
 \end{CJK*}
+\subsubsection{Code}
+Procedure \texttt{FindMedian} returns the median value of $A$ and $B$ with size $m$ and $n$ respectively.
 \setcounter{algorithm}{0}
 \begin{algorithm}[H]
-\caption{Find median in merged arrays}
+\caption{Binary Search Approach}
 \begin{algorithmic}[1]
-\Statex
-\Procedure{FindMedian}{$A$, $B$}
-\State $M: = (L_A + L_B + 1)/2$ \Comment set half length for the merged array
-\If{$L_A > L_B$}
+\Procedure{FindMedian}{$A, m, B, n$}
+\State $\ell: = (m + n + 1)/2$ \Comment set half length for the merged array
+\If{$m > n$}
 \State \textbf{swap} $A$ and $B$ \Comment make sure $B$ is the \textbf{longer} array
 \EndIf
-\State $l := 0$ and $r:=L_A$ \Comment set binary search's 2 ends
-\algstore{myalg}
-
-\end{algorithmic}
-\end{algorithm}
-
-\begin{algorithm}[H]
-\begin{algorithmic}[1]
-\algrestore{myalg}
+\State $l := 0$ and $r:=m$ \Comment Start binary search
 \While{$l \leq r$}
-\State $P_A \gets (l+r)/2$ \Comment get middle point in $A$
-\State $P_B \gets M - P_A$ \Comment get number of elements need to be from $B$
+\State $P_A := (l+r)/2$ \Comment get middle point in $A$
+\State $P_B := \ell - P_A$ \Comment get number of elements need to be from $B$
 \If{$P_A > 0 $ \textbf{and} $A[P_A-1] > B[P_B]$ }
-\State $r \gets P_A -1 $ \Comment $A[P_A-1]$ should $\leq B[P_B]$, search in the lower half
-\ElsIf{$P_A < L_A $ \textbf{and} $B[P_B-1] > A[P_A]$}
-\State $l \gets P_A +1 $ \Comment $A[P_A]$ should $ > B[P_B - 1]$, search in the upper half
+\State $r \gets P_A -1 $ \Comment Search in the lower half
+\ElsIf{$P_A < L_A $ \textbf{and} $ A[P_A] < B[P_B-1]$}
+\State $l \gets P_A +1 $ \Comment Search in the upper half
 \Else
 \If{$P_A=0$}
 \State $\theta_1 := B[P_B-1]$ \Comment No element from $A$ below than \textbf{median}
@@ -188,34 +192,48 @@ A[P_A - 1] \leq B[P_B] \quad \mathtt{and} \quad B[P_B - 1] \leq A[P_A]
 \Else 
 \State $\theta_1 := \max(A[P_A - 1], B[P_B-1])$ \Comment The lower median is the greater one
 \EndIf
-\If{$P_A = L_A$}
+\If{$P_A = m$}
 \State $\theta_2 := B[P_B]$ \Comment all elements from $A$ below than \textbf{median}
-\ElsIf{$P_B = L_B$}
+\ElsIf{$P_B = n$}
 \State $\theta_2 := A[P_A]$ \Comment all elements from $B$ below than \textbf{median}
 \Else
+\algstore{myalg}
+\end{algorithmic}
+\end{algorithm}
+
+\begin{algorithm}[H]
+\begin{algorithmic}[1]
+\algrestore{myalg}
 \State $\theta_2 := \min(A[P_A], B[P_B])$ \Comment The lower median is the \textbf{smaller} one
 \EndIf
 \EndIf
-\If{$(L_A+L_B) \bmod 2 = 0$} \Comment even length
+\If{$(m+n) \bmod 2 = 0$} \Comment even length
 \State \Return $(\theta_1 + \theta_2)/2$
 \Else \Comment odd length
 \State \Return $\theta_1$
 \EndIf
 \EndWhile
 \EndProcedure
-\Statex
 \end{algorithmic}
 \end{algorithm}
 
 \section{5 -- Longest Palindromic Substring}
-\begin{figure}[H]
-	\begin{center}
-		\includegraphics[width=18cm]{005.png}
-	\end{center}
-\end{figure}
-\textbf{\large{Note:}}
-\par
-\vspace{0.5em}
+Given a string $S$, find the longest palindromic substring in $S$. You may assume that the maximum length of $s$ is 1000.
+\paragraph{Example 1:}
+\begin{flushleft}
+\textbf{Input}: \texttt{babad}
+\\
+\textbf{Output}: \texttt{bab}
+\\
+\textbf{Note}:  \texttt{aba} is also a valid answer.
+\end{flushleft}
+\paragraph{Example 2:}
+\begin{flushleft}
+\textbf{Input}: \texttt{cbbd}
+\\
+\textbf{Output}: \texttt{bb}
+\end{flushleft}
+\subsection{Dynamic Programming Approach}
 \begin{CJK*}{UTF8}{gbsn}
 方法一： \texttt{Dynamic Programming}. \texttt{DP}方法也有两种，以长度为循环条件，以及倒序推。两种方法的\texttt{DP}公式一样
 \[
@@ -229,8 +247,9 @@ DP[i][j]  =
 这两种\texttt{DP}所需的空间复杂度都为$O(n^2)$，但是第二种方法可以做进一步修改，使得空间复杂度为$O(n)$
 \par
 方法二： 由于只有一维数组，所以数组中的每个元素在循环中都要被更新而不是固定不变，这点是和二维\texttt{DP}不同的地方。
-\clearpage
 \end{CJK*}
+\subsubsection{Code}
+Procedure \texttt{LongestPalindrome} returns the longest palindrome string for input string $S$.
 \setcounter{algorithm}{0}
 \begin{algorithm}[H]
 \caption{\texttt{DP} Method 1: loop by substring length}
@@ -271,7 +290,7 @@ DP[i][j]  =
 \For{$i:=|S|-1$ \textbf{to} $0$}
 \For{$j:=|S|-1$ \textbf{to} $i$}
 \If{$S[i] \neq S[j]$}
-\State $\mathtt{DP}[j] \gets \mathtt{false}$ \Comment Update $\mathtt{DP}[j]$ in each loop even though it is \textbf{true} in previous loop
+\State $\mathtt{DP}[j] \gets \mathtt{false}$ \Comment Update $\mathtt{DP}[j]$ in each loop although it is \textbf{true} in previous loop
 \Else
 \If{$j-i\leq 2$}
 \State $\mathtt{DP}[j] \gets \mathtt{true}$ \Comment If substring length $\leq 2$, directly update $\mathtt{DP}[j]$
@@ -294,6 +313,18 @@ DP[i][j]  =
 
 
 \section{6 --- ZigZag Conversion}
+The string \texttt{PAYPALISHIRING} is written in a zigzag pattern on a given number of rows like this: 
+\\
+P\hspace{1.5em}A\hspace{1.5em}H\hspace{1.5em}N
+\\
+A\hspace{0.5em}P\hspace{0.5em}L\hspace{0.5em}S\hspace{0.5em}I\hspace{0.5em}I\hspace{0.5em}G
+\\
+Y\hspace{1em}I\hspace{1em}R
+\\
+And then read line by line: \texttt{PAHNAPLSIIGYIR}
+\par
+Write the code that will take a string and make this conversion given a number of rows:
+
 \textbf{\large{Note:}}
 \par
 \vspace{0.5em}
@@ -341,8 +372,28 @@ i, \left(2 \times N - 2\right)-i, \left(2 \times N - 2\right) + i, 2\times\left(
 \end{algorithm}
 
 \section{7 --- Reverse Integer}
-\textbf{\large{Note:}}
-\par
+Given a 32-bit signed integer $N$, reverse digits of an integer.
+\paragraph{Example 1:}
+\begin{flushleft}
+\textbf{Input}: 123
+\\
+\textbf{Output}: 321
+\end{flushleft}
+\paragraph{Example 2:}
+\begin{flushleft}
+\textbf{Input}: $-123$
+\\
+\textbf{Output}: $-321$
+\end{flushleft}
+\paragraph{Example 3:}
+\begin{flushleft}
+\textbf{Input}: 120
+\\
+\textbf{Output}: 21
+\end{flushleft}
+\paragraph{Note:}
+Assume we are dealing with an environment which could only store integers within the 32-bit signed integer range: $[-2^{31}, 2^{31}-1]$. For the purpose of this problem, assume that your function returns 0 when the reversed integer overflows.
+\subsection{Intuition}
 We can build up the reverse integer one digit at a time. While doing so, we can check beforehand whether or not appending another digit would cause overflow.
 \begin{itemize}
 \item Reversing an integer can be done similarly to reversing a string.
