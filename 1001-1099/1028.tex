@@ -1,0 +1,108 @@
+\section{1028 --- Recover a Tree From Preorder Traversal}
+We run a preorder depth first search on the root of a binary tree.
+\par
+At each node in this traversal, we output $ D $ dashes (where $ D $ is the depth of this node), then we output the value of this node.  (If the depth of a node is $ D $, the depth of its immediate child is $ D+1 $.  The depth of the root node is 0.)
+\par
+If a node has only one child, that child is guaranteed to be the left child.
+\par
+Given the output $ S $ of this traversal, recover the tree and return its root.
+\paragraph{Example 1:}
+\begin{flushleft}
+\begin{figure}[H]
+\begin{tikzpicture}
+[my/.style={draw, circle, fill=gray!20, minimum size=5mm}]
+\node[my] (1) at (0,0) {1};
+\node[my] (2) [below=8mm of 1, xshift=-11mm] {2};
+\node[my] (3) [below=8mm of 1, xshift=11mm] {5};
+\node[my] (4) [below=8mm of 2, xshift=-6mm] {3};
+\node[my] (5) [below=8mm of 2, xshift=6mm] {4};
+\node[my] (6) [below=8mm of 3, xshift=-6mm] {6};
+\node[my] (7) [below=8mm of 3, xshift=6mm] {7};
+\draw[thick,red] (1) -- (2);
+\draw[thick,red] (1) -- (3);
+\draw[thick,red] (2) -- (4);
+\draw[thick,red] (2) -- (5);
+\draw[thick,red] (3) -- (6);
+\draw[thick,red] (3) -- (7);
+\end{tikzpicture}
+\end{figure}
+\textbf{Input}: $1D2DD3DD4D5DD6DD7$ ($ D $ is a dash)
+\\
+\textbf{Output}: $[1,2,5,3,4,6,7]$
+\end{flushleft}
+
+\paragraph{Example 2:}
+\begin{flushleft}
+\begin{figure}[H]
+\begin{tikzpicture}
+[my/.style={draw, circle, fill=gray!20, minimum size=5mm}]
+\node[my] (1) at (0,0) {1};
+\node[my] (2) [below=8mm of 1, xshift=-11mm] {2};
+\node[my] (3) [below=8mm of 1, xshift=11mm] {5};
+\node[my] (4) [below=8mm of 2, xshift=-6mm] {3};
+\node[my] (5) [below=8mm of 4, xshift=-6mm] {4};
+\node[my] (6) [below=8mm of 3, xshift=-6mm] {6};
+\node[my] (7) [below=8mm of 6, xshift=-6mm] {7};
+\draw[thick,red] (1) -- (2);
+\draw[thick,red] (1) -- (3);
+\draw[thick,red] (2) -- (4);
+\draw[thick,red] (4) -- (5);
+\draw[thick,red] (3) -- (6);
+\draw[thick,red] (6) -- (7);
+\end{tikzpicture}
+\end{figure}
+\textbf{Input}: $1D2DD3DDD4D5DD6DDD7$ ($ D $ is a dash)
+\\
+\textbf{Output}: $[1,2,5,3,\varnothing,6,\varnothing,4,\varnothing,7]$
+\end{flushleft}
+
+\paragraph{Example 3:}
+\begin{flushleft}
+\begin{figure}[H]
+\begin{tikzpicture}
+[my/.style={draw, circle, fill=gray!20, minimum size=5mm}]
+\node[my] (1) at (0,0) {1};
+\node[my] (2) [below=8mm of 1, xshift=-3mm] {401};
+\node[my] (3) [below=8mm of 2, xshift=-8mm] {349};
+\node[my] (4) [below=8mm of 2, xshift=8mm] {88};
+\node[my] (5) [below=8mm of 3, xshift=-6mm] {90};
+\draw[thick,red] (1) -- (2);
+\draw[thick,red] (2) -- (3);
+\draw[thick,red] (2) -- (4);
+\draw[thick,red] (3) -- (5);
+\end{tikzpicture}
+\end{figure}
+\textbf{Input}: $1D401DD349DDD90DD88$ ($ D $ is a dash)
+\\
+\textbf{Output}: $[1,401,\varnothing,349,88,90]$
+\end{flushleft}
+
+\paragraph{Note:}
+
+\begin{itemize}
+\item The number of nodes in the original tree is between 1 and 1000. 
+\item Each node will have a value between 1 and $ 10^9 $.
+\end{itemize}
+
+\subsection{Hash Map}
+\begin{itemize}
+\item 创建一个hash map $M$，其key为level的number，而value为数组，存放当前level所有create出的tree node。
+\item 遍历原数组，对于每个数字，创建相应的Tree Node。然后根据相应的level，找到上一层即level-1对应的parent。由于preorder的特性，上一层的level对应的数组的最后一个node即为当前create出的node的parent。
+\item 
+\end{itemize}
+
+\setcounter{lstlisting}{0}
+\begin{lstlisting}[style=customc, caption={TODO}]
+/**
+ * Definition for a binary tree node.
+ * struct TreeNode {
+ *     int val;
+ *     TreeNode *left;
+ *     TreeNode *right;
+ *     TreeNode(int x) : val(x), left(NULL), right(NULL) {}
+ * };
+ */
+TreeNode* recoverFromPreorder( string S )
+{
+}
+\end{lstlisting}
