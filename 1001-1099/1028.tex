@@ -86,23 +86,210 @@ Given the output $ S $ of this traversal, recover the tree and return its root.
 
 \subsection{Hash Map}
 \begin{itemize}
-\item 创建一个hash map $M$，其key为level的number，而value为数组，存放当前level所有create出的tree node。
-\item 遍历原数组，对于每个数字，创建相应的Tree Node。然后根据相应的level，找到上一层即level-1对应的parent。由于preorder的特性，上一层的level对应的数组的最后一个node即为当前create出的node的parent。
-\item 
+\item 创建一个hash map $M$，其key为level的number，而value为数组，存放当前level所有create出的tree node以及该tree node对应的parent node。
+\item 遍历原数组，对于每个数字，创建相应的Tree Node。然后根据相应的level，找到上一层即level-1对应的parent。由于preorder的特性，以及我们设计的数据结构的特点，上一层的level对应的数组的倒数第二个node即为当前create出的node的parent。(最后一个node是这个parent的parent node)。
+\item 最后从level = 1开始，将每个node与其parent node相连，先检查parent node的left child是否为null，如果是，将当前node设置为parent node的left child，否则设置为right child。(题目中说明了如果只有一个child，必定是left child)。
 \end{itemize}
 
 \setcounter{lstlisting}{0}
-\begin{lstlisting}[style=customc, caption={TODO}]
-/**
- * Definition for a binary tree node.
- * struct TreeNode {
- *     int val;
- *     TreeNode *left;
- *     TreeNode *right;
- *     TreeNode(int x) : val(x), left(NULL), right(NULL) {}
- * };
- */
+\begin{lstlisting}[style=customc, caption={Hash Map}]
 TreeNode* recoverFromPreorder( string S )
 {
+    if( S.empty() )
+    {
+        return nullptr;
+    }
+
+    //add dash to let state change can
+    //happen at the end of S
+    S.push_back( '-' );
+
+    //the hash map to
+    //store each level's node and its parent
+    unordered_map<int, vector<TreeNode*>> m_levels;
+
+    int level = 0;
+    int x = 0;
+
+    int max_level = 0;
+    TreeNode* parent = nullptr;
+
+    int state = 1; //1=digit,2=dash
+
+    for( auto c : S )
+    {
+        if( c != '-' )
+        {
+            if( state == 2 )
+            {
+                //update maximum level so far
+                max_level = ( max )( level, max_level );
+                //change state to 1
+                //to indicate we are collecting numbers
+                state = 1;
+            }
+
+            x = x * 10 + ( c - '0' );
+        }
+        else
+        {
+            if( state == 1 )
+            {
+                auto node = new TreeNode( x );
+
+                if( level > 0 )
+                {
+                    //get node's parent
+                    auto it = m_levels.find( level - 1 );
+                    auto sz = it->second.size();
+                    //the last element if the parent of parent
+                    //the one to the last element is the parent
+                    parent = it->second[sz - 2];
+                }
+
+                auto it = m_levels.find( level );
+                if( it == m_levels.end() )
+                {
+                    //we put node and its parent along each other
+                    m_levels.emplace( level, initializer_list<TreeNode*> {node, parent} ).first;
+                }
+                else
+                {
+                    it->second.emplace_back( node );
+                    it->second.emplace_back( parent );
+                }
+
+
+                //reset level and x
+                level = 0;
+                x = 0;
+
+                //change state to 2
+                //to indicate we are counting dashes
+                state = 2;
+            }
+
+            ++level;
+        }
+    }
+
+    //now, we link the nodes to its parent
+    for( int level = 1; level <= max_level; ++level )
+    {
+        auto& nodes = m_levels[level];
+
+        for( size_t i = 0; i < nodes.size(); i += 2 )
+        {
+            if( !nodes[i + 1]->left )
+            {
+                //left child has not been set
+                //set to left child
+                nodes[i + 1]->left = nodes[i];
+            }
+            else
+            {
+                //left child has been set
+                //set to right child
+                nodes[i + 1]->right = nodes[i];
+            }
+        }
+    }
+
+    //root is at the level 0
+    return m_levels[0][0];
+}
+\end{lstlisting}
+
+
+\subsection{Stack}
+\begin{itemize}
+\item 创建一个stack，其中存放create出来的tree node。
+\item 同样是从$S$中获取node的value和对应的level。然后根据value create一个新的node。
+\item 如果当前level比stack的size还要小，说明stack中包含了和当前node以及其child nodes相同level的nodes，将这些 nodes 从 stack 中移除， 直到stack的size等于当前level。
+\item 如果这时候stack不为空，那么这时候stack的top元素就是当前node的parent。(简单的推理： 当stack的size为1时，就只有root node。而root node的level为零。) 根据这个parent的左右子节点是否为null，来设定当前node为left child还是right child。
+\item 最后如果$S$的size不为1，需要将多余的元素弹出，因为最终需要的是$S$最底下的root node。
+\end{itemize}
+
+\setcounter{lstlisting}{0}
+\begin{lstlisting}[style=customc, caption={Stack}]
+TreeNode* recoverFromPreorder( string S )
+{
+    if( S.empty() )
+    {
+        return nullptr;
+    }
+
+    S.push_back( '-' );
+
+    stack<TreeNode*> stk;
+
+    size_t level = 0;
+    int x = 0;
+
+    size_t max_level = 0;
+    TreeNode* parent = nullptr;
+
+    int state = 1; //1=digit,2=dash
+
+    for( auto c : S )
+    {
+        if( c != '-' )
+        {
+            if( state == 2 )
+            {
+                max_level = ( max )( level, max_level );
+                state = 1;
+            }
+
+            x = x * 10 + ( c - '0' );
+        }
+        else
+        {
+            if( state == 1 )
+            {
+                auto node = new TreeNode( x );
+
+                //find the parent of node
+                while( !stk.empty() && stk.size() > level )
+                {
+                    stk.pop();
+                }
+
+                if( !stk.empty() )
+                {
+                    //stk.top() is the parent of node
+                    if( !stk.top()->left )
+                    {
+                        stk.top()->left = node;
+                    }
+                    else
+                    {
+                        stk.top()->right = node;
+                    }
+
+                }
+
+                //push node into the stack
+                stk.push( node );
+
+
+                level = 0;
+                x = 0;
+
+                state = 2;
+            }
+
+            ++level;
+        }
+    }
+
+    //we need to pop unnecessary nodes
+    //to get root node
+    while( stk.size() > 1 )
+    {
+        stk.pop();
+    }
+
+    return stk.top();
 }
 \end{lstlisting}
