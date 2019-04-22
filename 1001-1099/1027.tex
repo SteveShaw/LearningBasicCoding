@@ -47,9 +47,55 @@ The longest arithmetic subsequence is $[20,15,10,5]$.
 \item $0 \leq A[i] \leq 10000$
 \end{itemize}
 
+\subsection{Dynamic Programming}
+\begin{itemize}
+\item 用一个array $F$作为Dynamic Programming的递推数组。其中每个元素都是一个hash map，其key是等差数列的差值，而value则是这个等差数列的长度
+\item 对于当前index $i$，从0到$i-1$的每一个index $j$，根据$A[i]$与$A[j]$之间的差值，找到以$A[i]$为end的所形成的所有可能的等差数列，并记录相应的长度。
+\end{itemize}
+
 \setcounter{lstlisting}{0}
-\begin{lstlisting}[style=customc, caption={TODO}]
+\begin{lstlisting}[style=customc, caption={Dynamic Progamming}]
 int longestArithSeqLength( vector<int>& A )
 {
+    //DP array
+    vector<unordered_map<int, int>> F( A.size() );
+
+    int ans = 1;
+
+    for( size_t i = 1; i < A.size(); ++i )
+    {
+        for( size_t j = 0; j < i; ++j )
+        {
+            int diff = A[i] - A[j];
+
+            int l = 1;
+            //get the sequence end at A[j] with diff
+            auto it = F[j].find( diff );
+            if( it != F[j].end() )
+            {
+                l = it->second + 1;
+            }
+
+            auto it_cur = F[i].find( diff );
+
+            if( it_cur == F[i].end() )
+            {
+                F[i].emplace( diff, l );
+            }
+            else
+            {
+                //to account for duplicate number
+                //we should choose the maximum length so far
+                it_cur->second = ( max )( it_cur->second, l );
+            }
+
+            ans = ( max )( ans, l );
+        }
+    }
+
+    //The sequence length need to account for
+    //the start number, so add 1 to the answer
+    return ans + 1;
+
 }
 \end{lstlisting}
