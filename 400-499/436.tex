@@ -1,0 +1,81 @@
+\section{436 --- Find Right Interval}
+Given a set of intervals $I$, for each of the interval $i$, check if there exists an interval $j$ whose start point is bigger than or equal to the end point of the interval $i$, which can be called that $j$ is on the \texttt{right} of $ i $.
+
+For any interval $ i $, you need to store the minimum interval $ j $'s index, which means that the interval $ j $ has the minimum start point to build the \texttt{right} relationship for interval $ i $. If the interval $ j $ doesn't exist, store $-1$ for the interval i. Finally, you need output the stored value of each interval as an array.
+
+\paragraph{Note:}
+
+\begin{itemize}
+\item You may assume the interval's end point is always bigger than its start point.
+\item You may assume none of these intervals have the same start point.
+\end{itemize}
+ 
+
+\paragraph{Example 1:}
+
+\begin{flushleft}
+\textbf{Input}: [ [1,2] ]
+
+\textbf{Output}: [$-1$]
+
+\textbf{Explanation}: There is only one interval in the collection, so it outputs $-1$.
+\end{flushleft}
+ 
+
+\paragraph{Example 2:}
+
+\begin{flushleft}
+\textbf{Input}: [ [3,4], [2,3], [1,2] ]
+
+\textbf{Output}: [$-1, 0, 1$]
+
+\textbf{Explanation}: There is no satisfied right interval for [3,4].
+
+For [2,3], the interval [3,4] has minimum-right start point;
+
+For [1,2], the interval [2,3] has minimum-right start point.
+\end{flushleft}
+ 
+
+\paragraph{Example 3:}
+
+\begin{flushleft}
+\textbf{Input}: [ [1,4], [2,3], [3,4] ]
+
+\textbf{Output}: [$-1, 2, -1$]
+
+\textbf{Explanation}: There is no satisfied right interval for [1,4] and [3,4].
+
+For [2,3], the interval [3,4] has minimum-right start point.
+\end{flushleft}
+
+\subsection{Binary Search Lower Bound}
+
+\setcounter{lstlisting}{0}
+\begin{lstlisting}[style=customc, caption={Lower Bound}]
+vector<int> findRightInterval( vector<vector<int>>& intervals )
+{
+    map<int, size_t> m;
+
+    for( size_t i = 0; i < intervals.size(); ++i )
+    {
+        m.emplace( intervals[i][0], i );
+    }
+
+    vector<int> ans( intervals.size(), -1 );
+
+    for( size_t i = 0 ; i < intervals.size(); ++i )
+    {
+        //find the first start point that is
+        //no less than current end
+        auto it = m.lower_bound( intervals[i][1] );
+        if( it != m.end() )
+        {
+            ans[i] = it->second;
+        }
+    }
+
+    return ans;
+
+}
+\end{lstlisting}
