@@ -1,0 +1,57 @@
+\section{434 --- Number of Segments in a String}
+Count the number of segments in a string $s$, where a segment is defined to be a contiguous sequence of non-space characters.
+
+Please note that the string does not contain any non-printable characters.
+
+\paragraph{Example:}
+
+\begin{flushleft}
+\textbf{Input}: Hello, my name is John
+\\
+\textbf{Output}: 5
+\end{flushleft}
+
+\subsection{In-Place}
+
+\setcounter{lstlisting}{0}
+\begin{lstlisting}[style=customc, caption={In-place}]
+int countSegments( string s )
+{
+    if( s.empty() )
+    {
+        return 0;
+    }
+
+    if( s.back() != ' ' )
+    {
+        s.push_back( ' ' );
+    }
+
+    //last indicates the last non-space
+    //character before a new space
+    size_t last = s.size();
+
+    int ans = 0;
+
+    for( size_t i = 0; i < s.size(); ++i )
+    {
+        if( s[i] == ' ' )
+        {
+            //to avoid repeat counting
+            //make sure last is close to i
+            if( last == i - 1 )
+            {
+                ++ans;
+            }
+
+            continue;
+        }
+
+        //update the position of last non-space character
+        last = i;
+    }
+
+    return ans;
+}
+};
+\end{lstlisting}

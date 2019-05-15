@@ -1,0 +1,44 @@
+\section{431 --- Encode N-ary Tree to Binary Tree}
+Design an algorithm to encode an $N$-ary tree into a binary tree and decode the binary tree to get the original $N$-ary tree. An $N$-ary tree is a rooted tree in which each node has no more than $ N $ children. Similarly, a binary tree is a rooted tree in which each node has no more than 2 children. There is no restriction on how your encode/decode algorithm should work. You just need to ensure that an $ N $-ary tree can be encoded to a binary tree and this binary tree can be decoded to the original N-nary tree structure.
+
+For example, you may encode the following 3-ary tree to a binary tree in this way:
+
+\begin{figure}[H]
+\begin{tikzpicture}
+[my/.style={draw, circle, minimum size=7mm, fill=gray!20!}, thick]
+\node[my](0) at (0,0) {1};
+\node[my](1) [below=8mm of 0, xshift=-12mm] {3};
+\node[my](2) [below=8mm of 0] {2};
+\node[my](3) [below=8mm of 0, xshift=12mm] {4};
+\node[my](4) [below=8mm of 1, xshift=-10mm] {5};
+\node[my](5) [below=8mm of 1, xshift=10mm] {6};
+\draw (0)--(1)--(4);
+\draw (1)--(5);
+\draw (0)--(2);
+\draw (0)--(3);
+
+\node[draw, single arrow, minimum height=23mm, minimum width=8mm, single arrow head extend=2mm, anchor=west, fill=yellow!30!green!40!] at ($(3.east) + (1cm, 0)$) {};
+
+\node[my] (11) at (7.5, 1) {1};
+\node[my] (21) [below=8mm of 11, xshift=-8mm] {3};
+\node[my] (31) [below=8mm of 11, xshift=8mm] {2};
+\node[my] (41) [below=8mm of 21, xshift=-8mm] {5};
+\node[my] (51) [below=8mm of 31, xshift=8mm] {4};
+\node[my] (61) [below=8mm of 41, xshift=8mm] {6};
+\draw (11)--(21);
+\draw (11)--(31);
+\draw (31)--(51);
+\draw (21)--(41);
+\draw (41)--(61);
+\end{tikzpicture}
+\end{figure}
+
+
+Note that the above is just an example which might or might not work. You do not necessarily need to follow this format, so please be creative and come up with different approaches yourself.
+
+\paragraph{Note:}
+
+\begin{itemize}
+\item $ N $ is in the range of [1, 1000]
+\item Do not use class member/global/static variables to store states. Your encode and decode algorithms should be stateless.
+\end{itemize}

@@ -1,0 +1,210 @@
+\section{432 --- All O`one Data Structure}
+Implement a data structure supporting the following operations:
+
+
+\begin{lstlisting}[style=customc]
+/*
+Inserts a new key with value 1. 
+Or increments an existing key by 1. 
+Key is guaranteed to be a non-empty string.
+*/
+Inc(Key) 
+
+/*
+If Key's value is 1, remove it from the data structure. 
+Otherwise decrements an existing key by 1. 
+If the key does not exist,this function does nothing. 
+Key is guaranteed to be a non-empty string.
+*/
+Dec(Key)
+
+/*
+Returns one of the keys with maximal value. 
+If no element exists, return an empty string.
+*/
+
+GetMaxKey()
+
+/*
+Returns one of the keys with minimal value. 
+If no element exists, return an empty string
+*/
+GetMinKey()
+\end{lstlisting}
+
+\paragraph{Challenge:} 
+\begin{itemize}
+\item Perform all these in $O(1)$ time complexity.
+\end{itemize}
+
+\subsection{Hash Map With Double Linked List}
+\begin{itemize}
+\item Map key to its position in a double linked list.
+\end{itemize}
+
+\setcounter{lstlisting}{0}
+\begin{lstlisting}[style=customc, caption={Double Linked List and Iterator For Value In Hash Map}]
+class AllOne
+{
+public:
+    /** Initialize your data structure here. */
+    AllOne()
+    {
+
+        //we always have zero in the front
+        //Since the keys with one will delete
+        //so any existing key will have value greater than zero
+        blist.emplace_front( 0, "" );
+    }
+
+    /** Inserts a new key <Key> with value 1. Or increments an existing key by 1. */
+    void inc( string key )
+    {
+
+        auto it_key = m_sb.find( key );
+        if( it_key == m_sb.end() )
+        {
+            //add to front first
+            //try to unify the process of checking previous node
+            blist.front().keys.emplace( key ).first;
+            it_key = m_sb.emplace( key.c_str(), blist.begin() ).first;
+        }
+
+        auto p = it_key->second;
+        auto next = p;
+        ++next;
+
+        if( ( next == blist.end() ) || ( next->val != p->val + 1 ) )
+        {
+            //append a new item after p
+            //also update the position
+            it_key->second = blist.emplace( next, p->val + 1, key.c_str() );
+        }
+        else
+        {
+            //add the key to its next node's key pool
+            next->keys.emplace( key );
+            //update the key's associated position
+            it_key->second = next;
+        }
+
+        //remove key from p's key pool
+        p->keys.erase( key );
+        if( p->keys.empty() )
+        {
+            //this node does not contain any key
+            //remove from the list
+            //notice the front node will never be deleted
+            //because it has a empty string in the pool
+            blist.erase( p );
+        }
+
+    }
+
+    /** Decrements an existing key by 1. If Key's value is 1, remove it from the data structure. */
+    void dec( string key )
+    {
+
+        auto it_key = m_sb.find( key );
+        if( it_key == m_sb.end() )
+        {
+            return;
+        }
+
+        auto p = it_key->second;
+
+        if( p->val == 1 )
+        {
+            //remove from map and list
+            p->keys.erase( key );
+            if( p->keys.empty() )
+            {
+                blist.erase( p );
+            }
+
+            m_sb.erase( key );
+            return;
+        }
+
+        auto prev = p;
+        --prev;
+
+        if( prev->val != p->val - 1 )
+        {
+            //add an item before p
+            //also update the position
+            it_key->second = blist.emplace( p, p->val - 1, key.c_str() );
+        }
+        else
+        {
+            //update the position
+            it_key->second = prev;
+            //insert key to previous node's key pool
+            prev->keys.emplace( key );
+        }
+
+        //remove key from p's key pool
+        p->keys.erase( key );
+        if( p->keys.empty() )
+        {
+            blist.erase( p );
+        }
+    }
+
+    /** Returns one of the keys with maximal value. */
+    string getMaxKey()
+    {
+
+        auto it = blist.end();
+        --it;
+
+        if( it->val != 0 )
+        {
+            return *( it->keys.begin() );
+        }
+
+        return "";
+
+    }
+
+    /** Returns one of the keys with Minimal value. */
+    string getMinKey()
+    {
+
+        auto it = blist.begin();
+        ++it;
+
+        if( it == blist.end() )
+        {
+            return "";
+        }
+
+        return *( it->keys.begin() );
+
+    }
+
+private:
+
+    struct Bucket
+    {
+        //the value for each key
+        int val;
+        //the pool of keys with same value
+        unordered_set<string> keys;
+
+        Bucket( int v, const char* key )
+            : val( v )
+        {
+            keys.emplace( key );
+        }
+    };
+
+    //use a double linked list to store the bucket
+    //so that the insert/delete can be done in O(1)
+    list<Bucket> blist;
+
+    //Create a map between the key and its position in
+    //the list
+    unordered_map<string, list<Bucket>::iterator> m_sb;
+};
+\end{lstlisting}

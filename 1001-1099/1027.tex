@@ -1,0 +1,101 @@
+\section{1027 --- Longest Arithmetic Sequence}
+Given an array $ A $ of integers, return the length of the longest arithmetic subsequence in $ A $.
+\par
+Recall that a subsequence of $ A $ is a list $ A[i_1] $, $ A[i_2] $, $ \ldots $, $ A[i_k] $ with $0 <= i_1 < i_2 < \ldots < i_k \leq |A| - 1$, and that a sequence B is arithmetic if $B[i+1] - B[i]$ are all the same value (for $0 \leq i < |B| - 1$).
+
+\paragraph{Example 1:}
+
+\begin{flushleft}
+\textbf{Input}: $[3,6,9,12]$
+\\
+\textbf{Output}: 4
+\\
+\textbf{Explanation}:
+\\ 
+The whole array is an arithmetic sequence with steps of length = 3.
+\end{flushleft}
+
+
+\paragraph{Example 2:}
+
+\begin{flushleft}
+\textbf{Input}: $[9,4,7,2,10]$
+\\
+\textbf{Output}: 3
+\\
+\textbf{Explanation}:
+\\
+The longest arithmetic subsequence is $[4,7,10]$.
+\end{flushleft}
+
+\paragraph{Example 3:}
+
+\begin{flushleft}
+\textbf{Input}: $[20,1,15,3,10,5,8]$
+\\
+\textbf{Output}: 4
+\\
+\textbf{Explanation}: 
+\\
+The longest arithmetic subsequence is $[20,15,10,5]$.
+\end{flushleft}
+
+\paragraph{Note:}
+
+\begin{itemize}
+\item $2 \leq |A| \leq 2000$
+\item $0 \leq A[i] \leq 10000$
+\end{itemize}
+
+\subsection{Dynamic Programming}
+\begin{itemize}
+\item 用一个array $F$作为Dynamic Programming的递推数组。其中每个元素都是一个hash map，其key是等差数列的差值，而value则是这个等差数列的长度
+\item 对于当前index $i$，从0到$i-1$的每一个index $j$，根据$A[i]$与$A[j]$之间的差值，找到以$A[i]$为end的所形成的所有可能的等差数列，并记录相应的长度。
+\end{itemize}
+
+\setcounter{lstlisting}{0}
+\begin{lstlisting}[style=customc, caption={Dynamic Progamming}]
+int longestArithSeqLength( vector<int>& A )
+{
+    //DP array
+    vector<unordered_map<int, int>> F( A.size() );
+
+    int ans = 1;
+
+    for( size_t i = 1; i < A.size(); ++i )
+    {
+        for( size_t j = 0; j < i; ++j )
+        {
+            int diff = A[i] - A[j];
+
+            int l = 1;
+            //get the sequence end at A[j] with diff
+            auto it = F[j].find( diff );
+            if( it != F[j].end() )
+            {
+                l = it->second + 1;
+            }
+
+            auto it_cur = F[i].find( diff );
+
+            if( it_cur == F[i].end() )
+            {
+                F[i].emplace( diff, l );
+            }
+            else
+            {
+                //to account for duplicate number
+                //we should choose the maximum length so far
+                it_cur->second = ( max )( it_cur->second, l );
+            }
+
+            ans = ( max )( ans, l );
+        }
+    }
+
+    //The sequence length need to account for
+    //the start number, so add 1 to the answer
+    return ans + 1;
+
+}
+\end{lstlisting}
