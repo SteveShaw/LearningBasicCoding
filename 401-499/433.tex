@@ -1,0 +1,145 @@
+\section{433 --- Minimum Genetic Mutation}
+A gene string $S$ can be represented by an 8-character long string, with choices from \texttt{A}, \texttt{C}, \texttt{G}, \texttt{T}.
+
+Suppose we need to investigate about a mutation (mutation from start to end), where \texttt{ONE} mutation is defined as \texttt{ONE} single character changed in the gene string.
+
+For example, \texttt{AACCGGTT} $\longrightarrow$ \texttt{AACCGGTA} is 1 mutation.
+
+Also, there is a given gene bank, which records all the valid gene mutations. A gene must be in the bank to make it a valid gene string.
+
+Now, given 3 things - start $s$, end $t$, bank $B$, your task is to determine what is the minimum number of mutations needed to mutate from start to end. If there is no such a mutation, return $-1$.
+
+\paragraph{Note:}
+
+\begin{itemize}
+\item Starting point is assumed to be valid, so it might not be included in the bank.
+\item If multiple mutations are needed, all mutations during in the sequence must be valid.
+\item You may assume start and end string is not the same.
+\end{itemize}
+ 
+
+\paragraph{Example 1:}
+
+\begin{flushleft}
+\textbf{Input}: $s$: \texttt{AACCGGTT}, $e$: \texttt{AACCGGTA}, $B$: [\texttt{AACCGGTA}]
+\\
+\textbf{Output}: 1
+\end{flushleft}
+ 
+
+\paragraph{Example 2:}
+\begin{flushleft}
+\textbf{Input}: $s$: \texttt{AACCGGTT}, $e$: \texttt{AACCGGTA}, $B$: [\texttt{AACCGGTA}, \texttt{AACCGCTA}, \texttt{AAACGGTA}]
+\\
+\textbf{Output}: 2
+\end{flushleft} 
+
+
+\paragraph{Example 3:}
+\begin{flushleft}
+\textbf{Input}: $s$: \texttt{AAAAACCC}, $e$: \texttt{AACCCCCC}, $B$: [\texttt{AAAACCCC}, \texttt{AAACCCCC}, \texttt{AACCCCCC}]
+\\
+\textbf{Output}: 3
+\end{flushleft} 
+
+\subsection{Two-way Breadth First Search}
+
+\setcounter{lstlisting}{0}
+\begin{lstlisting}[style=customc, caption={Two-way Breadth First Search}]
+int minMutation( string start, string end, vector<string>& bank )
+{
+    //change to hash set
+    unordered_set<string> z( bank.begin(), bank.end() );
+
+    //the target string is not in the bank
+    if( z.find( end ) == z.end() )
+    {
+        return -1;
+    }
+
+    //forward: from start to end
+    unordered_set<string> f;
+    f.emplace( start );
+
+    //backward: from end to start
+    unordered_set<string> b;
+    b.emplace( end );
+
+    //The level from start to end
+    int f_level = 0;
+
+    //The level from end to start
+    int b_level = 0;
+
+    char gens[4] = {'A', 'C', 'G', 'T'};
+
+    //helper functon to get mutated strings from current gen strings
+    auto next_level = [&z, &gens]( unordered_set<string>& cur, unordered_set<string>& next )
+    {
+        for( const auto& s : cur )
+        {
+            string m = s;
+            for( size_t i = 0; i < s.size(); ++i )
+            {
+
+                for( char gen : gens )
+                {
+                    if( s[i] == gen ) continue;
+                    m[i] = gen;
+
+                    //the mutated string needs to be in the bank
+                    //and does not show before
+                    if( ( z.find( m ) != z.end() ) && ( cur.find( m ) == cur.end() ) )
+                    {
+                        next.emplace( m );
+                    }
+
+                    m[i] = s[i];
+                }
+            }
+        }
+    };
+
+    while( !f.empty()  && !b.empty() )
+    {
+        unordered_set<string> f_next;
+
+        next_level( f, f_next );
+
+        ++f_level;
+
+        //search the mutated strings of next level from forward direction
+        //in backward level
+        for( const auto& nf : f_next )
+        {
+            if( b.find( nf ) != b.end() )
+            {
+                return f_level + b_level;
+            }
+        }
+
+        unordered_set<string> b_next;
+        next_level( b, b_next );
+
+        ++b_level;
+
+        //search the mutated strings of next level from backward direction
+        //in forward level
+
+        for( const auto& nb : b_next )
+        {
+            if( f_next.find( nb ) != f_next.end() )
+            {
+                return f_level + b_level;
+            }
+        }
+
+        //update f as next level
+        swap( f, f_next );
+        //update b as next level
+        swap( b, b_next );
+    }
+
+    return -1;
+}
+\end{lstlisting}
