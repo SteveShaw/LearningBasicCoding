@@ -1,0 +1,122 @@
+\section{438 --- Find All Anagrams in a String}
+Given a string $ s $ and a non-empty string $ p $, find all the start indices of $ p $'s anagrams in $ s $.
+
+Strings consists of lowercase English letters only and the length of both strings $s$ and $p$ will not be larger than 20,100.
+
+The order of output does not matter.
+
+\paragraph{Example 1:}
+
+\begin{flushleft}
+\textbf{Input}: $s = \texttt{cbaebabacd}$,  $p=\texttt{abc}$
+
+\textbf{Output}: $[0, 6]$
+
+\textbf{Explanation}:
+
+The substring with start index 0 is \texttt{cba}, which is an anagram of \texttt{abc}.
+
+The substring with start index 6 is \texttt{bac}, which is an anagram of \texttt{abc}.
+\end{flushleft}
+
+
+\paragraph{Example 2:}
+
+\begin{flushleft}
+\textbf{Input}: $s=\texttt{abab}$, $p= \texttt{ab}$
+
+\textbf{Output}: $[0, 1, 2]$
+
+\textbf{Explanation}:
+
+The substring with start index 0 is \texttt{ab}, which is an anagram of \texttt{ab}.
+
+The substring with start index 1 is \texttt{ba}, which is an anagram of \texttt{ab}.
+
+The substring with start index 2 is \texttt{ab}, which is an anagram of \texttt{ab}.
+\end{flushleft}
+
+
+\setcounter{lstlisting}{0}
+\begin{lstlisting}[style=customc, caption={Sliding Window}]
+vector<int> findAnagrams( string s, string p )
+{
+    //create the character counter
+    unordered_map<int, int> m;
+    for( auto c : p )
+    {
+        int ci = c - 'a';
+        auto it = m.find( ci );
+        if( it == m.end() )
+        {
+            m.emplace( ci, 1 );
+        }
+        else
+        {
+            ++it->second;
+        }
+    }
+
+    //sliding window left and right boundary
+    int l = 0;
+    int r = 0;
+
+    int lp = static_cast<int>( p.size() );
+    int ls = static_cast<int>( s.size() );
+
+    //the number of unique characters
+    int count = static_cast<int>( m.size() );
+
+    vector<int> ans;
+
+    while( r < ls )
+    {
+        int ci = s[r] - 'a';
+        auto it = m.find( ci );
+        if( it != m.end() )
+        {
+
+            --it->second;
+            if( it->second == 0 )
+            {
+                //This means we already
+                //reach the count of character in p
+                --count;
+            }
+        }
+
+        ++r;
+
+        while( count == 0 )
+        {
+            //now, s[l...r] contains all same
+            //characters in p,
+            //but may contain other letters
+            int ci = s[l] - 'a';
+            auto it = m.find( ci );
+
+            if( it != m.end() )
+            {
+                ++it->second;
+                if( it->second > 0 )
+                {
+                    //this letter is in p,
+                    //and will be removed
+                    //from current sliding window
+                    //as left boundary is moving rightwards
+                    ++count;
+                }
+            }
+
+            //now s[l..r] is anagram of p
+            if( r - l == lp )
+            {
+                ans.push_back( l );
+            }
+
+            ++l;
+        }
+    }
+    return ans;
+}
+\end{lstlisting}

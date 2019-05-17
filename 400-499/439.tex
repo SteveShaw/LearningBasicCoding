@@ -1,0 +1,119 @@
+\section{439 --- Ternary Expression Parser}
+\textcolor{red}{LOCKED} 
+
+Given a string representing arbitrarily nested ternary expressions, calculate the result of the expression. You can always assume that the given expression is valid and only consists of digits 0--9, ?, :, $T$ and $F$ ($T$ and $F$r epresent \texttt{True} and \texttt{False} respectively).
+
+\paragraph{Note:}
+
+\begin{itemize}
+\item The length of the given string is $\leq 10000$.
+\item Each number will contain only one digit.
+\item The conditional expressions group right-to-left (as usual in most languages).
+\item The condition will always be either \texttt{T} or \texttt{F}. That is, the condition will never be a digit.
+\item The result of the expression will always evaluate to either a digit 0--9, \texttt{T} or \texttt{F}.
+\end{itemize}
+ 
+
+\paragraph{Example 1:}
+
+\begin{flushleft}
+\textbf{Input}: $T?2:3$
+
+\textbf{Output}: 2
+
+\textbf{Explanation}: If \texttt{true}, then result is 2; otherwise result is 3.
+\end{flushleft}
+ 
+
+\paragraph{Example 2:}
+
+\begin{flushleft}
+\textbf{Input}: $F?1:T?4:5$
+
+\textbf{Output}: 4
+
+\textbf{Explanation}: The conditional expressions group right-to-left. Using parenthesis, it is read/evaluated as:
+
+$(F ? 1 : (T ? 4 : 5)) \longrightarrow (F ? 1 : 4) \longrightarrow 4$
+
+or
+
+$(F ? 1 : (T ? 4 : 5)) \longrightarrow (T ? 4 : 5) \longrightarrow 4$
+ 
+\end{flushleft}
+
+
+\paragraph{Example 3:}
+
+\begin{flushleft}
+\textbf{Input}: $T?T?F:5:3$
+
+\textbf{Output}: $F$
+
+\textbf{Explanation}: The conditional expressions group right-to-left. Using parenthesis, it is read/evaluated as:
+
+$(T ? (T ? F : 5) : 3) \longrightarrow (T ? F : 3) \longrightarrow F$
+
+or
+
+$(T ? (T ? F : 5) : 3) \longrightarrow (T ? F : 5) \longrightarrow F$
+\end{flushleft}
+
+\subsection{Stack}
+\begin{itemize}
+\item 将expression中每个问号的index放入一个栈中，这样栈顶的问号就是表达式中最右边的问号。
+\item 然后开始处理栈，每次根据顶端的index $p$，处理$s[p-1...p+1]$段的三元表达式。然后压缩expression，因为这段表达式已经处理了。
+\item 将表达式的结果放入$s[p-1]$，同时将$s[p+4...L-1]$的部分往前移动4位，即$s[i-4]=s[i]$。
+\item 上述移动不会影响栈中的index位置，因为这些index都位于$p-1$之前。
+\end{itemize}
+
+\setcounter{lstlisting}{0}
+\begin{lstlisting}[style=customc, caption={Stack}]
+string parseTernary( string expression )
+{
+    stack<size_t> stk;
+
+    //push each ?'s index into stack
+    for( size_t i = 0; i < expression.size(); ++i )
+    {
+        if( expression[i] == '?' )
+        {
+            stk.push( i );
+        }
+    }
+
+    while( !stk.empty() )
+    {
+        //evaluate expression based on current position p
+        //expression[p-1] is T/F
+        //expression[p+1...p+3] is the ternary expression
+        auto p = stk.top();
+        stk.pop();
+
+        char x = expression[p - 1];
+        char y = expression[p + 1];
+        if( x == 'F' )
+        {
+            y = expression[p + 3];
+        }
+
+        //compress the string
+        //remove from s[p...p+3]
+        //set s[p-1] to the result
+        expression[p - 1] = y;
+
+        //move expression[p+4...] backward by 4 positions
+        for( size_t i = p + 4; i < expression.size(); ++i )
+        {
+            expression[i - 4] = expression[i];
+        }
+
+        //remove unnecessary parts
+        expression.resize( expression.size() - 3 );
+    }
+
+    string ans;
+    ans.push_back( expression[0] );
+    return ans;
+}
+\end{lstlisting}

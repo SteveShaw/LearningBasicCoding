@@ -19,21 +19,6 @@
 \begin{document}
 	\maketitle
 \section{400-409}
-\subsection{402 Remove K digits}
-Given a non-negative integer num represented as a string, remove \textit{\textbf{k}} digits from the number so that the new number is the smallest possible.
-\par
-\vspace{0.5em}
-\noindent
-\textbf{\large{Note:}}
-\begin{CJK*}{UTF8}{gbsn}
-\begin{itemize}
-\item 如果用贪心法，即每次从头开始找递减序列，然后删除递减序列的第一个字符，会超时
-\item 快速的方法是： 从头开始遍历\textbf{num}，将第一个字符放入结果中，然后如果继续，如果当前字符比结果的尾数要大，弹出尾部数字，直至到第一个在result的数字比这个数小。然后重复
-\item 最后需要处理头部为0的情况
-\item 另外，如果生成的结果数组长度大于原有长度和\textit{\textbf{k}}的差，就要重新\textit{resize}
-\end{itemize}
-\clearpage
-\end{CJK*}
 
 \subsection{403 -- Frog Jump}
 \begin{figure}[H]
@@ -43,45 +28,11 @@ Given a non-negative integer num represented as a string, remove \textit{\textbf
 \end{figure}
 \textbf{\large{Note:}}
 \begin{CJK*}{UTF8}{gbsn}
-	\begin{itemize}
-		\item 这个题目其实可以构造出一个树状结构，然后进行深度遍历
-		\item 从第一个石头开始，第一个石头只有一个\textit{jump}值就是\textbf{1}，所以从第一个石头往前面跳的$\text{step} = 1$ 或者 2，（$\text{step}=0$没有意义）根据后面石头和这块石头的间隔以及可能的\textbf{step}，可以得到可以跳到的下一块石头的位置。以题目给的例子为例，我们可以得出如下的树状图(图中每个节点用``[石头位置，跳到该位置所用的jump]''来表示).其中绿色的表示可以到达的石头，红色表示到不了的石头
-		\begin{figure}[H]
-			\begin{center}
-				\includegraphics[width=15cm]{403_Example.png}
-			\end{center}
-		\end{figure}
-		以节点[3,2]为例，从其下一个石头位置开始遍历，其下一个石头位置为5， $5-3=2$，所以可以跳到5， 再下一个石头位置为6， $6-3=3=2+1$, 因此也能跳到6， 接着是位置8的石头，$8-3=5>2+1$，所以这个位置不能到达，遍历停止。
-		\item 遍历这个树状图，如果用递归法，那么递归函数参数包括，当前位置, 跳到当前位置所用的\textit{jump}和以及用于记录位置和\textit{jump}是否能到达的\textit{hashmap}。
-		\item 在函数中，如果按照位置和\textit{jump}，\textit{hashmap}能找到，则直接返回，否则，从该位置的下一个位置开始遍历，直至到达到不了的位置（即两个石头的间隔比JUMP+1还大），然后从可以到达的石头位置开始递归调用函数。
-		\item 递归的终止条件还包括位置已经到达数组的末尾。
-	\end{itemize}
+
 	\clearpage
 \end{CJK*}
 
-\subsection{404 -- Sum of Left Leaves}
-\begin{figure}[H]
-	\begin{center}
-		\includegraphics[width=18cm]{404.png}
-	\end{center}
-\end{figure}
-\textbf{\large{Note:}}
-\begin{itemize}
-	\item For each node, check if it has left child and its left child is leaf. If it is, add the value.
-	\item If the node has left child but is not leaf, recursive on this node. and then recursive on the node's right child.
-\end{itemize}
 
-\subsection{405 -- Convert a Number to Hexadecimal}
-\begin{figure}[H]
-	\begin{center}
-		\includegraphics[width=18cm]{405.png}
-	\end{center}
-\end{figure}
-\textbf{\large{Note:}}
-\begin{itemize}
-	\item Basic idea: Right shift the number 4 bits, and then mask with 0xF. 
-	\item To stop the shift, either the number is zero or the number has been right shifted 7 times. The latter is dealing with the case when number is $-1$. Without latter, the shift will continue forever.
-\end{itemize}
 
 
 

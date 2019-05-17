@@ -1,0 +1,45 @@
+\section{1025 --- Divisor Game}
+Alice and Bob take turns playing a game, with Alice starting first.
+\par
+Initially, there is a number $ N $ on the chalkboard.  On each player's turn, that player makes a \textit{move} consisting of:
+\begin{itemize}
+\item Choosing any $ x $ with $ 0 < x < N $ and $ N \bmod x = 0 $.
+\item Replacing the number $ N $ on the chalkboard with $ N - x $.
+\end{itemize}
+\par
+Also, if a player cannot make a move, they lose the game.
+\par
+Return \texttt{true} if and only if Alice wins the game, assuming both players play optimally.
+
+ 
+\paragraph{Example 1:}
+
+\begin{flushleft}
+\textbf{Input}: 2
+\\
+\textbf{Output}: \texttt{true}
+\\
+\textbf{Explanation}: Alice chooses 1, and Bob has no more moves.
+\end{flushleft}
+
+\paragraph{Example 2:}
+
+\begin{flushleft}
+\textbf{Input}: 3
+\\
+\textbf{Output}: \texttt{false}
+\\
+\textbf{Explanation}: Alice chooses 1, Bob chooses 1, and Alice has no more moves.
+\end{flushleft}
+ 
+
+\paragraph{Note:}
+\begin{itemize}
+\item $ 1 \leq N \leq 1000 $
+\end{itemize}
+
+\subsection{Mathematical Induction}
+\begin{itemize}
+\item 如果 $N$是奇数，Alice 会输
+\item 否则，当$N$是偶数时，Alice会赢。
+\end{itemize}
