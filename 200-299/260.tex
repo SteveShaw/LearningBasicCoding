@@ -1,0 +1,72 @@
+\section{260 --- Single Number III}
+Given an array of numbers $A$, in which exactly two elements appear only once and all the other elements appear exactly twice. Find the two elements that appear only once.
+
+\paragraph{Example:}
+
+\begin{flushleft}
+\textbf{Input}:  $[1,2,1,3,2,5]$
+\\
+\textbf{Output}: $[3,5]$
+\end{flushleft}
+
+\paragraph{Note:}
+
+\begin{itemize}
+\item The order of the result is not important. So in the above example, $[5, 3]$ is also correct.
+\item Your algorithm should run in linear runtime complexity. Could you implement it using only constant space complexity?
+\end{itemize}
+\subsection{Bit Operation}
+\begin{itemize}
+\item 由于只有两个数出现一次，因此如果将整个数组的数进行XOR，最终结果肯定就是这两个数的XOR结果，其他的重复两次的数的XOR结果是零。
+\item 由于这两个数是不同的，因此这两个数会在某些bit位上不同。这个可以根据XOR的结果中那些bit位为1的位置来确定。
+\item 假设在第$i$个bit位上，这两个数是不同的，也就是其中一个数的第$i$个bit位是1，另外一个是零。
+\item 因此$A$中所有的数字都可以按照第$i$个bit位分成两个group，一个group中所有的数字在第$i$位是0，另外一个group中的所有数字在第$i$位是1。
+\item 然后XOR第一个group中的所有数字就能到两个只出现一次的数字中的一个，然后XOR另外一个group就得到了另一个。
+\item 所以找到原来XOR整个数组结果中最右边的第一个1，按照这个bit位进行划分group。\setcounter{lstlisting}{0}
+\end{itemize}
+\begin{lstlisting}[style=customc, caption={XOR}]
+vector<int> singleNumber( vector<int>& nums )
+{
+    //get xor results of all numbers in nums
+    int z = 0;
+
+    for( auto n : nums )
+    {
+        z ^= n;
+    }
+
+    //find which bit is 1
+    //and create a mask for this bit
+    int mask = 1;
+
+    for( int i = 1; i < 32; ++i )
+    {
+        if( z & mask )
+        {
+            break;
+        }
+
+        mask <<= 1;
+    }
+
+    int x = 0;
+    int y = 0;
+
+    //use mask to test which number is set on
+    //that bit
+    for( auto n : nums )
+    {
+        if( n & mask )
+        {
+            x ^= n;
+        }
+        else
+        {
+            y ^= n;
+        }
+    }
+
+    return { x, y };
+}
+\end{lstlisting}
+

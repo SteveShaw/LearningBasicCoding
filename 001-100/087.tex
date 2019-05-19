@@ -1,0 +1,225 @@
+\section{87 -- Scramble String}
+Given a string $S_1$, we may represent it as a binary tree by partitioning it to two non-empty substrings recursively.
+\par
+Below is one possible representation of $S_1 = \texttt{great}$:
+\begin{figure}[H]
+\begin{tikzpicture}
+[mynode/.style={circle, draw, minimum size=1.2cm, fill=gray!15}]
+\node(){};
+\node[mynode] (t1){\texttt{great}};
+\node[mynode, below = 8mm of t1, xshift=-24mm] (t2) {\texttt{gr}};
+\node[mynode, below = 8mm of t2, xshift=-8mm] (t4) {\texttt{g}};
+\node[mynode, below = 8mm of t2, xshift=8mm] (t5) {\texttt{r}};
+\node[mynode, below = 8mm of t1, xshift=24mm] (t3) {\texttt{eat}};
+\node[mynode, below = 8mm of t3, xshift=-16mm] (t6) {\texttt{e}};
+\node[mynode, below = 8mm of t3, xshift=16mm] (t7) {\texttt{at}};
+\node[mynode, below = 8mm of t7, xshift=-8mm] (t8) {\texttt{a}};
+\node[mynode, below = 8mm of t7, xshift=8mm] (t9) {\texttt{t}};
+\draw[->,>=stealth'] (t1)--(t2);
+\draw[->,>=stealth'] (t1)--(t3);
+\draw[->,>=stealth'] (t2)--(t4);
+\draw[->,>=stealth'] (t2)--(t5);
+\draw[->,>=stealth'] (t3)--(t6);
+\draw[->,>=stealth'] (t3)--(t7);
+\draw[->,>=stealth'] (t7)--(t8);
+\draw[->,>=stealth'] (t7)--(t9);
+\end{tikzpicture}
+\end{figure}
+To scramble the string, we may choose any non-leaf node and swap its two children.
+\par
+For example, if we choose the node \texttt{gr} and swap its two children, it produces a scrambled string \texttt{rgeat}.
+\begin{figure}[H]
+\begin{tikzpicture}
+[mynode/.style={circle, draw, minimum size=1.2cm, fill=gray!15}]
+\node(){};
+\node[mynode] (t1){\texttt{rgeat}};
+\node[mynode, below = 8mm of t1, xshift=-24mm] (t2) {\texttt{rg}};
+\node[mynode, below = 8mm of t2, xshift=-8mm] (t4) {\texttt{r}};
+\node[mynode, below = 8mm of t2, xshift=8mm] (t5) {\texttt{g}};
+\node[mynode, below = 8mm of t1, xshift=24mm] (t3) {\texttt{eat}};
+\node[mynode, below = 8mm of t3, xshift=-16mm] (t6) {\texttt{e}};
+\node[mynode, below = 8mm of t3, xshift=16mm] (t7) {\texttt{at}};
+\node[mynode, below = 8mm of t7, xshift=-8mm] (t8) {\texttt{a}};
+\node[mynode, below = 8mm of t7, xshift=8mm] (t9) {\texttt{t}};
+\draw[->,>=stealth'] (t1)--(t2);
+\draw[->,>=stealth'] (t1)--(t3);
+\draw[->,>=stealth'] (t2)--(t4);
+\draw[->,>=stealth'] (t2)--(t5);
+\draw[->,>=stealth'] (t3)--(t6);
+\draw[->,>=stealth'] (t3)--(t7);
+\draw[->,>=stealth'] (t7)--(t8);
+\draw[->,>=stealth'] (t7)--(t9);
+\end{tikzpicture}
+\end{figure}
+We say that \texttt{rgeat} is a scrambled string of \texttt{great}.
+\par
+Similarly, if we continue to swap the children of nodes \texttt{eat} and \texttt{at}, it produces a scrambled string \texttt{rgtae}.
+\begin{figure}[H]
+\begin{tikzpicture}
+[mynode/.style={circle, draw, minimum size=1.2cm, fill=gray!15}]
+\node(){};
+\node[mynode] (t1){\texttt{rgtae}};
+\node[mynode, below = 8mm of t1, xshift=-24mm] (t2) {\texttt{rg}};
+\node[mynode, below = 8mm of t2, xshift=-8mm] (t4) {\texttt{r}};
+\node[mynode, below = 8mm of t2, xshift=8mm] (t5) {\texttt{g}};
+\node[mynode, below = 8mm of t1, xshift=24mm] (t3) {\texttt{tae}};
+\node[mynode, below = 8mm of t3, xshift=16mm] (t6) {\texttt{e}};
+\node[mynode, below = 8mm of t3, xshift=-16mm] (t7) {\texttt{ta}};
+\node[mynode, below = 8mm of t7, xshift=-8mm] (t8) {\texttt{t}};
+\node[mynode, below = 8mm of t7, xshift=8mm] (t9) {\texttt{a}};
+\draw[->,>=stealth'] (t1)--(t2);
+\draw[->,>=stealth'] (t1)--(t3);
+\draw[->,>=stealth'] (t2)--(t4);
+\draw[->,>=stealth'] (t2)--(t5);
+\draw[->,>=stealth'] (t3)--(t6);
+\draw[->,>=stealth'] (t3)--(t7);
+\draw[->,>=stealth'] (t7)--(t8);
+\draw[->,>=stealth'] (t7)--(t9);
+\end{tikzpicture}
+\end{figure}
+We say that \texttt{rgtae} is a scrambled string of \texttt{great}.
+\par
+Given two strings $S_1$ and $S_2$ of the same length, determine if $S_2$ is a scrambled string of $S_1$
+\paragraph{Example 1:}
+\begin{flushleft}
+\textbf{Input}: $S_1 = \texttt{great}$, $S_2 = \texttt{rgeat}$
+\\
+\textbf{Output}: 1 (\texttt{true})
+\end{flushleft}
+\paragraph{Example 2:}
+\begin{flushleft}
+\textbf{Input}: $S_1 = \texttt{abcde}$, $S_2 = \texttt{caebd}$
+\\
+\textbf{Output}: 0 (\texttt{false})
+\end{flushleft}
+\subsection{Recrusive Approach}
+\begin{CJK*}{UTF8}{gbsn}
+基本思路是将$S_1$分为两个substring，长度分别为$\ell$和$L-\ell$。那么 $S_1$和$S_2$为scramble当且仅当
+\begin{itemize}
+\item $S_1[0\ldots\ell-1]$和$S_2[0\ldots \ell-1]$ 是scramble，同时$S_1[\ell\ldots L-1]$和$S_2[\ell\ldots L-1]$也是scramble. 或者
+\item $S_1[0\ldots\ell-1]$和$S_2[\ell\ldots L-1]$ 是scramble，同时$S_1[L-\ell\ldots L-1]$和$S_2[0\ldots L-\ell-1]$也是scramble
+\end{itemize} 
+以 \texttt{rgeat} 和 \texttt{great} 为例，\texttt{rgeat} 可分成 \texttt{rg} 和 \texttt{eat} 两段， \texttt{great} 可分成 \texttt{gr} 和 \texttt{eat} 两段，\texttt{rg} 和 \texttt{gr} 是scrambled的， \texttt{eat} 和 \texttt{eat} 当然是scrambled。因此递归算法需要测试每个index进行上述判断。
+\end{CJK*}
+\subsubsection{Code}
+Procedure $B$ check if two strings $S_1$ and $S_2$ are scramble string or not. The length of $S_1$ and $S_2$ are all $L$
+\setcounter{algorithm}{0}
+\begin{algorithm}[H]
+\caption{Recursive Approach Main Procedure}
+\begin{algorithmic}[1]
+\Procedure{$B$}{$S_1, S_2, L$}
+\State \Return $\Gamma(S_1, S_2, L, L)$
+\EndProcedure
+\end{algorithmic}
+\end{algorithm}
+Function $\Gamma$ recursively check if two strings $S_1$ with length $L_1$ and $S_2$ with length $L_2$ are scramble strings or not.
+\begin{algorithm}[H]
+\caption{Recursive Approach Function}
+\begin{algorithmic}[1]
+\Function{$\Gamma$}{$S_1, S_2$}
+\If{$|S_1|\neq |S_2|$} \Comment The length of two strings are not equal
+\State \Return 0 \Comment \texttt{false}
+\EndIf
+\State $\delta$ as $\delta[0]=\ldots=\delta[255]:=0$ The character counter array
+\State $L := |S_1|$
+\For{$i:=0$ to $L-1$}
+\State $\delta[S_1[i]]\gets \delta[S_1[i]] + 1$
+\State $\delta[S_2[i]]\gets \delta[S_2[i]] - 1$
+\EndFor
+\For{$j:=0$ \textbf{to} 255}
+\If{$\delta[j]\neq 0$}
+\State \Return 0 \Comment Found different character in $S_1$ and $S_2$
+\EndIf
+\EndFor
+\For{$\ell:=0$ \textbf{to} $L$ }
+\State $\alpha_1:=S_1[0,\ell-1], \alpha_2:=S_1[\ell, L-1]$
+\State $\beta_1:=S_2[0,\ell-1], \beta_2:=S_2[\ell, L-1]$ \Comment Check $S_2$ from left to right
+\If{$\Gamma(\alpha_1, \beta_1)=1$ \textbf{and} $\Gamma(\alpha_2, \beta_2)=1$} \Comment Recursively check $\alpha_1,\;\beta_1$ and $\alpha_2,\;\beta_2$
+\State \Return 1 \Comment $S_1$ and $S_2$ are scramble
+\EndIf
+\algstore{87algo}
+\end{algorithmic}
+\end{algorithm}
+\begin{algorithm}[H]
+\begin{algorithmic}[1]
+\algrestore{87algo}
+\State $\beta_1:=S_2[0,L-\ell-1], \beta_2:=S_2[L-\ell, L-1]$ \Comment Check $S_2$ from right to left
+\If{$\Gamma(\alpha_1, \beta_2)=1$ \textbf{and} $\Gamma(\alpha_2, \beta_1)=1$} \Comment Recursively check $\alpha_1,\;\beta_2$ and $\alpha_2,\;\beta_1$
+\State \Return 1 \Comment $S_1$ and $S_2$ are scramble
+\EndIf
+\EndFor
+\State \Return 0 \Comment $S_1$ and $S_2$ are not scramble
+\EndFunction
+\end{algorithmic}
+\end{algorithm}
+\subsection{Dynamic Programming Approach}
+\begin{CJK*}{UTF8}{gbsn}
+上面递归算法复杂度会达到指数级因为重复进行了很多次判断。如果用Dynamic Programming方法，这里的Recursive function $F$其实是一个三维数组。$F[i][j][\ell]$表示字符串$S_1[i, i+\ell-1]$和$S_2[j,j+\ell-1]$是否为scramble。
+\par
+接着就是建立recursive formula，也就是怎么根据历史信息来得到$F[i][j][\ell]$。首先是把当前$S_1[i, i+\ell-1]$字符串分成左右两部分，假设左半部分长度为$k$，即划分成$S_1[i, i+k-1]$ and $S_1[i+k, i+\ell-1]$。分两种情况进行比较：
+\begin{enumerate}
+    \item 分别比较$S_1[i,i+k-1]$ with $S_2[j, j+k-1]$, $S_1[i+k, i+\ell-1]$ with $S_2[j+k, j+\ell-1]$，即$S_1[i, i+\ell-1]$的前$k$个字符和$S_2[j, j+\ell-1]$的前$k$个字符进行比较，同时比较$S_1[i, i+\ell-1]$的后$\ell-k$个字符和$S_2[j, j+\ell-1]$的后$\ell-k$个字符
+    \item 分别比较$S_1[i, i+k-1]$ with $S_2[j+\ell-k, j+\ell-1]$, $S_1[i+k, i+\ell-1]$ with $S_2[j, j+\ell-k-1]$，即$S_1[i, i+\ell-1]$的前$k$个字符和$S_2[j, j+\ell-1]$的后$k$个字符进行比较，同时比较$S_1[i, i+\ell-1]$的后$\ell-k$个字符和$S_2[j, j+\ell-1]$的前$\ell-k$个字符
+\end{enumerate}
+如果以上两种情况有一种成立，说明$S_1[i,i+\ell-1]$和$S_2[j, j+\ell-1]$是scramble的。
+\par
+而对于判断这些左右部分是不是scramble则是已经计算并保存在$F$中的，因为长度小于$\ell$的所有情况都在前面计算过了（也就是长度是最外层循环）。
+\par
+上面说的是在按照一个给定的长度把$S_1$分成两部分的情况，而对于$S_1[i\ldots i+\ell-1]$来说左边的长度可以从1到$\ell-1$，在这些划分中只要有一个满足上面两种情况任何一个，那么$S_1[i, i+\ell-1]$和$S_2[j, j+\ell-1]$就是scramble。
+\par
+注意到$S_1[i,i+k-1]$是否和$S_2[j, j+k-1]$为scramble string其实是$F[i][j][k]$，同理$S_1[i+k, i+\ell-1]$是否和$S_2[j+k, j+\ell-1]$为scramble string即为$F[i+k][j+k][\ell-k]$。
+\par
+而$S_1[i, i+k-1]$ with $S_2[j+\ell-k, j+\ell-1]$的比较结果存放在$F[i][j+\ell-k][k]$，而$S_1[i+k, i+\ell-1]$ with $S_2[j, j+\ell-k-1]$则存放在$F[i+k][j][\ell-k]$。
+\par
+因此总结起来Recursive Formula 如下
+\[
+F[i][j][\ell] = \bigcup_{k=1}^{\ell-1}\{(F[i][j][k]\land F[i+k][j+k][\ell-k])\lor(F[i][j+\ell-k][k]\land F[i+k][j][\ell-k])\}
+\]
+总时间复杂度因为是三维动态规划，需要三层循环，加上每一步需要线行时间求解递推式，所以是$O(n^4)$。虽然已经比较高了，但是至少不是指数量级的，动态规划还是有很大优势的，空间复杂度是$O(n^3)$。
+\end{CJK*}
+\subsubsection{Code}
+\begin{algorithm}[H]
+\caption{Dynamic Programming Approach}
+\begin{algorithmic}[1]
+\Procedure{IsScramble}{$S_1, S_2$}
+\If{$|S_1|\neq |S_2|$} \Comment The lengths of $S_1$ and $S_2$ are not equal
+\State \Return 0
+\EndIf
+\If{$S_1=S_2$} \Comment $S_1$ is same as $S_2$
+\State \Return 1
+\EndIf
+\State $L:=|S_1|$
+\State $F$ as $F[0][0][0]=\cdots=F[L-1][L-1][L]:=0$ \Comment The \texttt{DP} array
+\For{$i:=0$ \textbf{to} $L-1$}
+\For{$j:=0$ \textbf{to} $L-1$}
+\If{$S_1[i]=S_2[j]$}
+\State $F[i][j][1]\gets 1$ \Comment Fill the case when $\ell=1$
+\EndIf
+\EndFor
+\EndFor
+\For{$\ell:=2$ \textbf{to} $L-1$} \label{087loop1}
+\For{$i:=0$ \textbf{to} $L-\ell$} \label{087loop2}
+\For{$j:=0$ \textbf{to} $L-\ell$} \label{087loop3}
+\For{$k:=1$ \textbf{to} $\ell-1$} \label{087loop4}
+\If{$F[i][j][k]=1$ \textbf{and} $F[i+k][j+k][\ell-k]=1$}
+\State $F[i][j][\ell]\gets 1$
+\State \texttt{break} \Comment Exit loop [\ref{087loop4}]
+\EndIf
+\algstore{087algo}
+\end{algorithmic}
+\end{algorithm}
+\begin{algorithm}[H]
+\begin{algorithmic}[1]
+\algrestore{087algo}
+\If{$F[i][j+\ell-k][k]=1$ \textbf{and} $F[i+k][j][\ell-k]=1$}
+\State $F[i][j][\ell]\gets 1$
+\State \texttt{break} \Comment Exit loop [\ref{087loop4}]
+\EndIf
+\EndFor \Comment End [\ref{087loop4}]
+\EndFor \Comment End [\ref{087loop3}]
+\EndFor \Comment End [\ref{087loop2}]
+\EndFor \Comment End [\ref{087loop1}]
+\State \Return $F[0][0][L]$
+\EndProcedure
+\end{algorithmic}
+\end{algorithm}

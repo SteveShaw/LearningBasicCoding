@@ -1,0 +1,159 @@
+\section{289 --- Game of Life}
+According to the \textit{Wikipedia}'s article: 
+\begin{quotation}
+The Game of Life, also known simply as Life, is a cellular automaton devised by the British mathematician John Horton Conway in 1970.
+\end{quotation}
+
+Given a board $B$ with $m\times n$ cells, each cell has an initial state live (1) or dead (0). Each cell interacts with its eight neighbors (horizontal, vertical, diagonal) using the following four rules (taken from the above \textbf{Wikipedia} article):
+
+\begin{enumerate}
+\item Any live cell with fewer than two live neighbors dies, as if caused by under-population.
+\item Any live cell with two or three live neighbors lives on to the next generation.
+\item Any live cell with more than three live neighbors dies, as if by over-population..
+\item Any dead cell with exactly three live neighbors becomes a live cell, as if by reproduction.
+\end{enumerate}
+
+Write a function to compute the next state (after one update) of the board given its current state. The next state is created by applying the above rules simultaneously to every cell in the current state, where births and deaths occur simultaneously.
+
+\paragraph{Example:}
+
+\begin{flushleft}
+\textbf{Input}: 
+\begin{table}[H]
+\begin{tabular}{lll}
+0 & 1 & 0\\
+0 & 0 & 1\\
+1 & 1 & 1\\
+0 & 0 & 0
+\end{tabular}
+\end{table}
+[
+
+]
+\textbf{Output}: 
+\begin{table}[H]
+\begin{tabular}{lll}
+0 & 0 & 0\\
+1 & 0 & 1\\
+0 & 1 & 1\\
+0 & 1 & 0
+\end{tabular}
+\end{table}
+\end{flushleft}
+
+\paragraph{Follow up:}
+
+\begin{itemize}
+\item Could you solve it in-place? Remember that the board needs to be updated at the same time: You cannot update some cells first and then use their updated values to update other cells.
+\item In this question, we represent the board using a 2D array. In principle, the board is infinite, which would cause problems when the active area encroaches the border of the array. How would you address these problems?
+\end{itemize}
+\subsection{In-Place By Bit Manipulation}
+\begin{itemize}
+\item Each cell只有1或者0这两种状态
+\item 为了能够同时保存现有状态和下一步状态，用两个bit位分别代表现有状态和下一步状态，这样就有四种情况
+\begin{enumerate}
+\item 00 --- 现在是dead，下一步也是dead
+\item 01 --- 现在是live，下一步是dead
+\item 10 --- 现在是dead，下一步是live
+\item 11 --- 现在是live，下一步是live
+\end{enumerate}
+这样要获取当前状态每个cell中的值只要与1进行相与即可，要获得下一步状态就将cell中的值右移一位。
+\item 最开始的时候每个cell的值为$00$或者$01$
+\item 因此需要遍历两次$B$，第一次获取下一步状态，第二次则是把上一次状态从每个cell的value中去除。
+\end{itemize}
+\setcounter{lstlisting}{0}
+\begin{lstlisting}[style=customc, caption={In-Place}]
+class Solution
+{
+public:
+    void gameOfLife( vector<vector<int>>& board )
+    {
+        m = static_cast<int>( board.size() );
+        n = static_cast<int>( board[0].size() );
+
+        //get next state for each cell
+        //current and next state will be
+        //in each cell's value
+        for( int r = 0; r < m; ++r )
+        {
+            for( int c = 0; c < n; ++c )
+            {
+                next( r, c, board );
+            }
+        }
+
+        //remove last state
+        //by right shift one place
+        for( int r = 0; r < m; ++r )
+        {
+            for( int c = 0; c < n; ++c )
+            {
+                board[r][c] >>= 1;
+            }
+        }
+
+    }
+    //get next state
+    void next( int r, int c, vector<vector<int>>& B )
+    {
+        int state = 0;
+
+        state += live( r - 1, c - 1, B );
+        state += live( r - 1, c, B );
+        state += live( r - 1, c + 1, B );
+
+        state += live( r, c - 1, B );
+        state += live( r, c + 1, B );
+
+        state += live( r + 1, c - 1, B );
+        state += live( r + 1, c, B );
+        state += live( r + 1, c + 1, B );
+
+
+        //get current state
+        int x = B[r][c] & 1;
+
+        if( x == 1 )
+        {
+            //cell is live
+            if( ( state < 2 ) || ( state > 3 ) )
+            {
+                //live->dead
+                //value for cell: 0x01=1
+                B[r][c] = 1;
+            }
+            else
+            {
+                //live->live
+                //value for cell: 0x11=3
+                B[r][c] = 3;
+            }
+        }
+        else
+        {
+            //current state is dead
+            if( state == 3 )
+            {
+                //dead->live
+                //value for cell: 0x10=2
+                B[r][c] = 2;
+            }
+        }
+
+    }
+
+    int live( int r, int c, vector<vector<int>>& B )
+    {
+        if( ( r >= 0 ) && ( r < m ) && ( c >= 0 ) && ( c < n ) )
+        {
+            //get current state by and 1
+            return B[r][c] & 1;
+        }
+
+        return 0;
+    }
+
+    int m;
+    int n;
+};
+\end{lstlisting}

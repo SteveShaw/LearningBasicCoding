@@ -1,0 +1,130 @@
+\section{224 --- Basic Calculator}
+Implement a basic calculator to evaluate a simple expression string $S$.
+\par
+The expression string may contain open ( and closing parentheses ), the plus or minus sign, non-negative integers and empty spaces .
+
+\paragraph{Example 1:}
+\begin{flushleft}
+\textbf{Input}: $1\ +\ 1$
+\\
+\textbf{Output}: 2
+\end{flushleft}
+
+\paragraph{Example 2:}
+\begin{flushleft}
+\textbf{Input}: $2-1\ +\ 2$
+\\
+\textbf{Output}: 3
+\end{flushleft}
+
+\paragraph{Example 3:}
+\begin{flushleft}
+\textbf{Input}: $(1+(4+5+2)-3)+(6+8)$
+\\
+\textbf{Output}: 23
+\end{flushleft}
+
+\paragraph{Note:}
+
+\begin{itemize}
+\item You may assume that the given expression is always valid.
+\item Do not use the \texttt{eval} built-in library function.
+\end{itemize}
+\subsection{Stack}
+\begin{CJK*}{UTF8}{gbsn}
+\begin{itemize}
+\item 由于只涉及到加法和减法，因此可以统一用加法来处理，遇到减号则将后面跟随的数字设置为负数即可。
+\item 每次遇到左括号，就将之前得到的结果和符号标记分别压入对应的stack中。所以需要两个stack。
+\item 每次遇到右括号，则分别将两个stack中顶端的数字加上符号与括号中的值相乘得到的结果即为当前表达式的值。
+\item 如果表达式是以数字结束的，那么在最后仍然需要将获得的数字和符号进行相乘加到之前的表达式结果中。否则最后的操作符和数字就会忽略掉。
+\end{itemize}
+\end{CJK*}
+\setcounter{algorithm}{0}
+\begin{algorithm}[H]
+\caption{Stack}
+\begin{algorithmic}[1]
+\Procedure{Calculate}{$S$}
+\State $n:=0$ \Comment The current integer number in $S$
+\State $t:=0$ \Comment The current evaluation result
+\State $z:=1$ \Comment The current sign. It is 1 for plus and $-1$ for minus
+\State $\star$ Prepare two stacks $S_1$ and $S_2$. $S_1$ has the numbers and $S_2$ the signs.
+\For{Each character $c$ in $S$}
+\If{$c$ is a digit}
+\State $n\gets n\times 10 + \texttt{Int}(c)$ \Comment Compose to integer $n$
+\Else
+\State $t\gets t+n\times z$ \Comment Get evaluation result 
+\State $n\gets 0$ \Comment Reset $n$ to zero
+\If{$c$ is plus symbol}
+\State $z\gets 1$ 
+\ElsIf{$c$ is minus symbol}
+\State $z\gets -1$
+\ElsIf{$c$ is left parenthesis}
+\State $\star$ push $t$ to $S_1$ and $z$ to $S_2$
+\State $\star$ Reset $t$ to zero and $z$ to 1 to prepare evaluation inside the parenthesis
+\ElsIf{$c$ is right parenthesis}
+\State $\star$ Get top element $t_1$ from $S_1$ and top element $z_1$ from $S_2$
+\State $\hat{t}:=t\times z_1 + t_1$ \Comment $t$ is the evaluation result inside the parenthesis
+\State $t\gets \hat{t}$ \Comment Update $t$
+\EndIf
+\EndIf
+\EndFor
+\State $t\gets n\times z +t$ \Comment When $S$ is ended with number
+\State \Return $t$
+\EndProcedure
+\end{algorithmic}
+\end{algorithm}
+\setcounter{lstlisting}{0}
+\begin{lstlisting}[style=customc, caption={Stack}]
+int calculate( string s )
+{
+    stack<long long> stk_nums;
+    stack<long long> stk_ops;
+
+    long long num = 0;
+    long long sign = 1;
+
+    long long last = 0;
+
+    for( auto c : s )
+    {
+        if( c >= '0' && c <= '9' )
+        {
+            num = num * 10 + ( c - '0' );
+            continue;
+        }
+
+
+        last += num * sign;
+        num = 0;
+
+        switch( c )
+        {
+        case '+':
+            sign = 1;
+            break;
+        case '-':
+            sign = -1;
+            break;
+
+        case '(':
+            stk_nums.push( last );
+            stk_ops.push( sign );
+            last = 0;
+            sign = 1;
+            break;
+
+        case ')':
+            last = stk_ops.top() * last + stk_nums.top();
+            stk_ops.pop();
+            stk_nums.pop();
+            break;
+        }
+    }
+
+	// When S is ended with number, need to 
+	// compute the last one
+    last += num * sign;
+
+    return static_cast< int >( last );
+}
+\end{lstlisting}

@@ -1,0 +1,126 @@
+\section{211 --- Add and Search Word: Data structure design}
+Design a data structure that supports the following two operations:
+\begin{lstlisting}[style=customc]
+void addWord(word)
+bool search(word)
+\end{lstlisting}
+The \texttt{search} function can search a literal word or a regular expression string containing only letters a--z or dot. A dot means it can represent any one letter.
+\paragraph{Example:}
+\setcounter{lstlisting}{0}
+\begin{lstlisting}[style=customc]
+addWord("bad")
+addWord("dad")
+addWord("mad")
+search("pad") // false
+search("bad") // true
+search(".ad") // true
+search("b..") // true
+\end{lstlisting}
+\paragraph{Note:}
+\begin{itemize}
+\item You may assume that all words are consist of lowercase letters a--z.
+\end{itemize}
+\subsection{Trie}
+\begin{CJK*}{UTF8}{gbsn}
+\begin{itemize}
+\item 由于dot能代表所有字符，因此search必然需要设计成调用一个递归函数来进行搜索。
+\item 这里采用hash map而不是array来存放每层的trie。
+\end{itemize}
+\end{CJK*}
+\setcounter{lstlisting}{0}
+\begin{lstlisting}[style=customc, caption={Trie}]
+class WordDictionary
+{
+	//Trie node definition
+    struct Node
+    {
+        unordered_map<char, Node*> m;
+
+        bool isWord;
+
+        Node()
+            : isWord( false )
+        {}
+    };
+
+public:
+    /** Initialize your data structure here. */
+    WordDictionary()
+    {
+        m_root = new Node();
+    }
+
+    /** Adds a word into the data structure. */
+    void addWord( string word )
+    {
+
+        auto p = m_root;
+
+        for( auto c : word )
+        {
+            auto it = p->m.find( c );
+
+            if( it == p->m.end() )
+            {
+                Node* node = new Node();
+                p->m.emplace( c, node );
+
+                p = node;
+            }
+            else
+            {
+                p = it->second;
+            }
+        }
+
+        p->isWord = true;
+
+    }
+
+    /*
+    Returns if the word is in the data structure. 
+	A word could contain the dot character '.' 
+	to represent any one letter. 
+	*/
+    bool search( string word )
+    {
+        return searchTrie( word, 0, m_root );
+    }
+
+	//recursive helper function
+	//i is the start index in w
+    bool searchTrie( const string& w, size_t i, Node* node )
+    {
+        if( i == w.size() )
+        {
+            return node->isWord;
+        }
+
+        if( w[i] == '.' )
+        {
+            for( const auto& p : node->m )
+            {
+                if( searchTrie( w, i + 1, p.second ) )
+                {
+                    return true;
+                }
+            }
+
+            return false;
+        }
+
+        auto it = node->m.find( w[i] );
+        if( it == node->m.end() )
+        {
+            return false;
+        }
+
+        return searchTrie( w, i + 1, it->second );
+
+    }
+	
+	//Trie tree root
+    Node *m_root;
+
+};
+\end{lstlisting}

@@ -1,0 +1,273 @@
+\section{236 --- Lowest Common Ancestor of a Binary Tree}
+Given a binary tree, find the lowest common ancestor (\texttt{LCA}) of two given nodes in the tree.
+\par
+According to the definition of \texttt{LCA} on \textbf{Wikipedia}: \textit{The lowest common ancestor is defined between two nodes $p$ and $q$ as the lowest node in $T$ that has both $p$ and $q$ as descendants (where we allow \textbf{a node to be a descendant of itself}).}
+
+\paragraph{Example 1:}
+
+\begin{flushleft}
+\textbf{Input}: 
+\begin{figure}[H]
+\begin{tikzpicture}
+[mynode/.style={draw,circle,minimum size=5mm, fill=gray!20!}]
+\node(){};
+\node[mynode](1) {3};
+\node[mynode](2)[below=8mm of 1, xshift=-13mm] {5};
+\node[mynode](3)[below=8mm of 1, xshift=13mm] {1};
+\node[mynode](4)[below=8mm of 2, xshift=-7mm] {6};
+\node[mynode](5)[below=8mm of 2, xshift=7mm] {2};
+\node[mynode](6)[below=8mm of 3, xshift=-7mm] {0};
+\node[mynode](7)[below=8mm of 3, xshift=7mm] {8};
+\node[mynode](8)[below=8mm of 5, xshift=-7mm] {7};
+\node[mynode](9)[below=8mm of 5, xshift=7mm] {4};
+\draw (1) -- (2);
+\draw (1) -- (3);
+\draw (2) -- (4);
+\draw (2) -- (5);
+\draw (3) -- (6);
+\draw (3) -- (7);
+\draw (5) -- (8);
+\draw (5) -- (9);
+\end{tikzpicture}
+\end{figure}
+$p = 5$, $q = 1$
+\\
+\textbf{Output}: 6
+\\
+\textbf{Explanation}: 
+\\
+The LCA of nodes 5 and 1 is 3.
+\end{flushleft}
+
+\paragraph{Example 2:}
+
+\begin{flushleft}
+\textbf{Input}:
+\begin{figure}[H]
+\begin{tikzpicture}
+[mynode/.style={draw,circle,minimum size=5mm, fill=gray!20!}]
+\node(){};
+\node[mynode](1) {3};
+\node[mynode](2)[below=8mm of 1, xshift=-13mm] {5};
+\node[mynode](3)[below=8mm of 1, xshift=13mm] {1};
+\node[mynode](4)[below=8mm of 2, xshift=-7mm] {6};
+\node[mynode](5)[below=8mm of 2, xshift=7mm] {2};
+\node[mynode](6)[below=8mm of 3, xshift=-7mm] {0};
+\node[mynode](7)[below=8mm of 3, xshift=7mm] {8};
+\node[mynode](8)[below=8mm of 5, xshift=-7mm] {7};
+\node[mynode](9)[below=8mm of 5, xshift=7mm] {4};
+\draw (1) -- (2);
+\draw (1) -- (3);
+\draw (2) -- (4);
+\draw (2) -- (5);
+\draw (3) -- (6);
+\draw (3) -- (7);
+\draw (5) -- (8);
+\draw (5) -- (9);
+\end{tikzpicture}
+\end{figure}
+$p = 5$, $q = 4$
+\\
+\textbf{Output}: 5
+\\
+\textbf{Explanation}: 
+\\
+The LCA of nodes 5 and 4 is 5, since a node can be a descendant of itself according to the LCA definition.
+\end{flushleft}
+
+\paragraph{Note:}
+
+\begin{itemize}
+\item All of the nodes' values will be unique.
+\item $p$ and $q$ are different and both values will exist in the binary tree.
+\end{itemize}
+\subsection{Recursion}
+\begin{CJK*}{UTF8}{gbsn}
+这道题和235不同，这里只是一般的bianry tree。
+\begin{itemize}
+\item 按照深度优先的方式遍历tree。
+\item 当遇到$p$或者$q$时，返回一些boolean flags。这些flags会帮助确定是否在某个path上找到了$p$或者$q$。
+\item \texttt{LCA}则是其对其左右子树进行递归处理都能够返回\texttt{true}的那个节点。
+\item 由于\texttt{LCA}也可能是$p$或者$q$中的一个，这种情况下只会有一个子树返回\texttt{true}
+\end{itemize}
+算法过程如下
+\begin{itemize}
+\item 从root开始遍历tree。
+\item 如果current node本身就是$p$或者是$q$，将一个变量$x$设为\texttt{true}，然后继续在左右子树中寻找另外一个节点。
+\item 如果遍历左子树的结果$l$或者遍历右子树$r$是\texttt{true}，表明$p$和$q$中的一个被找到了。
+\item 在遍历过程中，任何时候发现$l$, $r$和$x$这三个变量中有两个为\texttt{true}了，表明已经找到了$p$和$q$的\texttt{LCA}。
+\item 具体实现时，用$l$, $r$和$x$都设为\texttt{int}。这样可以通过判断这三个的和来判定是否有两个为\texttt{true}。
+\end{itemize}
+\end{CJK*}
+\setcounter{lstlisting}{0}
+\begin{lstlisting}[style=customc, caption={Recursion}]
+TreeNode* LCA( TreeNode* root, TreeNode* p, TreeNode* q )
+{
+    TreeNode* ans;
+    dfs( root, p, q, ans );
+
+    return ans;
+}
+
+bool dfs( TreeNode* node, TreeNode* p, TreeNode* q, TreeNode*& lca )
+{
+    if( !node )
+    {
+        return false;
+    }
+
+    int x = 0;
+
+    if( ( node == p ) || ( node == q ) )
+    {
+        //one of p and q is found
+        x = 1;
+    }
+
+    int l = 0;
+    if( dfs( node->left, p, q, lca ) )
+    {
+        //Found p and/or q in left tree
+        l = 1;
+    }
+
+    int r = 0;
+    if( dfs( node->right, p, q, lca ) )
+    {
+        //Found p and/or q in right tree
+        r = 1;
+    }
+
+    if( l + r + x >= 2 )
+    {
+        //LCA is found
+        lca = node;
+    }
+
+    return ( l + r + x ) > 0; //at least find one of p and q
+}
+\end{lstlisting}
+\subsection{Another Recursion}
+\begin{CJK*}{UTF8}{gbsn}
+在binary tree中搜索$p$和$q$，然后从遍历路径中找到最后一个相同的节点即为\texttt{LCA}。边界情况很简单： 首先看当前结点是否为\texttt{null}，若为\texttt{null}则直接返回\texttt{null}，若为$p$或$q$中的任意一个，直接返回当前结点
+\par
+如果当前结点不等于$p$或$q$，$p$和$q$要么分别位于左右子树中，要么同时位于左子树，或者同时位于右子树
+\begin{itemize}
+\item 若$p$和$q$分别位于左右子树中，那么对左右子结点进行recursion，会分别返回$p$和$q$结点的位置，而当前结点正好就是$p$和$q$的最小共同父结点，直接返回当前结点即可，这就是题目中的例子1的情况。
+\item 若$p$和$q$同时位于左子树，这时候调用递归函数处理right subtree会返回\texttt{null}， 而处理left subtree有两种情况，
+\begin{enumerate}
+\item 函数返回的是$p$和$q$中靠近根节点的那个节点，这时候返回这个节点。这就是题目中的例子2的情况。
+\item 函数返回的是$p$和$q$的\texttt{LCA}，就是说当前结点的左子树中的某个结点才是$p$和$q$的\texttt{LCA}，也直接返回这个结果。
+\end{enumerate}
+\item 若$p$和$q$同时位于右子树，和上述左子树情形类似。
+\end{itemize}
+\end{CJK*}
+\begin{lstlisting}[style=customc, caption={Recursion Based On Left And Right Subtree}]
+TreeNode* LCA( TreeNode* root, TreeNode* p, TreeNode* q )
+{
+    if( !root || root == p || root == q )
+    {
+        return root;
+    }
+
+    //process left subtree
+    auto l_node = LCA( root->left, p, q );
+    //process right subtree
+    auto r_node = LCA( root->right, p, q );
+
+    //found the two nodes in left and right subtree respectively
+    //LCA is found
+    if( l_node && r_node )
+    {
+        return root;
+    }
+
+    //p and q only in left subtree
+    if( l_node )
+    {
+        return l_node;
+    }
+
+    //p and q only in right subtree
+    return r_node;
+}
+\end{lstlisting}
+\subsection{Iterative using parent pointers}
+\begin{CJK*}{UTF8}{gbsn}
+这种方法则需要借助queue和hash map来寻找最接近$p$和$q$的common ancestor。
+\par
+算法步骤如下
+\begin{enumerate}
+\item 从根节点开始遍历tree。由于是iterative traverse，所以需要借助queue。
+\item 将当前节点的parent node保存在一个hash map $M$中直到找到$p$和$q$。
+\item 一旦找到$p$和$q$，将$p$的所有ancestors从$M$中加入到一个hash set $S$中。
+\item 然后在$M$中遍历$q$所有的ancestors。如果当前遇到的ancestor可以在$S$中找到，这就是$p$和$q$的\texttt{LCA}。
+\end{enumerate}
+\end{CJK*}
+\begin{lstlisting}[style=customc, caption={Iterative Searching}]
+TreeNode* LCA( TreeNode* root, TreeNode* p, TreeNode* q )
+{
+
+    queue<TreeNode*> qt;
+    unordered_map<TreeNode*, TreeNode*> m;
+
+    qt.push( root );
+    m.emplace( root, nullptr ); //root's parent is empty
+
+    //iterative traverse the tree using the queue
+    while( !qt.empty() )
+    {
+        auto it_p = m.find( p );
+        auto it_q = m.find( q );
+
+        if( ( it_p != m.end() ) && ( it_q != m.end() ) )
+        {
+            //p and q both are found
+            break;
+        }
+
+        auto t = qt.front();
+        qt.pop();
+
+        if( t->left )
+        {
+            m.emplace( t->left, t );
+            qt.emplace( t->left );
+        }
+
+        if( t->right )
+        {
+            m.emplace( t->right, t );
+            qt.emplace( t->right );
+        }
+    }
+
+    unordered_set<TreeNode*> A;
+
+    // add all p's ancestors into the hash set A
+    auto t = p;
+    while( t )
+    {
+        A.insert( t );
+        t = m[t];
+    }
+
+    // find the first ancestor of q that
+    // can be found in A
+    t = q;
+    while( t )
+    {
+        auto it = ancestors.find( t );
+
+        if( it != ancestors.end() )
+        {
+            return *it;
+        }
+
+        t = m[t];
+    }
+
+    // cannot find LCA
+    return nullptr;
+}
+\end{lstlisting}

@@ -1,0 +1,49 @@
+\section{93 --- Restore IP Addresses}
+Given a string $S$ containing only digits, restore it by returning all possible valid IP address combinations.
+\paragraph{Example:}
+\begin{flushleft}
+\textbf{Input}: 25525511135
+\\
+\textbf{Output}: $[255.255.11.135,\;255.255.111.35]$
+\end{flushleft}
+\subsection{Analysis}
+\begin{CJK*}{UTF8}{gbsn}
+IP地址由32位二进制数组成，为便于使用，常以XXX.XXX.XXX.XXX形式表现，每组XXX代表小于或等于255的10进制数。所以说IP地址总共有四段，每一段可能有一位，两位或者三位，范围是$[0,\;255]$，题目明确指出输入字符串只含有数字，所以当某段是三位时，我们要判断其是否越界（$>255$)，还有一点很重要的是，当只有一位时，0可以成某一段，如果有两位或三位时，像 $00, 01, 001, 011, 000$ 等都是不合法的。
+\par
+由于每段数字最多只能有三位，而且只能分为四段，所以情况并不是很多，我们可以使用暴力搜索的方法，每一段都循环1到3，然后当4段长度之和等于原字符串长度时，我们进一步判断每段数字是否不大于255，然后将这些数字转换为字符串加上中间分隔的dot，然后看生成的IP长度是否为$S$的长度加3，这样可以过滤掉那些包含0开头的两位或者三位段的IP。
+\end{CJK*}
+\subsubsection{Solution}
+\setcounter{algorithm}{0}
+\begin{algorithm}[H]
+\caption{Exhaust Searching}
+\begin{algorithmic}[1]
+\Procedure{RestoreIpAddresses}{$S, L$}
+\State $\texttt{ans}:=\emptyset$
+\For{$a:=1$ \textbf{to} 3}
+\For{$b:=1$ \textbf{to} 3}
+\For{$c:=1$ \textbf{to} 3}
+\For{$d:=1$ \textbf{to} 3}
+\If{$a+b+c+d=L$}
+\State $A:= \texttt{ToInt}(S[0\ldots a-1])$ \Comment Segment 1
+\State $B:= \texttt{ToInt}(S[a\ldots a+b-1])$ \Comment Segment 2
+\State $C:= \texttt{ToInt}(S[a+b\ldots a+b+c-1])$ \Comment Segment 3
+\State $D:= \texttt{ToInt}(S[a+b+c\ldots a+b+c+d-1])$ \Comment Segment 4
+\algstore{93algo}
+\end{algorithmic}
+\end{algorithm}
+\begin{algorithm}[H]
+\begin{algorithmic}[1]
+\algrestore{93algo}
+\State $\texttt{IP}:= \texttt{ToString}(A) + \texttt{ToString}(B) + \texttt{ToString}(C) + \texttt{ToString}(D)$
+\If{$|\texttt{IP}| = L+3$}
+\State $\texttt{ans} \gets \texttt{ans} + \texttt{IP}$ \Comment Add to result array
+\EndIf
+\EndIf
+\EndFor
+\EndFor
+\EndFor
+\EndFor
+\State \Return \texttt{ans}
+\EndProcedure
+\end{algorithmic}
+\end{algorithm}

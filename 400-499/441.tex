@@ -1,0 +1,126 @@
+\section{441 --- Arranging Coins}
+You have a total of $n$ coins that you want to form in a staircase shape, where every $k$-th row must have exactly $k$ coins.
+
+Given $n$, find the total number of full staircase rows that can be formed.
+
+$n$ is a non-negative integer and fits within the range of a 32-bit signed integer.
+
+\paragraph{Example 1:}
+
+\begin{flushleft}
+$n = 5$
+
+The coins can form the following rows:
+
+\begin{figure}[H]
+\begin{tikzpicture}
+[every node/.style={draw, circle,
+ minimum size=6mm, fill=gray!20!},
+  node distance=5mm and 5mm, 
+  every join/.style={>=stealth,->},
+ thick
+]
+{
+[start chain]
+\node[on chain](0) {};
+}
+
+{
+[start chain]
+\node[on chain, below=of 0](1) {};
+\node[on chain] {};
+}
+
+{
+[start chain]
+\node[on chain, below=of 1] {};
+\node[on chain] {};
+}
+\end{tikzpicture}
+\end{figure}
+
+Because the 3rd row is incomplete, we return 2.
+\end{flushleft}
+
+
+\paragraph{Example 2:}
+
+\begin{flushleft}
+n = 8
+
+The coins can form the following rows:
+
+\begin{figure}[H]
+\begin{tikzpicture}
+[every node/.style={draw, circle,
+ minimum size=6mm, fill=gray!20!},
+  node distance=5mm and 5mm, 
+  every join/.style={>=stealth,->},
+ thick
+]
+{
+[start chain]
+\node[on chain](0) {};
+}
+
+{
+[start chain]
+\node[on chain, below=of 0](1) {};
+\node[on chain] {};
+}
+
+{
+[start chain]
+\node[on chain, below=of 1](2) {};
+\node[on chain] {};
+\node[on chain] {};
+}
+
+{
+[start chain]
+\node[on chain, below=of 2] {};
+\node[on chain] {};
+}
+\end{tikzpicture}
+\end{figure}
+
+Because the 4th row is incomplete, we return 3.
+\end{flushleft}
+
+\subsection{Binary Search}
+其实就是计算最大的整数$x$使得$x\times(x+1)/2\geq n$，可以用binary search的方式进行查找。
+
+\setcounter{lstlisting}{0}
+\begin{lstlisting}[style=customc, caption={Binary Search}]
+int arrangeCoins( int n )
+{
+    long long l = 1;
+    long long r = n;
+
+    //left most search
+    while( l < r )
+    {
+        long long m = ( l + r ) / 2;
+
+        if( m * ( m + 1 ) / 2 < n )
+        {
+            l = m + 1;
+        }
+        else
+        {
+            r = m;
+        }
+    }
+
+    //we need to check if l
+    //can precisly get the to n
+    auto x = ( l + 1 ) * l / 2;
+    if( x == n )
+    {
+        return l;
+    }
+
+    return l - 1;
+
+}
+\end{lstlisting}

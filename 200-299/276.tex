@@ -1,0 +1,84 @@
+\section{276 --- Paint Fence}
+There is a fence with $n$ posts, each post can be painted with one of the $k$ colors.
+\par
+You have to paint all the posts such that no more than two adjacent fence posts have the same color.
+\par
+Return the total number of ways you can paint the fence.
+\par
+\paragraph{Note:}
+\begin{itemize}
+\item $n$ and $k$ are non-negative integers.
+\end{itemize}
+\subsection{Dynamic Programming}
+\begin{itemize}
+\item $n=1$： 那么有$k$个方法，因为有$k$种颜色可以选择。
+\item $n=2$: 分两种情况来统计，
+\begin{enumerate}
+\item 相邻部分没有相同的，这种情况下，第一个post有$k$个颜色可以选择，而第二个post就只能有$k-1$种颜色选择。因此有$k\times (k-1)$个方法。
+\item 相邻部分具有相同颜色，这种情况下，两个post都有$k$种颜色可以选择，因此有$k\times k$个方法。
+\item 总共有$k\times k+k\times(k-1) = k^2$
+\end{enumerate}
+\item $n=3$：同样是两种情况，\begin{enumerate}
+\item 如果与第二个post颜色相同，那么显然第二个post不能选择和第一个post相同的颜色，因此这种情况下的方法即为第二个post刷与第一个post不同颜色的方法即$k\times(k-1)$。
+\item 而如果与第二个post颜色不同，那么第二个post既能够和第一个post具有相同颜色，也可以与第一个post有不相同的颜色，也就是刷第二个post的总的方法即$k^2$在乘以第三个post能够选择的颜色种类即$k-1$，因为只要与第二个post不同颜色就行，与第一个post颜色相同没有关系。
+\end{enumerate}
+\end{itemize}
+综上所述，假设有数组$x$和$y$
+\begin{itemize}
+\item $x[i]$表示第$i$个post与第$i-1$个post具有相同颜色的方法数
+\item $y[i]$表示第$i$个post与第$i-1$个post有不相同颜色的方法数。
+\end{itemize}
+那么，第$i$个post的方法$F[i]$与第$i-1$个post的方法$F[i-1]$的关系如下
+\begin{align*}
+F[i-1] &= x[i-1] + y[i-1]\\
+x[i] &= y[i-1]\\
+y[i] &= F[i-1]\times(k-1)\\
+F[i] &= x[i] + y[i]\\
+\end{align*}
+由于上述递推关系之和$i-1$有关，因此具体代码实现时，可以用两个变量来代表$x[i]$和$y[i]$
+\setcounter{algorithm}{0}
+\begin{algorithm}[H]
+\caption{Dynamic Programming}
+\begin{algorithmic}[1]
+\Procedure{NumWays}{$n,k$}
+\If{$n=0$}
+\State \Return 0
+\EndIf
+\State $\ast$ $n=1$时，只有一个post，所以有$k$个方法
+\State $x:=0$
+\State $y:=k$
+\State $F:=x+y$
+\For{$i:=2$ \textbf{to} $n$}
+\State $\ast$ $x[i]\gets y[i-1]$ The number ways that $i$th post has same color as $(i-1)$th post
+\State $x\gets y$ 
+\State $\ast$ $x[i]\gets y[i-1]$ The number ways that $i$th post has different color than $(i-1)$th post
+\State $y\gets F\times (k-1)$ 
+\State $\ast$ $F[i]\gets x[i]+y[i]$ The total ways that $i$th post can be painted
+\State $F\gets x+y$ 
+\EndFor
+\State \Return $F$
+\EndProcedure
+\end{algorithmic}
+\end{algorithm}
+\setcounter{lstlisting}{0}
+\begin{lstlisting}[style=customc, caption={Dynamic Programming}]
+int numWays( int n, int k )
+{
+    if( n == 0 )
+    {
+        return 0;
+    }
+
+    int x = 0; //when current post and last post have same colors
+    int y = k; //when current post and last post have different colors
+    int F = x + y; //The total ways to paint current post
+
+    for( int i = 2; i <= n; ++i )
+    {
+        x = y; //x[i]=y[i-1]
+        y = F * ( k - 1 ); //y[i]=F*(k-1)
+        F = x + y; //F[i]=x[i]+y[i]
+    }
+    return F;
+}
+\end{lstlisting}

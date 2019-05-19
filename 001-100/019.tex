@@ -1,0 +1,96 @@
+\section{19 --- Remove Nth Node From End of List}
+Given a linked list, remove the $n$-th node from the end of list and return its head.
+
+\paragraph{Example:}
+\begin{flushleft}
+\textbf{Input:}
+\begin{figure}[H]
+\begin{tikzpicture}
+[my/.style={draw, circle, fill=gray!20!}]
+\node[my] (1) at(0,0) {1};
+\node[my] (2) [right=8mm of 1] {2};
+\node[my] (3) [right=8mm of 2] {3};
+\node[my] (4) [right=8mm of 3] {4};
+\node[my] (5) [right=8mm of 4] {5};
+\draw[thick, >=stealth, ->] (1) --(2);
+\draw[thick, >=stealth, ->] (2) --(3);
+\draw[thick, >=stealth, ->] (3) --(4);
+\draw[thick, >=stealth, ->] (4) --(5);
+\end{tikzpicture}
+\end{figure}
+and $ n=2 $
+\\
+\textbf{Output:}
+\begin{figure}[H]
+\begin{tikzpicture}
+[my/.style={draw, circle, fill=gray!20!}]
+\node[my] (1) at(0,0) {1};
+\node[my] (2) [right=8mm of 1] {2};
+\node[my] (3) [right=8mm of 2] {3};
+\node[my] (4) [right=8mm of 3] {5};
+\draw[thick, >=stealth, ->] (1) --(2);
+\draw[thick, >=stealth, ->] (2) --(3);
+\draw[thick, >=stealth, ->] (3) --(4);
+\end{tikzpicture}
+\end{figure}
+\end{flushleft}
+
+\paragraph{Note:}
+
+\begin{itemize}
+\item Given $ n $ will always be valid.
+\end{itemize}
+
+\paragraph{Follow up:}
+
+\begin{itemize}
+\item Could you do this in one pass?
+\end{itemize}
+
+\subsection{Two Pointers}
+\begin{itemize}
+\item 使用两个指针$ x $和$ y $。
+\item 创建一个dummy node $ z $，指向head node。
+\item 最开始，$ x $初始化为dummy node，而$ y $则是head node。
+\item 当$ y $走到第$n+1$个node时(假设head是第一个node)，$ x $开始移动。
+\item 当$ y $走到链表的最后的\texttt{null} node时，$ x $的下一个node就是需要移除的node。
+\item 最后返回dummy的下一个node。使用dummy的原因是，有可能要移除head node。
+\end{itemize}
+
+\setcounter{lstlisting}{0}
+\begin{lstlisting}[style=customc, caption={Two Pointers}]
+ListNode* removeNthFromEnd( ListNode* head, int n )
+{
+    auto z = new ListNode( -1 );
+    z->next = head;
+
+    auto y = head;
+    auto x = z;
+
+    int count = 0;
+
+    while( y )
+    {
+        y = y->next;
+        ++count;
+
+        if( count > n )
+        {
+            //only when y is after (n+1)th
+            //x then move
+            x = x->next;
+        }
+    }
+
+    //Just remove the next node of x
+    auto next = x->next;
+    x->next = next->next;
+    x->next = nullptr;
+
+    //The next node of dummy head
+    //is the head of new list
+    return z->next;
+
+}
+
+\end{lstlisting}

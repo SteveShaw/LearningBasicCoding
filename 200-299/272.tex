@@ -1,0 +1,299 @@
+\section{272 --- Closest Binary Search Tree Value IIe}
+Given a non-empty binary search tree and a target value $T$, find $k$ values in the BST that are closest to the target.
+
+\paragraph{Note:}
+
+\begin{itemize}
+\item Given target value is a floating point.
+\item You may assume $k$ is always valid, that is: $k \leq$ total nodes.
+\item You are guaranteed to have only one unique set of $k$ values in the BST that are closest to the target.
+\end{itemize}
+ 
+\paragraph{Follow up:}
+\begin{itemize}
+\item Assume that the BST is balanced, could you solve it in less than $O(n)$ runtime (where $n =$ total nodes)?
+\end{itemize}
+
+\paragraph{Hint:}
+
+\begin{enumerate}
+\item Consider implement these two helper functions:
+\begin{enumerate}
+\item \texttt{getPredecessor}($N$), which returns the next smaller node to $N$.
+\item \texttt{getSuccessor}($N$), which returns the next larger node to $N$.
+\end{enumerate}
+\item Try to assume that each node has a parent pointer, it makes the problem much easier.
+\item Without parent pointer we just need to keep track of the path from the root to the current node using a stack.
+\item You would need two stacks to track the path in finding \textbf{predecessor} and \textbf{successor} node separately.
+\end{enumerate}
+\subsection{In-order Traverse}
+\begin{itemize}
+\item In-order traverse on BST得到的是从小到大排序的序列。
+\item 在in-order traverse中，如果当前结果序列的size小于$k$，直接把访问的节点的值放入结果序列$A$中。
+\item 如果当前结果序列的size等于$k$了，则将当前访问的节点值与当前结果序列$A$的第一个值$A[0]$按照与$T$的差的绝对值进行比较。如果当前节点值与$T$的差的绝对值更小，说明当前节点值与$T$更接近，将$A[0]$从$A$中去除，将当前节点值加到$A$的末尾。
+\item 比较$A[0]$而不是$A$其他的元素，是因为$A[0]$是$A$中最小的number。如果当前节点值比$A[0]$更靠近$T$，那么由于当前节点值比$A$中所有的number都要大，所以除了$A[0]$外的其他number肯定都要比$A[0]$更接近$T$。而我们需要得到$k$个更接近$T$的值，因此只需要移除掉$A[0]$。
+\item 如果当前节点值与$T$的差的绝对值比$A[0]$的更大，这时候就不用再继续遍历了，因为后面的节点值与$T$的差的绝对值更大。
+\end{itemize}
+\setcounter{algorithm}{0}
+\begin{algorithm}[H]
+\caption{In-order Traverse}
+\begin{algorithmic}[1]
+\Procedure{ClosestKValues}{$R, T, k$}
+\State $\star$ Create the result array $A$
+\State \Call{InOrder}{$S=R, T, A, K=k$} \Comment Call function \texttt{InOrder}
+\State \Return $A$
+\EndProcedure
+\end{algorithmic}
+\end{algorithm}
+Function \texttt{InOrder} traverse the BST tree start from node $S$.
+
+\begin{algorithm}[H]
+\caption{Helper Function For In-order Traverse}
+\begin{algorithmic}[1]
+\Procedure{InOrder}{$S, T, A, K$}
+\If{$S$ is null node}
+\State \Return
+\EndIf
+\State $\star$ Call \texttt{InOrder} on left subtree of $S$
+\If{size of $A$ is less than $K$}
+\State $\star$ 将$S$的节点值加到$A$的末尾
+\Else
+\If{$S$的节点值与$K$的差的绝对值小于$\lvert K-A[0]\rvert$}
+\State $\star$ Remove $A[0]$ from $A$
+\State $\star$ 将$S$的节点值加到$A$的末尾
+\Else
+\State \Return \Comment 后面遍历到的节点值会更偏离$T$
+\algstore{272algo}
+\end{algorithmic}
+\end{algorithm}
+\begin{algorithm}[H]
+\begin{algorithmic}[1]
+\algrestore{272algo}
+\EndIf
+\EndIf
+\State $\star$ Call \texttt{InOrder} on right subtree of $S$
+\EndProcedure
+\end{algorithmic}
+\end{algorithm}
+\setcounter{lstlisting}{0}
+\begin{lstlisting}[style=customc,caption={In-order Traverse}]
+vector<int> closestKValues( TreeNode* root, double target, int k )
+{
+    vector<int> ans;
+    ans.reserve( k );
+
+    auto K = static_cast< size_t >( k );
+
+    inorder( root, target, ans, K );
+
+    return ans;
+}
+
+void inorder( TreeNode* node, double T, vector<int>& A, size_t k )
+{
+    if( !node )
+    {
+        return;
+    }
+
+    inorder( node->left, T, A, k );
+
+    if( A.size() < k )
+    {
+        A.push_back( node->val );
+    }
+    else
+    {
+        auto a0 = static_cast< double >( A[0] );
+        auto dv = static_cast< double >( node->val );
+
+
+        if( abs( a0 - T ) > abs( dv - T ) )
+        {
+            //node-val is closer to T
+            //Remove A[0]
+            A.erase( A.begin() );
+            //Add node->val
+            A.push_back( node->val );
+        }
+        else
+        {
+            //We cannot find value that is closer to T
+            //from now on
+            return;
+        }
+    }
+
+    inorder( node->right, T, A, k );
+}
+\end{lstlisting}
+\subsection{Based On Hints}
+\begin{itemize}
+\item Maintian two stacks: $P$ and $S$。
+\item At start, 根据BST的特性，将节点值小于$T$的节点push到$P$中，将节点值大于或者等于$T$的节点push到$S$中。
+\item 然后循环$k$次,每次都比较$P$和$S$的栈顶node的value哪个更close to $T$。
+\item 如果$P$的栈顶node的value更close to $T$，将这个栈顶node的value输出到结果序列$A$中并从$P$中删除该node。接下来借助函数\texttt{getPredecessor}寻找the next smaller node to this node。在BST中，这个next \textbf{smaller} node是该节点的\textbf{左子树的最右节点}如果该节点的左子树存在。在寻找的过程中，把路径上的所有节点都push到$P$中。
+\item 如果$S$的栈顶node的value更close to $T$，将这个栈顶node的value输出到结果序列$A$中并从$S$中删除该node。接下来借助函数\texttt{getSuccessor}寻找the next \textbf{larger} node to this node。在BST中，这个next \textbf{larger} node是该节点的\textbf{右子树的最左节点}如果该节点的右子树存在。在寻找的过程中，把路径上的所有节点都push到$S$中。
+\end{itemize}
+\begin{algorithm}[H]
+\caption{Find Next Larger And Next Smaller Node}
+\begin{algorithmic}[1]
+\Procedure{ClosestKValues}{$R, T, k$}
+\State $\star$ Create two stacks $P$ and $S$
+\State $\ast$ Push nodes whose values less than $T$ to $P$. Otherwise, push to $S$
+\State $x:=R$
+\While{$x$ is not null node}
+\If{value of $x$ is less than $T$}
+\State $\star$ Push $x$ to $P$
+\State $\star$ Update $x$ to its left child node
+\Else
+\State $\star$ Push $x$ to $S$
+\State $\star$ Update $x$ to its right child node
+\EndIf
+\EndWhile
+\State $\delta:=0$ \Comment The counter of loops
+\State $\star$ Create an array $A$ as the result array
+\While{$\delta < k$}
+\If{$S$ is empty \textbf{or} top node's value of $P$ is closer to $T$}
+\State $\star$ Add $P$'s top node's value to $A$
+\State $\star$ Call \texttt{GetPredecessor} to find next smaller nodes to $P$'s top node
+\Else
+\State $\star$ Add $S$'s top node's value to $A$
+\State $\star$ Call \texttt{GetSuccessor} to find next larger nodes to $S$'s top node
+\EndIf
+\State $\delta\gets\delta+1$ \Comment Increments the counter of loops
+\EndWhile
+\State \Return $A$
+\EndProcedure
+\end{algorithmic}
+\end{algorithm}
+Function \texttt{GetPredecessor}寻找the next smaller node to $P$'s top node。同时把路径上的节点都push到$P$中。
+\begin{algorithm}[H]
+\caption{Get Next Smaller Node}
+\begin{algorithmic}[1]
+\Procedure{GetPredecessor}{$P$}
+\State $\star$ Set $t$ as $P$'s top node
+\State $\star$ Pop $P$'s top node
+\If{$t$'s left child node is not null}
+\State $\star$ Push $t$'s \textbf{left} child node to $P$
+\State $\star$ Update $t$ as its left child node
+\While{$t$'s \textbf{right} child node is not null}
+\State $\star$ Push $t$'s \textbf{right} child node to $P$
+\State $\star$ Update $t$ as its \textbf{right} child node
+\EndWhile
+\EndIf
+\EndProcedure
+\end{algorithmic}
+\end{algorithm}
+Function \texttt{GetSuccessor}寻找the next larger node to $S$'s top node。同时把路径上的节点都push到$S$中。
+
+\begin{algorithm}[H]
+\caption{Get Next Larger Node}
+\begin{algorithmic}[1]
+\Procedure{GetSuccessor}{$S$}
+\State $\star$ Set $t$ as $S$'s top node
+\State $\star$ Pop $S$'s top node
+\If{$t$'s right child node is not null}
+\State $\star$ Push $t$'s \textbf{right} child node to $S$
+\State $\star$ Update $t$ as its right child node
+\While{$t$'s \textbf{left} child node is not null}
+\State $\star$ Push $t$'s \textbf{left} child node to $S$
+\State $\star$ Update $t$ as its \textbf{left} child node
+\EndWhile
+\EndIf
+\EndProcedure
+\end{algorithmic}
+\end{algorithm}
+\begin{lstlisting}[style=customc, caption={Find Next Larger And Next Smaller Node}]
+vector<int> closestKValues( TreeNode* root, double target, int k )
+{
+    stack<TreeNode*> P;
+    stack<TreeNode*> S;
+
+    auto node = root;
+
+    while( node )
+    {
+        auto dv = static_cast< double >( node->val );
+
+        if( dv < target )
+        {
+            P.push( node );
+            node = node->right;
+        }
+        else
+        {
+            S.push( node );
+            node = node->left;
+        }
+
+    }
+
+    int loops = 0;
+    vector<int> ans;
+    ans.reserve( k );
+
+    while( loops < k )
+    {
+        double dp = P.empty() ? 0 : abs( static_cast< double >( P.top()->val ) - target );
+        double ds = S.empty() ? 0 : abs( static_cast< double >( S.top()->val ) - target );
+
+        if( S.empty() )
+        {
+            ans.push_back( P.top()->val );
+            getPredecessor( P );
+        }
+        else if( !P.empty() && ( dp < ds ) )
+        {
+			//P.top() is closer to T
+            ans.push_back( P.top()->val );
+            getPredecessor( P );
+        }
+        else //S is not empty or P is empty or dp >= ds
+        {
+            ans.push_back( S.top()->val );
+            getSuccessor( S );
+        }
+
+        ++loops;
+    }
+
+    return ans;
+}
+//Get next smaller node to P.top()
+void getPredecessor( stack<TreeNode*>& P )
+{
+    auto t = P.top();
+    P.pop();
+
+    if( t->left )
+    {
+        P.push( t->left );
+        t = t->left;
+        while( t->right )
+        {
+            P.push( t->right );
+            t = t->right;
+        }
+    }
+}
+//Get next larger node to S.top()
+void getSuccessor( stack<TreeNode*>& S )
+{
+    auto t = S.top();
+    S.pop();
+
+    if( t->right )
+    {
+        S.push( t->right );
+
+        t = t->right;
+        while( t->left )
+        {
+            S.push( t->left );
+            t = t->left;
+        }
+
+    }
+}
+\end{lstlisting}

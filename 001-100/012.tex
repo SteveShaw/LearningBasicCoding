@@ -1,0 +1,66 @@
+\section{12 --- Integer to Roman}
+Roman numerals are represented by seven different symbols: $I$, $V$, $X$, $L$, $C$, $D$ and $M$.
+\begin{table}[H]
+\begin{tabular}{lc}
+Symbol  & Value\\
+$ I $   & 1\\
+$ V $  &   5\\
+$ X $    & 10 \\
+$ L $  & 50 \\
+$ C $  & 100 \\
+$ D $ & 500 \\
+$ M $  & 1000
+\end{tabular}
+\end{table}
+For example, two is written as \texttt{II} in Roman numeral, just two one's added together. Twelve is written as, \texttt{XII}, which is simply \texttt{X} + \texttt{II}. The number twenty seven is written as \texttt{XXVII}, which is \texttt{XX} + \texttt{V} + \texttt{II}.
+\par
+Roman numerals are usually written largest to smallest from left to right. However, the numeral for four is not \texttt{IIII}. Instead, the number four is written as IV. Because the one is before the five we subtract it making four. The same principle applies to the number nine, which is written as \texttt{IX}. There are six instances where subtraction is used:
+
+\begin{itemize}
+\item $ I $ can be placed before $ V $ (5) and $ X $ (10) to make 4 and 9. 
+\item $ X $ can be placed before $ L $ (50) and $ C $ (100) to make 40 and 90. 
+\item $ C  $can be placed before $ D $ (500) and $ M $ (1000) to make 400 and 900.
+\end{itemize}
+
+Given an integer, convert it to a roman numeral. Input is guaranteed to be within the range from 1 to 3999.
+
+\paragraph{Example 1:}
+
+\begin{flushleft}
+\textbf{Input}: 3
+\\
+Output: \texttt{III}
+\end{flushleft}
+
+\paragraph{Example 2:}
+\begin{flushleft}
+\textbf{Input}: 4
+\\
+\textbf{Output}: \texttt{IV}
+\end{flushleft}
+
+\paragraph{Example 3:}
+\begin{flushleft}
+\textbf{Input}: 9
+\\
+\textbf{Output}: \texttt{IX}
+\end{flushleft}
+
+\paragraph{Example 4:}
+\begin{flushleft}
+\textbf{Input}: 58
+\\
+\textbf{Output}: \texttt{LVIII}
+\\
+\textbf{Explanation}: $L = 50$, $ V = 5 $, $ III = 3 $.
+\end{flushleft}
+
+\paragraph{Example 5:}
+
+\begin{flushleft}
+\textbf{Input}: 1994
+\\
+\textbf{Output}: \texttt{MCMXCIV}
+\\
+\textbf{Explanation}: $ M = 1000 $, $ CM = 900 $, $ XC = 90 $ and $ IV = 4 $.
+\end{flushleft}

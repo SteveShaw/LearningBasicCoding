@@ -1,0 +1,128 @@
+\section{15 --- 3Sum}
+Given an array $ A $ of $ n $ integers, are there elements $ a $, $ b $, $ c $ in $ A $ such that $ a + b + c = 0 $? Find all unique triplets in the array which gives the sum of zero.
+
+\paragraph{Note:}
+
+\begin{itemize}
+	\item The solution set must not contain duplicate triplets.
+\end{itemize}
+
+\paragraph{Example:}
+\begin{flushleft}
+\textbf{Input}: $ A =  [-1,\; 0,\; 1,\; 2,\; -1,\; -4]$
+\\
+\textbf{Output}: $ (-1,\;0,\;1) $, $ (-1,\;-1,\;2) $
+\end{flushleft}
+
+\subsection{Sorting}
+\begin{itemize}
+\item 对$ A $行排序，然后开始遍历排序后的数组，这里注意不是遍历到最后一个停止，而是到倒数第三个就可以了。
+\item 当遍历到正数的时候就break, 因为数组已经排序过， 如果第一个是正数了，那么后面的数字就都是正数，就永远不会出现和为0的情况了。
+\item 加上重复就跳过的处理，处理方法是从第二个数开始，如果和前面的数字相等，就跳过。
+\item 对于遍历到的数$A[i]$，需要在$A[i+1\ldots L-1]$中找到两个数之和等于$ 0-A[i] $。
+\begin{itemize}
+\item 用两个指针$l$和$r$分别指向$A[i+1\ldots L-1]$首尾两个数， 如果$A[l]+A[r] = 0-A[i]$，则将$A[i], A[l], A[r]$一起存入结果中
+\item 然后开始检查是否有重复数字。
+\item 如果$A[l]+A[r] < 0-A[i]$， $l$右移，增大数字，反正，则将$r$左移，减小数字。
+\end{itemize}
+\end{itemize}
+
+\setcounter{algorithm}{0}
+\begin{algorithm}[H]
+\caption{Find 3 numbers with sum equal to zero}
+\begin{algorithmic}[1]
+\Procedure{ThreeSum}{$A,L$}
+\State $\star$ Sort $A$ by ascending order
+\State $S: = \emptyset$ \Comment The final results
+\For{$i:=0$ \textbf{to} $L-1$}
+\If{$A[i] >0$}
+\State \texttt{break} \Comment Exit the loop
+\EndIf
+\If{$i > 0$ \textbf{and} $A[i] = A[i-1]$} \State \texttt{continue} \Comment skip duplicate numbers
+\EndIf
+\State $\ast$ Initialize two indexes $l$ and $r$ as $l:=i+1$ and $r:=L-1$
+\While{$l<r$}
+\If{$A[L]+A[R] + A[i] = 0$}
+\State $S \gets S + (A[i], A[L], A[R]) $
+\While{$l < r$ \textbf{and} $A[l+1] = A[l]$} \Comment skip duplicate numbers
+\State $l \gets l+1$
+\EndWhile
+\While{$l < r$ \textbf{and} $A[r-1] = A[r]$} \Comment skip duplicate numbers
+\State $r \gets r-1$
+\EndWhile
+\State $l \gets l+1$ \Comment $A[l+1]$ is the first number that is not equal to $A[L]$ from left
+\State $r \gets r-1$ \Comment $r-1$ is the first number that is not equal to $A[r]$ from right
+\ElsIf{$A[l]+A[r] + A[i] < 0$}
+\State $l \gets l+1$ \Comment Increase $A[l]$
+\Else
+\State $r \gets r-1$ \Comment Decrease $A[r]$
+\EndIf
+\EndWhile
+\EndFor
+\State \Return $S$
+\EndProcedure
+\end{algorithmic}
+\end{algorithm}
+\setcounter{lstlisting}{0}
+\begin{lstlisting}[style=customc, caption={Sorting}]
+vector<vector<int>> threeSum( vector<int>& A )
+{
+    sort( A.begin(), A.end() );
+
+    int L = static_cast<int>( A.size() );
+
+    //The final result set
+    vector<vector<int>> S;
+
+    for( int i = 0; i <= L - 3; ++i )
+    {
+        if( A[i] > 0 )
+        {
+            break;
+        }
+
+        if( ( i > 0 ) && ( A[i] == A[i - 1] ) )
+        {
+            continue;
+        }
+
+        int l = i + 1;
+        int r = L - 1;
+
+        //start looking for candidates
+        while( l < r )
+        {
+            if( A[i] + A[l] + A[r] == 0 )
+            {
+                S.emplace_back( vector<int> {A[i], A[l], A[r]} );
+                //skip duplicate numbers
+                while( ( l < r ) && ( A[l] == A[l + 1] ) )
+                {
+                    ++l;
+                }
+                //skip duplicate numbers
+                while( ( l < r ) && ( A[r] == A[r - 1] ) )
+                {
+                    --r;
+                }
+                //l+1 is the first different number from left
+                ++l;
+                //r-1 is the first different number from right
+                --r;
+            }
+            else if( A[i] + A[l] + A[r] < 0 )
+            {
+                //increase A[l]
+                ++l;
+            }
+            else
+            {
+                //decrease A[r]
+                --r;
+            }
+        }
+    }
+    return S;
+}
+
+\end{lstlisting}

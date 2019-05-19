@@ -1,0 +1,154 @@
+\section{265 --- Paint House II}
+There are a row of $n$ houses, each house can be painted with one of the $k$ colors. The cost of painting each house with a certain color is different. You have to paint all the houses such that no two adjacent houses have the same color.
+\par
+The cost of painting each house with a certain color is represented by a $n \times k$ cost matrix $C$. For example, $C[0][0]$ is the cost of painting house 0 with color 0; $C[1][2]$is the cost of painting house 1 with color 2, and so on. Find the minimum cost to paint all houses.
+
+\paragraph{Note:}
+\begin{itemize}
+\item All costs are positive integers.
+\end{itemize}
+
+\paragraph{Follow up:}
+\begin{itemize}
+\item Could you solve it in $O(nk)$ runtime?
+\end{itemize}
+\subsection{Dynamic Programming}
+这道题是之前Paint House的拓展，如果用之前的解法，那么对应的时间复杂度将是$O(n\times k\times k)$。
+\begin{itemize}
+\item 用$a$和$b$分别代表当前第$i-1$个house的minimum cost和second minimum cost。
+\item 用$x$和$y$来代表$a$和$b$对应的颜色。
+\item 如果第$i$个house的颜色和$x$相同，就用$y$对应的cost也就是$b$进行计算。否则就用$x$对应的cost即$a$。
+\item 由于需要更新$a$和$b$，因此当找到比$a$更小的值时，要先把当前的$a$赋给$b$。这样才能保证更新后仍然能够得到正确的$b$。
+\end{itemize}
+\setcounter{algorithm}{0}
+\begin{algorithm}[H]
+\caption{Dynamic Programming}
+\begin{algorithmic}[1]
+\State $\star$ $n$ is the number of house and $k$ the number colors
+\Procedure{MinCostII}{$C,n,k$}
+\State $a:=+\infty$, $b=+\infty$
+\State $x:=-1$, $y=-1$
+\State $\ast$ Process the first house
+\For{$i:=0$ \textbf{to} $k-1$}
+\algstore{265algo}
+\end{algorithmic}
+\end{algorithm}
+\begin{algorithm}[H]
+\begin{algorithmic}[1]
+\algrestore{265algo}
+\If{$C[0][i] < a$}
+\State $b\gets a$ \Comment Make sure second minimum is correct
+\State $a\gets C[0][i]$
+\State $x\gets i$
+\ElsIf{$C[0][i] < b$}
+\State $b\gets C[0][i]$
+\EndIf
+\EndFor
+\State $\ast$ Process the other houses
+\For{$h:=1$ \textbf{to} $n-1$}
+\State $\ast$ 得到当前房子刷哪种颜色可以得到最小cost
+\State $\bar{a}:=+\infty$, $\bar{b}=+\infty$
+\State $\bar{x}:=-1$, $\bar{y}:=-1$
+\For{$i:=0$ \textbf{to} $k-1$} \Comment Iterate over each color
+\State $z:=0$ \Comment 当前的cost
+\If{$x\neq i$}
+\State $z\gets C[h][i] + a$ \Comment 上个房子即$h-1$可以刷$x$以获得$a$即最小的cost
+\Else
+\State $z\gets C[h][i] + b$ \Comment 房子$h-1$不能刷$x$这样就只能获得$b$即第二小的cost
+\EndIf
+\If{$z<\hat{a}$}
+\State $\hat{b}\gets\hat{a}$
+\State $\hat{a}\gets z$ \Comment Current minimum cost for house $h$
+\State $\hat{x}\gets i$
+\ElsIf{$z<\hat{b}$}
+\State $\hat{b}\gets z$ \Comment Current second minimum cost for house $h$
+\EndIf
+\EndFor
+\State $a\gets\hat{a}$, $b\gets\hat{b}$, $x\gets\hat{x}$ \Comment 更新全局的值
+\EndFor
+\State \Return $a$
+\EndProcedure
+\end{algorithmic}
+\end{algorithm}
+\setcounter{lstlisting}{0}
+\begin{lstlisting}[style=customc, caption={Dynamic Programming}]
+int minCostII( vector<vector<int>>& costs )
+{
+   int n = static_cast< int >( costs.size() );
+    int k = static_cast< int >( costs[0].size() );
+
+    int x = -1;
+
+    //global minimum cost
+    int a = INT_MAX;
+    //global second minimum cost
+    int b = INT_MAX;
+
+    //process first house
+    auto &K = costs[0];
+    for( int color = 0; color < k; ++color )
+    {
+        if( K[color] < a )
+        {
+            b = a; //make sure second minimum is correct
+            a = K[color];
+            x = color;
+        }
+        else if( K[color] < b )
+        {
+            b = K[color];
+        }
+    }
+
+    //process remaining houses
+    for( int i = 1; i < n; ++i )
+    {
+        auto& K = costs[i];
+
+        //current minimum cost
+        int cur_a = INT_MAX;
+        //current second minimum cost
+        int cur_b = INT_MAX;
+        //current color for current minimum cost
+        int cur_x = 0;
+
+
+        for( int color = 0; color < k; ++color )
+        {
+            int z = K[color];
+
+            if( color == x )
+            {
+                //house h-1 cannot be color x
+                //therefore add second minimum cost
+                z += b;
+            }
+            else
+            {
+                //house h-1 can be color x
+                //therefore add minimum cost
+                z += a;
+            }
+
+            if( z < cur_a )
+            {
+                cur_b = cur_a;
+                cur_a = z;
+                cur_x = color;
+            }
+            else if( z < cur_b )
+            {
+                cur_b = z;
+            }
+        }
+
+        //update global values
+        a = cur_a;
+        b = cur_b;
+        x = cur_x;
+    }
+
+
+    return a;
+}
+\end{lstlisting}

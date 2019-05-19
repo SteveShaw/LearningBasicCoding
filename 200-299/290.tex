@@ -1,0 +1,109 @@
+\section{290 --- Word Pattern}
+Given a pattern $P$ and a string $S$, find if $S$ follows the same pattern.
+\par
+Here follow means a full match, such that there is a bijection between a letter in $P$ and a non-empty word in $S$.
+
+\paragraph{Example 1:}
+\begin{flushleft}
+\textbf{Input}: $P$ = \texttt{abba}, $S$ = \texttt{dog cat cat dog}
+\\
+\textbf{Output}: \texttt{true}
+\end{flushleft}
+
+\paragraph{Example 2:}
+\begin{flushleft}
+Input: $P$ = \texttt{abba}, $S$ = \texttt{dog cat cat fish}
+\\
+Output: \texttt{false}
+\end{flushleft}
+
+\paragraph{Example 3:}
+\begin{flushleft}
+\textbf{Input}: $P$ = \texttt{aaaa}, $S$ = \texttt{dog cat cat dog}
+\\
+\textbf{Output}: \texttt{false}
+\end{flushleft}
+
+\paragraph{Example 4:}
+\begin{flushleft}
+\textbf{Input}: $P$ = \texttt{abba}, $S$ = \texttt{dog dog dog dog}
+\\
+\textbf{Output}: \texttt{false}
+\end{flushleft}
+
+\paragraph{Notes:}
+\begin{itemize}
+\item You may assume $P$ contains only lowercase letters, and $S$ contains lowercase letters separated by a single space.
+\end{itemize}
+\subsection{Hash Map}
+这道题并不难。但是如果自己手动写分割字符串，有几点需要注意
+\begin{itemize}
+\item 需要考虑$P$和$S$中$P$的长度和$S$中单词个数不相等的情况。
+\item 如果只是建立$P$中的letter和$S$中的word的map并不够，比如$P$=\texttt{abba}，$S$=\texttt{cat cat cat cat}"，这时候letter $a$和$b$都map到了同一个word即\texttt{cat}上，但是不会产生错误
+\item 因此还需要一个hash set用来记录已经出现的word，当发现一个letter没有对应的word时，先检查这个word有没有在hash set中，如果有，表示之前有letter已经和这个word对应了。
+\end{itemize}
+\setcounter{lstlisting}{0}
+\begin{lstlisting}[style=customc, caption={Hash Map}]
+bool wordPattern( string pattern, string str )
+{
+    //letter to word map
+    vector<string> m( 26 );
+
+    //word sets
+    unordered_set<string> ss;
+
+    size_t start = 0;
+    size_t count = 0;
+
+    for( auto c : pattern )
+    {
+        auto p = str.find( ' ', start );
+
+        auto word = str.substr( start, p - start );
+
+        start = p + 1;
+
+        if( m[c - 'a'].empty() )
+        {
+            if( ss.find( word ) != ss.end() )
+            {
+                //This word has been already
+                //mapped by another letter
+                return false;
+            }
+
+            m[c - 'a'] = word;
+            ss.emplace( word );
+        }
+        else
+        {
+            if( m[c - 'a'] != word )
+            {
+                //The word is different from the word mapped
+                //from the same letter
+                return false;
+            }
+        }
+
+        //increments the valid match count
+        ++count;
+
+        if( p == string::npos )
+        {
+            start = str.size();
+            break;
+        }
+    }
+
+    if( start < str.size() )
+    {
+        //str is longer
+        return false;
+    }
+
+    //The valid match count must equal to
+    //the number letters of pattern
+    return count == pattern.size();
+}
+\end{lstlisting}
+

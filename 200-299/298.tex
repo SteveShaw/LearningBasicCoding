@@ -1,0 +1,129 @@
+\section{298 --- Binary Tree Longest Consecutive Sequence}
+Given a binary tree, find the length of the longest consecutive sequence path.
+\par
+The path refers to any sequence of nodes from some starting node to any node in the tree along the parent-child connections. The longest consecutive path need to be from parent to child (cannot be the reverse).
+
+\paragraph{Example:}
+
+\begin{flushleft}
+
+\begin{figure}[H]
+\begin{tikzpicture}
+[mynode/.style={draw,circle,minimum size=5mm, fill=gray!20!}]
+\node(){};
+\node[mynode](a) {1};
+\node[mynode](b)[below=8mm of a, xshift=8mm] {3};
+\node[mynode](c)[below=8mm of b, xshift=-8mm] {2};
+\node[mynode](d)[below=8mm of b, xshift=8mm] {4};
+\node[mynode](e)[below=8mm of d, xshift=8mm] {5};
+\draw (a) -- (b);
+\draw (b) -- (c);
+\draw (b) -- (d);
+\draw (d) -- (e);
+\end{tikzpicture}
+\end{figure}
+
+Longest consecutive sequence path is 3--4--5, so return 3.
+
+\begin{figure}[H]
+\begin{tikzpicture}
+[mynode/.style={draw,circle,minimum size=5mm, fill=gray!20!}]
+\node(){};
+\node[mynode](a) {2};
+\node[mynode](b)[below=8mm of a, xshift=8mm] {3};
+\node[mynode](c)[below=8mm of b, xshift=-8mm] {2};
+\node[mynode](d)[below=8mm of c, xshift=-8mm] {1};
+\draw (a) -- (b);
+\draw (b) -- (c);
+\draw (c) -- (d);
+\end{tikzpicture}
+\end{figure}
+
+Longest consecutive sequence path is 2--3,not 3--2--1, so return 2.
+\end{flushleft}
+\subsection{Depth First Search}
+\begin{itemize}
+\item 对当前节点$t$的left and right node分别处理，
+\item 如果left node存在且值比$t$的值大1，则递归处理left node，同时递归调用函数输入参数中的当前长度加1。否则，还是递归处理left node，但是输入参数中的当前长度重置为1。
+\item 对于right node的处理情况和left node相同。
+\item 处理完左右节点，需要和当前的结果进行比较，得到最大的那个length。
+\end{itemize}
+\setcounter{lstlisting}{0}
+\begin{lstlisting}[style=customc, caption={DFS}]
+int longestConsecutive( TreeNode* root )
+{
+    if( !root )
+    {
+        return 0;
+    }
+
+    int ans = 0;
+
+    dfs( root, 1, ans );
+
+    return ans;
+}
+
+void dfs( TreeNode *t, int len, int &ans )
+{
+    ans = max( ans, len );
+
+    if( t->left )
+    {
+        if( t->left->val == t->val + 1 )
+        {
+			//len<-len+1
+            dfs( t->left, len + 1, ans );
+        }
+        else
+        {
+			//reset len to 1
+            dfs( t->left, 1, ans );
+        }
+    }
+
+    if( t->right )
+    {
+        if( t->right->val == t->val + 1 )
+        {
+            //len<-len+1
+            dfs( t->right, len + 1, ans );
+        }
+        else
+        {
+            //reset len to 1
+            dfs( t->right, 1, ans );
+        }
+    }
+}
+
+\end{lstlisting}
+另外一种更简洁的代码如下
+\begin{lstlisting}[style=customc, caption={DFS 2}]
+int longestConsecutive( TreeNode* root )
+{
+    return dfs( root, nullptr, 0 );
+}
+
+int dfs( TreeNode *t, TreeNode *parent, int len )
+{
+    if( !t )
+    {
+        return len;
+    }
+
+    if( parent && ( t->val == parent->val + 1 ) )
+    {
+        ++len;
+    }
+    else
+    {
+        len = 1;
+    }
+
+    int l_len = dfs( t->left, t, len );
+    int r_len = dfs( t->right, t, len );
+
+    return ( max )( len, ( max )( l_len, r_len ) );
+}
+\end{lstlisting}

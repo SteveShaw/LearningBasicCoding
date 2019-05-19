@@ -1,0 +1,39 @@
+\section{268. Missing Number}
+Given an array $A$ containing $n$ distinct numbers taken from $0, 1, 2, \ldots, n$, find the one that is missing from the array.
+
+\paragraph{Example 1:}
+
+\begin{flushleft}
+\textbf{Input}: $[3,0,1]$
+\\
+\textbf{Output}: 2
+\end{flushleft}
+
+\paragraph{Example 2:}
+
+\begin{flushleft}
+\textbf{Input}: $[9,6,4,2,3,5,7,0,1]$
+\\
+\textbf{Output}: 8
+\end{flushleft}
+
+\paragraph{Note:}
+\begin{itemize}
+\item Your algorithm should run in linear runtime complexity. \item Could you implement it using only constant extra space complexity?
+\end{itemize}
+\subsection{Mathematical Induction}
+先求出整个数组的和，然后用$(L+1)\times L/2$得到$0,1,\ldots,L$的和，这两个之差即为missing number
+\subsection{Bit Manipulation}
+由于$A$中只包含了$n$个数，因此index的范围是从$0$到$n-1$，因此将每个index和其对应的数进行XOR，然后再计算整体的XOR，由于重复的数的XOR结果为零，那个missing number就是最终的XOR结果。
+\setcounter{lstlisting}{0}
+\begin{lstlisting}[style=customc, caption={Bit Manipulation}]
+int missingNumber( vector<int>& nums )
+{
+    int ans = 0;
+    for( int i = 0; i < nums.size(); ++i )
+    {
+        ans ^= ( i + 1 ) ^ nums[i];
+    }
+    return ans;
+}
+\end{lstlisting}

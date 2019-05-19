@@ -1,0 +1,83 @@
+\section{277 --- Find the Celebrity}
+Suppose you are at a party with $n$ people (labeled from 0 to $n-1$) and among them, there may exist one celebrity. The definition of a celebrity is that all the other $n-1$ people know him/her but he/she does not know any of them.
+\par
+Now you want to find out who the celebrity is or verify that there is not one. The only thing you are allowed to do is to ask questions like: ``Hi, A. Do you know B?'' to get information of whether $A$ knows $B$. You need to find out the celebrity (or verify there is not one) by asking as few questions as possible (in the asymptotic sense).
+\par
+You are given a helper function 
+\setcounter{lstlisting}{0}
+\begin{lstlisting}[style=customc]
+bool knows(a, b)
+\end{lstlisting}
+which tells you whether $A$ knows $B$. Implement a function
+\setcounter{lstlisting}{0}
+\begin{lstlisting}[style=customc]
+int findCelebrity(n)
+\end{lstlisting}
+your function should minimize the number of calls to \texttt{knows}.
+
+\paragraph{Note:} 
+\begin{itemize}
+\item There will be exactly one celebrity if he/she is in the party. 
+\item Return the celebrity's label if there is a celebrity in the party.
+\item If there is no celebrity, return $-1$.
+\end{itemize}
+\subsection{Two Round Checking}
+\begin{itemize}
+\item 初始化celebrity的编号$x$为0
+\item 从$1$到$n-1$调用函数\texttt{knows}，如果第$i$th个人\texttt{knows}$(x,i)$是\texttt{true}，那么更新$x$为$i$。因为只有一个celebrity，因此这个过程能够找到可能的celebrity。
+\item 在从$0$到$n-1$循环来检查$x$是否为celebrity，只要发现任何一个$i$使得\texttt{knows}$(x,i)$为\texttt{true}(即$x$ knows $i$)，或者\texttt{knows}$(i,x)$为\texttt{false}(即$i$不认识$x$)，那么表示$x$并不是celebrity。
+\end{itemize}
+\setcounter{algorithm}{0}
+\begin{algorithm}[H]
+\caption{Two Round Checking}
+\begin{algorithmic}[1]
+\Procedure{FindCelebrity}{$n$}
+\State $x:=0$
+\State $ast$ 找到可能的celebrity。
+\For{$i:=1$ \textbf{to} $n-1$}
+\If{\Call{knows}{$x,i$} is \texttt{true}} \Comment $x$ knows $i$ so $x$ cannot be celebrity
+\State $x\gets i$ \Comment Update $x$ to $i$ because $i$ is the possible celebrity
+\EndIf
+\EndFor
+\State $\ast$ 检查$x$是否为celebrity
+\For{$i:=0$ \textbf{to} $n-1$}
+\If{$i\neq x$}
+\If{\Call{knows}{$x,i$} is \texttt{true}}
+\State \Return $-1$ \Comment $x$ knows $i$ so $x$ cannot be the celebrity
+\EndIf
+\If{\Call{knows}{$i,x$} is \texttt{false}}
+\State \Return $-1$ \Comment $i$ does not know $x$ so $x$ cannot be the celebrity
+\EndIf
+\EndIf
+\EndFor
+\State \Return $x$ \Comment $x$ is the celebrity
+\EndProcedure
+\end{algorithmic}
+\end{algorithm}
+\setcounter{lstlisting}{0}
+\begin{lstlisting}[style=customc, caption={Two Round Checking}]
+int findCelebrity( int n )
+{
+    int x = 0;
+
+    //find the possible celebrity
+    for( int i = 0; i < n; ++i )
+    {
+        if( knows( x, i ) )
+        {
+            x = i;
+        }
+    }
+    for( int i = 0; i < n; ++i )
+    {
+        if( x != i && ( knows( x, i ) || !knows( i, x ) ) )
+        {
+            //either x knows someone
+            //or someone does not know x
+            //x cannot be the celebrity
+            return -1;
+        }
+    }
+    return x;
+}
+\end{lstlisting}

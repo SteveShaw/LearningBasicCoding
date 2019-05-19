@@ -1,0 +1,81 @@
+\section{78 --- Subsets}
+Given a set of distinct integers, $A$, return all possible subsets (the power set).
+\par
+Note: The solution set must not contain duplicate subsets.
+\paragraph{Example:}
+\begin{flushleft}
+\textbf{Input}: $A = [1,2,3]$
+\\
+\textbf{Output}:
+$(3), (1), (2), (1,2,3), (1,3),  (2,3),  (1,2), () $
+\end{flushleft}
+\subsection{Depth First Search}
+\begin{CJK*}{UTF8}{gbsn}
+原来的set中每一个element在subset中有两种状态：要么存在、要么不存在。这样构造subset的过程中每个element有两种选择方法：选择、不选择，因此可以构造一颗二叉树，例如给出的例子$A=[1,2,3]$，构造的二叉树如下（左子树表示选择该层处理的元素，右子树不选择），最后得到的叶子节点就是子集：
+\end{CJK*}
+\begin{figure}[H]
+\begin{tikzpicture}
+[mynode/.style={draw, minimum size=1cm, fill=gray!20!}]
+\node(){};
+\node[mynode](rt){};
+\node[mynode](l1) [below = 8mm of rt, xshift=-3.8cm] {$(1)$};
+\node[mynode](r1) [below = 8mm of rt, xshift=3.8cm] {};
+\node[mynode](ll) [below = 8mm of l1, xshift=-2cm] {$(1,2)$};
+\node[mynode](lr) [below = 8mm of l1, xshift=2cm] {$(1)$};
+\node[mynode](rl) [below = 8mm of r1, xshift=-2cm] {$(2)$};
+\node[mynode](rr) [below = 8mm of r1, xshift=2cm] {};
+\node[mynode](lll) [below = 8mm of ll, xshift=-1cm] {$(1,2,3)$};
+\node[mynode](llr) [below = 8mm of ll, xshift=1cm] {$(1,2)$};
+\node[mynode](lrl) [below = 8mm of lr, xshift=-1cm] {$(1,3)$};
+\node[mynode](lrr) [below = 8mm of lr, xshift=1cm] {$(1)$};
+\node[mynode](rll) [below = 8mm of rl, xshift=-1cm] {$(2,3)$};
+\node[mynode](rlr) [below = 8mm of rl, xshift=1cm] {$(2)$};
+\node[mynode](rrl) [below = 8mm of rr, xshift=-1cm] {$(3)$};
+\node[mynode](rrr) [below = 8mm of rr, xshift=1cm] {};
+\draw[>=stealth,->] (rt) -- (l1.north east);
+\draw[>=stealth,->] (rt) -- (r1.north west);
+\draw[>=stealth,->] (l1) -- (ll);
+\draw[>=stealth,->] (l1) -- (lr);
+\draw[>=stealth,->] (ll) -- (lll);
+\draw[>=stealth,->] (ll) -- (llr);
+\draw[>=stealth,->] (lr) -- (lrl);
+\draw[>=stealth,->] (lr) -- (lrr);
+\draw[>=stealth,->] (r1) -- (rl);
+\draw[>=stealth,->] (r1) -- (rr);
+\draw[>=stealth,->] (rl) -- (rll);
+\draw[>=stealth,->] (rl) -- (rlr);
+\draw[>=stealth,->] (rr) -- (rrl);
+\draw[>=stealth,->] (rr) -- (rrr);
+\end{tikzpicture}
+\end{figure}
+\begin{CJK*}{UTF8}{gbsn}
+根据上述二叉树，递归函数中需要从某个位置开始，向当前level的数组中加入该位置的数字，然后继续递归，结束后，把这个数字移除出数组。类似的题目都有类似这样的递归结构。原来的题目中还有个要求是subset中的数字必须是非递减序列，因此首先需要对数组进行排序。
+\end{CJK*}
+\subsubsection{Code}
+\setcounter{algorithm}{0}
+\begin{algorithm}[H]
+\caption{Depth First Search}
+\begin{algorithmic}[1]
+\Procedure{Subsets}{$A, L$}
+\State $\texttt{sort}(A)$
+\State $V:=\emptyset$ \Comment Empty array to hold current subset
+\State $\texttt{ans}:=\emptyset$ \Comment The result subsets
+\State $\texttt{DFS}(A, L, V, \texttt{ans}, 0)$ \Comment Call recursive function \texttt{DFS}
+\State \Return \texttt{ans}
+\EndProcedure
+\end{algorithmic}
+\end{algorithm}
+
+\begin{algorithm}[H]
+\caption{Recursive Function}
+\begin{algorithmic}[1]
+\Function{DFS}{$A, L, V, \texttt{ans}, \alpha$} \Comment $\alpha$ is the starting index
+\State $\texttt{ans}\gets \texttt{ans} + V$ \Comment Add current subset to result subsets
+\For{$i:=\alpha$ \textbf{to} $L-1$}
+\State $V\gets V + A[i]$ \Comment Add to current subset
+\State $\texttt{DFS}(A, L, V, \texttt{ans}, i+1)$ \Comment Recursive for next number
+\State $V\gets V\setminus A[i]$ \Comment Remove $A[i]$ from current subset
+\EndFor
+\EndFunction
+\end{algorithmic}
+\end{algorithm}

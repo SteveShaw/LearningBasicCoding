@@ -1,0 +1,10 @@
+\section{252 --- Meeting Rooms}
+Given an array of meeting time intervals $A$ consisting of start and end times $[s_1,\;e_1],\;[s_2,\;e_2],\;\ldots$ $(s_i < e_i)$, determine if a person could attend all meetings.
+\par
+\begin{flushleft}
+\textbf{Input}: $A =[[0, 30],\;[5, 10],\;[15, 20]]$
+\\
+\textbf{Output}: \texttt{false}
+\end{flushleft}
+\subsection{Check Overlapped Ranges}
+很简单的题目，将输入的ranges按照start time从小到打排序，然后依次看上一个range的end是否小于或者等于下一个range的start time。

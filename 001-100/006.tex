@@ -1,0 +1,132 @@
+\section{6 --- ZigZag Conversion}
+The string \texttt{PAYPALISHIRING} is written in a zigzag pattern on a given number of rows like this: (you may want to display this pattern in a fixed font for better legibility)
+\begin{table}[H]
+	\begin{tabular}{lllllll}
+P & &  A & & H & &  N\\
+A  & P  & L  & S  & I  & I &  G\\
+Y &  I & R &  &  &  &
+	\end{tabular}
+\end{table}
+And then read line by line: \texttt{PAHNAPLSIIGYIR}
+\par
+Write the code that will take a string and make this conversion given a number of rows:
+\begin{lstlisting}[style=customc]
+string convert(string s, int numRows);
+\end{lstlisting}
+
+\paragraph{Example 1:}
+
+\begin{flushleft}
+	\textbf{Input}: $S$ = \texttt{PAYPALISHIRING}, $N = 3$
+	\\
+\textbf{Output}: \texttt{PAHNAPLSIIGYIR}
+\\
+\end{flushleft}
+
+
+\paragraph{Example 2:}
+
+\begin{flushleft}
+	\textbf{Input}: $S$ = \texttt{PAYPALISHIRING}, $N = 4$
+	\\
+\textbf{Output}: \texttt{PINALSIGYAHRPI}
+\\
+\textbf{Explanation}:
+\begin{table}[H]
+	\begin{tabular}{lllllll}
+		P & &   &  I &  & &  N\\
+		A  &  & L  & S   &  & I &  G\\
+		Y &  A &  & H & R &  &  \\
+		P &  &  & I &  &  &
+	\end{tabular}
+\end{table}
+\end{flushleft}
+\subsection{Visit By Row}
+Visit all characters in row 0 first, then row 1, then row 2, and so on $\dots$. Supper number of rows is $N$
+\begin{itemize}
+	\item Characters in row $0$ are located at indexes $0, \left(2 \times N - 2\right), 2\times\left(2 \times N - 2\right), \ldots$
+	\item Characters in row $N-1$ are located at indexes 
+	\[N-1, \left(2 \times N - 2\right) + N - 1, 2\times\left(2 \times N - 2\right) + N - 1, \ldots\]
+	\item Characters in inner row $0<i<N-1$ are located at indexes 
+	\[
+	i, \left(2 \times N - 2\right)-i, \left(2 \times N - 2\right) + i, 2\times\left(2 \times N - 2\right)- i, 2\times\left(2 \times N - 2\right)+ i, 3\times\left(2 \times N - 2\right)- i, \dots
+	\]
+\end{itemize}
+\setcounter{algorithm}{0}
+\begin{algorithm}[H]
+	\caption{Print letters in Zigzag way}
+	\begin{algorithmic}[1]
+		\Procedure{Zigzag}{$S, L, N$}
+		\If{$N = 1$}
+		\State \Return $S$ \Comment one row is $S$ itself
+		\EndIf
+		\State $\delta := 2 \times N -2$
+		\State $Z:= \emptyset$ \Comment $Z$ will be the print string
+		\For{$n:=0$ \textbf{to} $N-1$}
+		\State $k:= 0$
+		\While{$k+n < L$}
+		\State $Z \gets Z + S[k+n]$ \Comment $S[m\times \left(2 \times N - 2\right)] + i$ for $m = 1,2, \ldots$ and $i = 0, \ldots, N-1$
+		\If{$n\neq 0$ \textbf{and} $n\neq N-1$ \textbf{and} $k+\delta - n < L$} \Comment For inner rows
+		\State $Z \gets Z + S[k+\delta-n]$ \Comment get $S[m\times\left(2 \times N - 2\right)- i]$
+		\EndIf
+		\State $k \gets k+\delta$
+		\EndWhile
+		\EndFor
+		\State \Return $Z$
+		\EndProcedure
+		\Statex
+	\end{algorithmic}
+\end{algorithm}
+\subsection{Sort by Row}
+By iterating through the string from left to right, we can easily determine which row in the Zig-Zag pattern that a character belongs to.
+\par
+We can use $\min(N,L)$  lists to represent the non-empty rows of the Zig-Zag Pattern.
+
+\begin{itemize}
+	\item Iterate through $S$ from left to right, appending each character to the appropriate row. 
+	\item The appropriate row can be tracked using two variables: the current row $r$ and the current direction $d$.
+	\item The current direction $d$ changes only when moved up to the top-most row or moved down to the bottom-most row.
+\end{itemize}
+
+\setcounter{lstlisting}{0}
+\begin{lstlisting}[style=customc, caption={Sort By Row}]
+string convert( string s, int numRows )
+{
+    if( numRows == 1 )
+    {
+        return s;
+    }
+
+    //Determine the rows for print
+    int l = static_cast<int>( s.size() );
+    l = ( min )( l, numRows );
+
+    vector<string> v_rows( l );
+    int curRow = 0;
+
+    bool goingDown = false;
+
+    for( char c : s )
+    {
+        v_rows[curRow].push_back( c );
+
+        if( curRow == 0 || curRow == numRows - 1 )
+        {
+            //Change the direction
+            goingDown = !goingDown;
+        }
+
+        //up: -1
+        //down: 1
+        curRow += goingDown ? 1 : -1;
+    }
+
+    string ans;
+    for( const string &row : v_rows )
+    {
+        ans += row;
+    }
+
+    return ans;
+}
+\end{lstlisting}

@@ -1,0 +1,233 @@
+\section{31 --- Next Permutation}
+Implement \textbf{next permutation}, which rearranges numbers into the lexicographically next greater permutation of numbers.
+\par
+If such arrangement is not possible, it must rearrange it as the lowest possible order (ie, sorted in ascending order).
+\par
+The replacement must be in-place and use only constant extra memory.
+\par
+Here are some examples. Inputs are in the left-hand column and its corresponding outputs are in the right-hand column.
+\begin{table}[H]
+\begin{tabular}{lcl}
+(1,2,3) & $\Longrightarrow$ & (1,3,2) \\
+(3,2,1) & $\Longrightarrow$ & (1,2,3) \\
+(1,1,5) & $\Longrightarrow$ & (1,5,1)
+\end{tabular}
+\end{table}
+\subsection{Single Pass}
+\begin{enumerate}
+    \item 如果给定的sequence已经是降序排列，就不会有next permutation。例如 $[9, 5, 4, 3, 1]$
+    \item 从右到左寻找the first pair of two successive numbers $a[i]$ and $a[i-1]$, which satisfy $A[i] > A[i-1]$. 由于从$A[i]$到最后一个数都是降序排列，因此这个部分无需进行rearrange。需要rearrang的是从$A[i-1]$到最后一个数。
+    \item 由于next permutation is the one just larger than the current one，因此方法就是用$A[i-1]$的右边所有数中，即从$A[i]$到$A[L-1]$中大于$A[i-1]$的数中最小的那个数替换$A[i-1]$。而由于$A[i]$到$A[L-1]$都是降序排列，因此只需从位置$i$开始寻找最后一个大于$A[i-1]$的数即可，假设这个数是$A[j]$。 
+    \item Swap $A[i-1]$ and $A[j]$。 这时候$A[i]$到$A[L-1]$仍然是降序排列。为了得到更小的permutation， 需要将其变为升序排列。因此 Reverse $A[i]$ to $A[L-1]$就能得到next permutation了。
+\end{enumerate}
+\begin{figure}[H]
+\begin{tikzpicture}
+[mynode/.style={draw,minimum height=1cm, inner sep=0.5 cm, node distance=0.6cm, fill=gray!20!}]
+\node[rectangle split, rectangle split horizontal, rectangle split parts=9] (a)[mynode] {$1$ \nodepart{two} $5$ \nodepart{three} $8$ \nodepart{four} $4$ \nodepart{five} $7$ \nodepart{six} $6$ \nodepart{seven} $5$ \nodepart{eight} $3$ \nodepart{nine} $1$};
+\node (b) [below=8mm of a.nine south] {};
+\node (c) [above=1cm of a] {从右到左寻找第一个decreasing number};
+\draw[red, >=stealth,->, line width=2pt] (b) -- (a.nine south);
+\end{tikzpicture}
+\end{figure}
+\begin{figure}[H]
+\begin{tikzpicture}
+[mynode/.style={draw,minimum height=1cm, inner sep=0.5 cm, node distance=0.6cm, fill=gray!20!}]
+\node[rectangle split, rectangle split horizontal, rectangle split parts=9] (a)[mynode] {$1$ \nodepart{two} $5$ \nodepart{three} $8$ \nodepart{four} $4$ \nodepart{five} $7$ \nodepart{six} $6$ \nodepart{seven} $5$ \nodepart{eight} $3$ \nodepart{nine} $1$};
+\node (b) [below=8mm of a.eight south] {};
+\draw[red, >=stealth,->, line width=2pt] (b) -- (a.eight south);
+\end{tikzpicture}
+\end{figure}
+\begin{figure}[H]
+\begin{tikzpicture}
+[mynode/.style={draw,minimum height=1cm, inner sep=0.5 cm, node distance=0.6cm, fill=gray!20!}]
+\node[rectangle split, rectangle split horizontal, rectangle split parts=9] (a)[mynode] {$1$ \nodepart{two} $5$ \nodepart{three} $8$ \nodepart{four} $4$ \nodepart{five} $7$ \nodepart{six} $6$ \nodepart{seven} $5$ \nodepart{eight} $3$ \nodepart{nine} $1$};
+\node (b) [below=8mm of a.seven south] {};
+\draw[red, >=stealth,->, line width=2pt] (b) -- (a.seven south);
+\end{tikzpicture}
+\end{figure}
+\begin{figure}[H]
+\begin{tikzpicture}
+[mynode/.style={draw,minimum height=1cm, inner sep=0.5 cm, node distance=0.6cm, fill=gray!20!}]
+\node[rectangle split, rectangle split horizontal, rectangle split parts=9] (a)[mynode] {$1$ \nodepart{two} $5$ \nodepart{three} $8$ \nodepart{four} $4$ \nodepart{five} $7$ \nodepart{six} $6$ \nodepart{seven} $5$ \nodepart{eight} $3$ \nodepart{nine} $1$};
+\node (b) [below=8mm of a.six south] {};
+\draw[red, >=stealth,->, line width=2pt] (b) -- (a.six south);
+\end{tikzpicture}
+\end{figure}
+\begin{figure}[H]
+\begin{tikzpicture}
+[mynode/.style={draw,minimum height=1cm, inner sep=0.5 cm, node distance=0.6cm, fill=gray!20!}]
+\node[rectangle split, rectangle split horizontal, rectangle split parts=9] (a)[mynode] {$1$ \nodepart{two} $5$ \nodepart{three} $8$ \nodepart{four} $4$ \nodepart{five} $7$ \nodepart{six} $6$ \nodepart{seven} $5$ \nodepart{eight} $3$ \nodepart{nine} $1$};
+\node (b) [below=8mm of a.five south] {};
+\draw[red, >=stealth,->, line width=2pt] (b) -- (a.five south);
+\end{tikzpicture}
+\end{figure}
+\begin{figure}[H]
+\begin{tikzpicture}
+[mynode/.style={draw,minimum height=1cm, inner sep=0.5 cm, node distance=0.6cm, fill=gray!20!}]
+\node[rectangle split, rectangle split horizontal, rectangle split parts=9] (a)[mynode] {$1$ \nodepart{two} $5$ \nodepart{three} $8$ \nodepart{four} $4$ \nodepart{five} $7$ \nodepart{six} $6$ \nodepart{seven} $5$ \nodepart{eight} $3$ \nodepart{nine} $1$};
+\node (b) [below=8mm of a.four south] {};
+\draw[red, >=stealth,->, line width=2pt] (b) -- (a.four south);
+\node (c) [above=1cm of a] {找到了第一个decreasing number = $4$};
+\end{tikzpicture}
+\end{figure}
+\begin{figure}[H]
+\begin{tikzpicture}
+[mynode/.style={draw,minimum height=1cm, inner sep=0.5 cm, node distance=0.6cm, fill=gray!20!}]
+\node[rectangle split, rectangle split horizontal, rectangle split parts=9] (a)[mynode] {$1$ \nodepart{two} $5$ \nodepart{three} $8$ \nodepart{four} $4$ \nodepart{five} $7$ \nodepart{six} $6$ \nodepart{seven} $5$ \nodepart{eight} $3$ \nodepart{nine} $1$};
+\node (b) [below=10mm of a.four south] {\textcolor{red}{$A[i-1]$}};
+\draw[red, >=stealth,->, line width=2pt] (b) -- (a.four south);
+\node (d) [above=1cm of a.five north] {};
+\draw[blue, >=stealth,->, line width=2pt] (d) -- (a.five north);
+\node (c) [above=2cm of a] {从4开始往右寻找最后一个大于4的number};
+\end{tikzpicture}
+\end{figure}
+\begin{figure}[H]
+\begin{tikzpicture}
+[mynode/.style={draw,minimum height=1cm, inner sep=0.5 cm, node distance=0.6cm, fill=gray!20!}]
+\node[rectangle split, rectangle split horizontal, rectangle split parts=9] (a)[mynode] {$1$ \nodepart{two} $5$ \nodepart{three} $8$ \nodepart{four} $4$ \nodepart{five} $7$ \nodepart{six} $6$ \nodepart{seven} $5$ \nodepart{eight} $3$ \nodepart{nine} $1$};
+\node (b) [below=10mm of a.four south] {\textcolor{red}{$A[i-1]$}};
+\draw[red, >=stealth,->, line width=2pt] (b) -- (a.four south);
+\node (d) [above=1cm of a.six north] {};
+\draw[blue, >=stealth,->, line width=2pt] (d) -- (a.six north);
+\end{tikzpicture}
+\end{figure}
+\begin{figure}[H]
+\begin{tikzpicture}
+[mynode/.style={draw,minimum height=1cm, inner sep=0.5 cm, node distance=0.6cm, fill=gray!20!}]
+\node[rectangle split, rectangle split horizontal, rectangle split parts=9] (a)[mynode] {$1$ \nodepart{two} $5$ \nodepart{three} $8$ \nodepart{four} $4$ \nodepart{five} $7$ \nodepart{six} $6$ \nodepart{seven} $5$ \nodepart{eight} $3$ \nodepart{nine} $1$};
+\node (b) [below=10mm of a.four south] {\textcolor{red}{$A[i-1]$}};
+\draw[red, >=stealth,->, line width=2pt] (b) -- (a.four south);
+\node (d) [above=1.1cm of a.seven north] {\textcolor{blue}{$A[j]$}};
+\draw[blue, >=stealth,->, line width=2pt] (d) -- (a.seven north);
+\node (c) [above=2cm of a] {找到了从4往右最后一个大于4的number=5};
+\end{tikzpicture}
+\end{figure}
+%swap
+\begin{figure}[H]
+\begin{tikzpicture}
+[mynode/.style={draw,minimum height=1cm, inner sep=0.5 cm, node distance=0.6cm, fill=gray!20!}]
+\node[rectangle split, rectangle split horizontal, rectangle split parts=9] (a)[mynode] {$1$ \nodepart{two} $5$ \nodepart{three} $8$ \nodepart{four} $4$ \nodepart{five} $7$ \nodepart{six} $6$ \nodepart{seven} $5$ \nodepart{eight} $3$ \nodepart{nine} $1$};
+\node (b) [below=10mm of a.four south] {\textcolor{red}{$A[i-1]$}};
+\draw[red, >=stealth,->, line width=2pt] (b) -- (a.four south);
+\node (d) [above=1.1cm of a.seven north] {\textcolor{blue}{$A[j]$}};
+\draw[blue, >=stealth,->, line width=2pt] (d) -- (a.seven north);
+\node (c) [above=2cm of a] {将4和5的位置进行互换};
+\draw [blue,>=stealth,->,line width=2pt,out=105,in=30] (a.seven north) to (a.four north);
+\draw [red,>=stealth,->,line width=2pt,out=-15,in=-60] (a.four south) to (a.seven south);
+\end{tikzpicture}
+\end{figure}
+\begin{figure}[H]
+\begin{tikzpicture}
+[mynode/.style={draw,minimum height=1cm, inner sep=0.5 cm, node distance=0.6cm, fill=gray!20!}]
+\node[rectangle split, rectangle split horizontal, rectangle split parts=9] (a)[mynode] {$1$ \nodepart{two} $5$ \nodepart{three} $8$ \nodepart{four} $5$ \nodepart{five} $7$ \nodepart{six} $6$ \nodepart{seven} $4$ \nodepart{eight} $3$ \nodepart{nine} $1$};
+\node (b) [below=10mm of a.four south] {\textcolor{red}{$A[i-1]$}};
+\draw[red, >=stealth,->, line width=2pt] (b) -- (a.four south);
+\node (d) [above=1.1cm of a.seven north] {\textcolor{blue}{$A[j]$}};
+\draw[blue, >=stealth,->, line width=2pt] (d) -- (a.seven north);
+\end{tikzpicture}
+\end{figure}
+%Reverse
+\begin{figure}[H]
+\begin{tikzpicture}
+[mynode/.style={draw,minimum height=1cm, inner sep=0.5 cm, node distance=0.6cm, fill=gray!20!}]
+\node[rectangle split, rectangle split horizontal, rectangle split parts=9] (a)[mynode] {$1$ \nodepart{two} $5$ \nodepart{three} $8$ \nodepart{four} $5$ \nodepart{five} $7$ \nodepart{six} $6$ \nodepart{seven} $4$ \nodepart{eight} $3$ \nodepart{nine} $1$};
+\node (b) [below=10mm of a.four south] {\textcolor{red}{$A[i-1]$}};
+\draw[red, >=stealth,->, line width=2pt] (b) -- (a.four south);
+\node (c) [above=1cm of a] {Reverse $A[i-1]$ 后面的数字};
+\node (d) [below=1.5cm of a.seven south] {Reverse};
+\draw[blue, line width=2pt] (a.four split south) ..  controls +(0,-1.5cm) and +(0,1.5cm) .. (d.north);
+\draw[blue, line width=2pt] (a.south east) ..  controls +(0,-1.5cm) and +(0,1.5cm) .. (d.north);
+\end{tikzpicture}
+\end{figure}
+\begin{figure}[H]
+\begin{tikzpicture}
+[mynode/.style={draw,minimum height=1cm, inner sep=0.5 cm, node distance=0.6cm, fill=gray!20!}]
+\node[rectangle split, rectangle split horizontal, rectangle split parts=9] (a)[mynode] {$1$ \nodepart{two} $5$ \nodepart{three} $8$ \nodepart{four} $5$ \nodepart{five} $1$ \nodepart{six} $3$ \nodepart{seven} $4$ \nodepart{eight} $6$ \nodepart{nine} $7$};
+\node (c) [above=1cm of a] {Next Permutation};
+\end{tikzpicture}
+\end{figure}
+
+\setcounter{algorithm}{0}
+\begin{algorithm}[H]
+\caption{Find Next Permutation}
+\begin{algorithmic}[1]
+\Procedure{NextPermutation}{$A, L$}
+\State $\star$ 从右到左检查是否存在$A[i]>A[i-1]$
+\State $p:=L$ \Comment At $p$, $A[p] > A[p-1]$
+\For{$i := L-1$ \textbf{to} $1$}
+\If{$A[i] > A[i-1]$}
+\State $p\gets i$ \Comment Found the first descending number
+\State \textbf{Break}
+\EndIf
+\EndFor
+\If{$p \neq L_A$} \Comment There exits $A[i] > A[i-1]$
+\State $\ast$ 寻找$A[p]$到$A[L-1]$中大于$A[p-1]$的所有数中的最小值。
+\State $q:=p$ \Comment $A[q] =\min(A[j]\;|\;A[j] > A[p],\ p\leq j<L)$
+\For{$j:=p$ \textbf{to} $L-1$}
+\If{$A[j] > A[p-1]$}
+\State $q\gets j$ \Comment Update $q$ 
+\Else
+\State \texttt{break}
+\EndIf
+\EndFor
+\algstore{31algo}
+\end{algorithmic}
+\end{algorithm}
+\begin{algorithm}[H]
+\begin{algorithmic}[1]
+\algrestore{31algo}
+\State $\star$ Swap $A[p-1]$ and $A[q]$
+\State $\star$ Reverse $A[p]$ to $A[L-1]$
+\Else
+\State $\ast$ 不存在next permutation 因为$A$已经是降序排列了
+\State $\star$ 直接reverse $A$
+\EndIf
+\EndProcedure
+\end{algorithmic}
+\end{algorithm}
+\setcounter{lstlisting}{0}
+\begin{lstlisting}[style=customc, caption={Next Permutation}]
+void nextPermutation( vector<int>& nums )
+{
+    size_t p = nums.size();
+
+    for( size_t i = nums.size() - 1; i >= 1; --i )
+    {
+        if( nums[i] > nums[i - 1] )
+        {
+            p = i;
+            break;
+        }
+    }
+
+    if( p != nums.size() )
+    {
+        //Exists A[i] > A[i-1]
+        //Need to find the minimum number thar is larger than A[p-1]
+
+        auto q = p;
+
+        for( size_t j = p; j < nums.size(); ++j )
+        {
+            if( nums[j] > nums[p - 1] )
+            {
+                q = j;
+            }
+            else
+            {
+                break;
+            }
+        }
+
+        swap( nums[q], nums[p - 1] );
+        reverse( nums.begin() + p, nums.end() );
+    }
+    else
+    {
+        //A is decending
+        //just reverse A
+        reverse( nums.begin(), nums.end() );
+    }
+
+}
+\end{lstlisting}

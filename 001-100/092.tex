@@ -1,0 +1,86 @@
+\section{92 --- Reverse Linked List II}
+Reverse a linked list $\ell$ from position $m$ to $n$. Do it in one-pass.
+\par
+Note: $1 \leq m \leq n \leq L$. $L$ is the length of $\ell$
+\paragraph{Example:}
+\begin{flushleft}
+\textbf{Input}:
+\end{flushleft}
+\begin{figure}[H]
+\begin{tikzpicture}
+[mynode/.style={draw,circle,minimum size=5mm, fill=gray!20!}]
+\node(){};
+\node[mynode](1){$1$};
+\node[mynode](2) [right=8mm of 1]{$2$};
+\node[mynode](3) [right=8mm of 2]{$3$};
+\node[mynode](4) [right=8mm of 3]{$4$};
+\node[mynode](5) [right=8mm of 4]{$5$};
+\node[mynode](e) [right=8mm of 5]{$\varnothing$};
+\draw[>=stealth,->] (1) -- (2);
+\draw[>=stealth,->] (2) -- (3);
+\draw[>=stealth,->] (3) -- (4);
+\draw[>=stealth,->] (4) -- (5);
+\draw[>=stealth,->] (5) -- (e);
+\end{tikzpicture}
+\end{figure}
+\begin{flushleft}
+$m=2, n=4$
+\\
+\textbf{Output}:
+\end{flushleft}
+\begin{figure}[H]
+\begin{tikzpicture}
+[mynode/.style={draw,circle,minimum size=5mm, fill=gray!20!}]
+\node(){};
+\node[mynode](1){$1$};
+\node[mynode](2) [right=8mm of 1]{$4$};
+\node[mynode](3) [right=8mm of 2]{$3$};
+\node[mynode](4) [right=8mm of 3]{$2$};
+\node[mynode](5) [right=8mm of 4]{$5$};
+\node[mynode](e) [right=8mm of 5]{$\varnothing$};
+\draw[>=stealth,->] (1) -- (2);
+\draw[>=stealth,->] (2) -- (3);
+\draw[>=stealth,->] (3) -- (4);
+\draw[>=stealth,->] (4) -- (5);
+\draw[>=stealth,->] (5) -- (e);
+\end{tikzpicture}
+\end{figure}
+\subsection{Analysis}
+\begin{CJK*}{UTF8}{gbsn}
+基本的思路有两点
+\begin{enumerate}
+\item 创建一个dummy node，然后其next指针指向head。然后用变量$\alpha$代表previous node，而变量$\beta$代表current node。在开始时，$\alpha$就是dummy node，而$\beta$就是head。设定counter $\delta$起始为1。然后移动$\alpha$和$\beta$直到$\delta=m$。
+\item 这个时候，$\beta$指向reverse的起始node，reverse的过程就是把$\beta$的下一个node $n$ 移动到$\alpha$的下一个节点位置。同时increment $\delta$直到$\delta=n$。移动的过程中，$\alpha$和$\beta$保持不动，每次都会更新$n$为$\beta$的下一个节点。
+\end{enumerate}
+\end{CJK*}
+\subsubsection{Algorithm}
+\setcounter{algorithm}{0}
+\begin{algorithm}[H]
+\caption{Linear Scan}
+\begin{algorithmic}[1]
+\Procedure{ReverseBetween}{$H, m, n$}
+\State $D:=\texttt{ListNode}(-1)$ \Comment Create a dummy node $D$
+\State $\texttt{next}(D) \gets H$ \Comment Link Dummy node to $H$
+\State $\alpha:=D, \beta:=H, \delta:=0$
+\algstore{92algo}
+\end{algorithmic}
+\end{algorithm}
+\begin{algorithm}[H]
+\begin{algorithmic}[1]
+\algrestore{92algo}
+\While{$\delta < m$}
+\State $\alpha\gets \texttt{next}(\alpha)$ \Comment Move $\alpha$ to next node
+\State $\beta\gets \texttt{next}(\beta)$ \Comment Move $\beta$ to next node
+\State $\delta \gets \delta +1$ \Comment Increment counter $\delta$
+\EndWhile
+\While{$\delta < n$}
+\State $n:=\texttt{next}(\beta)$ \Comment Get next node of $\beta$
+\State $\texttt{next}(\beta)\gets \texttt{next}(n)$ \Comment Move next node of $\beta$ to next node of $n$
+\State $\texttt{next}(n) \gets \texttt{next}(\alpha)$ \Comment Move next of $n$ as next node of $\alpha$
+\State $\texttt{next}(\alpha) \gets n$ \Comment Change next node of $\alpha$ as $n$
+\State $\delta \gets \delta +1$ \Comment Increment counter $\delta$
+\EndWhile
+\State \Return $\texttt{next}(D)$ \Comment Return the next node of dummy node
+\EndProcedure
+\end{algorithmic}
+\end{algorithm}

@@ -1,0 +1,142 @@
+\section{273 --- Integer to English Words}
+Convert a non-negative integer $n$ to its english words representation. Given input is guaranteed to be less than $2^{31} - 1$.
+
+\paragraph{Example 1:}
+
+\begin{flushleft}
+\textbf{Input}: 123
+\\
+\textbf{Output}: One Hundred Twenty Three
+\end{flushleft}
+
+\paragraph{Example 2:}
+
+\begin{flushleft}
+\textbf{Input}: 12345
+\\
+\textbf{Output}: Twelve Thousand Three Hundred Forty Five
+\end{flushleft}
+
+\paragraph{Example 3:}
+
+\begin{flushleft}
+\textbf{Input}: 1234567
+\\
+\textbf{Output}: One Million Two Hundred Thirty Four Thousand Five Hundred Sixty Seven
+\end{flushleft}
+
+\paragraph{Example 4:}
+
+\begin{flushleft}
+\textbf{Input}: 1234567891
+\\
+\textbf{Output}:
+\\
+One Billion Two Hundred Thirty Four Million Five Hundred Sixty Seven Thousand Eight Hundred Ninety One
+\end{flushleft}
+\subsection{Process Each Hundred Segment}
+\begin{itemize}
+\item 每次将$n$除以1000，余数就是小于1000的数，对这个余数进行处理得到英文的表达式
+\item 之后按照商是否大于零，分别加上Thousand，Million和Billion。
+\end{itemize}
+
+\setcounter{lstlisting}{0}
+\begin{lstlisting}[style=customc,caption={Process Each Segment}]
+string numberToWords( int num )
+{
+    vector<string> v1000 =
+    {
+        "Thusand", "Million", "Billion"
+    };
+
+    vector<string> v1 =
+    {
+        "",
+        "One", "Two", "Three",
+        "Four", "Five", "Six",
+        "Seven", "Eight", "Nine",
+        "Ten", "Eleven", "Twelve",
+        "Thirteen", "Fourteen", "Fifteen",
+        "Sixteen", "Seventeen", "Eighteen",
+        "Nineteen"
+    };
+
+    vector<string> v20 =
+    {
+        "", "",
+        "Twenty", "Thirty", "Forty",
+        "Fifty", "Sixty",
+        "Seventy", "Eighty",
+        "Ninety"
+    };
+
+    //The sepration between each thousand
+    int level = 0;
+
+    int q = num / 1000;
+    int r = num - 1000 * q;
+
+    num = q;
+
+    //Process the first hundred segment
+    string ans = process_hundred( r, v1, v20 );
+
+    while( num != 0 )
+    {
+
+        q = num / 1000;
+        r = num - 1000 * q;
+
+        if( r != 0 )
+        {
+            auto prev = ans;
+            ans = process_hundred( r, v1, v20 ) + " " + v1000[level];
+            ans.push_back( ' ' );
+            ans += prev;
+        }
+
+        ++level;
+        num = q;
+    }
+
+    while( !ans.empty() && ( ans.back() == ' ' ) )
+    {
+        ans.pop_back();
+    }
+
+    return ans.empty() ? "Zero" : ans;
+}
+
+//Transform less than 1000 to english word
+string process_hundred( int n, vector<string>& v1,  vector<string>& v20 )
+{
+    if( n < 20 )
+    {
+        return v1[n];
+    }
+
+    if( n < 100 )
+    {
+        int q = n / 10;
+        int r = n - 10 * q;
+
+        if( r == 0 )
+        {
+            return v20[q];
+        }
+
+        return v20[q] + " " + v1[r];
+    }
+
+    int q = n / 100;
+    int r = n - 100 * q;
+
+    if( r == 0 )
+    {
+        return v1[q] + " Hundred";
+    }
+
+    auto next = process_hundred( r, v1, v20 );
+    return  v1[q] + " Hundred " + next;
+}
+\end{lstlisting}

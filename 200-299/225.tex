@@ -1,0 +1,85 @@
+\section{225 --- Implement Stack using Queues}
+Implement the following operations of a stack using queues.
+
+\begin{itemize}
+\item \texttt{push(x)} -- Push element x onto stack.
+\item \texttt{pop()} -- Removes the element on top of the stack.
+\item \texttt{top()} -- Get the top element.
+\item \texttt{empty()} -- Return whether the stack is empty.
+\end{itemize}
+\paragraph{Example:}
+\begin{lstlisting}[style=customc]
+MyStack stack = new MyStack();
+
+stack.push(1);
+stack.push(2);  
+stack.top();   // returns 2
+stack.pop();   // returns 2
+stack.empty(); // returns false
+\end{lstlisting}
+
+\paragraph{Notes:}
+
+\begin{itemize}
+\item You must use only standard operations of a queue -- which means only \texttt{push} to back,\texttt{ peek/pop} from front, \texttt{size}, and \texttt{is empty} operations are valid.
+\item Depending on your language, queue may not be supported natively. You may simulate a queue by using a list or deque (double-ended queue), as long as you use only standard operations of a queue.
+\item You may assume that all operations are valid (for example, no pop or top operations will be called on an empty stack).
+\end{itemize}
+\subsection{One queue}
+\begin{CJK*}{UTF8}{gbsn}
+这题一般的思路是用两个queue，然后当需要进行pop时，就将其中一个queue中的元素弹出放入另外一个queue。这无形中增加了memory的需求。其实这题可以借助一个queue来完成，即每次加入一个元素后，检查当前queue的size是否大于1。 如果大于1，则不停的将queue的front弹出重新加入queue中，直到处理到当前加入的元素。每次这样操作后，queue中的元素排列顺序就和stack是一样的了。
+\end{CJK*}
+\setcounter{lstlisting}{0}
+\begin{lstlisting}[style=customc, caption={Queue}]
+class MyStack
+{
+public:
+    /** Initialize your data structure here. */
+    MyStack()
+    {
+    }
+
+    /** Push element x onto stack. */
+    void push( int x )
+    {
+        q.push( x );
+
+        auto sz = q.size();
+
+		//make sure the loop stop at current element x
+        while( sz > 1 )
+        {
+            int t = q.front();
+            q.pop();
+            q.push( t );
+
+            --sz;
+        }
+    }
+
+    /** Removes the element on top of the stack and returns that element. */
+    int pop()
+    {
+        int t = q.front();
+        q.pop();
+
+        return t;
+    }
+
+    /** Get the top element. */
+    int top()
+    {
+        return q.front();
+    }
+
+    /** Returns whether the stack is empty. */
+    bool empty()
+    {
+        return q.empty();
+    }
+
+    queue<int> q;
+};
+
+
+\end{lstlisting}

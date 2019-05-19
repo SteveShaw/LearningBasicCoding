@@ -1,0 +1,138 @@
+\section{234 --- Palindrome Linked List}
+Given a singly linked list, determine if it is a palindrome.
+
+\paragraph{Example 1:}
+
+\begin{flushleft}
+\textbf{Input}: 
+\begin{figure}[H]
+\begin{tikzpicture}
+[mynode/.style={draw,circle,minimum size=5mm, fill=gray!20!}]
+\node(){};
+\node[mynode](1) {1};
+\node[mynode](2)[right=8mm of 1] {2};
+\draw[>=stealth,->] (1) -- (2);
+\end{tikzpicture}
+\end{figure}
+\textbf{Output}: \texttt{false}
+\end{flushleft}
+
+\paragraph{Example 2:}
+
+\begin{flushleft}
+\textbf{Input}:
+\begin{figure}[H]
+\begin{tikzpicture}
+[mynode/.style={draw,circle,minimum size=5mm, fill=gray!20!}]
+\node(){};
+\node[mynode](1) {1};
+\node[mynode](2)[right=8mm of 1] {2};
+\node[mynode](3)[right=8mm of 2] {2};
+\node[mynode](4)[right=8mm of 3] {1};
+\draw[>=stealth,->] (1) -- (2);
+\draw[>=stealth,->] (2) -- (3);
+\draw[>=stealth,->] (3) -- (4);
+\end{tikzpicture}
+\end{figure}
+\textbf{Output}: \texttt{true}
+\end{flushleft}
+
+\paragraph{Follow up:}
+\begin{itemize}
+\item Could you do it in $O(n)$ time and $O(1)$ space?
+\end{itemize}
+\subsection{Fast Slow Pointer And Reverse}
+\begin{CJK*}{UTF8}{gbsn}
+\begin{itemize}
+\item 先用快慢指针找到链表的中间位置
+\item 将中间位置往右的部分reverse
+\item 比较前半部分链表和reverse的后半部分。
+\end{itemize}
+\end{CJK*}
+\setcounter{algorithm}{0}
+\begin{algorithm}[H]
+\caption{Reverse Right Half}
+\begin{algorithmic}[1]
+\Procedure{IsPalindrome}{$H$}
+\State $\ast$ Corner case
+\If{$L$ is empty or has only one node}
+\State \Return \texttt{true}
+\EndIf
+\State $\star$ Initialize two pointers $f$ and $s$ as head node $H$. $f$ move two nodes at once while $s$ one node
+\algstore{234algo}
+\end{algorithmic}
+\end{algorithm}
+\begin{algorithm}[H]
+\begin{algorithmic}[1]
+\algrestore{234algo}
+\While{$f$'s next node and next of $f$'s next node are not empty}
+\State $\star$ Move $s$ one node forward
+\State $\star$ Move $f$ two nodes forward
+\EndWhile
+\State $\star$ Save $s$'s next node as $x$ and then set it as null pointer
+\State $\star$ Reverse the right half list starting from $x$ and then get the head of reversed list as $y$
+\State $\star$ Compare left half list starting from $H$ and right half list with head $y$
+\State $\star$ Return \texttt{false} whenever found different values. Otherwise, Return \texttt{true}
+\EndProcedure
+\end{algorithmic}
+\end{algorithm}
+\setcounter{lstlisting}{0}
+\begin{lstlisting}[style=customc, caption={Find Middle Reverse Right Half}]
+bool isPalindrome( ListNode* head )
+{
+
+    if( !head || !head->next )
+    {
+        return true;
+    }
+
+    auto fast = head;
+    auto slow = head;
+
+    //find the middle of the linked list
+    while( fast->next && fast->next->next )
+    {
+        slow = slow->next;
+        fast = fast->next->next;
+    }
+
+    //Save the right half list head
+    auto next_head = slow->next;
+    //Break the list into left and right halves
+    slow->next = nullptr;
+
+    //Reverse the right half list
+    ListNode* prev = nullptr;
+    auto t = next_head;
+
+    //Compare two halves
+    while( t )
+    {
+        auto next = t->next;
+        t->next = prev;
+        prev = t;
+        t = next;
+    }
+
+    auto n1 = head;
+    //Now prev is the head of reversed right half list
+    auto n2 = prev;
+
+    while( n1 && n2 )
+    {
+        if( n1->val != n2->val )
+        {
+            return false;
+        }
+
+        n1 = n1->next;
+        n2 = n2->next;
+    }
+
+    //Since we break at the middle of the linked list
+    //Either the length of both halves are equal (even nodes)
+    //or the left half has one more node than right half
+    //(odd nodes)
+    return true;
+}
+\end{lstlisting}

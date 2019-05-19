@@ -1,0 +1,94 @@
+\section{228 --- Summary Ranges}
+Given a sorted integer array $A$ without duplicates, return the summary of its ranges.
+
+\paragraph{Example 1:}
+
+\begin{flushleft}
+\textbf{Input}:  $[0,1,2,4,5,7]$
+\\
+\textbf{Output}: $[0\to2, 4\to5, 7]$
+\\
+\textbf{Explanation}: $0,1,2$ form a continuous range; $4,5$ form a continuous range.
+\end{flushleft}
+
+\paragraph{Example 2:}
+
+\begin{flushleft}
+\textbf{Input}:  $[0,2,3,4,6,8,9]$
+\\
+\textbf{Output}: $[0,2\to4,6,8\to9]$
+\\
+\textbf{Explanation}: $2,3,4$ form a continuous range; $8,9$ form a continuous range.
+\end{flushleft}
+\subsection{Plain Algorithm}
+\begin{CJK*}{UTF8}{gbsn}
+\begin{itemize}
+\item 遍历数组，然后寻找连续数的segment。
+\item 需要小心处理每一个分割点。
+\item 需要将\texttt{int} type升级成\texttt{long long} type以处理数据精度overflow。
+\end{itemize}
+\end{CJK*}
+\setcounter{lstlisting}{0}
+\begin{lstlisting}[style=customc, caption={Plain Algorithm}]
+vector<string> summaryRanges( vector<int>& nums )
+{
+
+    if( nums.empty() )
+    {
+        return {};
+    }
+
+    vector<string> ans;
+
+    // Need to check if the back of nums has been
+    // added into a range
+    int last_end = nums.back() + 1;
+
+    long long a = 0;
+    long long b = 0;
+
+    for( size_t i = 0; i < nums.size() - 1; ++i )
+    {
+        a = static_cast<long long>( nums[i + 1] );
+        b = static_cast<long long>( nums[i] );
+        if( a - b == 1 )
+        {
+            size_t j = i + 1;
+
+            while( j < nums.size() - 1 )
+            {
+                a = static_cast<long long>( nums[j + 1] );
+                b = static_cast<long long>( nums[j] );
+
+                if( a - b != 1 )
+                {
+                    break;
+                }
+                ++j;
+            }
+
+            string s = to_string( nums[i] );
+            s += "->";
+            s += to_string( nums[j] );
+
+            ans.emplace_back( s );
+            i = j;
+
+            //update range end
+            last_end = nums[j];
+        }
+        else
+        {
+            ans.emplace_back( to_string( nums[i] ) );
+            //update range end
+            last_end = nums[i];
+        }
+    }
+
+    if( nums.back() != last_end )
+    {
+        ans.emplace_back( to_string( nums.back() ) );
+    }
+    return ans;
+}
+\end{lstlisting}

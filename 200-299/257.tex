@@ -1,0 +1,65 @@
+\section{257 --- Binary Tree Paths}
+Given a binary tree, return all root-to-leaf paths.
+\par
+\paragraph{Note:}
+\begin{itemize}
+\item  A leaf is a node with no children.
+\end{itemize}
+
+\paragraph{Example:}
+\begin{flushleft}
+\textbf{Input}:
+\\
+\begin{figure}[H]
+\begin{tikzpicture}
+[mynode/.style={draw,circle,minimum size=5mm, fill=gray!20!}]
+\node(){};
+\node[mynode](A) {1};
+\node[mynode](B)[below=8mm of A, xshift=-8mm] {2};
+\node[mynode](C)[below=8mm of A, xshift=8mm] {3};
+\node[mynode](D)[below=8mm of B, xshift=6mm] {5};
+\draw (A) -- (B);
+\draw (A) -- (C);
+\draw (B) -- (D);
+\end{tikzpicture}
+\end{figure}
+\textbf{Output}: $[1\longrightarrow 2 \longrightarrow 5, 1\longrightarrow 3]$
+\\
+\textbf{Explanation}: All root-to-leaf paths are: $1\longrightarrow 2\longrightarrow 5$, $1\longrightarrow 3$
+\end{flushleft}
+\subsection{Depth First Search}
+很简单的递归，当遇到leaf node时，就将生成的路径string加入到最终结果中即可。
+\setcounter{lstlisting}{0}
+\begin{lstlisting}[style=customc, caption={Depth First Search}]
+vector<string> binaryTreePaths( TreeNode* root )
+{
+    vector<string> ans;
+    dfs( root, "", ans );
+
+    return ans;
+}
+
+void dfs( TreeNode* node, string cur_path, vector<string>& paths )
+{
+    if( !node )
+    {
+        return;
+    }
+
+    cur_path += to_string( node->val );
+    cur_path += "->";
+
+    if( !node->left && !node->right )
+    {
+        //remove "->"
+        cur_path.pop_back();
+        cur_path.pop_back();
+
+        paths.emplace_back( cur_path );
+        return;
+    }
+
+    dfs( node->left, cur_path, paths );
+    dfs( node->right, cur_path, paths );
+}
+\end{lstlisting}

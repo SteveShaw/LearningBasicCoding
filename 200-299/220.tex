@@ -1,0 +1,103 @@
+\section{220 --- Contains Duplicate III}
+
+Given an array of integers $A$, find out whether there are two distinct indices $i$ and $j$ in the array such that the absolute difference between $A[i]$ and $A[j]$ is at most $t$ and the absolute difference between $i$ and $j$ is at most $k$.
+\paragraph{Example 1}
+\begin{flushleft}
+\textbf{Input}: $A = [1,2,3,1]$, $k = 3$, $t = 0$
+\\
+\textbf{Output}: \texttt{true}
+\end{flushleft}
+\paragraph{Example 2:}
+\begin{flushleft}
+\textbf{Input}: $A = [1,0,1,1]$, $k = 1$, $t = 2$
+\\
+\textbf{Output}: \texttt{true}
+\end{flushleft}
+\paragraph{Example 3:}
+\begin{flushleft}
+\textbf{Input}: $A = [1,5,9,1,5,9]$, $k = 2$, $t = 3$
+\\
+\textbf{Output}: \texttt{false}
+\end{flushleft}
+\subsection{Tree Map}
+\begin{CJK*}{UTF8}{gbsn}
+\begin{itemize}
+\item 对于index $i$，小于$i-k$的index对结果没有影响。
+\item 需要找到在$[i-k, i]$中是否存在某个index $x$，使得 $-t\leq A[i] - A[x] \leq t$
+\item 借助于Tree Map以及二分查找，寻找第一个$A[x]\geq A[i]-t$，如果这个$A[x]\leq A[i]+t$，那么就找到了符合条件的$j$。
+\item 如果这个$A[x] > A[i]+t$，由于$A[x]$是符合$A[x]\geq A[i]-t$中最小的，因此就不可能存在$A[x]\leq A[i]+t$了。
+\item Coding的时候需要注意当$t$以及$A[i]$都超过了Integer类型的最大值时的边界情况，因此实际上需要比integer更宽的数值类型，比如\texttt{long long}.
+\end{itemize}
+\end{CJK*}
+\setcounter{algorithm}{0}
+\begin{algorithm}[H]
+\caption{Binary Search With Tree Map}
+\begin{algorithmic}[1]
+\Procedure{ContainsNearbyAlmostDuplicate}{$A,L,k,t$}
+\State $\star$ Initialize a tree map $M$
+\State $p:=0$ \Comment The $k$ index left from current index 
+\For{$i:=0 \to L-1$}
+\If{$i-p > k$} \Comment Ingore those indexes are more than $k$ index left from $i$
+\State $\star$ Remove $A[p]$ from $M$ if $A[p]$ is in $M$ and the value is $p$
+\State $p\gets p+1$ \Comment Move $p$ right by one index
+\EndIf
+\State $\star$ Find the first key $y$ that $y\geq (A[i]-t)$
+\If{$y$ can be found and $y\leq (A[i]+t)$}
+\State \Return \texttt{true} \Comment $-t\leq |y-A[i]| \leq t$
+\EndIf
+\State $M[A[i]]:=i$ \Comment Add $A[i]$ to $M$
+\EndFor
+\State \Return \texttt{false}
+\EndProcedure
+\end{algorithmic}
+\end{algorithm}
+\setcounter{lstlisting}{0}
+\begin{lstlisting}[style=customc, caption={TreeMap}]
+int L = static_cast< int >( nums.size() );
+
+map<long long, int> m;
+
+int last = 0;
+
+for( int i = 0; i < L; ++i )
+{
+    auto x = static_cast< long long >( nums[last] );
+
+    if( i - last > k )
+    {
+        auto it = m.find( x );
+
+        if( ( it != m.end() ) && ( it->second == last ) )
+        {
+            m.erase( it );
+        }
+
+        ++last;
+    }
+
+    auto y = static_cast< long long >( nums[i] );
+
+    auto it = m.lower_bound( y - t );
+
+    if( it != m.end() )
+    {
+        if( it->first <= y + t )
+        {
+            return true;
+        }
+    }
+
+    it = m.find( y );
+
+    if( it == m.end() )
+    {
+        m.emplace( y, i );
+    }
+    else
+    {
+        it->second = i;
+    }
+}
+
+return false;
+\end{lstlisting}

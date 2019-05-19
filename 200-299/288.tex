@@ -1,0 +1,122 @@
+\section{288 --- Unique Word Abbreviation}
+An abbreviation of a word follows the form <first letter><number><last letter>. Below are some examples of word abbreviations:
+\begin{enumerate}
+\item \texttt{it} --- \texttt{it} (no abbreviation)
+\item \texttt{dog} --- \texttt{d1g} (only 1 letter between \textbf{d} and \textbf{g})
+\item \texttt{internationalization} --- \texttt{i18n} (There are 18 letters between the first letter \textbf{i} and the last one \textbf{n})
+\item  \texttt{localization}  --- \texttt{l10n}
+\end{enumerate}
+Assume you have a dictionary $A$ and given a word $W$, find whether its abbreviation is unique in the dictionary. A word's abbreviation is \textbf{unique} \textbf{if no other word} from the dictionary has the same abbreviation.
+
+\paragraph{Example: }
+
+Given $A$ = [ \texttt{deer}, \texttt{door}, \texttt{cake}, \texttt{card} ]
+
+\begin{lstlisting}[style=customc]
+isUnique("dear") // false
+isUnique("cart") // true
+isUnique("cane") // false
+isUnique("make") // true
+\end{lstlisting}
+\subsection{Hash Map}
+注意题目中的\textbf{if no other word}。例如
+\begin{itemize}
+\item $A$ = [\texttt{dear}]，
+\begin{lstlisting}[style=customc]
+isUnique("door") // false
+\end{lstlisting}
+\item $A$ = [\texttt{door}, \texttt{door}]
+\begin{lstlisting}[style=customc]
+isUnique("door") // true
+\end{lstlisting}
+\item $A$ = [\texttt{dear}, \texttt{door}]
+\begin{lstlisting}[style=customc]
+isUnique("door") // false
+\end{lstlisting}
+\end{itemize}
+结合题目中的例子，unique的要求是
+\begin{itemize}
+\item 如果$A$中所有单词的缩写形式都没有和$W$相同的，是unqiue。
+\item 如果有相同的，那么如果这个缩写形式还有除了$W$的其他单词，就不是unique，反之则仍然是unique。
+\end{itemize}
+因此用一个hash map建立缩写形式和其对应的单词的映射，把所有缩写形式的相同单词放到一个hash set中。在hash map中找不到缩写形式，返回\texttt{true}。如果找到了，而且对应的hash set只有一个单词，且这个单词就是$W$。那么也返回\texttt{true}。
+\setcounter{lstlisting}{0}
+\begin{lstlisting}[style=customc, caption={Hash Map}]
+class ValidWordAbbr
+{
+public:
+    ValidWordAbbr( vector<string> &dictionary )
+    {
+        for( auto a : dictionary )
+        {
+            string k = a[0] + to_string( a.size() - 2 ) + a.back();
+            auto iter = m.find( k );
+            if( iter == m.end() )
+            {
+                m.emplace( k, initializer_list<string> {a} );
+            }
+            else
+            {
+                iter->second.emplace( a );
+            }
+        }
+    }
+    bool isUnique( string word )
+    {
+        string k = word[0] + to_string( word.size() - 2 ) + word.back();
+        auto iter = m.find( k );
+        if( iter == m.end() )
+        {
+            return false;
+        }
+        //iter->second.size()==1
+        //and iter->second only contains word
+        return iter->second.count( word ) == iter->second.size();
+    }
+private:
+    unordered_map<string, set<string>> m;
+};
+\end{lstlisting}
+\subsection{Memory Efficient}
+为了减少内存使用，可以把上述hash map的hash set换成string。当处理字典中的单词时，如果在hash map中找不到当前单词的缩写形式，将该缩写形式和当前单词建立映射，如果该缩写形式已经在hash map中，看对应的单词是不是当前单词，如果不是，就将这个缩写形式对应的值改为空字符串，这样只要字典中一个缩写形式对应一个以上的单词，最终的结果这个缩写形式对应的单词就是空字符串，如果$W$的缩写形式也是能够在hash map中找到，则直接比较$W$和这个缩写形式所对应的字符串，看是否相等。
+\begin{lstlisting}[style=customc, caption={Memory Efficient}]
+class ValidWordAbbr
+{
+public:
+    ValidWordAbbr( vector<string> &dictionary )
+    {
+        for( auto a : dictionary )
+        {
+            string k = a[0] + to_string( a.size() - 2 ) + a.back();
+            auto iter = m.find( k );
+            if( iter == m.end() )
+            {
+                m.emplace( k, a );
+            }
+            else
+            {
+                //this abbr has already
+                //been found in another different word
+                if( iter->second != a )
+                {
+                    iter->second.clear();
+                }
+            }
+        }
+    }
+
+    bool isUnique( string word )
+    {
+        string k = word[0] + to_string( word.size() - 2 ) + word.back();
+        auto iter = m.find( k );
+        if( iter == m.end() )
+        {
+            return true;
+        }
+
+        return iter->second == word;
+    }
+private:
+    unordered_map<string, string> m;
+};
+\end{lstlisting}

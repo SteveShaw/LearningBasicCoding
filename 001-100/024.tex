@@ -1,0 +1,31 @@
+\section{24 --- Swap Nodes in Pairs}
+Given a linked list $L$, swap every two adjacent nodes and return its head.
+
+You may not modify the values in the list's nodes, only nodes itself may be changed.
+
+
+\paragraph{Example:}
+\begin{flushleft}
+\textbf{Input}:
+\begin{figure}[H]
+\begin{tikzpicture}
+[start chain, every node/.style={draw, circle, minimum size=6mm, fill=gray!20!}, thick, node distance = 8mm, every join/.style={>=stealth,->}]
+\node[on chain,] {1};
+\node[on chain, join] {2};
+\node[on chain, join] {3};
+\node[on chain, join] {4};
+\end{tikzpicture}
+\end{figure}
+
+\textbf{Output}:
+\begin{figure}[H]
+\begin{tikzpicture}
+[start chain, every node/.style={draw, circle, minimum size=6mm, fill=gray!20!}, thick, node distance = 8mm, every join/.style={>=stealth,->}]
+\node[on chain,] {2};
+\node[on chain, join] {1};
+\node[on chain, join] {4};
+\node[on chain, join] {3};
+\end{tikzpicture}
+\end{figure}
+
+\end{flushleft}

@@ -1,0 +1,390 @@
+\section{25 --- Reverse Nodes in k-Group}
+Given a linked list, reverse the nodes of a linked list $k$ at a time and return its modified list.
+
+$k$ is a positive integer and is less than or equal to the length of the linked list. If the number of nodes is not a multiple of k then left-out nodes in the end should remain as it is.
+
+\paragraph{Example:}
+
+\begin{flushleft}
+Given this linked list: 
+
+\begin{figure}[H]
+\begin{tikzpicture}
+[start chain, every node/.style={draw, circle, minimum size=6mm, fill=gray!20!}, node distance=8mm, every join/.style={>=stealth,->}, thick]
+\node[on chain] {1};
+\node[on chain, join] {2};
+\node[on chain, join] {3};
+\node[on chain, join] {4};
+\node[on chain, join] {5};
+\end{tikzpicture}
+\end{figure}
+For k = 2, you should return:
+
+\begin{figure}[H]
+\begin{tikzpicture}
+[start chain, every node/.style={draw, circle, minimum size=6mm, fill=gray!20!}, node distance=8mm, every join/.style={>=stealth,->}, thick]
+\node[on chain] {2};
+\node[on chain, join] {1};
+\node[on chain, join] {4};
+\node[on chain, join] {3};
+\node[on chain, join] {5};
+\end{tikzpicture}
+\end{figure}
+
+For k = 3, you should return: 
+\begin{figure}[H]
+\begin{tikzpicture}
+[start chain, every node/.style={draw, circle, minimum size=6mm, fill=gray!20!}, node distance=8mm, every join/.style={>=stealth,->}, thick]
+\node[on chain] {3};
+\node[on chain, join] {2};
+\node[on chain, join] {1};
+\node[on chain, join] {4};
+\node[on chain, join] {5};
+\end{tikzpicture}
+\end{figure}
+
+\end{flushleft}
+
+
+\paragraph{Note:}
+
+\begin{itemize}
+\item Only constant extra memory is allowed.
+\item You may not alter the values in the list's nodes, only nodes itself may be changed.
+\end{itemize}
+
+\subsection{Pointer Operation}
+以图中给出的链表为例, 创建一个\texttt{dummy node}，因为翻转链表时头结点可能会变化，那么加入这个node后的链表变为
+\begin{figure}[H]
+\begin{tikzpicture}
+[start chain, 
+every node/.style={draw, circle,
+ minimum size=6mm, fill=gray!20!},
+  node distance=8mm, 
+  every join/.style={>=stealth,->},
+ thick
+]
+\node[on chain] {$-1$};
+\node[on chain, join] {2};
+\node[on chain, join] {3};
+\node[on chain, join] {4};
+\node[on chain, join] {5};
+\end{tikzpicture}
+\end{figure}
+
+如果$k$为3的话，目标是将1, 2, 3翻转一下，需要维护两个 pointers： $x$和$y$，分别指向需要翻转的$k$个nodes部分的前后位置，如下图所示
+
+\begin{figure}[H]
+\begin{tikzpicture}
+[start chain, 
+every node/.style={draw, circle,
+ minimum size=8mm, fill=gray!20!},
+  node distance=8mm and 8mm, 
+  every join/.style={>=stealth,->},
+ thick
+]
+\node(1)[on chain] {$-1$};
+\node(x)[below=of 1] {$x$};
+\node[on chain, join] {1};
+\node[on chain, join] {2};
+\node[on chain, join] {3};
+\node(4)[on chain, join] {4};
+\node(y) [below=of 4] {$y$};
+\node[on chain, join] {5};
+\draw[>=stealth,->] (x) -- (1);
+\draw[>=stealth,->] (y) -- (4);
+\end{tikzpicture}
+\end{figure}
+
+reverse完成后，$x$更新到下图所示的位置：
+
+\begin{figure}[H]
+\begin{tikzpicture}
+[start chain, 
+every node/.style={draw, circle,
+ minimum size=8mm, fill=gray!20!},
+  node distance=8mm and 8mm, 
+  every join/.style={>=stealth,->},
+ thick
+]
+\node(1)[on chain] {$-1$};
+\node[on chain, join] {3};
+\node(2)[on chain, join] {2};
+\node(3)[on chain, join] {1};
+\node(4)[on chain, join] {4};
+\node[on chain, join] {5};
+\node(x)[below=of 3] {$x$};
+\node(y) [below=of 4] {$y$};
+\draw[>=stealth,->] (x) -- (3);
+\draw[>=stealth,->] (y) -- (4);
+\end{tikzpicture}
+\end{figure}
+
+以此类推，只要\texttt{y}走过$k$个节点，就可以进行局部翻转了。反转过程可参见下面的示意图。
+
+给定的链表如下图所示： 其中start node is $S$, end node is $E$. To reverse node between $S$ and $E$
+
+\begin{figure}[H]
+\centering
+\begin{tikzpicture}
+[start chain, 
+every node/.style={draw, circle,
+ minimum size=6mm, fill=gray!20!},
+  node distance=8mm, 
+  every join/.style={>=stealth,->},
+ thick
+]
+\node[on chain] {$\ldots$};
+\node[on chain, join](1) {$S$};
+\node[on chain, join](2) {$P$};
+\node[on chain, join](3) {$C$};
+\node[on chain, join](4) {$N$};
+\node[on chain, join] {$\ldots$};
+\node[on chain, join](5) {$E$};
+\node[on chain, join] {$\ldots$};
+\end{tikzpicture}
+\end{figure}
+
+\begin{figure}[H]
+\label{fig01}
+\caption{Break $P$ with $C$ and link $P$ to $N$}
+\centering
+\begin{tikzpicture}
+[start chain, 
+every node/.style={draw, circle,
+ minimum size=6mm, fill=gray!20!},
+  node distance=8mm, 
+  every join/.style={>=stealth,->},
+ thick
+]
+\node[on chain] {$\ldots$};
+\node[on chain, join](1) {$S$};
+\node[on chain, join](2) {$P$};
+\node[on chain](3) {$C$};
+\node[on chain, join](4) {$N$};
+\node[on chain, join] {$\ldots$};
+\node[on chain, join](5) {$E$};
+\node[on chain, join] {$\ldots$};
+\draw[>=stealth, ->] (2) [bend left=60] to (4);
+\end{tikzpicture}
+\end{figure}
+
+\begin{figure}[H]
+\caption{Break $C$ with $N$ and set $C$ to next node of $S$}
+\centering
+\begin{tikzpicture}
+[start chain, 
+every node/.style={draw, circle,
+ minimum size=6mm, fill=gray!20!},
+  node distance=8mm, 
+  every join/.style={>=stealth,->},
+ thick
+]
+\node[on chain] {$\ldots$};
+\node[on chain, join](1) {$S$};
+\node[on chain, join](2) {$P$};
+\node[on chain](3) {$C$};
+\node[on chain](4) {$N$};
+\node[on chain, join] {$\ldots$};
+\node[on chain, join](5) {$E$};
+\draw[>=stealth, ->] (2) [bend left=60] to (4);
+\draw[>=stealth, ->] (3) [bend left=60] to (2);
+\end{tikzpicture}
+\end{figure}
+
+\begin{figure}[H]
+\caption{Break $S$ and $P$, link $S$ to $C$}
+\centering
+\begin{tikzpicture}
+[start chain, 
+every node/.style={draw, circle,
+ minimum size=6mm, fill=gray!20!},
+  node distance=8mm, 
+  every join/.style={>=stealth,->},
+ thick
+]
+\node[on chain] {$\ldots$};
+\node[on chain, join](1) {$S$};
+\node[on chain](2) {$P$};
+\node[on chain](3) {$C$};
+\node[on chain](4) {$N$};
+\node[on chain, join] {$\ldots$};
+\node[on chain, join](5) {$E$};
+\node[on chain, join] {$\ldots$};
+\draw[>=stealth, ->] (2) [bend left=60] to (4);
+\draw[>=stealth, ->] (3) [bend left=60] to (2);
+\draw[>=stealth, ->] (1) [bend left=280] to (3);
+\end{tikzpicture}
+\end{figure}
+
+
+\begin{figure}[H]
+\caption{Set next node of $S$ to $C$}
+\centering
+\begin{tikzpicture}
+[start chain, 
+every node/.style={draw, circle,
+ minimum size=6mm, fill=gray!20!},
+  node distance=8mm, 
+  every join/.style={>=stealth,->},
+ thick
+]
+\node[on chain] {$\ldots$};
+\node[on chain, join](1) {$S$};
+\node[on chain](2) {$P$};
+\node[on chain](3) {};
+\node[on chain](4) {$C$};
+\node[on chain, join] {$\ldots$};
+\node[on chain, join](5) {$E$};
+\node[on chain, join] {$\ldots$};
+\draw[>=stealth, ->] (2) [bend left=60] to (4);
+\draw[>=stealth, ->] (3) [bend left=60] to (2);
+\draw[>=stealth, ->] (1) [bend left=280] to (3);
+\end{tikzpicture}
+\end{figure}
+
+By the figures shows above, we put previous $C$ before $P$ and link $S$ to $C$. Then move $C$ to previous $N$, and repeat the process by staring similarly to figure \ref{fig01}.
+
+At the end of the reverse, $C$ will be at $E$, while $P$ is not moved and the next node of $S$ is the previous node of $E$.
+
+\begin{figure}[H]
+\caption{Update $C$ to $P$'s next node}
+\centering
+\begin{tikzpicture}
+[start chain, 
+every node/.style={draw, circle,
+ minimum size=6mm, fill=gray!20!},
+  node distance=8mm, 
+  every join/.style={>=stealth,->},
+ thick
+]
+\node[on chain] {$\ldots$};
+\node[on chain, join](1) {$S$};
+\node[on chain](2) {$P$};
+\node[on chain](3) {};
+\node[on chain](4) {$\ldots$};
+\node[on chain](T) {};
+\node[on chain, label=above:$C$](5) {$E$};
+\node[on chain, join] {$\ldots$};
+\draw[>=stealth,->] (2) [bend left=60] to (5);
+\draw[>=stealth,->] (1) [bend left=300] to (T);
+\draw[>=stealth,->] (T) -- (4);
+\draw[>=stealth,->] (4) -- (3);
+\draw[>=stealth,->] (3) -- (2);
+\end{tikzpicture}
+\end{figure}
+
+
+\setcounter{algorithm}{0}
+\begin{algorithm}[H]
+\caption{Reverse link list by $k$ steps}
+\begin{algorithmic}[1]
+\Procedure{ReverseKGroup}{$L, K$}
+\State $\star$ Create a dummy node $d$.
+\State $s:=d$ \Comment The pointer to the previous node of the group to be reversed
+\State $\star$ Link $s$ to $L$ \Comment Link dummy node to the linked list
+\State $\ast$ Start the process
+\State $c:=L$ \Comment Current Node
+\State $\delta:=0$ \Comment The counter
+\While{$c$ is not null}
+\State $\delta\gets\delta + 1$
+\If{$\delta=K$}
+\State $\delta=0$
+\State $s\gets$\Call{Reverse}{$s, c_n$} \Comment Reverse the group starting with next node of $s$ and ending with $c$
+\State $\star$ Update $c$ as the next node of $x$
+\Else
+\State $\star$ Update $c$ to its next node
+\EndIf
+\EndWhile
+\EndProcedure
+\end{algorithmic}
+\end{algorithm}
+
+Function \texttt{Reverse} reverse the segment in list between start node $s$ and end node $e$
+
+\begin{algorithm}[H]
+\caption{Reverse one segment of link list }
+\begin{algorithmic}[1]
+\Function{Reverse}{$s,e$}
+\State $p := s_n$ \Comment $x$ is the next node of $s$
+\State $\ast$ Starting reverse from next node of $x$
+\State $c := p_n$ 
+\While{$c \neq e$}
+\State $\ast$ Break $p$ with $c$, and link $p$ to next node of $c$
+\State $p_n \gets c_n $
+\State $\ast$ Set next node of $c$ to next node of $s$
+\State $c_n \gets s_n $ 
+\State $\ast$ Set next node of $s$ to $c$
+\State $s_n \gets c$ 
+\State $\ast$ Update $c$ as next node of $p$
+\State $c\gets p_n$
+\EndWhile
+\State \Return $p$ \Comment next node of $p$ is the start of next group
+\EndFunction
+\end{algorithmic}
+\end{algorithm}
+
+
+\setcounter{lstlisting}{0}
+\begin{lstlisting}[style=customc, caption={Pointer operation}]
+ListNode* reverseKGroup( ListNode* head, int k )
+{
+    ListNode* dummy = new ListNode( 0 );
+
+    auto S = dummy;
+
+    //link S to head
+    S->next = head;
+
+    auto x = head;
+
+    int count = 0;
+
+    while( x != nullptr )
+    {
+        //since count starting with zero
+        //increment count first
+        ++count;
+
+        if( count == k )
+        {
+            count = 0;
+            //reverse S to x->next
+            S = reverse( S, x->next );
+            //update x to S->next
+            x = S->next;
+        }
+        else
+        {
+            x = x->next;
+        }
+    }
+
+    return dummy->next;
+}
+//Helper function to reverse between S and E
+ListNode* reverse( ListNode* S, ListNode* E )
+{
+    auto P = S->next;
+
+    auto C = P->next;
+
+    while( C != E )
+    {
+        //break P with C and link to C->next
+        P->next = C->next;
+
+        //link C to S->next
+        C->next = S->next;
+
+        //link S to C
+        S->next = C;
+
+        //update C to P->next
+        C = P->next;
+    }
+
+    //P->next is the start of next group
+    return P;
+}
+\end{lstlisting}

@@ -1,0 +1,165 @@
+\section{254 --- Factor Combinations}
+Numbers can be regarded as product of its factors. 
+\par
+For example, $8 = 2 \times 2 \times 2 = 2\times 4$
+\par
+Write a function that takes an integer $n$ and return all possible combinations of its factors.
+
+\paragraph{Note: }
+
+\begin{itemize}
+\item Each combination's factors must be sorted ascending, for example: The factors of 2 and 6 is $[2, 6]$, not $[6, 2]$.
+\item You may assume that $n$ is always positive.
+\item Factors should be greater than 1 and less than $n$.
+\end{itemize}
+ 
+
+\paragraph{Examples: }
+\begin{flushleft}
+\textbf{input}: 1
+\\
+\textbf{output}: $[]$
+\\
+\textbf{input}: 37
+\\
+\textbf{output}: $[]$
+\\
+\textbf{input}: 12
+\\
+\textbf{output}: $[2,6], \ [2, 2, 3], \ [3, 4]$
+\\
+\textbf{input}: 32
+\\
+\textbf{output}:
+\\
+$[[2, 16],\  [2, 2, 8],\  [2, 2, 2, 4],\ [2, 2, 2, 2, 2],\   [2, 4, 4],\ [4, 8]]$
+\end{flushleft}
+\subsection{Depth First Search}
+\begin{itemize}
+\item 递归函数中，由于题目要求factor是按照升序排列，因此在测试factor时，如果遇到$n$除以factor得到比$i$小的值就可以stop测试了。
+\item 另外，也是由于factor是按照升序排列，因此将当前factor数组中的最后一个也是最大的一个作为递归函数的参数，这样递归函数中测试factor的循环就从这个参数开始进行测试。
+\item 为了重复利用当前factor数组，在递归调用结束后，总是弹出最后一个数。
+\end{itemize}
+\setcounter{algorithm}{0}
+\begin{algorithm}[H]
+\caption{DFS}
+\begin{algorithmic}[1]
+\Procedure{GetFactors}{$n$}
+\State $\star$ Initialize an array $x$ to save found factors
+\State $\star$ Initialize an array $y$ to save all found factors
+\State \Call{DFS}{$n, 2, x, y$} \Comment 最开始进行递归函数\texttt{DFS}调用时，从factor等于2开始测试
+\State \Return $y$
+\EndProcedure
+\end{algorithmic}
+\end{algorithm}
+函数\texttt{DFS}的输入参数包括
+\begin{itemize}
+\item $n$: 输入的整数
+\item $\alpha$: 测试的起始factor
+\item $x$，$y$同上
+\end{itemize}
+\begin{algorithm}[H]
+\caption{Helper Recursive Function}
+\begin{algorithmic}[1]
+\Procedure{DFS}{$n, \alpha, x, y$}
+\For{$i:=\alpha$ \textbf{to} $n/\alpha$} \Comment 只需测试到$n/\alpha$，再往后起始就重复了
+\State $q:=n/i$
+\If{$q < i$} \Comment 这时候已经不能构成升序的factor了
+\State \texttt{break} \Comment 退出循环
+\EndIf
+\If{$n-q\times i=0$} \Comment $i$是$n$的factor
+\State $\star$将$i$加入到$x$的\texttt{back}
+\State $\star$将$q$加入到$x$的\texttt{back}
+\State $\star$将$x$加入到$y$的\texttt{back} \Comment 找到了一个factor数组
+\State $\star$将$q$从$x$中remove，因为接下来要对$q$进行递归处理
+\State \Call{DFS}{$n=q$, $\alpha$=$x$的最后一个元素, $x$, $y$}
+\State $\ast$ 递归结束后，将$x$的最后一个元素从$x$中remove以重复利用$x$
+\EndIf
+\EndFor
+\EndProcedure
+\end{algorithmic}
+\end{algorithm}
+\setcounter{lstlisting}{0}
+\begin{lstlisting}[style=customc, caption={DFS}]
+vector<vector<int>> getFactors( int n )
+{
+    vector<int> next;
+    vector<vector<int>> ans;
+
+    //factor start from 2
+    dfs( n, next, 2, ans );
+
+    return ans;
+}
+
+void dfs( int n, vector<int>& cur, int last, vector<vector<int>>& ans )
+{
+    //factor testing start from last
+    for( int i = last; i <= n / last; ++i )
+    {
+        int q = n / i;
+
+        //The factor array needs to be sorted ascending
+        //therefore we can stop testing i when q < i
+        if( q < i )
+        {
+            break;
+        }
+
+        if( n - q * i == 0 )
+        {
+            cur.push_back( i );
+            cur.push_back( q );
+            ans.emplace_back( cur.begin(), cur.end() );
+            //We must remove q from cur, since next
+            //we will process q
+            cur.pop_back();
+            dfs( q, cur, cur.back(), ans );
+            cur.pop_back();
+        }
+    }
+}
+\end{lstlisting}
+\subsection{DFS Using Only One Function}
+这种方法直接用原来的\texttt{GetFactors}进行递归调用。从2遍历到$n$的平方根，
+\begin{itemize}
+\item 如果$i$是因子，递归调用$n/i$，结果用$x$来保存，然后新建一个包含$i$和$n/i$两个因子的序列$y$，然后将其存入结果$z$,
+\item 然后再遍历之前递归$n/i$的所得到的结果，如果$i$小于等于结果中某个factor数组的第一个数字，那么将其插入该数组的首位置，然后把该数组存入结果$z$中，
+\item 例如$n = 12$，那么刚开始$i = 2$，是12的一个factor，然后对$n/i=12/2=6$递归处理，得到$[2,3]$，
+\begin{itemize}
+\item 首先将$[2, 6]$先存入结果$z$中，
+\item 然后发现$i$(此时为2)小于等于$[2, 3]$中的第一个数字2，那么将2插入首位置得到$[2, 2, 3]$加入结果$z$中，
+\item 继续测试下一个factor，此时$i$变成3，还是12的factor，对$n/i=12/3=4$递归处理，得到$[2, 2]$，
+\item 同样先把$[3, 4]$存入结果$z$中，然后发现$i$(此时为3)大于$[2, 2]$中的第一个数字2，这时候就忽略掉$[2,2]$。因为$[2,2,3]$在此之前肯定已经加入到结果$z$中了。
+\end{itemize}
+\end{itemize}
+\begin{lstlisting}[style=customc, caption={Another DFS Approach}]
+vector<vector<int>> getFactors( int n )
+{
+    vector<vector<int>> z;
+
+    for( int i = 2; i * i <= n; ++i )
+    {
+        if( n % i == 0 ) //i is the factor of n
+        {
+            vector<vector<int>> x = getFactors( n / i );
+            vector<int> y{ i, n / i };
+
+            //add y to z
+            z.emplace_back( y.begin(), y.end() );
+
+            //iterate over x
+            for( auto& t : x )
+            {
+                if( i <= t[0] )
+                {
+                    t.insert( t.begin(), i );
+                    z.emplace_back( t.begin(), t.end() );
+                }
+            }
+        }
+    }
+
+    return z;
+}
+\end{lstlisting}

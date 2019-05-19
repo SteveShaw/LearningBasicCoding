@@ -1,0 +1,51 @@
+\section{442 --- Find All Duplicates in an Array}
+Given an array of integers, $1 \leq a[i] \leq n$ ($n$ is size of array), some elements appear twice and others appear once.
+
+Find all the elements that appear twice in this array.
+
+Could you do it without extra space and in $O(n)$ runtime?
+
+\paragraph{Example:}
+\begin{flushleft}
+\textbf{Input}: [4,3,2,7,8,2,3,1]
+
+\textbf{Output}: [2,3]
+\end{flushleft}
+
+\subsection{Negate Number By Its Index}
+\begin{itemize}
+\item Since each number is between $ [1,n] $, we can treat each element as the index in the array.
+\item Iterate each element $A[i]$, set $A[A[i]] = -A[A[i]]$.
+\item For the duplicate element, we will see the number at the corresponding index is negative before negating it. 
+\end{itemize}
+
+\setcounter{lstlisting}{0}
+\begin{lstlisting}[style=customc, caption={Negation Index}]
+vector<int> findDuplicates( vector<int>& nums )
+{
+    vector<int> ans;
+
+    for( size_t i = 0; i < nums.size(); ++i )
+    {
+        //since nums[i] may be less than zero
+        //we need absolute value of nums[i]
+        //to get the index
+        int idx = abs( nums[i] ) - 1;
+
+        if( nums[idx] < 0 )
+        {
+            //we found duplicate elements
+            //idx+1
+            ans.push_back( idx + 1 );
+        }
+        else
+        {
+            //otherwise, we negate
+            //the number at index idx
+            nums[idx] = -nums[idx];
+        }
+    }
+
+    return ans;
+}
+\end{lstlisting}

@@ -1,0 +1,90 @@
+\section{253 --- Meeting Rooms II}
+Given an array of meeting time intervals $A$ consisting of start and end times $[s_1,\;e_1],\;[s_2,\;e_2],\;\ldots$ $(s_i < e_i)$, find the minimum number of conference rooms required.
+\par
+\begin{flushleft}
+\textbf{Input}: $A =[[0, 30],\;[5, 10],\;[15, 20]]$
+\\
+\textbf{Output}: 2
+\end{flushleft}
+\subsection{Tree Map}
+\begin{itemize}
+\item Tree Map能够自动排序插入的数
+\item 遍历$A$，同时maintain一个tree map $M$
+\begin{itemize}
+\item 遇到start，将其插入$M$，对应的值设为$1$，如果已经存在将其对应的value加1
+。
+\item 遇到end，将其拆入$M$，对应的值设为$-1$。如果这个end在$M$中存在，将其对应的value减1。
+\end{itemize}
+\item 然后遍历$M$，累加各个key的value，同时maintain一个计数器，如果发生overlap，那么这个计数器的值在一直增加。
+\item 记录遍历过程中计数器的最大值，这个最大值就是overlap的最多的interval的个数。
+\end{itemize}
+\setcounter{algorithm}{0}
+\begin{algorithm}[H]
+\caption{Counter Of Overlapped Intervals}
+\begin{algorithmic}[1]
+\Procedure{MinMeetingRooms}{$A, L$}
+\State $\star$ 创建一个Tree Map $M$
+\For{$i:=0$ \textbf{to} L-1}
+\State $\star$ 将$A[i]$的\texttt{start}插入$M$,对应的value为1,如果存在就increments其value
+\State $\star$ 将$A[i]$的\texttt{end}插入$M$,对应的value为$-1$,如果存在就decrements其value
+\EndFor
+\State $\ast$ 初始化一个计数器$\delta$为0
+\State $\ast$ 创建一个变量$x$作为记录$\delta$在遍历$M$中出现的最大值
+\For{Each key $k$ in $M$}
+\State $\delta\gets\delta+M[k]$
+\State $x\gets\max(x, \delta)$
+\EndFor
+\algstore{253algo}
+\end{algorithmic}
+\end{algorithm}
+\begin{algorithm}[H]
+\begin{algorithmic}[1]
+\algrestore{253algo}
+\State \Return $x$
+\EndProcedure
+\end{algorithmic}
+\end{algorithm}
+\setcounter{lstlisting}{0}
+\begin{lstlisting}[style=customc, caption={Tree Map}]
+int minMeetingRooms( vector<Interval>& intervals )
+{
+    map<int, int> m;
+
+    for( auto& itv : intervals )
+    {
+        //insert start
+        auto it = m.find( itv.start );
+        if( it != m.end() )
+        {
+            ++it->second;
+        }
+        else
+        {
+            m.emplace( itv.start, 1 );
+        }
+
+        //insert end
+        it = m.find( itv.end );
+        if( it != m.end() )
+        {
+            --it->second;
+        }
+        else
+        {
+            m.emplace( itv.end, -1 );
+        }
+    }
+
+    //iterate over m
+    int delta = 0;
+    int x = 0;
+    for( const auto& p : m )
+    {
+        //p.second is the times of each start and end
+        delta += p.second;
+        x = ( max )( x, delta );
+    }
+
+    return x;
+}
+\end{lstlisting}

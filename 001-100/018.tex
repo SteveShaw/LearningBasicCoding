@@ -1,0 +1,96 @@
+\section{18 --- 4Sum}
+Given an array $A$ of $ n $ integers and an integer target $ T $, are there elements $ a $, $ b $, $ c $, and $ d $ in $ A $ such that $ a + b + c + d = T $? Find all unique quadruplets in the array which gives the sum of target.
+
+\paragraph{Note:}
+
+\begin{itemize}
+\item The solution set must not contain duplicate quadruplets.
+\end{itemize}
+
+\paragraph{Example:}
+
+\begin{flushleft}
+\textbf{Input}: $A = [1, 0, -1, 0, -2, 2]$, $T = 0$
+\\
+\textbf{Output}: 
+\begin{table}[H]
+\begin{tabular}{lcccc}
+1): & -1 &  0 & 0 & 1  \\
+2): & -2 & -1 & 1 & 2  \\
+3): & -2  & 0 & 0 & 2 
+\end{tabular}
+\end{table}
+\end{flushleft}
+
+\subsection{Sort}
+为了避免重复项，使用了Tree Set保证新加入的数没有重复。解法思路跟三数之和基本没啥区别，就是多加了一层for循环，其他的都一样，当然同样都要先对数组进行排序。
+
+\setcounter{lstlisting}{0}
+\begin{lstlisting}[style=customc, caption={Sorting}]
+vector<vector<int>> fourSum( vector<int>& nums, int target )
+{
+    sort( nums.begin(), nums.end() );
+
+    int L = static_cast< int >( nums.size() );
+
+    vector<vector<int>> ans;
+
+    for( int i = 0; i <= L - 4; ++i )
+    {
+        if( ( i > 0 ) && ( nums[i] == nums[i - 1] ) )
+        {
+            continue;
+        }
+
+        for( int j = i + 1; j <= L - 3; ++j )
+        {
+            //skip duplicate numbers
+            if( ( j > i + 1 ) && ( nums[j] == nums[j - 1] ) )
+            {
+                continue;
+            }
+
+            int l = j + 1;
+            int r = L - 1;
+
+            while( l < r )
+            {
+                if( nums[i] + nums[j] + nums[l] + nums[r] == target )
+                {
+                    ans.emplace_back( initializer_list<int> {nums[i], nums[j], nums[l], nums[r]} );
+
+                    //skip duplicate numbers
+                    while( ( l < r ) && ( nums[l] == nums[l + 1] ) )
+                    {
+                        ++l;
+                    }
+
+                    //skip duplicate numbers
+                    while( ( l < r ) && ( nums[r] == nums[r - 1] ) )
+                    {
+                        --r;
+                    }
+
+                    //important: l+1 and r-1 is the first number
+                    //that is not same as before
+                    ++l;
+                    --r;
+                }
+                else if( nums[i] + nums[j] + nums[l] + nums[r] < target )
+                {
+                    ++l;
+                }
+                else
+                {
+                    --r;
+                }
+            }
+
+        }
+
+    }
+
+    return ans;
+}
+
+\end{lstlisting}

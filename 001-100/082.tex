@@ -1,0 +1,162 @@
+\section{82 -- Remove Duplicates from Sorted List II}
+\tikzset
+{
+llstyle/.style={>=stealth',auto,node distance=7mm},
+mynode/.style={circle, draw, minimum size=5mm, fill=gray!15}
+}
+Given a sorted linked list with head node $H$, delete all nodes that have duplicate numbers, leaving only distinct numbers from the original list.
+\paragraph{Example 1:}
+\begin{flushleft}
+\textbf{Input}:
+\begin{figure}[H]
+\begin{tikzpicture}[llstyle]
+\node(){};
+\node[mynode](1){1};
+\node[mynode, right=of 1](2){2};
+\node[mynode, right=of 2](3){3};
+\node[mynode, right=of 3](31){3};
+\node[mynode, right=of 31](4){4};
+\node[mynode, right=of 4](41){4};
+\node[mynode, right=of 41](5){5};
+\draw[->,>=stealth'] (1)--(2);
+\draw[->,>=stealth'] (2)--(3);
+\draw[->,>=stealth'] (3)--(31);
+\draw[->,>=stealth'] (31)--(4);
+\draw[->,>=stealth'] (4)--(41);
+\draw[->,>=stealth'] (41)--(5);
+\end{tikzpicture}
+\end{figure}
+\textbf{Output:}
+\begin{figure}[H]
+\begin{tikzpicture}[llstyle]
+\node(){};
+\node[mynode](1){1};
+\node[mynode, right=7mm of 1](2){2};
+\node[mynode, right=7mm of 2](5){5};
+\draw[->,>=stealth'] (1)--(2);
+\draw[->,>=stealth'] (2)--(5);
+\end{tikzpicture}
+\end{figure}
+\end{flushleft}
+\paragraph{Example 2:}
+\begin{flushleft}
+\textbf{Input}:
+\begin{figure}[H]
+\begin{tikzpicture}[llstyle]
+\node(){};
+\node[mynode](1){1};
+\node[mynode, right=of 1](a1){1};
+\node[mynode, right=of a1](b1){1};
+\node[mynode, right=of b1](2){2};
+\node[mynode, right=of 2](3){3};
+\draw[->,>=stealth'] (1)--(a1);
+\draw[->,>=stealth'] (a1)--(b1);
+\draw[->,>=stealth'] (b1)--(2);
+\draw[->,>=stealth'] (2)--(3);
+\end{tikzpicture}
+\end{figure}
+\textbf{Output:}
+\begin{figure}[H]
+\begin{tikzpicture}[llstyle]
+\node(){};
+\node[mynode](2){2};
+\node[mynode, right=of 2](3){3};
+\draw[->,>=stealth'] (2)--(3);
+\end{tikzpicture}
+\end{figure}
+\end{flushleft}
+\subsection{Linear Scan}
+\begin{CJK*}{UTF8}{gbsn}
+首先创建一个dummy节点，指向\texttt{head}，然后从\texttt{head}开始，我们维护三个节点，分别指向当前节点$\alpha$，当前节点的前一个节点$\beta$以及当前节点的下一个节点$\gamma$。同时用一个计数器$\delta$记录遇到的重复节点个数。
+\par
+然后从头节点出发，如果$\alpha$和$\gamma$有不同的value，$\alpha$会保留，所以这时候$\beta$前进到$\alpha$而$\alpha$前进到$\gamma$。否则，从$\alpha$开始搜索相同的节点，直至链表末尾或者$\gamma$和$\alpha$具有不同的值。这时候如果$\alpha$是链表末尾，表示从$\beta$后的下一个节点开始直至链表末尾都是相同的元素，直接把$\beta$的指向下一个节点的指针指向\texttt{null}然后返回。否则，将$\beta$的指向下一个节点的指针指向$\gamma$。但这时候$\beta$并不前进还是停留在当前位置，因为我们并不确定从$\gamma$开始的节点是否有重复。而$\alpha$仍旧前进到$\gamma$的位置。最后返回dummy的节点的下一个节点作为头节点。 
+\end{CJK*}
+\subsubsection{Code}
+Procedure \texttt{DeleteDuplicate} delete all duplicate nodes from linked list with head $H$.
+\setcounter{algorithm}{0}
+\begin{algorithm}[H]
+\caption{Linear Scanning}
+\begin{algorithmic}[1]
+\Procedure{DeleteDuplicate}{$H$}
+\State Create a dummny node $D$
+\State $D_n\gets H$ \Comment The next pointer of $D$ points to the list head $H$
+\State $\alpha:=D$ \Comment The previous node
+\State $\beta:=H$ \Comment The current node
+\While{$\beta \neq 0$} \label{82while1}
+\State $\delta:=0$ \Comment The counter of duplicate nodes
+\State $\gamma:=\beta_n$ \Comment The next node of $\beta$
+\While{$\beta\neq 0$ \textbf{and} $\gamma \neq 0$} \label{82while2}
+\If{$V(\beta)\neq V(\gamma)$} \Comment The two nodes are not duplicate
+\State \texttt{break} \Comment Stop while loop [\ref{82while2}]
+\EndIf
+\State $\delta\gets \delta+1$ \Comment Increments the counter
+\State $\beta \gets \gamma$ \Comment $\beta$ move forward to $\gamma$
+\State $\gamma \gets \gamma_n$ \Comment $\gamma$ move forward to next node
+\EndWhile \Comment End[\ref{82while2}]
+\If{$\delta > 0$} \Comment Found duplicate nodes
+\State $\delta\gets 0$ \Comment Reset the counter
+\If{$\beta \neq 0$} \Comment Not at end of the list
+\State $\alpha_n\gets \gamma$ \Comment Change previous node's next pointer to $\gamma$
+\Else
+\State $\alpha_n\gets 0$ \Comment At the end of the list
+\State \texttt{break} \Comment Stop while loop[\ref{82while1}]
+\EndIf
+\Else
+\State $\alpha \gets \beta$ \Comment Move previous node to current node
+\EndIf
+\State $\beta\gets \beta_n$ \Comment Move current node to next node
+\EndWhile
+\algstore{82algo}
+\end{algorithmic}
+\end{algorithm}
+\begin{algorithm}[H]
+\begin{algorithmic}[1]
+\algrestore{82algo}
+\State \Return $D_n$ \Comment Return the next node of dummny node
+\EndProcedure
+\end{algorithmic}
+\end{algorithm}
+\subsection{Recursive}
+\begin{CJK*}{UTF8}{gbsn}
+递归算法比较简洁。如果当前点$\beta$以及其下一个节点$\gamma$都不为空，那么如果两个不是重复的，递归处理$\gamma$，然后将返回的头节点设置为$\beta$的\texttt{next}指针。如果是重复的，就从$\gamma$开始找到第一个不是重复的节点，然后递归处理该节点，由于$\beta$和$\gamma$是重复的，所以它们就被放弃掉，直接返回递归处理后的头节点。
+\end{CJK*}
+\subsubsection{Code}
+\begin{algorithm}[H]
+\caption{Recursive Approach}
+\begin{algorithmic}[1]
+\Procedure{DeleteDuplicate}{$H$}
+\State \Return $\Gamma(H)$ \Comment Recursive function $\Gamma$
+\EndProcedure
+\end{algorithmic}
+\end{algorithm}
+
+Function $\Gamma$ recursively process the linked list $\beta$ to remove duplicate elements
+\begin{algorithm}[H]
+\caption{Recursively Removing Duplicate Elements}
+\begin{algorithmic}[1]
+\Function{$\Gamma$}{$\beta$}
+\If{$\beta=0$} \Comment The current list is empty
+\State \Return 0
+\EndIf
+\If{$\beta_n=0$} \Comment The current list has only one node
+\State \Return $\beta$
+\EndIf
+\State $\gamma:=\beta_n$
+\If{$V(\gamma)\neq V(\beta)$} \Comment They are not duplicate
+\State $\beta_n \gets \Gamma(\gamma)$ \Comment Recursively process linked list with head $\gamma$
+\State \Return $\beta$ \Comment Return current head
+\EndIf
+\State $v:=V(\beta_n)$
+\algstore{82algo}
+\end{algorithmic}
+\end{algorithm}
+\begin{algorithm}[H]
+\begin{algorithmic}[1]
+\algrestore{82algo}
+\While{$\gamma\neq 0$ \textbf{and} $V(\gamma)=v$}
+\State $\gamma \gets \gamma_n$ \Comment Move to next node
+\EndWhile
+\State \Return $\Gamma(\gamma)$ \Comment Recursively process linked list with head $\gamma$ and exclude duplicates as $\beta$
+\EndFunction
+\end{algorithmic}
+\end{algorithm}

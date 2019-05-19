@@ -1,0 +1,209 @@
+\section{212 --- Word Search II}
+Given a 2D board $B$ and a list of words $W$ from the dictionary, find all words in the board.
+\par
+Each word must be constructed from letters of sequentially adjacent cell, where \textbf{adjacent} cells are those horizontally or vertically neighboring. The same letter cell may not be used more than once in a word.
+\paragraph{Example:}
+\begin{flushleft}
+\textbf{Input}:
+\\
+$W$ = [\texttt{oath}, \texttt{pea}, \texttt{eat}, \texttt{rain}]
+\\
+$B$ =
+\begin{figure}[H]
+\begin{tikzpicture}
+\matrix [matrix of nodes]
+{ 
+\textcolor{red}{o} & \textcolor{red}{a} & a & n\\
+e & \textcolor{red}{t} & \textcolor{red}{a} & \textcolor{red}{e}\\
+i & \textcolor{red}{h} & k & r\\
+i & f & l & v\\
+};
+\end{tikzpicture}
+\end{figure} 
+\textbf{Output}: [\texttt{eat}, \texttt{oath}]
+\end{flushleft}
+\paragraph{Note:}
+\begin{itemize}
+\item You may assume that all inputs are consist of lowercase letters a--z.
+\end{itemize}
+\subsection{DFS + Trie}
+\begin{CJK*}{UTF8}{gbsn}
+\begin{itemize}
+\item Trie的node数据结构中需要放入所加入的word。
+\item 为了避免使用额外的数组来判断$B$中某个位置是否访问过，可以先把该位置上的字符替换为除了a -- z之外的其他字符。然后DFS函数末尾再换回该位置上的原字符。
+\begin{lstlisting}[style=customc]
+void DFS(B, r, c)
+{
+ 	char letter = B[r][c]; //Save to letter
+ 	B[r][c] = '#'; //set to a special character
+ 	....
+ 	B[r][c] = letter; //Reset to original letter
+}
+\end{lstlisting}
+\item 如果当前Trie node的word存在，那么除了把这个word加入到返回结果中，可以把这个word置为empty string。这样避免了在返回结果中出现重复的word。
+\end{itemize}
+\end{CJK*}
+\setcounter{algorithm}{0}
+\begin{algorithm}[H]
+\caption{DFS Plus Trie}
+\begin{algorithmic}[1]
+\State $\star$ $B$ has dimension $R\times C$. $W$ has length $L$
+\Procedure{FindWords}{$B, R, C, W, L$}
+\State $\star$ Add each word from $W$ into Trie
+\State $\star$ Iterate over all elements in $B$
+\State $\omega:=\emptyset$ \Comment The found words
+\For{$r:=0\to R-1$} \Comment Row
+\For{$c:=0\to C-1$} \Comment Column
+\State $\star$ Call helper function \texttt{DFS} to find word in $W$
+\State \Call{DFS}{$B, t, r, c, \omega$}
+\EndFor
+\EndFor
+\State \Return $\omega$
+\EndProcedure
+\end{algorithmic}
+\end{algorithm}
+Function \texttt{DFS} have 5 inputs which are
+\begin{itemize}
+\item $B$: The input board
+\item $r$ and $c$: The start position to do DFS
+\item $t$: The root of \textbf{Trie}
+\item $\omega$: The found words
+\end{itemize}
+\begin{algorithm}[H]
+\caption{Helper Function}
+\begin{algorithmic}[1]
+\Function{DFS}{$B,r,c,t,\omega$}
+\If{$B[r][c]$ is not in $t$'s children}
+\State \Return
+\EndIf
+\State $\star$ Update $t$ as $t$'s child in index corresponding to $B[r][c]$
+\If{$t$ has a non-empty \texttt{word} member which is in the dictionary}
+\State $\star$ Add $t$'s \texttt{word} memeber to $\omega$ and reset $t$'s \texttt{word} to empty
+\EndIf
+\algstore{212algo}
+\end{algorithmic}
+\end{algorithm}
+\begin{algorithm}[H]
+\begin{algorithmic}[1]
+\algrestore{212algo}
+\State $x:=B[r][c]$ \Comment Save $B[r][c]$ to $x$
+\State Set $B[r][c]$ to a special character $\pi$ other than a--z.
+\State $\star$ Move one unit in 4 directions. Each move will get a new position $(r_1, c_1)$
+\If{$(r_1, c_1)$ is inside $B$ and $B[r_1][c_1]\neq \pi$}
+\State \Call{DFS}{$B, r_1, c_1, t, \omega$} \Comment Continue DFS from $(r_1,c_1)$
+\EndIf
+\State $B[r][c]\gets x$ \Comment Restore $B[r][c]$ as its original letter
+\EndFunction
+\end{algorithmic}
+\end{algorithm}
+\setcounter{lstlisting}{0}
+\begin{lstlisting}[style=customc, caption={DFS And Trie}]
+class Solution
+{
+	//Trie Node defintion
+    struct Node
+    {
+        vector<Node*> siblings;
+		// A little change: save added word
+        string word;
+        Node()
+            : siblings( 26, nullptr )
+        {}
+
+    };
+
+public:
+    vector<string> findWords( vector<vector<char>>& board, vector<string>& words )
+    {
+
+        for( const auto& w : words )
+        {
+            addWord( w );
+        }
+
+        int rows = static_cast<int>( board.size() );
+        int cols = static_cast<int>( board[0].size() );
+
+        vector<string> ans;
+        ans.reserve( words.size() );
+
+        for( int r = 0; r < rows; ++r )
+        {
+            for( int c = 0; c < cols; ++c )
+            {
+                dfs( board, m_root, r, c, ans );
+            }
+        }
+
+        return ans;
+    }
+
+    void dfs( vector<vector<char>>& G, Node* node, int r, int c, vector<string>& ans )
+    {
+        int rows = static_cast<int>( G.size() );
+        int cols = static_cast<int>( G[0].size() );
+
+        int index = G[r][c] - 'a';
+
+        if( node->siblings[index] == nullptr )
+        {
+            return;
+        }
+
+        node = node->siblings[index];
+
+		//Save original letter 
+        auto letter = G[r][c];
+		//indicate this position has been visited
+        G[r][c] = '#'; 
+
+        if( !node->word.empty() )
+        {
+            ans.emplace_back( node->word );
+			//Avoid duplicate words in ans
+            node->word.clear();
+        }
+
+        for( const auto& d : m_dirs )
+        {
+            int nr = r + d.first;
+            int nc = c + d.second;
+
+            if( ( nr >= 0 ) && ( nr < rows ) && ( nc >= 0 ) && ( nc < cols ) && ( G[nr][nc] != '#' ) )
+            {
+                dfs( G, node, nr, nc, ans );
+            }
+        }
+
+		//reset to original letter
+        G[r][c] = letter; 
+    }
+
+    void addWord( const string& word )
+    {
+        auto node = m_root;
+
+        for( auto c : word )
+        {
+            int i = c - 'a';
+            if( node->siblings[i] == nullptr )
+            {
+                node->siblings[i] = new Node();
+            }
+
+            node = node->siblings[i];
+        }
+
+		//put word into the node
+        node->word = word;
+    }
+
+    Node* m_root = new Node();
+	
+	// The offset in 4 directions
+    vector<pair<int, int>> m_dirs =
+    {
+        {-1, 0}, {1, 0}, {0, -1}, {0, 1}
+    };
+};
+\end{lstlisting}

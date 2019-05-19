@@ -1,0 +1,104 @@
+\section{22 --- Generate Parentheses}
+Given $ n $ pairs of parentheses, write a function to generate all combinations of well-formed parentheses.
+\par
+For example, given $ n = 3 $, a solution set is:
+\begin{table}[H]
+\begin{tabular}{c}
+$ ((())) $\\
+  $ (()()) $\\
+$   (())() $\\
+$   ()(()) $\\
+$   ()()() $
+\end{tabular}
+\end{table}
+
+\subsection{Backtracking}
+\begin{itemize}
+\item To generate all sequences, use a recursion. 
+\item All sequences of length $n$ is just a open parenthesis plus all sequences of length $n-1$, and then a close parenthesis plus all sequences of length $n-1$.
+\item However, only add them when it will remain a valid sequence by keeping track of the number of opening and closing brackets that have been placed so far.
+\end{itemize}
+
+
+\setcounter{algorithm}{0}
+\begin{algorithm}[H]
+\caption{Backtracking}
+\begin{algorithmic}[1]
+\Procedure{GenerateParenthesis}{$N$}
+\State $ \star $ Initialize an empty array $A$ to save the results
+\State $\ast$ Call recursive helper function \texttt{DFS}
+\State \Call{DFS}($A=A, S=\varnothing, x=0, y=0, n$) \Comment Start with empty string, 0 openings and 0 closings
+\EndProcedure
+\end{algorithmic}
+\end{algorithm}
+
+Helper function \texttt{DFS} generate all valid parenthesis strings by tracking $x$ opening and $y$ closings.
+
+\begin{algorithm}[H]
+\caption{Recursive Helper Function}
+\begin{algorithmic}[1]
+\Function{DFS}{$A, S, x, y, n$}
+\If{$x+y =2\times n$} \Comment Number of opening and closing parenthesis both are equal to $n$
+\State $\star$ Add current string $S$ into $A$
+\State \Return
+\EndIf
+\algstore{22algo}
+\end{algorithmic}
+\end{algorithm}
+\begin{algorithm}[H]
+\begin{algorithmic}[1]
+\algrestore{22algo}
+\If{$x < n$}
+\State $\star$ Add an opening parenthesis to $S$
+\State $\ast$ Recursively generate with remaining part
+\State \Call{DFS}{$ A, S, x+1, y, n $} \Comment Increments number of opening parenthesis 
+\EndIf
+
+\If{$y < x$} \Comment We only add closing parenthesis when its number is less than openings
+\State $\star$ Add a closing parenthesis to $S$
+\State $\ast$ Recursively generate with remaining part
+\State \Call{DFS}{$ A, S, x, y+1, n $} \Comment Increments number of closing parenthesis 
+\EndIf
+\EndFunction
+\end{algorithmic}
+\end{algorithm}
+
+\setcounter{lstlisting}{0}
+\begin{lstlisting}[style=customc, caption={Backtracking}]
+vector<string> generateParenthesis( int n )
+{
+    vector<string> ans;
+    string s;
+
+    dfs( ans, s, 0, 0, n );
+
+    return ans;
+}
+
+void dfs( vector<string>& A, string S, int x, int y, int n )
+{
+    if( x + y == n * 2 )
+    {
+        A.emplace_back( S );
+        return;
+    }
+
+    if( x < n )
+    {
+        S.push_back( '(' );
+        dfs( A, S, x + 1, y, n );
+        S.pop_back();
+    }
+
+    if( y < x )
+    {
+        //only add closing parenthesis when
+        //current number of closings are
+        //less than current number of openings
+        S.push_back( ')' );
+        dfs( A, S, x, y + 1, n );
+        S.pop_back();
+    }
+}
+
+\end{lstlisting}

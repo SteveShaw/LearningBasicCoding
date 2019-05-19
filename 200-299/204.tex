@@ -1,0 +1,82 @@
+\section{204 --- Count Primes}
+Count the number of prime numbers less than a non-negative number, $n$.
+\paragraph{Example:}
+
+\begin{flushleft}
+\textbf{Input}: 10
+\\
+\textbf{Output}: 4
+\\
+\textbf{Explanation}: 
+\\
+There are 4 prime numbers less than 10, they are 2, 3, 5, 7.
+\end{flushleft}
+\subsection{Sieve of Eratosthenes}
+\begin{CJK*}{UTF8}{gbsn}
+\begin{itemize}
+\item 从2开始遍历到$\sqrt{n}$，
+\item 先找到第一个质数2，然后将其所有的倍数全部标记出来，
+\item 然后到下一个质数3，标记其所有倍数，
+\item 依次类推，直到$\sqrt{n}$，此时数组中未被标记的数字就是质数。
+\end{itemize}
+maintain 一个 $n-1$ 长度的数组来记录每个数字是否被标记，长度为$n-1$的原因是题目说是小于$n$的质数个数，并不包括$n$。
+\end{CJK*}
+\setcounter{algorithm}{0}
+\begin{algorithm}[H]
+\caption{Sieve of Eratosthenes}
+\begin{algorithmic}[1]
+\Procedure{CountPrimes}{$n$}
+\State $\star$ Let $A$ be an array where $A[0]:=0$ and $A[1]=A[2]=\ldots=A[n-2]:=1$.
+\State $\star$ $A[0]:=0$ because 1 is not a prime number
+\State $i:=2$
+\While{$i \times i \leq n$}
+\If{$A[i-1]=1$}
+\For{$j:=i\times i$ \textbf{to} $n-1$ \textbf{by} $i$}
+\State $A[j]\gets 0$ \Comment Mark $A[j]$ as non-prime number
+\EndFor
+\EndIf
+\State $i\gets i+1$
+\EndWhile
+\algstore{204algo}
+\end{algorithmic}
+\end{algorithm}
+\begin{algorithm}[H]
+\begin{algorithmic}[1]
+\algrestore{204algo}
+\State $\star$ Get and return the number of 1s in $A$
+\EndProcedure
+\end{algorithmic}
+\end{algorithm}
+\setcounter{lstlisting}{0}
+\begin{lstlisting}[style=customc, caption={Sieve of Eratosthenes}]
+int countPrimes( int n )
+{
+    if( n <= 2 )
+    {
+        return 0;
+    }
+
+    vector<unsigned char> A( n - 1, 1 );
+
+    A[0] = 0; // 1 is not a prime number
+
+    int i = 2;
+
+    while( i * i <= n )
+    {
+        if( A[i - 1] == 1 )
+        {
+            for( int j = i * i; j < n; j += i )
+            {
+                A[j - 1] = 0;
+            }
+        }
+
+        ++i;
+    }
+
+    int ans = accumulate( A.begin(), A.end(), 0 );
+
+    return ans;
+}
+\end{lstlisting}

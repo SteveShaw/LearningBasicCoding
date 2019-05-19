@@ -1,0 +1,62 @@
+\section{251 --- Flatten 2D Vector}
+Implement an iterator to flatten a 2d vector.
+\par
+For example,
+\par
+Given 2d vector = $[[1,2],\;[3],\;[4,5,6]]$
+\par
+By calling \texttt{next} repeatedly until \texttt{hasNext} returns \texttt{false}, the order of elements returned by \texttt{next} should be: 
+\par
+
+$[1,2,3,4,5,6]$.
+\par
+\texttt{Hint:}
+
+\begin{itemize}
+\item How many variables do you need to keep track?
+\item Two variables is all you need. Try with $x$ and $y$.
+\item Beware of empty rows. It could be the first few rows.
+\item To write correct code, think about the invariant to maintain. What is it?
+\item The invariant is $x$ and $y$ must always point to a valid point in the 2d vector. Should you maintain your invariant ahead of time or right when you need it?
+\item Not sure? Think about how you would implement \texttt{hasNext}(). Which is more complex?
+\item Common logic in two different places should be refactored into a common method.
+\end{itemize}
+
+\paragraph{Follow up:}
+\begin{itemize}
+\item As an added challenge, try to code it using only iterators in \texttt{C++} or iterators in \texttt{Java}.
+\end{itemize}
+\subsection{Iterator}
+将$x$定义为row的iterator，再用另外一个变量$z$指向二维数组的末尾，同时定义一个整型变量$y$来指向列位置
+\setcounter{lstlisting}{0}
+\begin{lstlisting}[style=customc, caption={Iterator}]
+class Vector2D
+{
+public:
+    Vector2D( vector<vector<int>>& vec2d )
+    {
+        x = vec2d.begin();
+        z = vec2d.end();
+    }
+	
+    int next()
+    {
+        return ( *x )[y++];
+    }
+	
+    bool hasNext()
+    {
+        if( ( x != z ) && ( y == ( *x ).size() ) )
+        {
+            ++x;
+            y = 0;
+        }
+        return x != z;
+    }
+
+private:
+    vector<vector<int>>::iterator x;
+    vector<vector<int>>::iterator z;
+    size_t y = 0;
+};
+\end{lstlisting}

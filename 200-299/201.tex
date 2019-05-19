@@ -1,0 +1,67 @@
+\section{201 --- Bitwise AND of Numbers Range}
+Given a range $[m, n]$ where $0 \leq m \leq n \leq 2147483647$, return the bitwise \textbf{AND} of all numbers in this range, inclusive.
+\paragraph{Example 1:}
+\begin{flushleft}
+\textbf{Input}: $[5,7]$
+\\
+\textbf{Output}: 4
+\end{flushleft}
+\paragraph{Example 2:}
+\begin{flushleft}
+\textbf{Input}: $[0,1]$
+\\
+\textbf{Output}: 0
+\end{flushleft}
+\subsection{Find Common Left Part}
+\begin{CJK*}{UTF8}{gbsn}
+先从题目中给的例子来分析，$[5, 7]$里共有三个数字，其二进制分别为：
+$101\;110\;111$
+\par
+Bitwise AND后的结果为100，仔细观察可以看出，最后的数是该数字范围内所有的数的左边共同的部分。
+\par
+再以$[26, 30]$为例，它们的二进制如下：
+\par
+$11010\;11011\;11100\;11101\;11110$
+\par
+Bitwise AND后的结果为11000。
+\par
+因此程序所作的就是找到找到范围内所有数左边公共的部分。算法步骤包括
+\begin{itemize}
+\item 建立一个32位都是1的mask，
+\item 每次把mask左移一位。然后看$m$与mask做bitwise AND后的结果与$n$ Bitwise AND mask后的结果是否相同。
+\item 最后$m$和mask bitwise AND 的结果就是最终结果
+\end{itemize}
+\end{CJK*}
+\setcounter{lstlisting}{0}
+\begin{lstlisting}[style=customc, caption={Find Common Left Bits}]
+int rangeBitwiseAnd( int m, int n )
+{
+
+    int mask = INT_MAX;
+    int zero_mask = 1;
+
+    while( m != n )
+    {
+		
+        mask ^= zero_mask; //left shift mask to add zero at its right
+        zero_mask <<= 1;
+        m &= mask;
+        n &= mask;
+    }
+
+    return m;
+}
+\end{lstlisting}
+\subsection{Removing rightest bit 1}
+The key point: reduce $n$ by removing the rightest 1 bit until $n\leq m$;
+\begin{lstlisting}[style=customc, caption={Remove rightest bit 1}]
+int rangeBitwiseAnd( int m, int n )
+{
+    while( m < n )
+    {
+        n = ( n & ( n - 1 ) ); // remove rightest bit 1 from n
+    }
+
+    return n;
+}
+\end{lstlisting}

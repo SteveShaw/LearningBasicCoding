@@ -1,0 +1,260 @@
+\section{230 --- Kth Smallest Element in a BST}
+Given a binary search tree, write a function to find the $k$th smallest element in it.
+\par
+\paragraph{Note: }
+\begin{itemize}
+\item You may assume $k$ is always valid, $1 \leq k \leq$ BST's total elements.
+\end{itemize}
+
+\paragraph{Example 1:}
+\begin{flushleft}
+
+\textbf{Input}: 
+\begin{figure}[H]
+\begin{tikzpicture}
+[mynode/.style={draw,circle,minimum size=5mm, fill=gray!20!}]
+\node(){};
+\node[mynode](1) {3};
+\node[mynode](2)[below=8mm of 1, xshift=-10mm] {1};
+\node[mynode](3)[below=8mm of 1, xshift=10mm] {4};
+\node[mynode](4)[below=8mm of 2, xshift=6mm] {2};
+\draw (1)--(2);
+\draw (1)--(3);
+\draw (2)--(4);
+\end{tikzpicture}
+\end{figure}
+$k = 1$
+\\
+\textbf{Output}: 1
+\end{flushleft}
+
+\paragraph{Example 2:}
+
+\begin{flushleft}
+Input:
+\begin{figure}[H]
+\begin{tikzpicture}
+[mynode/.style={draw,circle,minimum size=5mm, fill=gray!20!}]
+\node(){};
+\node[mynode](1) {5};
+\node[mynode](2)[below=8mm of 1, xshift=-10mm] {3};
+\node[mynode](3)[below=8mm of 1, xshift=10mm] {6};
+\node[mynode](4)[below=8mm of 2, xshift=-8mm] {2};
+\node[mynode](5)[below=8mm of 2, xshift=8mm] {4};
+\node[mynode](6)[below=8mm of 4, xshift=-8mm] {1};
+\draw (1)--(2);
+\draw (1)--(3);
+\draw (2)--(4);
+\draw (2)--(5);
+\draw (4)--(6);
+\end{tikzpicture}
+\end{figure}
+$k = 3$
+\par
+\textbf{Output}: 3
+\end{flushleft}
+
+\paragraph{Follow up:}
+\begin{itemize}
+\item What if the BST is modified (insert/delete operations) often and you need to find the $k$th smallest frequently? How would you optimize the function?
+\end{itemize}
+\subsection{In-order Traverse}
+\begin{CJK*}{UTF8}{gbsn}
+\begin{itemize}
+\item 仔细分析就可以看出，由于BST的特性，中序遍历其实就是从小到大的顺序。
+\item 因此求$k$th smallest element就变成中序遍历中记录当前访问元素是否是遍历到的第$k$个数字即可。
+\item 中序遍历可以使用stack，递归，以及Morris Traverse。
+\end{itemize}
+\end{CJK*}
+\setcounter{lstlisting}{0}
+\begin{lstlisting}[style=customc, caption={Stack Based In-order Traverse}]
+int kthSmallest( TreeNode* root, int k )
+{
+    int cnt = 0;
+    stack<TreeNode*> s;
+    TreeNode *p = root;
+    while( p || !s.empty() )
+    {
+        while( p )
+        {
+            s.push( p );
+            p = p->left;
+        }
+        p = s.top();
+        s.pop();
+        ++cnt;
+        if( cnt == k ) return p->val;
+        p = p->right;
+    }
+    return 0;
+}
+\end{lstlisting}
+\begin{lstlisting}[style=customc, caption={Recursion Based In-order Traverse}]
+int kthSmallest( TreeNode* root, int k )
+{
+
+    int x = 0;
+    int val = -1;
+
+    inorder( root, k, x, val );
+
+    return val;
+
+}
+//x is the count of current node when traversing the tree
+//val is the visited kth number when traversing the tree
+void inorder( TreeNode* node, int k, int& x, int& val )
+{
+    if( !node )
+    {
+        return;
+    }
+
+    inorder( node->left, k, x, val );
+
+    ++x;
+
+    if( x == k )
+    {
+        val = node->val;
+        return;
+    }
+
+    inorder( node->right, k, x, val );
+}
+\end{lstlisting}
+\subsection{Divide And Conquer}
+\begin{CJK*}{UTF8}{gbsn}
+\begin{itemize}
+\item 由于BST的性质，可以快速定位出第$k$小的元素是在左子树还是右子树，
+\item 首先计算出左子树的结点个数总和$t$，
+\item 如果$k\leq t$，说明第k小的元素在左子树中，直接对左子结点调用递归即可。
+\item 如果$k>t+1$，说明目标值在右子树中，对右子结点调用递归函数，注意此时的$k$需要更新为$k-t-1$，因为已经减少了左子树和根节点总计$t+1$个结点。
+\item 如果$k=t+1$，说明当前结点即为所求，返回当前结点值即可
+\end{itemize}
+\end{CJK*}
+\begin{lstlisting}[style=customc, caption={Divide And Conquer}]
+int kthSmallest( TreeNode* root, int k )
+{
+    int count = countNodes( root->left );
+
+    if( k <= count )
+    {
+        return kthSmallest( root->left, k );
+    }
+    else if( k > count + 1 )
+    {
+        return kthSmallest( root->right, k - count - 1 );
+    }
+
+    return root->val;
+}
+
+int countNodes( TreeNode* root )
+{
+    if( !root )
+    {
+        return 0;
+    }
+
+    return 1 + countNodes( root->left ) + countNodes( root->right );
+}
+\end{lstlisting}
+\subsection{Follow Up}
+\begin{CJK*}{UTF8}{gbsn}
+\begin{itemize}
+\item 如果该BST被修改的很频繁，而且查找操作也很频繁，那么最好的方法还是用分治法来快速定位目标所在的位置，
+\item 分治法中最低效的部分在于每次都需要遍历左子树所有结点来计算个数。
+\item 为了提升效率，需要修改\texttt{TreeNode struct}，在其中保存包括当前结点和其左右子树所有结点的个数，这样就可以快速得到任何左子树结点总数。
+\item 由于\texttt{TreeNode struct}被修改了，因此需要重新build BST。然后再进行查找$k$th smallest element的操作。
+\end{itemize}
+\end{CJK*}
+\begin{lstlisting}[style=customc, caption={Follow Up}]
+class Solution
+{
+public:
+
+    // New struct
+    struct CountNode
+    {
+        int val;
+        int counts;
+
+        CountNode *left;
+        CountNode *right;
+
+        CountNode( int x )
+            : val( x )
+            , counts( 1 )
+            , left( nullptr )
+            , right( nullptr )
+        {}
+    };
+
+    CountNode* build( TreeNode* root )
+    {
+        if( !root )
+        {
+            return nullptr;
+        }
+        // node->counts is set to 1 when constructed
+        CountNode* node = new CountNode( root->val );
+        node->left = build( root->left );
+        node->right = build( root->right );
+
+        //Update current node's node counts.
+        if( node->left )
+        {
+            node->counts += node->left->counts;
+        }
+
+        if( node->right )
+        {
+            node->counts += node->right->counts;
+        }
+
+
+        return node;
+    }
+
+    int searchKthSmallest( CountNode* root, int k )
+    {
+        if( root->left )
+        {
+            //The target is in left subtree
+            if( k <= root->left->counts )
+            {
+                return searchKthSmallest( root->left, k );
+            }
+
+            //The target is in right subtree
+            if( k > root->left->counts + 1 )
+            {
+                return searchKthSmallest( root->right, k - root->left->counts - 1 );
+            }
+
+            return root->val;
+        }
+        else
+        {
+            //since left subtree is empty
+            //Then we can assume root->left->counts=0
+            if( k > 1 )
+            {
+                return searchKthSmallest( root->right, k - 1 );
+            }
+
+            return root->val;
+        }
+    }
+
+    int kthSmallest( TreeNode* root, int k )
+    {
+
+        //build new tree based on CountNode struct
+        CountNode* node = build( root );
+
+        return searchKthSmallest( node, k );
+    }
+};
+\end{lstlisting}

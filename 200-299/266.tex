@@ -1,0 +1,24 @@
+\section{266 --- Palindrome Permutation}
+Given a string $s$, determine if a permutation of the string could form a palindrome.
+\par
+For example,
+\par
+\texttt{code}: \texttt{false}
+\par
+\texttt{aab}: \texttt{true}
+\par
+\texttt{carerac}: \texttt{true}
+
+\paragraph{Hint:}
+
+\begin{itemize}
+\item Consider the palindromes of odd vs even length. What difference do you notice?
+\item Count the frequency of each character.
+\item If each character occurs even number of times, then it must be a palindrome. How about character which occurs odd number of times?
+\end{itemize}
+\subsection{Hash Table}
+用一个数组记录每个字母对应的出现次数，然后统计出现次数为奇数的字母的个数，两种情况下是palindrome
+\begin{itemize}
+\item 没有出现次数为奇数的字母
+\item 字符串长度为奇数，且只有一个出现次数为奇数的字母
+\end{itemize}

@@ -1,0 +1,71 @@
+\section{275 --- H-Index II}
+Given an array of citations \textbf{sorted in ascending order} (each citation is a non-negative integer) of a researcher, write a function to compute the researcher's h-index.
+\par
+According to the definition of \textbf{h-index} on Wikipedia:
+\begin{quote}
+ A scientist has index $h$ if $h$ of his/her $N$ papers have at least h citations each, and the other $N - h$ papers have no more than $h$ citations each.
+\end{quote}
+
+\paragraph{Example:}
+
+\begin{flushleft}
+\textbf{Input}: $A = [0,1,3,5,6]$
+\\
+\textbf{Output}: 3 
+\\
+\textbf{Explanation}: 
+\\
+$[0,1,3,5,6]$ means the researcher has 5 papers in total and each of them had received 0, 1, 3, 5, 6 citations respectively. 
+\\
+Since the researcher has 3 papers with \textbf{at least} 3 citations each and the remaining two with \textbf{no more than} 3 citations each, her \textbf{h-index} is 3.
+\end{flushleft}
+\paragraph{Note:} 
+\begin{itemize}
+\item If there are several possible values for $h$, the maximum one is taken as the \textbf{h-index}
+\end{itemize}
+
+\paragraph{Follow up:}
+
+\begin{itemize}
+\item This is a follow up problem to \textbf{274 --- H-Index}, where citations is now guaranteed to be sorted in ascending order.
+\item Could you solve it in \textbf{logarithmic} time complexity?
+\end{itemize}
+\subsection{Binary Search}
+\begin{itemize}
+\item 由于数组是排序的，因此binary search找到第一个index $i$，使得$A[i]\geq L -i $，其中$L$是$A$的长度。由于$A[i]$到$A[L-1]$有$L-i$个数，因此只要这些数都大于或者等于$L-i$，就找到了符合要求的H-index。
+\item 找到$i$后，$L-i$就是H-index。
+\item 很显然这就是leftmost binary search
+\end{itemize}
+\setcounter{lstlisting}{0}
+\begin{lstlisting}[style=customc, caption={Leftmost Binary Search}]
+int hIndex( vector<int>& citations )
+{
+    if( citations.empty() )
+    {
+        return 0;
+    }
+
+    int L = static_cast<int>( citations.size() );
+
+    int l = 0;
+    int r = L;
+
+    //leftmost binary search
+    //find first index i where A[i]>=L-i
+    while( l < r )
+    {
+        int mid = ( l + r ) / 2;
+        if( citations[mid] < L - mid )
+        {
+            l = mid + 1;
+        }
+        else
+        {
+            r = mid;
+        }
+    }
+
+    //L-i is the H-index
+    return L - l;
+}
+\end{lstlisting}

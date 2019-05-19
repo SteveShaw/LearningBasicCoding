@@ -1,0 +1,44 @@
+\section{294 --- Flip Game II}
+You are playing the following Flip Game with your friend: Given a string that contains only these two characters: $+$ and $-$, you and your friend take turns to flip two consecutive $++$ into $--$. The game ends when a person can no longer make a move and therefore the other person will be the winner.
+\par
+Write a function to determine if the starting player can guarantee a win.
+\par
+\paragraph{Example}:
+
+\begin{flushleft}
+\textbf{Input}: $s = ++++$
+\\
+\textbf{Output}: \texttt{true} 
+\\
+\textbf{Explanation}:
+\\
+The starting player can guarantee a win by flipping the middle $++$ to become $+--+$.
+\end{flushleft}
+
+\paragraph{Follow up:}
+\begin{itemize}
+\item Derive your algorithm's runtime complexity.
+\end{itemize}
+\subsection{Backtracking}
+此题同样也是用Backtracking，从第二个字母开始遍历整个字符串，如果当前字母和之前那个字母都是$+$，将其变为$--$，然后递归检查这个字符串，如果返回\texttt{false}，说明当前玩家可以赢，因为那个结果是另一个玩家的结果。
+\setcounter{lstlisting}{0}
+\begin{lstlisting}[style=customc, caption={Backtracking}]
+bool canWin( string s )
+{
+    for( int i = 1; i < s.size(); ++i )
+    {
+        if( s[i] == '+' && s[i - 1] == '+' )
+        {
+            if( !canWin( s.substr( 0, i - 1 ) + "--" + s.substr( i + 1 ) ) )
+            {
+                //Another player lose means I can win
+                return true;
+            }
+        }
+    }
+    return false;
+}
+
+\end{lstlisting}
+
+

@@ -1,0 +1,54 @@
+\section{94 --- Binary Tree Inorder Traversal}
+Given a binary tree $T$, return the \textbf{inorder} traversal of its nodes' values.
+\paragraph{Example:}
+\begin{flushleft}
+\textbf{Input}: 
+\begin{figure}[H]
+\begin{tikzpicture}
+[mynode/.style={draw,circle,minimum size=5mm, fill=gray!20!}]
+\node(){};
+\node[mynode](1) {1};
+\node[mynode](2)[below=8mm of 1, xshift=8mm] {2};
+\node[mynode](3)[below=8mm of 2, xshift=-8mm] {3};
+\draw[-] (1) -- (2);
+\draw[-] (2) -- (3);
+\end{tikzpicture}
+\end{figure}
+\textbf{Output}: $[1,3,2]$
+\end{flushleft}
+\paragraph{Follow up}
+\begin{flushleft}
+Recursive solution is trivial, could you do it iteratively?
+\end{flushleft}
+\subsection{Iterative Method Based On Stack}
+\begin{CJK*}{UTF8}{gbsn}
+从root开始，先将root压入栈，然后再将其所有left child nodes压入栈，然后取出栈顶node，保存节点值，再将当前指针移到其right child node上，若存在right child node，则在下次循环时又可将其所有left child nodes压入栈中。这样就保证了访问顺序为left--root--right。
+\end{CJK*}
+\setcounter{algorithm}{0}
+\begin{algorithm}[H]
+\caption{Iterative With Stack}
+\begin{algorithmic}[1]
+\Procedure{InorderTraversal}{$T$}
+\State $S:=\emptyset$ \Comment The stack
+\State $p:=T$ \Comment Start with root $T$
+\State $\texttt{ans}:=\emptyset$
+\While{$p\neq \texttt{NULL}$ \textbf{or} $S\neq \emptyset$}
+\While{$p\neq \texttt{NULL}$} \Comment Push all left child nodes $p$ to $S$
+\State $S\gets S + p$
+\State $p\gets \texttt{Left}(p)$
+\EndWhile
+\algstore{94algo}
+\end{algorithmic}
+\end{algorithm}
+\begin{algorithm}[H]
+\begin{algorithmic}[1]
+\algrestore{94algo}
+\State $p\gets \texttt{Top}(S)$
+\State $\texttt{Pop}(S)$
+\State $\texttt{ans}\gets \texttt{ans}+ \texttt{Val}(p)$ \Comment Visit $p$
+\State $p\gets \texttt{Right}(p)$
+\EndWhile
+\State \Return \texttt{ans}
+\EndProcedure
+\end{algorithmic}
+\end{algorithm}

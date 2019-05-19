@@ -1,0 +1,88 @@
+\section{17 --- Letter Combinations of a Phone Number}
+Given a string containing digits from 2---9 inclusive, return all possible letter combinations that the number could represent.
+\par
+A mapping of digit to letters (just like on the telephone buttons) is given below.
+\begin{table}[H]
+\begin{tabular}{l*{8}{c}}
+digit: & 2 & 3 & 4 & 5 & 6 & 7 & 8 & 9 \\   
+\hline
+letters: & \texttt{abc} & \texttt{def}  & \texttt{ghi} & \texttt{jkl} & \texttt{mno} & \texttt{pqrs}  & \texttt{tuv}  & \texttt{wxyz}
+\end{tabular}
+\end{table}
+Note that 1 does not map to any letters.
+
+\paragraph{Example:}
+
+\begin{flushleft}
+\textbf{Input}: 23
+\\
+\textbf{Output}: [\texttt{ad}, \texttt{ae}, \texttt{af}, \texttt{bd}, \texttt{be}, \texttt{bf}, \texttt{cd}, \texttt{ce}, \texttt{cf}].
+\end{flushleft}
+
+\subsection{Depth First Search}
+用递归来求求解，注意，递归时，不需要用循环。同时需要创建一个hash map $M$，其key是2---9， value则是每个数字对应的字符串，比如$2 \rightarrow (\texttt{abc})$
+\setcounter{algorithm}{0}
+\begin{algorithm}[H]
+\caption{Generate all combinations}
+\begin{algorithmic}[1]
+\Procedure{LetterCombinations}{$S$}
+\State $\star$ Create a hash map $M$
+\State $Z := \emptyset$ \Comment The results
+\State \Call{DFS}{$S, M, p=0, W=\emptyset, Z$} 
+\EndProcedure
+\end{algorithmic}
+\end{algorithm}
+Function \texttt{DFS} generates all possible combinations $Z$ from given number string $S$. Start from index $p$ in $S$. It uses $W$ to save the intermediately generated string.
+\begin{algorithm}[H]
+\caption{DFS Helper Function}
+\begin{algorithmic}[1]
+\Function{DFS}{$S, L, M, p, W, Z$}
+\If{$p = L$} \Comment At the end of $S$
+\State $Z\gets Z+W$ \Comment Add $W$ to $Z$
+\State \Return
+\EndIf
+\State $T: = M(S[p])$ \Comment Get the letters associated with digit $S[p]$
+\For{Each letter $c$ in $T$} \Comment Iterate all characters in the string
+\State $W \gets W+c$ 
+\State \Call{DFS}{$S, M, p + 1, W, WORD$} \Comment Recursively on to next digit
+\State $\star$ Remove $c$ from $W$ after recursion is done
+\EndFor
+\EndFunction
+\end{algorithmic}
+\end{algorithm}
+\setcounter{lstlisting}{0}
+\begin{lstlisting}[style=customc, caption={DFS}]
+vector<string> letterCombinations( string digits )
+{
+    vector<string> res;
+
+    if( digits.empty() )
+    {
+        return res;
+    }
+
+    string dict[] = {"abc", "def", "ghi", "jkl", "mno", "pqrs", "tuv", "wxyz"};
+
+    DFS( digits, dict, 0, "", res );
+
+    return res;
+}
+void DFS( string digits, string dict[], int level, string out, vector<string> &res )
+{
+    if( level == digits.size() )
+    {
+        res.push_back( out );
+    }
+    else
+    {
+        string str = dict[digits[level] - '2'];
+
+        for( int i = 0; i < str.size(); ++i )
+        {
+            out.push_back( str[i] );
+            DFS( digits, dict, level + 1, out, res );
+            out.pop_back();
+        }
+    }
+}
+\end{lstlisting}

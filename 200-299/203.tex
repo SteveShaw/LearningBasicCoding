@@ -1,0 +1,81 @@
+\section{203 --- Remove Linked List Elements}
+Remove all elements from a linked list of integers that have value $v$.
+\paragraph{Example}:
+\textbf{Input}:
+\begin{flushleft}
+\begin{figure}[H]
+\begin{tikzpicture}
+[mynode/.style={draw,circle,minimum size=5mm, fill=gray!20!}]
+\node(){};
+\node[mynode](1) {1};
+\node[mynode](2)[right=4mm of 1] {2};
+\node[mynode](3)[right=4mm of 2] {6};
+\node[mynode](4)[right=4mm of 3] {3};
+\node[mynode](5)[right=4mm of 4] {4};
+\node[mynode](6)[right=4mm of 5] {5};
+\node[mynode](7)[right=4mm of 6] {6};
+\draw[>=stealth,->] (1) -- (2);
+\draw[>=stealth,->] (2) -- (3);
+\draw[>=stealth,->] (3) -- (4);
+\draw[>=stealth,->] (4) -- (5);
+\draw[>=stealth,->] (5) -- (6);
+\draw[>=stealth,->] (6) -- (7);
+\end{tikzpicture}
+\end{figure}
+$v=6$
+\\
+\textbf{Output}:
+\begin{figure}[H]
+\begin{tikzpicture}
+[mynode/.style={draw,circle,minimum size=5mm, fill=gray!20!}]
+\node(){};
+\node[mynode](1) {1};
+\node[mynode](2)[right=4mm of 1] {2};
+\node[mynode](3)[right=4mm of 2] {3};
+\node[mynode](4)[right=4mm of 3] {4};
+\node[mynode](5)[right=4mm of 4] {5};
+\draw[>=stealth,->] (1) -- (2);
+\draw[>=stealth,->] (2) -- (3);
+\draw[>=stealth,->] (3) -- (4);
+\draw[>=stealth,->] (4) -- (5);
+\end{tikzpicture}
+\end{figure}
+\end{flushleft}
+\subsection{Dummy Header}
+\begin{CJK*}{UTF8}{gbsn}
+创建一个dummy header，用它的\texttt{next}指向\texttt{head}，这样就能很好避免很多判断了。
+\end{CJK*}
+\setcounter{lstlisting}{0}
+\begin{lstlisting}[style=customc, caption={Dummy Header}]
+ListNode* removeElements( ListNode* head, int val )
+{
+
+    ListNode *dummy = new ListNode( -1 );
+
+    dummy->next = head;
+
+    auto cur = head;
+    auto pre = dummy;
+
+    while( cur )
+    {
+        if( cur->val == val )
+        {
+            auto next = cur->next;
+            cur->next = nullptr;
+
+            pre->next = next;
+
+            cur = next;
+        }
+        else
+        {
+            pre = cur;
+            cur = cur->next;
+        }
+    }
+
+    return dummy->next;
+}
+
+\end{lstlisting}

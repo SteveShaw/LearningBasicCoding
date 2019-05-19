@@ -1,0 +1,108 @@
+\section{443 --- String Compression}
+Given an array of characters $A$, compress it in-place.
+
+The length after compression must always be smaller than or equal to the original array.
+
+Every element of the array should be a character (not int) of length 1.
+
+After you are done modifying the input array in-place, return the new length of the array.
+
+ 
+\paragraph{Follow up:}
+
+\begin{itemize}
+\item Could you solve it using only O(1) extra space?
+\end{itemize}
+
+ 
+\paragraph{Example 1:}
+
+\begin{flushleft}
+\textbf{Input}: $[a,a,b,b,c,c,c]$
+
+\textbf{Output}: Return 6, and the first 6 characters of the input array should be: $[a,2,b,2,c,3]$
+
+\textbf{Explanation}: $aa$ is replaced by $a2$. $bb$ is replaced by $b2$. $ccc$ is replaced by $c3$.
+ 
+\end{flushleft}
+
+\paragraph{Example 2:}
+
+\begin{flushleft}
+\textbf{Input}: $[a]$
+
+\textbf{Output}: Return 1, and the first 1 characters of the input array should be: $[a]$
+
+\textbf{Explanation}: Nothing is replaced.
+
+\end{flushleft}
+
+
+\paragraph{Example 3:}
+
+\begin{flushleft}
+\textbf{Input}: $[a,b,b,b,b,b,b,b,b,b,b,b,b]$
+
+\textbf{Output}: Return 4, and the first 4 characters of the input array should be: $[a,b,1,2]$.
+
+\textbf{Explanation}: Since the character a does not repeat, it is not compressed. $bbbbbbbbbbbb$ is replaced by $b12$. Notice each digit has it's own entry in the array.
+ 
+
+\end{flushleft}
+
+
+\paragraph{Note:}
+
+\begin{itemize}
+\item All characters have an ASCII value in $[35, 126]$.
+\item $1 \leq \lvert A\rvert \leq 1000$.
+\end{itemize}
+
+\subsection{Two Pointers}
+\begin{itemize}
+\item Maintain three pointers $w$, $r$ and $a$
+\item $w$ is the position where we just write
+\item $r$ is the position we are current at
+\item $a$ is the first position of a sequence of duplicate letters
+\item whenever we found different letters in two adjacent indices, this is the change of state. Write the count of duplicate letters and update $w$. And then update $a$ as the index of the new letter.
+\end{itemize}
+
+\setcounter{lstlisting}{0}
+\begin{lstlisting}[style=customc, caption={Read And Write Pointers}]
+int compress( vector<char>& chars )
+{
+    int w = 0; //write
+    int a = 0; //anchor
+
+    int L = static_cast<int>( chars.size() );
+
+    for( int r = 0; r < L; ++r )
+    {
+        if( ( r + 1 == L ) || ( chars[r] != chars[r + 1] ) )
+        {
+            //state of change
+            int count = r - a + 1;
+
+            chars[w] = chars[a];
+            ++w;
+
+            if( count > 1 )
+            {
+                //write count when count
+                //is larger than 1
+                auto s = to_string( count );
+                for( auto c : s )
+                {
+                    chars[w] = c;
+                    ++w;
+                }
+            }
+
+            //update anchor position
+            a = r + 1;
+        }
+    }
+
+    return w;
+}
+\end{lstlisting}

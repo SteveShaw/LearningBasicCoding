@@ -1,0 +1,81 @@
+\section{238 --- Product of Array Except Self}
+Given an array $A$ of $n$ integers where $n > 1$,  return an array $B$ such that B[i] is equal to the product of all the elements of $A$ except $A[i]$.
+
+\paragraph{Example:}
+\begin{flushleft}
+\textbf{Input}:  $[1,2,3,4]$
+\\
+\textbf{Output}: $[24,12,8,6]$
+\end{flushleft}
+
+\paragraph{Note:}
+\begin{itemize}
+\item Please solve it without division and in O(n).
+\end{itemize}
+
+\paragraph{Follow up:}
+\begin{itemize}
+\item Could you solve it with constant space complexity? (The output array $B$ does not count as extra space for the purpose of space complexity analysis.)
+\end{itemize}
+\subsection{Simplify Prefix And Postfix Product Array To Two Variables}
+\begin{CJK*}{UTF8}{gbsn}
+\begin{itemize}
+\item 如果用prefix and postfix product array，就很简单了，从左到右逐个获得prefix product。然后再从右到左逐个获得postfix product，两个相乘就是所在index的product except itself。
+\item 但其实可以将prefix and postfix product array简化成两个变量，因为我们只关心上一个值。
+\end{itemize}
+\end{CJK*}
+\setcounter{algorithm}{0}
+\begin{algorithm}[H]
+\caption{Prefix And Postfix Products}
+\begin{algorithmic}[1]
+\Procedure{ProductExceptSelf}{$A, L$}
+\State $\star$ Initialize $\alpha$ and $\beta$ as ones. $\alpha$ will save the prefix products while $\beta$ for postfix products.
+\State $\star$ Initialize $P$ as the result array. $P$ has length $L$ and all values are initialized to 1.
+\State $\ast$ Start the process of finding prefix and postfix products
+\For{$i:=0$ \textbf{to} $L-1$}
+\State $P[i]\gets P[i] \times \alpha$
+\State $\alpha\gets \alpha\times A[i]$ \Comment Update prefix product
+\State \Return $P$
+\algstore{238algo}
+\end{algorithmic}
+\end{algorithm}
+\begin{algorithm}[H]
+\begin{algorithmic}[1]
+\algrestore{238algo}
+\State $j:=L-i-1$ \Comment We needs to get postfix product at same time
+\State $P[j]\gets P[j]\times\beta$ 
+\State $\beta\gets\beta\times A[j]$
+\EndFor
+\EndProcedure
+\end{algorithmic}
+\end{algorithm}
+\begin{CJK*}{UTF8}{gbsn}
+\paragraph{Note}
+\begin{itemize}
+\item 上述算法中，最开始其实$P[i]$和$P[j]$都不是正确的值，但是由于我们是同时从两边进行更新，因此循环结束后就会得到正确的值。
+\end{itemize}
+\end{CJK*}
+\setcounter{lstlisting}{0}
+\begin{lstlisting}[style=customc, caption={Prefix And Postfix Product}]
+vector<int> productExceptSelf( vector<int>& nums )
+{
+    int alpha = 1;
+    int beta = 1;
+
+    vector<int> P( nums.size(), 1 );
+
+    for( size_t i = 0; i < nums.size(); ++i )
+    {
+        //get prefix product
+        P[i] *= alpha;
+        alpha *= nums[i];
+
+        //prcocess postfix product
+        auto j = nums.size() - i - 1;
+        P[j] *= beta;
+        beta *= nums[j];
+    }
+
+    return P;
+}
+\end{lstlisting}

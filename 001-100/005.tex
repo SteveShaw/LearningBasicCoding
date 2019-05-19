@@ -1,0 +1,113 @@
+\section{5 -- Longest Palindromic Substring}
+Given a string $S$, find the longest palindromic substring in $S$. You may assume that the maximum length of $S$ is 1000.
+
+\paragraph{Example 1:}
+
+\begin{flushleft}
+	\textbf{Input}: \texttt{babad}
+	\\
+\textbf{Output}: \texttt{bab}
+\\
+\textbf{Note}: \texttt{aba} is also a valid answer.
+\end{flushleft}
+
+\paragraph{Example 2:}
+
+\begin{flushleft}
+	\textbf{Input}: \texttt{cbbd}
+	\\
+\textbf{Output}: \texttt{bb}
+\end{flushleft}
+
+
+\subsection{Dynamic Programming}
+如果以长度为循环条件
+\[
+F[i][j]  = 
+\begin{cases}
+0 & \iff S[i] \neq S[j] \\
+F[i+1][j-1] &\iff S[i] = S[j]
+\end{cases}
+\]
+\setcounter{algorithm}{0}
+\begin{algorithm}[H]
+	\caption{Dynamic Progamming Looping By Substring Length}
+	\begin{algorithmic}[1]
+		\Procedure{LongestPalindrome}{$S, L$}
+		\State $\ast$ Create an array $F$ with size $|S|\times|S|$. All elements are initialized to zero
+		\State $\ell := 1$ \Comment The maximum palindrome length and it is initialized with 1
+				\For{$i:=0$ \textbf{to} $L-1$}
+		\State $F[i][i] \gets 1$ \Comment single character is \textbf{palindrome} by itself.
+		\EndFor
+				\For{$l:=2$ \textbf{to} $L$} \Comment substring length from $2 \to L$
+		\For{$i := 0$ \textbf{to} $L - l$} \Comment the start of substring is from $0 \to L - l$
+		\State $j := i + l - 1$ \Comment the end of substring
+				\If{$S[i] \neq S[j]$}
+		\State $F[i][j] = 0$ \Comment $S[i\ldots j]$ cannot be \textbf{palindrome}
+		\algstore{005algo}
+\end{algorithmic}
+\end{algorithm}
+\begin{algorithm}[H]
+\begin{algorithmic}[1]
+\algrestore{005algo}
+		\Else
+		\State $F[i][j] = F[i+1][j-1]$ 
+		\EndIf
+		\If{$F[i][j] = 1$} \Comment $S[i\ldots j]$ is \textbf{palindrome}
+		\If{$\ell < l$}
+		\State $\hat{S} := S[i\ldots j]$ \Comment update current \textbf{longest palindrome} $\hat{S}$ as $S[i\ldots j]$
+		\State $\ell \gets l$ \Comment update current \textbf{maximum palindrome length}
+		\EndIf
+		\EndIf
+		\EndFor
+		\EndFor
+		\State \Return $\hat{S}$
+		\EndProcedure
+	\end{algorithmic}
+\end{algorithm}
+\subsection{Dynamic Programming By Backwarding}
+这种方法中，可以使用一个一维数组作为$F$。然后从$F$的末尾进行倒推
+\begin{itemize}
+\item 仍然是二重循环，两个循环都是从$L-1$ backward 到 0。
+\item 首先更新的是$F[L-1]$，然后在inner loop里，$F[j]$则是根据$F[j-1]$来进行update。
+\item $F$的每个元素在循环中都要被更新而不是固定不变，这点是和使用二维数组$F$不同的地方。
+\end{itemize}
+\begin{algorithm}[H]
+\caption{Dynamic Programming By Backwarding}
+\begin{algorithmic}[1]
+\Procedure{LongestPalindrome}{$S, L$}
+\State \texttt{F} := \textbf{1 dimension array} with $\mathtt{size} = |S|$ and all elements are \textbf{false}
+\State $\star$ Create an array $F$ with size equal to $L$. All elements are initialized to zero
+\State $\ell := 1$ \Comment The maximum palindrome length and it is initialized with 1
+\State $\hat{S}:=\emptyset$ \Comment The largest palindrome substring in $S$
+\For{$i:=L-1$ \textbf{to} $0$} \Comment Loop $i$ back from end to $0$ \label{005outer}
+\For{$j:=L-1$ \textbf{to} $i$} \Comment Loop $j$ back from end to $i$ \label{005inner}
+\If{$S[i] \neq S[j]$}
+\State $F[j] \gets 0$ \Comment Update $F[j]$ in each loop even though it is \textbf{1} in previous loop
+\algstore{005algo}
+\end{algorithmic}
+\end{algorithm}
+\begin{algorithm}[H]
+\begin{algorithmic}[1]
+\algrestore{005algo}
+\Else
+\If{$j-i\leq 2$} \Comment $S[i\ldots j]$ has one or two characters
+\State $F[j] \gets 1$ \Comment $S[i]=S[j]$ and $j=i+1$ or $j=i$
+\Else 
+\State $F[j] \gets F[j-1]$ \Comment  Update $F[j]$ as $F[j-1]$
+\EndIf
+\EndIf
+\If{$\mathtt{DP}[j] = \mathtt{true}$} \Comment Found palindrome
+\If{$j-i +1 > \ell$} \Comment Found larger palindrome length larger than $\ell$
+\State $\ell \gets j-i +1$
+\State $\hat{S} \gets S[i\ldots j]$
+\EndIf \Comment End[\ref{005inner}]
+\EndIf \Comment End[\ref{005outer}]
+\EndFor
+\EndFor
+\State \Return $\hat{S}$
+\EndProcedure
+\end{algorithmic}
+\end{algorithm}
+\subsection{Manacher Algorithm}
+%TODO%

@@ -1,0 +1,175 @@
+\section{299 --- Bulls and Cows}
+You are playing the following \textbf{Bulls and Cows} game with your friend: You write down a number and ask your friend to guess what the number is. Each time your friend makes a guess, you provide a hint that indicates how many digits in said guess match your secret number exactly in both digit and position (called \textit{bulls}) and how many digits match the secret number but locate in the wrong position (called \textit{cows}). Your friend will use successive guesses and hints to eventually derive the secret number.
+\par
+Write a function to return a hint according to the secret number and friend's guess, use $A$ to indicate the bulls and $B$ to indicate the cows. 
+\par
+
+Please note that both secret number and friend's guess may contain duplicate digits.
+
+\paragraph{Example 1:}
+
+\begin{flushleft}
+\textbf{Input}: secret = 1807, guess = 7810
+\\
+\textbf{Output}: $1A3B$
+\\
+\textbf{Explanation}: 1 bull and 3 cows. The bull is 8, the cows are 0, 1 and 7.
+\end{flushleft}
+
+\paragraph{Example 2:}
+
+\begin{flushleft}
+\textbf{Input}: secret = 1123, guess = 0111
+\\
+\textbf{Output}: $1A1B$
+\\
+\textbf{Explanation}: The 1st 1 in friend's guess is a bull, the 2nd or 3rd 1 is a cow.
+\end{flushleft}
+
+\paragraph{Note:} 
+\begin{itemize}
+\item You may assume that the secret number and your friend's guess only contain digits, and their lengths are always equal.
+\end{itemize}
+\subsection{Tricks}
+\begin{itemize}
+\item 算法思路： iterate over secret $S$ 和 guess $G$，首先可以很快得到所有bulls的（即数字和出现位置都相等）。对于cows（即数字相同，但是出现位置不同），则maintain一个array用于记录数字在$S$和$G$中的出现次数。技巧在于，对于$G$中的数字的出现次数，用负数来表示。
+\item 如果$S$当前位置数字的出现次数小于0，则表示其在$G$中出现过，increments cows，同时increments对应的出现次数，
+\item 如果$G$当前位置数字的出现次数大于0，则表示其在$S$中出现过，同样increments cows，但是要decrements对应的出现次数。
+\end{itemize}
+\setcounter{algorithm}{0}
+\begin{algorithm}[H]
+\caption{Counts}
+\begin{algorithmic}[1]
+\Procedure{GetHint}{$S, G, L$}
+\State $\star$ 创建一个array $C$，长度为10，用于记录$S$和$G$中数字的出现次数
+\State $\star$ $C$中所有元素初始化零，而$G$中数字的出现次数用负数表示
+\State $A:=0$ \Comment Number of bulls
+\State $B:=0$ \Comment Number of cows
+\For{$i:=0$ \textbf{to} $L$}
+\If{$S[i] = G[i]$}
+\State $A\gets A+1$ \Comment Number and position are matched --- bull
+\Else
+\If{$C[S[i]] < 0$} 
+\State $\ast$ $S[i]$在$G$中出现过，而且出现次数大于到目前为在$S$的出现次数
+\State $B\gets B+1$
+\EndIf
+\State $C[S[i]]\gets C[S[i]] +1$ \Comment Increments $S[i]$的出现次数
+\If{$C[G[i]] > 0$} 
+\State $\ast$ $G[i]$在$S$中出现过，而且出现次数大于到目前为在$G$的出现次数
+\State $B\gets B+1$
+\EndIf
+\State $C[G[i]]\gets C[G[i]] -1$ \Comment Increments $G[i]$的出现次数(因为是负数，所以减一)
+\EndIf
+\EndFor
+\State \Return $A$的count和$B$的count组成的字符串
+\EndProcedure
+\end{algorithmic}
+\end{algorithm}
+\setcounter{lstlisting}{0}
+\begin{lstlisting}[style=customc, caption={Counts}]
+string getHint( string secret, string guess )
+{
+    vector<int> count( 10, 0 );
+
+    int A = 0;
+    int B = 0;
+
+    for( size_t i = 0; i < secret.size(); ++i )
+    {
+        if( secret[i] == guess[i] )
+        {
+            ++A;
+        }
+        else
+        {
+            if( count[secret[i] - '0'] < 0 )
+            {
+                //secret[i] appeared in guess
+                ++B;
+            }
+
+            //increments the count of secret[i]
+            ++count[secret[i] - '0'];
+
+            if( count[guess[i] - '0'] > 0 )
+            {
+                //guess[i] appeared in secret
+                ++B;
+            }
+            //decrements the count of guess[i]
+            --count[guess[i] - '0'];
+        }
+    }
+
+    string ans = to_string( A );
+    ans.push_back( 'A' );
+    ans += to_string( B );
+    ans.push_back( 'B' );
+
+    return ans;
+}
+\end{lstlisting}
+\section{Two Pass}
+\begin{itemize}
+\item 算法本质和上述方法是一样的
+\item 这里需要两个array，分别记录$S$和$G$中的数字出现的次数。
+\item 同样的 iterate over secret $S$ 和 guess $G$，很快得到所有bulls的（即数字和出现位置都相等）。
+\item 否则的话，分别increment $S$和$G$在当前位置的数字的次数。
+\item 最后，同时遍历$S$和$G$（因为两个长度都是10），然后取其中的较小值加到$B$中。
+\end{itemize}
+\begin{algorithm}[H]
+\caption{Two Pass}
+\begin{algorithmic}[1]
+\Procedure{GetHint}{$S, G, L$}
+\State $\star$ 创建两个数组$x$和$y$，长度都是10
+\State $\star$ $x$用于记录$S$中的number的出现次数，$y$用于记录$G$中的number的出现次数
+\State $A:=0$ \Comment Number of bulls
+\State $B:=0$ \Comment Number of cows
+\For{$i:=0$ \textbf{to} $L-1$}
+\If{$S[i]=G[i]$}
+\State $A\gets A+1$ \Comment Number and position are matched --- bull
+\Else
+\State $x[S[i]]\gets x[S[i]] +1$ \Comment Increments count of $S[i]$
+\State $y[G[i]]\gets y[G[i]] +1$ \Comment Increments count of $G[i]$
+\EndIf
+\EndFor
+\For{$k:=0$ \textbf{to} $9$}
+\State $B\gets B+\min(x[k], y[k])$ \Comment The minimum of $S[k]$ and $G[k]$ is B
+\EndFor
+\State \Return $A$的count和$B$的count组成的字符串
+\EndProcedure
+\end{algorithmic}
+\end{algorithm}
+\begin{lstlisting}[style=customc, caption={Two Pass}]
+string getHint( string secret, string guess )
+{
+    vector<int> s_count( 10, 0 );
+    vector<int> g_count( 10, 0 );
+    int A = 0;
+    int B = 0;
+    for( size_t i = 0; i < secret.size(); ++i )
+    {
+        if( secret[i] == guess[i] )
+        {
+            ++A;
+        }
+        else
+        {
+            ++s_count[secret[i] - '0'];
+            ++g_count[guess[i] - '0'];
+        }
+    }
+
+    for( int i = 0; i < 10; ++i )
+    {
+        B += ( min )( s_count[i], g_count[i] );
+    }
+
+    string ans = to_string( A );
+    ans.push_back( 'A' );
+    ans += to_string( B );
+    ans.push_back( 'B' );
+
+    return ans;
+}
+\end{lstlisting}

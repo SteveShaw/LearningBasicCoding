@@ -1,0 +1,54 @@
+\section{3 --  Longest Substring Without Repeating Characters}
+Given a string $S$, find the length of the longest substring without repeating characters.
+
+\paragraph{Example 1:}
+\begin{flushleft}
+\textbf{Input}: \texttt{abcabcbb}
+\\
+\textbf{Output}: 3 
+\\
+\textbf{Explanation}: The answer is \texttt{abc}, with the length of 3. 
+\end{flushleft}
+
+\paragraph{Example 2:}
+\begin{flushleft}
+\textbf{Input:} \texttt{bbbbb}
+\\
+\textbf{Output}: 1
+\\
+\textbf{Explanation}: The answer is \texttt{b}, with the length of 1.
+\end{flushleft}
+
+\paragraph{Example 3:}
+
+\begin{flushleft}
+\textbf{Input}: \texttt{pwwkew}
+\\
+\textbf{Output}: 3
+\\
+\textbf{Explanation}:
+\\
+The answer is \texttt{wke}, with the length of 3. Note that the answer must be a substring, \texttt{pwke} is a subsequence and not a substring.
+
+\end{flushleft}
+\subsection{Hash Map}
+用一个\texttt{hashmap}来记录每个字符出现的位置，并逐步更新最新的位置。这是因为如果字符\quad $s[j]$ \quad 在 \quad $s[\mathtt{start}\ldots j-1]$ \quad 中在\quad$k$\quad 处重复，那么只需要把\quad$\mathtt{start}$\quad 更新到\quad$k+1$\quad 就可以了。
+\begin{algorithm}[H]
+\caption{Get longest substring without duplicates}
+\begin{algorithmic}[1]
+\Procedure{GetLongestSubstring}{$S, L$}
+\State \textbf{initialize} an array $M$ with \textbf{256} elements that are set to \textbf{-1}.
+\State $p := 0 $
+\State $\ell:= 0$ \Comment maximum length initialized to \textbf{zero}
+\For{$i := 0$ \textbf{to} $L$}
+\If{$M[S(i)] \neq -1$} \Comment found repeat $S(i)$ in $S[p\ldots i-1]$
+\State $p \gets \max(p, M[S(i)]) + 1$ \Comment update to the next index of the duplicate
+\EndIf
+\State $\ell \gets \max(\ell, i - p +1 )$ \Comment update current maximum length
+\State $M[S(i)] \gets i$ \Comment update $M[S(i)]$ by latest index
+\EndFor
+\State \Return $\ell$
+\EndProcedure
+\Statex
+\end{algorithmic}
+\end{algorithm}

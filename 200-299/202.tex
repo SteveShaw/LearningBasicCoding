@@ -1,0 +1,85 @@
+\section{202 --- Happy Number}
+Write an algorithm to determine if a number is \textit{happy}.
+\par
+A happy number is a number defined by the following process: 
+\par
+Starting with any positive integer, replace the number by the sum of the squares of its digits, and repeat the process until the number equals 1 (where it will stay), or it loops endlessly in a cycle which does not include 1. Those numbers for which this process ends in 1 are \textit{happy numbers}.
+\paragraph{Example: }
+\begin{flushleft}
+
+\textbf{Input}: 19
+\\
+\textbf{Output}: \texttt{true}
+\\
+\textbf{Explanation}: 
+\begin{align*}
+1^2 + 9^2 &= 82\\
+8^2 + 2^2 &= 68\\
+6^2 + 8^2 &= 100\\
+1^2 + 0^2 + 0^2 &= 1\\
+\end{align*}
+\end{flushleft}
+\subsection{Hash Set}
+\begin{CJK*}{UTF8}{gbsn}
+可以用hash set来记录所有出现过的数字，然后每出现一个新数字，在set中查找看是否存在
+\end{CJK*}
+\setcounter{lstlisting}{0}
+\begin{lstlisting}[style=customc, caption={Hash Set}]
+bool isHappy( int n )
+{
+    unordered_set<int> s;
+    s.insert( n );
+
+    while( true )
+    {
+        int m = n;
+        int sum = 0;
+
+        while( m )
+        {
+            int q = m / 10;
+            int r = m - 10 * q;
+
+            sum += ( r * r );
+            m = q;
+        }
+
+        if( sum == 1 )
+        {
+            return true;
+        }
+
+        if( s.find( sum ) != s.end() )
+        {
+            return false;
+        }
+
+        s.insert( sum );
+
+        n = sum;
+    }
+
+    return false;
+}
+
+\end{lstlisting}
+\subsection{Mathematical Induction}
+\begin{CJK*}{UTF8}{gbsn}
+Non happy number有个特点，循环的数字中必定会有4
+\end{CJK*}
+\begin{lstlisting}[style=customc, caption={Mathematical Induction}]
+bool isHappy( int n )
+{
+    while( n != 1 && n != 4 )
+    {
+        int t = 0;
+        while( n )
+        {
+            t += ( n % 10 ) * ( n % 10 );
+            n /= 10;
+        }
+        n = t;
+    }
+    return n == 1;
+}
+\end{lstlisting}

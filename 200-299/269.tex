@@ -1,0 +1,320 @@
+\section{269 --- Alien Dictionary}
+There is a new alien language which uses the latin alphabet. However, the order among letters are unknown to you. You receive a list of non-empty words $W$ from the dictionary, where words are sorted lexicographically by the rules of this new language. Derive the order of letters in this language.
+
+\paragraph{Example 1:}
+
+\begin{flushleft}
+\textbf{Input}
+\begin{table}[H]
+\begin{tabular}{l}
+\texttt{wrt}  \\
+\texttt{wrf}  \\
+\texttt{er}   \\
+\texttt{ett}  \\
+\texttt{rftt}
+\end{tabular}
+\end{table}
+\textbf{Output}: \texttt{wertf}
+\end{flushleft}
+
+\paragraph{Example 2:}
+
+\begin{flushleft}
+\textbf{Input}:
+\begin{table}[H]
+\begin{tabular}{l}
+\texttt{z}  \\
+\texttt{x} 
+\end{tabular}
+\end{table}
+\textbf{Output}: \texttt{zx}
+\end{flushleft}
+
+\paragraph{Example 3:}
+
+\begin{flushleft}
+\textbf{Input}:
+\begin{table}[H]
+\begin{tabular}{l}
+\texttt{z}  \\
+\texttt{x} \\
+\texttt{z} 
+\end{tabular}
+\end{table}
+\textbf{Output}: $\emptyset$
+\\
+\textbf{Explanation}: The order is invalid, so return  $\emptyset$.
+\end{flushleft}
+
+\paragraph{Note:}
+
+\begin{itemize}
+\item You may assume all letters are in lowercase.
+\item You may assume that if a is a prefix of b, then a must appear before b in the given dictionary.
+\item If the order is invalid, return an empty string.
+\item There may be multiple valid order of letters, return any one of them is fine.
+\end{itemize}
+\subsection{BFS}
+这其实是build a directed graph, calculate each node's in-degree and output them according to in-degree.
+\begin{itemize}
+\item 构建出相邻的word在相同的位置上的letter形成的edges所构成的graph。
+\item 同时用一个hash set保存所有words中的letters。
+\item 边界情况：例如\texttt{baac}出现在\texttt{baa}之前，这种情况下不是valid order。
+\end{itemize}
+\setcounter{algorithm}{0}
+\begin{algorithm}[H]
+\caption{BFS}
+\begin{algorithmic}[1]
+\Procedure{AlienOrder}{$W, L$}
+\State $\star$ 初始化一个hash set $C$
+\State $\ast$ 构建出directed grap $G$
+\For{$i:=0$ \textbf{to} $L-1$}
+\State $\star$ All all characters of $W[i]$ to $C$
+\State $\star$ 得到$W[i]$和$W[i+1]$的最小length $\ell$
+\If{$W[i][0\ldots\ell-1]$ is equal to $W[i+1][0\ldots\ell-1]$ }
+\If{$W[i]$'s length is larger than $W[i+1]$'s length}
+\State \Return $\emptyset$ \Comment 这是invalid order
+\EndIf
+\EndIf
+\State $\star$ Add edge ($W[i][j], W[i][j]$) to $g$ for the first $j$ where $W[i][j]\neq W[i+1][j]$: 
+\State $\star$ while iterating $j$ from 0 to $\ell-1$
+\EndFor
+\State $\star$ Add all characters of $W[L-1]$ to $C$ \Comment 上述循环没有处理$W[L-1]$
+\algstore{269algo}
+\end{algorithmic}
+\end{algorithm}
+\begin{algorithm}[H]
+\begin{algorithmic}[1]
+\algrestore{269algo}
+\State $\star$ 遍历$g$的每个edge，计算其中每个edge的终止点的in-degree。
+\State $\star$ 将$g$所有in-degree为零的节点加入queue $q$中。同时输出到结果序列$S$中。
+\While{$q\neq\emptyset$}
+\State $\star$ 弹出$q$的\texttt{front} $x$
+\State $\star$ 在$g$中找到所有与$x$的相连的nodes,decrements their in-degrees
+\State $\star$ 如果某个node的in-degree变为零, push it into $q$.同时输出该节点到结果序列$S$中。
+\EndWhile
+\State $\star$ 检查$S$中的节点个数是否与$C$中的节点个数相等: 
+\State $\star$ 如果不相等，说明$g$中存在cycle，显然是invalid order，因此返回空序列。
+\State $\star$ 如果相等，则返回$S$
+\EndProcedure
+\end{algorithmic}
+\end{algorithm}
+\setcounter{lstlisting}{0}
+\begin{lstlisting}[style=customc, caption={BFS}]
+string alienOrder( vector<string>& words )
+{
+    unordered_map<char, unordered_set<char>> g;
+
+    unordered_set<char> chs;
+
+    auto L = static_cast< int >( words.size() );
+
+    for( int i = 0; i < L - 1; ++i )
+    {
+        auto& w1 = words[i];
+        auto& w2 = words[i + 1];
+
+        chs.insert( w1.begin(), w1.end() );
+
+        auto len = ( min )( w1.size(), w2.size() );
+        auto k = 0;
+
+        for( k = 0; k < len; ++k )
+        {
+            if( w1[k] != w2[k] )
+            {
+                auto it = g.find( w1[k] );
+
+                if( it == g.end() )
+                {
+                    g.emplace( w1[k], initializer_list<char> { w2[k] } );
+                }
+                else
+                {
+                    it->second.emplace( w2[k] );
+                }
+
+                break;
+            }
+        }
+
+        //Invalid Order
+        if( ( k == len ) && ( w1.size() > w2.size() ) )
+        {
+            return "";
+        }
+    }
+
+    // add final word's characters into the
+    chs.insert( words.back().begin(), words.back().end() );
+
+    vector<int> v_degIn( 26, 0 );
+
+    for( const auto& p : g )
+    {
+        for( auto c : p.second )
+        {
+            v_degIn[c - 'a']++;
+        }
+    }
+
+    queue<char> q;
+
+    string ans = "";
+
+    for( auto c : chs )
+    {
+        if( v_degIn[c - 'a'] == 0 )
+        {
+            // add in-degree=0 nodes
+            // into the queue
+            q.push( c );
+            ans.push_back( c );
+        }
+    }
+
+    while( !q.empty() )
+    {
+        auto c = q.front();
+        q.pop();
+
+        for( auto next : g[c] )
+        {
+            v_degIn[next - 'a']--;
+
+            if( v_degIn[next - 'a'] == 0 )
+            {
+                q.push( next );
+                ans.push_back( next );
+            }
+        }
+    }
+
+    if( ans.size() == g.size() )
+    {
+        return ans;
+    }
+
+    //There exists a cycle
+    return "";
+
+}
+\end{lstlisting}
+\subsection{DFS}
+如果用Depth First Search，需要改变$g$的存储结构： 用一个Boolean二维数组。如果$g[i][j]=\texttt{true}$,就表示有directed edge between $i$ and $j$。
+\par
+另外采用这种结构就不需要用额外的hash set去存储所有words中的letter，只需要将$g[i][i]=\texttt{true}$。
+\par
+DFS需要对已经访问的节点进行mark，但可以从任何一个node开始进行深度搜索。由于题目中所有的words中只包含了lowercase letter，因此可以逐个递归粗粒26个lowercase letter。
+\par
+在递归中
+\begin{itemize}
+\item 检测该字符是否包含在words中
+\item 访问从该字符出发的与其相连的其他字符。检测这些字符有没有被访问过，如果访问过，表明存在cycle。输出invalid order即空序列。
+\item 然后继续从这些字符进行深度搜索。任何一个深度搜索返回invalid order都直接输出空序列。
+\item 如果这些字符都是valid order，将当前字符标注为已访问。同时将其标注为不在words中的letter。
+\item 由于加入letter到输出序列是在每次深度搜索完成后，因此最后产生的序列其实是倒序的，返回时需要将这个序列进行reverse。
+\end{itemize}
+根据上述递归过程，在字典序排序后面的字符会比前面的更早处理。如果最开始进行DFS的letter是字典序排序最前面的，那么经过从这个letter开始的深度搜索一次就完成了字典序列的创建。
+\setcounter{lstlisting}{0}
+\begin{lstlisting}[style=customc, caption={DFS}]
+string alienOrder( vector<string>& words )
+{
+    vector<vector<unsigned char>> g( 26, vector<unsigned char> ( 26, 0 ) );
+
+    auto L = static_cast< int >( words.size() );
+
+    //A helper function to add letters from
+    //a string to g
+    auto add_chars = [&g]( const string & w )
+    {
+        for( auto c : w )
+        {
+            g[c - 'a'][c - 'a'] = 1;
+        }
+    };
+
+    for( int i = 0; i < L - 1; ++i )
+    {
+        auto &w1 = words[i];
+        auto &w2 = words[i + 1];
+
+        add_chars( w1 );
+
+        auto l = ( min )( w1.size(), w2.size() );
+
+        size_t k = 0;
+
+        for( ; k < l; ++k )
+        {
+            if( w1[k] != w2[k] )
+            {
+                g[w1[k] - 'a'][w2[k] - 'a'] = 1;
+                break;
+            }
+        }
+
+        //this is invalid order
+        if( ( k == l ) && ( w1.size() > w2.size() ) )
+        {
+            return "";
+        }
+    }
+
+	//The last word also needs to be added
+    add_chars( words.back() );
+
+    vector<unsigned char> seen( 26, 0 );
+
+    string ans;
+
+    //test each letter by DFS
+    for( char c = 'a'; c <= 'z'; ++c )
+    {
+        int i = c - 'a';
+        if( !dfs( i, g, seen, ans ) )
+        {
+            return "";
+        }
+    }
+
+    return string( ans.rbegin(), ans.rend() );
+}
+
+bool dfs( int x, vector<vector<unsigned char>>&g, vector<unsigned char>& seen, string &ans )
+{
+    if( g[x][x] == 0 )
+    {
+        return true;
+    }
+    seen[x] = 1;
+
+    for( int i = 0; i < 26; ++i )
+    {
+        if( ( i == x ) || ( g[x][i] == 0 ) )
+        {
+            continue;
+        }
+
+        if( seen[i] == 1 )
+        {
+            return false;
+        }
+
+        if( !dfs( i, g, seen, ans ) )
+        {
+            return false;
+        }
+    }
+
+    //mark this letter as
+    //unseen and not included in words
+    //to make sure no repeat
+    seen[x] = 0;
+    g[x][x] = 0;
+
+    ans.push_back( x + 'a' );
+
+    return true;
+}
+\end{lstlisting}

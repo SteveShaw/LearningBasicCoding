@@ -1,0 +1,149 @@
+\section{209 --- Minimum Size Subarray Sum}
+Given an array of $n$ positive integers and a positive integer $s$, find the minimal length of a contiguous subarray of which the sum $\geq s$. If there isn't one, return 0 instead.
+\paragraph{Example:}
+\begin{flushleft}
+\textbf{Input}: $s = 7$, $A = [2,3,1,2,4,3]$
+\\
+\textbf{Output}: 2
+\\
+\textbf{Explanation}: the subarray $[4,3]$ has the minimal length under the problem constraint.
+\end{flushleft}
+\paragraph{Follow up:}
+\begin{itemize}
+\item If you have figured out the $O(n)$ solution, try coding another solution of which the time complexity is $O(n \log n)$.
+\end{itemize} 
+\subsection{Sliding Window}
+\begin{CJK*}{UTF8}{gbsn}
+\begin{itemize}
+\item 用$l$和$r$代表sliding window的左边界和右边界
+\item 如果sliding window内的数字和小于$s$，则一直向右移动$r$，即扩大sliding window的宽度
+\item 否则不停的向右移动$l$，即缩小这个sliding window。同时从$s$中去除缩小过程中不再包含在window中的数直至window内的数字和小于$s$。
+\item 在3中，更新当前的window的宽度以及对应的全局最小宽度
+\end{itemize}
+\end{CJK*}
+\setcounter{algorithm}{0}
+\begin{algorithm}[H]
+\caption{Sliding Window}
+\begin{algorithmic}[1]
+\Procedure{MinSubArrayLen}{$A, L, s$}
+\State $l:=0$ \Comment The left edge of sliding window
+\State $r:=0$ \Comment The right edge of sliding window
+\State $\sigma:=0$ \Comment The sum of numbers in sliding window
+\State $w:=+\infty$ \Comment The minimum width
+\While{$r < L$}
+\State $\sigma\gets\sigma + A[r]$
+\State $\star$ Need to consider the case when only one number is inside the sliding window
+\State $\star$ Therefore, the condition is $l\leq r$ not $l<r$
+\algstore{209algo}
+\end{algorithmic}
+\end{algorithm}
+\begin{algorithm}[H]
+\begin{algorithmic}[1]
+\algrestore{209algo}
+\While{$\sigma\geq s$ \textbf{and} $l\leq r$}
+\State $w\gets\min(w, r-l+1)$ \Comment Update minimum width
+\State $\sigma\gets \sigma - A[l]$
+\State $l\gets l+1$ \Comment Right move left edge
+\EndWhile
+\State $r\gets r+1$
+\EndWhile
+\If{$w=+\infty$} \Comment No such subarray exists
+\State \Return 0
+\Else
+\State \Return $w$
+\EndIf
+\EndProcedure
+\end{algorithmic}
+\end{algorithm}
+\setcounter{lstlisting}{0}
+\begin{lstlisting}[style=customc, caption={Sliding Window}]
+int minSubArrayLen( int s, vector<int>& nums )
+{
+    int left = 0;
+    int L = static_cast<int>( nums.size() );
+
+    int right = 0;
+
+    int sum = 0;
+
+    int w = INT_MAX;
+
+    while( right < L )
+    {
+        sum += nums[right];
+
+        while( ( sum >= s ) && ( left <= right ) )
+        {
+            w = ( min )( w, right - left + 1 );
+            sum -= nums[left];
+            ++left;
+        }
+
+        ++right;
+    }
+
+    if( w == INT_MAX )
+    {
+        return 0;
+    }
+
+    return w;
+}
+\end{lstlisting}
+\subsection{Binary Search}
+\begin{CJK*}{UTF8}{gbsn}
+\begin{itemize}
+\item 用一个tree map存放从0到$i$的sum及其对应的$i$
+\item 当$\sum\limits_{k=0}^iA[k] \geq s$时，计算两者之差$d$，然后在tree map中寻找第一个大于这个$d$的key，然后得到这个key的上一个key对应的$j$
+\item 因为$\sum\limits_{k=j+1}^iA[k] \geq s$，所以与最小宽度比较进行更新。
+\end{itemize}
+\end{CJK*}
+\begin{lstlisting}[style=customc, caption={Binary Search}]
+int minSubArrayLen( int s, vector<int>& nums )
+{
+    if( nums.empty() )
+    {
+        return 0;
+    }
+
+    map<int, int> m;
+
+    int L = static_cast<int>( nums.size() );
+
+    m.emplace( nums[0], 0 );
+
+    int preSum = nums[0];
+
+    int w = INT_MAX;
+
+    if( preSum >= s )
+    {
+        return 1;
+    }
+
+    for( int i = 1; i < L; ++i )
+    {
+        preSum += nums[i];
+
+
+        if( preSum >= s )
+        {
+            w = ( min )( w, i + 1 );
+
+            int d = preSum - s;
+
+            auto it = m.upper_bound( d );
+
+            if( it != m.begin() )
+            {
+                --it;
+                w = ( min )( w, i - it->second );
+            }
+        }
+
+        m.emplace( preSum, i );
+    }
+
+    return w == INT_MAX ? 0 : w;
+}
+\end{lstlisting}

@@ -1,0 +1,209 @@
+\section{14 --- Longest Common Prefix}
+Write a function to find the longest common prefix string amongst an array of strings $ A $.
+\par
+If there is no common prefix, return an empty string.
+
+\paragraph{Example 1:}
+
+\begin{flushleft}
+\textbf{Input}: [\texttt{flower}, \texttt{flow}, \texttt{flight}]
+\\
+\textbf{Output}: \texttt{fl}
+\end{flushleft}
+
+\paragraph{Example 2:}
+
+\begin{flushleft}
+\textbf{Input}: [\texttt{dog}, \texttt{racecar}, \texttt{car}]
+\\
+\textbf{Output}: $ \emptyset $
+\\
+\textbf{Explanation}: There is no common prefix among the input strings.
+\end{flushleft}
+
+\paragraph{Note:}
+
+\begin{itemize}
+\item All given inputs are in lowercase letters.
+\end{itemize}
+
+\subsection{Horizontal scanning}
+\begin{itemize}
+\item Set prefix equal to $S[0]$
+\item Iterate through the strings $S[1],\ldots S[n-1]$.
+\item At each iteration, check if $S[i]$ can find the prefix at position 0. If it is not, {\color{red}shorten} the prefix by \textbf{\color{red}1} character until prefix is empty or found the prefix at \textbf{position} \textbf{\color{red}0}.
+\end{itemize}
+\setcounter{algorithm}{0}
+\begin{algorithm}[H]
+\caption{Scanning horizontal to find prefix}
+\begin{algorithmic}[1]
+\Procedure{LongestCommonPrefix}{$S,L$}
+\State $P := S[0]$ \Comment Set prefix to first string of the array
+\For{$i:=1$ \textbf{to} $L-1$}
+\While{$S[i][0\ldots \lvert P\rvert-1] \neq P$}
+\If{$ \lvert P\rvert = 1$}
+\State \Return $\emptyset$ \Comment Return empty string since $P$ will become empty.
+\EndIf
+\State $P\gets P[0\ldots \lvert P\rvert-2]$ \Comment Shorten current prefix $P$ by one character
+\EndWhile
+		\algstore{014algo}
+		\end{algorithmic}
+	\end{algorithm}
+\begin{algorithm}[H]
+	\begin{algorithmic}[1]
+		\algrestore{014algo}
+		\EndFor
+\State \Return $P$
+\EndProcedure
+\end{algorithmic}
+\end{algorithm}
+\setcounter{lstlisting}{0}
+\begin{lstlisting}[style=customc, caption={Horizontal scanning}]
+string longestCommonPrefix( vector<string>& strs )
+{
+
+    if( strs.empty() )
+    {
+        return "";
+    }
+
+    string prefix = strs[0];
+
+    for( size_t i = 1; i < strs.size(); ++i )
+    {
+        auto sz = ( min )( strs[i].size(), prefix.size() );
+
+        size_t x = sz;
+
+        for( size_t j = 0; j < sz; ++j )
+        {
+            if( strs[i][j] != prefix[j] )
+            {
+                if( j == 0 )
+                {
+                    return "";
+                }
+
+                x = j;
+
+                break;
+            }
+        }
+
+        if( x < prefix.size() )
+        {
+            prefix = prefix.substr( 0, x );
+        }
+    }
+
+    return prefix;
+}
+\end{lstlisting}
+
+\subsection{Vertical Scanning}
+Imagine a very short string is at the end of the array. The above approach will still do $\lvert S\rvert$ comparisons. One way to optimize this case is to do vertical scanning by comparing characters from top to bottom on the same column (same \textbf{\color{red}index} of the strings) before moving on to the next column.
+\begin{algorithm}[H]
+\caption{Scanning vertically to find prefix}
+\begin{algorithmic}[1]
+\Procedure{LongestCommonPrefix}{$S,L$}
+\If{$S = \emptyset$}
+\State \Return $\emptyset$
+\EndIf
+\For{$i:=0$ \textbf{to} $\lvert S[0]\rvert-1$} 
+\State $C := S[0][i]$ 
+\For{$k:=1$ \textbf{to} $L-1$}
+\If{$\lvert S[k]\rvert = i$ \textbf{or} $S[k][i] \neq C$} 
+\State \Return $S[0][0\ldots i-1]$ \Comment This is the common prefix
+\EndIf
+\EndFor
+\EndFor
+\State \Return $S[0]$ \Comment $S[0]$ match all prefix in the array.
+\EndProcedure
+\end{algorithmic}
+\end{algorithm}
+\begin{lstlisting}[style=customc, caption={Vertical Scanning}]
+string longestCommonPrefix( vector<string>& strs )
+{
+    if( strs.empty() )
+    {
+        return "";
+    }
+
+    string &p = strs[0];
+
+    for( size_t i = 0; i < p.size(); ++i )
+    {
+        for( size_t j = 1; j < strs.size(); ++j )
+        {
+            if( ( strs[j].size() == i ) || ( strs[j][i] != p[i] ) )
+            {
+                //If the code can run here
+                //then strs[1...j] has been matched
+                //for prefix strs[0][0...i]
+                //we can directly return the prefix string here
+                if( i == 0 )
+                {
+                    return "";
+                }
+
+                return p.substr( 0, i );
+            }
+        }
+    }
+    return p;
+}
+\end{lstlisting}
+\subsection{Divide and conquer}
+\begin{itemize}
+\item Split problem of finding \texttt{LCP} in $S[i\ldots j]$ into 2 subproblems, i.e. find \texttt{LCP} in $S[i,x]$ and $S[x+1\ldots j]$ where $x = (i+j)/2$.
+\item 根据上述两个部分得到的\texttt{LCP}，construct \texttt{LCP} for $S[i\ldots j]$.
+\item 方法是逐个字符比较这两个\texttt{LCP}直到没有匹配的letter，也就是这两个\texttt{LCP}的\texttt{LCP}。这个就是\texttt{LCP} for $S[i\ldots j]$。
+\end{itemize}
+\begin{algorithm}[H]
+\caption{Divide and conquer}
+\begin{algorithmic}[1]
+\Procedure{LongestCommonPrefix}{$A, L$}
+\State \Return \Call{Find}($A, 0, L-1$)
+\EndProcedure
+\end{algorithmic}
+\end{algorithm}
+Function \texttt{find} 包括三个参数
+\begin{itemize}
+\item $A, L$ --- input array and its length
+\item $l$, $r$ --- 处理的范围即$A[l\ldots r]$
+\end{itemize}
+\begin{algorithm}[H]
+\caption{Helper Function}
+\begin{algorithmic}[1]
+\Procedure{Find}{$A, L, l, r$}
+\If{$l=r$}
+\State \Return $A[l]$
+\EndIf
+\State $x:=(l+r)/2$
+\State $S_1 :=$ \Call{Find}{$A, l, x$}
+\State $S_2 :=$ \Call{Find}{$A, x+1, r$}
+\State \Return \Call{CommonPrefix}($S_{1}, S_{2}$)
+\EndProcedure
+\Statex
+\end{algorithmic}
+\end{algorithm}
+
+Function \texttt{CommonPrefix}则寻找两个输入string $S_1$和$ S_2 $的common prefix。
+\begin{algorithm}[H]
+\caption{Helper Function To Get Common Prefix}
+\begin{algorithmic}[1]
+\Procedure{CommonPrefix}{$S_{1}, L_1, S_{2}, L_2$}  
+\If{$S_{1}$ is empty \textbf{or} $S_2$ is empty}
+\State \Return A empty string
+\EndIf
+\State $\ell:= \min(L_1, L_2)$ \Comment Get shorter length
+\For{$i:=0$ \textbf{to} $\ell$}
+\If{$S_1[i] \neq S_2[i]$}
+\State \Return $S_1[0\ldots i-1]$ 
+\EndIf
+\EndFor
+\State \Return $S_1[0\ldots \ell-1]$ 
+\EndProcedure
+\Statex
+\end{algorithmic}
+\end{algorithm}

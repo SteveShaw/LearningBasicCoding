@@ -1,0 +1,57 @@
+\section{89 --- Gray Code}
+The gray code is a binary numeral system where two successive values differ in only one bit.
+\par
+Given a non-negative integer $n$ representing the total number of bits in the code, print the sequence of gray code. A gray code sequence must begin with 0.
+\paragraph{Example 1:}
+\begin{flushleft}
+\textbf{Input}: 2
+\\
+\textbf{Output}: $[0,1,3,2]$
+\\
+\textbf{Explanation}:
+\\
+00 -- 0
+\\
+01 -- 1
+\\
+11 -- 3
+\\
+10 -- 2
+\\
+For a given $n$, a gray code sequence may not be uniquely defined. For example, $[0,2,3,1]$ is also a valid gray code sequence.
+\\
+00 -- 0
+\\
+10 -- 2
+\\
+11 -- 3
+\\
+01 -- 1
+\end{flushleft}
+\paragraph{Example 2:}
+\begin{flushleft}
+\textbf{Input}: 0
+\\
+\textbf{Output}: $[0]$
+\\
+\textbf{Explanation}: We define the gray code sequence to begin with 0. A gray code sequence of $n$ has size $= 2^n$, which for $n = 0$ the size is $2^0 = 1$. Therefore, for $n = 0$ the gray code sequence is $[0]$.
+\end{flushleft}
+\subsection{Analysis}
+\begin{CJK*}{UTF8}{gbsn}
+维基百科给出了gray code的转换代码
+\end{CJK*}
+\begin{lstlisting}[backgroundcolor=\color{blue!80!green!10}, keywordstyle=\bfseries\color{green!40!black}, commentstyle=\itshape\color{purple!40!black},language=C++]
+/*
+ * This function converts an unsigned binary
+ * number to reflected binary Gray code.
+ *
+ * The operator >> is shift right. The operator ^ is exclusive or.
+ */
+unsigned int BinaryToGray(unsigned int num)
+{
+    return num ^ (num >> 1);
+}
+\end{lstlisting}
+\begin{CJK*}{UTF8}{gbsn}
+只要从0到$2^n-1$用上述函数计算处gray code放到输出数组中即可。
+\end{CJK*}

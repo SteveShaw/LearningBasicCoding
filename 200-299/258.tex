@@ -1,0 +1,21 @@
+\section{258 --- Add Digits}
+Given a non-negative integer $n$, repeatedly add all its digits until the result has only one digit.
+\paragraph{Example:}
+\begin{flushleft}
+\textbf{Input}: 38
+\\
+\textbf{Output}: 2
+\\ 
+\textbf{Explanation}: 
+\\
+The process is like: $3 + 8 = 11$, $1 + 1 = 2$. Since 2 has only one digit, return it.
+\end{flushleft}
+\paragraph{Follow up:}
+\begin{itemize}
+\item Could you do it without any loop/recursion in O(1) runtime?
+\end{itemize}
+\subsection{Mathematical Induction}
+Starting from 10, the result is 1 to 9 repeatedly. Therefore, the formula is
+\[
+x=(n-10)\bmod 9 + 1
+\]

@@ -1,0 +1,268 @@
+\section{207 --- Course Schedule}
+There are a total of $n$ courses you have to take, labeled from 0 to $n-1$.
+\par
+Some courses may have prerequisites, for example to take course 0 you have to first take course 1, which is expressed as a pair: $[0,1]$
+\par
+Given the total number of courses $n$ and a list of prerequisite pairs $P$, is it possible for you to finish all courses?
+\paragraph{Example 1:}
+\begin{flushleft}
+\textbf{Input}: $2$, $[[1,0]]$
+\\
+\textbf{Output}: \texttt{true}
+\\
+\textbf{Explanation}:
+\\
+There are a total of 2 courses to take. To take course 1 you should have finished course 0. So it is possible.
+\end{flushleft}
+\paragraph{Example 2:}
+\begin{flushleft}
+\textbf{Input}: $2$, $[[1,0],[0,1]]$
+\\
+\textbf{Output}: \texttt{false}
+\\
+\textbf{Explanation}:
+\\
+There are a total of 2 courses to take. To take course 1 you should have finished course 0, and to take course 0 you should also have finished course 1. So it is impossible.
+\end{flushleft}
+\paragraph{Note:}
+\begin{itemize}
+    \item The input prerequisites is a graph represented by a list of edges, not adjacency matrices. Read more about how a graph is represented.
+    \item You may assume that there are no duplicate edges in the input prerequisites.
+\end{itemize}
+\subsection{DFS}
+To detect cycle in directed graph, mark the visited node as one color number like 1. And then if there is a cycle, some nodes that has already been colored as $1$ could be meeted again. If there is no cycle, Otherwise, after the DFS is done for this starting node, mark this node as another color number like 2.
+\setcounter{algorithm}{0}
+\begin{algorithm}[H]
+\caption{DFS}
+\begin{algorithmic}[1]
+\State $\star$ $P$ is the prerequisite pair array with length $L$ and $L$ may not equal to $n$
+\Procedure{CanFinish}{$n, P, L$}
+\State $\star$ Build a adjacent graph structure $G$ from $P$
+\State $\star$ Create a array $x$ which records each node's marked color, initially, all nodes are colored as 0
+\For{$\alpha \in G$} \Comment Iterate through each outgoing node in $G$
+\State $b:=$ \Call{DFS}{$\alpha, G, x$}
+\If{$b=\texttt{false}$}
+\State \Return $b$ \Comment Found cycle in $G$
+\EndIf
+\State \Return \texttt{true}
+\EndFor
+\EndProcedure
+\end{algorithmic}
+\end{algorithm}
+Function \texttt{DFS} color each node by number 2. Before the depth first search process, the starting node is marked by number 1. If a node marked by number 1 meet again, there is a cycle in the graph. 
+\begin{algorithm}[H]
+\caption{Helper Function}
+\begin{algorithmic}[1]
+\Function{DFS}{$\alpha, G, x$}
+\If{$x[\alpha]=2$} \Comment This node has been visited
+\State \Return \texttt{true}
+\EndIf
+\If{$x[\alpha]=1$} \Comment This node is found by back edge so there is a cycle
+\State \Return \texttt{false}
+\EndIf
+\State $x[\alpha]\gets 1$ \Comment Color the node as 1 indicate DFS is going on from this node
+\For{$t \in G[\alpha]$} \Comment Iterate through each connected node of $\alpha$
+\State $b:=$ \Call{DFS}{$t, G, x$}
+\If{$b = \texttt{false}$} \Comment There is a cycle
+\State \Return \texttt{false}
+\EndIf
+\algstore{207algo}
+\end{algorithmic}
+\end{algorithm}
+\begin{algorithm}[H]
+\begin{algorithmic}[1]
+\algrestore{207algo}
+\EndFor
+\State $x[\alpha]\gets 2$ \Comment Color the node as 2 indicate this node has survived the DFS process
+\EndFunction
+\end{algorithmic}
+\end{algorithm}
+\setcounter{lstlisting}{0}
+\begin{lstlisting}[style=customc]
+bool canFinish( int numCourses, vector<pair<int, int>>& prerequisites )
+{
+    unordered_map<int, unordered_set<int>> g;
+
+    for( const auto& p : prerequisites )
+    {
+        auto it = g.find( p.second );
+
+        if( it == g.end() )
+        {
+            g.emplace( p.second, initializer_list<int> {p.first} );
+        }
+        else
+        {
+            it->second.insert( p.first );
+        }
+    }
+
+    vector<int> color( numCourses, 0 );
+
+    for( const auto& p : g )
+    {
+        int start = p.first;
+        if( !dfs( g, start, color ) )
+        {
+            return false;
+        }
+    }
+
+    return true;
+}
+
+bool dfs( unordered_map<int, unordered_set<int>>& g, int x, vector<int>& color )
+{
+    if( color[x] == 2 )
+    {
+        //visited before
+        return true;
+    }
+
+    if( color[x] == 1 )
+    {
+        //visited but still in DFS process
+        return false;
+    }
+
+    //Mark color of x as 1 which means DFS is started and in the progress
+    color[x] = 1;
+
+    for( int y : g[x] )
+    {
+        if( !dfs( g, y, color ) )
+        {
+            return false;
+        }
+    }
+
+    color[x] = 2; //Mark color of x as 2. Survivied DFS search
+
+    return true;
+}
+\end{lstlisting}
+\subsection{BFS}
+The idea is to simply use \textbf{Topological Sorting}
+\begin{enumerate}
+    \item Get in-degree (number of incoming edges) for each of the vertex present in the graph and initialize the count of visited nodes as 0.
+    \item Pick all the vertices with in-degree as 0 and add them into a queue $Q$
+    \item Pop a vertex from $Q$ and then
+    \begin{itemize}
+        \item increment count of visited nodes by 1. 
+        \item Decrease in-degree by 1 for all its neighboring nodes.
+    \item If in-degree of a neighboring nodes is reduced to zero, then add it to $Q$.
+\end{itemize}
+\item Repeat 3 until $Q$ is empty.
+\item If count of visited nodes is not equal to the number of nodes in the graph, then there exits a cycle.
+\end{enumerate}
+\begin{algorithm}[H]
+\caption{BFS}
+\begin{algorithmic}[1]
+\Procedure{CanFinish}{$n, P, L$}
+\State $\star$ Build a adjacent graph structure $G$ from $P$
+\State $\star$ Process array $P$ and put all nodes' in degree into an array $I$
+\State $\star$ Initialize an empty queue $Q$
+\For{$i:=0\to n-1$}
+\If{$I[i]=0$} \Comment In-degree of node $i$ is zero
+\State $Q\gets Q + (i)$ \Comment Push $i$ into the queue
+\EndIf
+\EndFor
+\State $\delta:=0$ \Comment The number of visited nodes
+\While{$Q\neq\emptyset$}
+\State $\star$ Get the front of $Q$: $x$
+\State $\star$ Pop front of $Q$
+\State $\delta\gets\delta+1$ \Comment Increments the number of visited nodes
+\algstore{207algo}
+\end{algorithmic}
+\end{algorithm}
+\begin{algorithm}[H]
+\begin{algorithmic}[1]
+\algrestore{207algo}
+\If{$G[x]\neq \emptyset$} \Comment $x$ has connected nodes
+\For{$y \in G[x]$} \Comment Iterate all connected nodes of $x$
+\If{$I[y] > 0$}
+\State $I[y]\gets I[y]-1$ \Comment Decrements the in-degree of $y$
+\If{$I[y] = 0$}
+\State $\star$ Push $y$ into $Q$
+\EndIf
+\EndIf
+\EndFor
+\EndIf
+\EndWhile
+\If{$\delta\neq n$} \Comment Number of visited nodes does not equal to number of nodes
+\State \Return \texttt{false} \Comment There exits a cycle
+\Else
+\State \Return \texttt{true}
+\EndIf
+\EndProcedure
+\end{algorithmic}
+\end{algorithm}
+\setcounter{lstlisting}{0}
+\begin{lstlisting}[style=customc, caption={BFS}]
+bool canFinish( int numCourses, vector<pair<int, int>>& prerequisites )
+{
+
+    vector<int> idg( numCourses, 0 );
+
+    unordered_map<int, unordered_set<int>> g;
+
+    for( const auto& p : prerequisites )
+    {
+        ++idg[p.first];
+
+        auto it = g.find( p.second );
+        if( it == g.end() )
+        {
+            g.emplace( p.second, initializer_list<int> {p.first} );
+        }
+        else
+        {
+            it->second.insert( p.first );
+        }
+    }
+
+    queue<int> q;
+
+    int num_visited = 0;
+
+    for( int i = 0; i < numCourses; ++i )
+    {
+        if( idg[i] == 0 )
+        {
+            q.push( i );
+        }
+    }
+
+    while( !q.empty() )
+    {
+        int node = q.front();
+        q.pop();
+
+        ++num_visited;
+
+        auto it = g.find( node );
+
+        if( it == g.end() )
+        {
+            //node does not have any node connected
+            continue;
+        }
+
+        for( int t : it->second )
+        {
+            if( idg[t] > 0 )
+            {
+                --idg[t]; //Decrease the in-degreee of t
+
+                if( idg[t] == 0 )
+                {
+                    q.push( t );
+                }
+            }
+        }
+    }
+
+    return num_visited == numCourses;
+
+}
+\end{lstlisting}

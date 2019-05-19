@@ -1,0 +1,30 @@
+\section{270 --- Closest Binary Search Tree Value}
+Given a non-empty binary search tree and a target value $T$, find the value in the BST that is closest to the target.
+
+\paragraph{Note:}
+
+\begin{itemize}
+\item Given target value is a floating point.
+\item You are guaranteed to have only one unique value in the BST that is closest to the target.
+\end{itemize}
+\subsection{BST}
+由于是比较浮点值，因此用当前节点的值和目标值的差的绝对值作为close的判定依据。
+\setcounter{lstlisting}{0}
+\begin{lstlisting}[style=customc,caption={BST}]
+int closestValue( TreeNode* root, double target )
+{
+    int ans = root->val;
+    auto node = root;
+
+    while( node )
+    {
+        //compare the abs value
+        if( abs( ans - target ) >= abs( node->val - target ) )
+        {
+            ans = node->val;
+        }
+        node = target < node->val ? node->left : node->right;
+    }
+    return ans;
+}
+\end{lstlisting}

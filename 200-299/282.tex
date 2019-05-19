@@ -1,0 +1,283 @@
+\section{282 --- Expression Add Operators}
+Given a string $S$ that contains only digits 0--9 and a target value $T$, return all possibilities to add binary operators (not unary) $+$, $-$, or $\times$ between the digits so they evaluate to the target value.
+
+\paragraph{Example 1:}
+
+\begin{flushleft}
+\textbf{Input}: $S = 123$, $T = 6$
+\\
+\textbf{Output}: $[1+2+3, 1\times2\times3]$
+\end{flushleft} 
+
+\paragraph{Example 2:}
+
+\begin{flushleft}
+\textbf{Input}: $S = 232$, $T = 8$
+\\
+\textbf{Output}: $[2\times3+2, 2+3\times2]$
+\end{flushleft}
+
+\paragraph{Example 3:}
+
+\begin{flushleft}
+\textbf{Input}: $S = 105$, $T = 5$
+\\
+\textbf{Output}: $[1\times0+5, 10-5]$
+\end{flushleft}
+
+\paragraph{Example 4:}
+\begin{flushleft}
+\textbf{Input}: $S = 00$, $T = 0$
+\\
+\textbf{Output}: $[0+0, 0-0, 0\times0]$
+\end{flushleft}
+
+\paragraph{Example 5:}
+
+\begin{flushleft}
+\textbf{Input}: $S = 3456237490$, $T = 9191$
+\\
+\textbf{Output}: $\emptyset$
+\end{flushleft}
+\subsection{Backtracking}
+从左到右扫描$S$，尝试所有可能的operators，看是否能够得到目标值。而操作符两端的数字则有$S$的子串产生，因此这种需要借助于backtracking的方法。
+\par
+算法的大致步骤如下
+\begin{enumerate}
+\item 在Backtracking的递归函数的输入参数用一个$p$来代表当前处理到$S$的哪个位置上。同时输入参数中还有一个参数$E$用以记录到目前生成的表达式字符串。
+\item 在递归函数内，$S[0,p-1]$已经处理完，并得到了表达式$E$。这些目前来说是已知的，可以通过输入参数获得。然后index $i$从$p$循环到$S$的末尾，每一次循环，都要分别选择3个操作符进行递归。同时循环中在每一处$i$将$S[p,i]$转换成数字，这样就测试了$S[p, L-1]$中以$S[p]$开头的所有数字了。
+\item 然后一直build表达式字符串直到整个$S$处理完，这时候要检查表达式所得到的值是否是$T$。如果是，就表示得到了一个符合要求的表达式，将其加入到输出序列中。
+\item 在build表达式的过程中，同时记录表达式产生的值。
+\begin{itemize}
+\item 如果operator是加号或者减号，比较容易处理，因为这两个operators左右两端的数字的优先级是一样的。
+\item 但如果operator是乘号，由于乘法具有比较高的优先级，如果还是从左到右处理，会导致例如$10+2\times4=12\times4$的错误。这里乘法需要的是上一个数字2，而不是上一个表达式$10+2$的值。
+\item 为了解决乘法带来的问题，递归函数的输入参数中还需要一个参数来记录上一个表达式的右边的数字。如果遇到乘法，就将上一个表达式的结果进行反向处理，得到去除这个数字之后上一个表达式应该有的值，然后用这个数字来和乘法右边的数字进行相乘。
+\item 举个例子，如果build出的表达式是$10+2$，那么在进入下一次调用递归函数时，这个记录上一次表达式右边数字的参数就为2。而如果是$10-2$，那么这个数字我们将其记录为$-2$，这个好处是，不用记住上个表达式到底是加法还是减法，一律当作加法。
+\item 对于乘法，如果build出的上一个表达式是$10+2$，现在要乘以4，即要获得$10+2\times 4$的值，这时候上一个表达式右边的数字是2，所以用表达式的值12减去2得到10即表达式左边的数字，然后用这个2乘以4，即$12-2+(2\times 4)$这时候在进入下一个递归时，上一个表达式右边的数字就是$8=2\times 4$。而如果在遇到乘法比如$10+2\times4\times3$，仍然是用表达式$10+2\times4$的值减去记录的数字8得到10，然后用8再乘以3，最终得到$10+2\times4\times3=24$了。
+\end{itemize}
+\end{enumerate}
+\setcounter{algorithm}{0}
+\begin{algorithm}[H]
+\caption{Backtracking}
+\begin{algorithmic}[1]
+\Procedure{AddOperators}{$S, L, T$}
+\State $\star$ Create an array $A$ to save the results
+\If{$S$ is empty}
+\State \Return $\emptyset$
+\EndIf
+\State \Call{DFS}{$S, L, T, p=0, x=0, y=0, E=\emptyset, A$} \Comment Start backtracking
+\EndProcedure
+\end{algorithmic}
+\end{algorithm}
+Function \texttt{DFS}的输入参数如下
+\begin{itemize}
+\item $S$，$L$和$T$如题
+\item $p$ --- 递归的起始index
+\item $x$ --- 上一个表达式右边的值
+\item $y$ --- 当前表达式的值
+\item $E$ --- 当前表达式字符串
+\item $A$ --- 结果数组
+\end{itemize}
+\begin{algorithm}[H]
+\caption{Backtracking辅助函数}
+\begin{algorithmic}[1]
+\Procedure{DFS}{$S, L, T, p, x, y, E, A$}
+\If{$p = L$} \Comment 已经完成了$S$的全部处理
+\If{$y=T$} \Comment 表达式的值等于目标值
+\State $\star$ 将获得的表达式字符串$E$加入$A$
+\EndIf
+\State \Return
+\EndIf
+\For{$i:=p$ \textbf{to} $L-1$}
+\State $\ast$ 处理最开头的数字为零的情况，如果此时$S[p,i]$长度大于1，直接返回
+\If{$S[p]$ is 0 \textbf{and} $S[p,i]$ has length larger than 1}
+\State \Return 
+\EndIf
+\State $\star$ 得到$S[p, i]$对应的数字$z$
+\algstore{282algo}
+\end{algorithmic}
+\end{algorithm}
+\begin{algorithm}[H]
+\begin{algorithmic}[1]
+\algrestore{282algo}
+\If{$p=0$}
+\State $\star$ 这时候$E$其实是空字符串，因此其实就是将$S[0,i]$转换成数字
+\State \Call{DFS}{$S,L,T,p=i+1,x=z,y=z,E=E+S[p,i], A$}
+\Else
+\State $\ast$ 插入加号，即$E=E$+`$+$'+$S[p,i]$
+\State \Call{DFS}{$S,L,T,p=i+1,x=z,y=y+z,E, A$}
+\State $\ast$ 插入减号，即$E=E$+`$-$'+$S[p,i]$
+\State \Call{DFS}{$S,L,T,p=i+1,x=-z,y=y-z,E, A$}
+\State $\ast$ 插入乘号，即$E=E$+`$\times$'+$S[p,i]$
+\State $\ast$ 如上所述，此处$y$要先减去上一个表达式右边的数$x$，再加上$x\times z$。
+\State \Call{DFS}{$S,L,T,p=i+1,x=x\times z,y=y-x+x\times z,E, A$} \Comment 
+\EndIf
+\EndFor
+\EndProcedure
+\end{algorithmic}
+\end{algorithm}
+下述代码中，将目标值放入一个成员变量中。同时为了避免在计算过程中发生overflow，中间结果都用\texttt{long long}的类型。
+\setcounter{lstlisting}{0}
+\begin{lstlisting}[style=customc, caption={Backtracking}]
+class Solution
+{
+public:
+    vector<string> addOperators( string num, int target )
+    {
+        vector<string> ans;
+
+        if( num.empty() )
+        {
+            return ans;
+        }
+
+        T = target;
+
+        dfs( num, 0, "", 0, 0, ans );
+
+        return ans;
+    }
+
+    void dfs( const string& S,
+              size_t pos,
+              string expr,
+              long long last,
+              long long cur,
+              vector<string>& ans )
+    {
+        if( pos == S.size() )
+        {
+            if( cur == T )
+            {
+                ans.emplace_back( expr );
+            }
+
+            return;
+        }
+
+        long long val = 0;
+
+        for( size_t i = pos; i < S.size(); ++i )
+        {
+            val = val * 10 + ( S[i] - '0' );
+
+            if( S[pos] == '0' && ( i > pos ) )
+            {
+                break;
+            }
+
+            auto left = S.substr( pos, i - pos + 1 );
+
+            if( pos == 0 )
+            {
+                //expr is actually an empty string
+                dfs( S, i + 1, expr + left, val, val, ans );
+            }
+            else
+            {
+                //Add +, last=val for next recursion
+                dfs( S, i + 1, expr + "+" + left, val, cur + val, ans );
+                //Add -, last=-val for next recursion
+                dfs( S, i + 1, expr + "-" + left, -val, cur - val, ans );
+                //Add *, last = val * last for next recursion
+                dfs( S, i + 1, expr + "*" + left, val * last, cur - last + val * last, ans );
+            }
+        }
+    }
+
+    int T;
+};
+\end{lstlisting}
+为了提高效率，表达式字符串可以实现分配好，然后在递归函数中，增加一个参数用于track表达式字符串目前的长度。
+\begin{lstlisting}[style=customc, caption={More Efficient Implementation}]
+class Solution
+{
+public:
+    vector<string> addOperators( string num, int target )
+    {
+        vector<string> ans;
+
+        if( num.empty() )
+        {
+            return ans;
+        }
+
+        //preallocate expression string
+        string expr( num.size() * 2, '$' );
+
+        T = target;
+
+        dfs( num, 0, expr, 0, 0, 0, ans );
+
+        return ans;
+    }
+    //expr_len is the current length of expression string expr
+    void dfs( const string& S,
+              size_t start,
+              string& expr,
+              size_t expr_len,
+              long long last,
+              long long cur,
+              vector<string>& ans )
+    {
+        if( start == S.size() )
+        {
+            if( cur == T )
+            {
+                ans.emplace_back( expr.substr( 0, expr_len ) );
+            }
+
+            return;
+        }
+
+        long long val = 0;
+
+        //Save this position
+        //to put operator
+        auto last_expr_len = expr_len;
+
+        //If we are processing the substring not from start
+        //Then expr cannot be empty, so, we need to increments the length
+        //to accomodate the operator
+        if( start != 0 )
+        {
+            ++expr_len;
+        }
+
+        for( size_t i = start; i < S.size(); ++i )
+        {
+            val = val * 10 + ( S[i] - '0' );
+
+            //Any number statring with zero is invalid
+            //except 0 itself
+            if( S[start] == '0' && ( i > start ) )
+            {
+                break;
+            }
+
+            //Add current number to expr
+            expr[expr_len] = S[i];
+
+            ++expr_len;
+
+            if( start == 0 )
+            {
+                dfs( S, i + 1, expr, expr_len, val, val, ans );
+            }
+            else
+            {
+                //put operator at the saved position
+                expr[last_expr_len] = '+';
+                dfs( S, i + 1, expr, expr_len, val, cur + val, ans );
+
+                expr[last_expr_len] = '-';
+                dfs( S, i + 1, expr, expr_len, -val, cur - val, ans );
+
+                expr[last_expr_len] = '*';
+                dfs( S, i + 1, expr, expr_len, val * last, cur - last + val * last, ans );
+            }
+        }
+    }
+    int T;
+};
+\end{lstlisting}

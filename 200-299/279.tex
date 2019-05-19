@@ -1,0 +1,44 @@
+\section{279 --- Perfect Squares}
+Given a positive integer $n$, find the least number of perfect square numbers (for example, 1, 4, 9, 16, $\ldots$) which sum to $n$.
+
+\paragraph{Example 1:}
+\begin{flushleft}
+\textbf{Input}: $n = 12$
+\\
+\textbf{Output}: 3 
+\\
+\textbf{Explanation}: $12 = 4 + 4 + 4$.
+\end{flushleft}
+
+\paragraph{Example 2:}
+\begin{flushleft}
+\textbf{Input}: $n = 13$
+\\
+\textbf{Output}: 2
+\\
+\textbf{Explanation}: $13 = 4 + 9$.
+\end{flushleft}
+\subsection{Dynamic Programming}
+\paragraph{TODO: Description}
+%Algo
+\setcounter{algorithm}{0}
+\begin{algorithm}[H]
+\caption{Dynamic Programming}
+\begin{algorithmic}[1]
+\Procedure{NumSquares}{$n$}
+\State $\star$ Initialize an array $F$ with size equal to $n+1$
+\State $\star$ $F[i]$ is initialized to $+\infty$ for $i\in[0,n]$
+\State $F[0]\gets 0$ \Comment 0 do not have any squares
+\For{$i:=1$ \textbf{to} $n$}
+\State $\ast$ Test square numbers for each $i$
+\State $j:=1$
+\While{$j^2\leq i$}
+\State $F[i]\gets \min(F[i-j^2]+1, F[i])$ \Comment Check how many squares required to add to $i-j^2$
+\State $j\gets j+1$
+\EndWhile
+\EndFor
+\State \Return $F[n]$
+\EndProcedure
+\end{algorithmic}
+\end{algorithm}
+\paragraph{TODO: Souce Code}

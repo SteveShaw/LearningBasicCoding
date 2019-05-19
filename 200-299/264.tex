@@ -1,0 +1,59 @@
+\section{264 --- Ugly Number II}
+Write a program to find the $n$-th ugly number.
+\par
+Ugly numbers are positive numbers whose prime factors only include 2, 3, 5. 
+
+\paragraph{Example:}
+
+\begin{flushleft}
+\textbf{Input}: $n = 10$
+\\
+\textbf{Output}: 12
+\\
+\textbf{Explanation}: 1, 2, 3, 4, 5, 6, 8, 9, 10, 12 is the sequence of the first 10 ugly numbers.
+\end{flushleft}
+
+\paragraph{Note:}  
+
+\begin{itemize}
+\item 1 is typically treated as an ugly number.
+\item $n$ does not exceed 1690.
+\end{itemize}
+\subsection{Dynamic Programming}
+\begin{itemize}
+\item 设定3个计数器$x$，$y$和$z$。分别对应factor 2，3和5。
+\item maintain一个size为$n$的DP数组$A$
+\item 从第一个ugly number 1开始，$A[0]=1$。下一个数就是$A[0]\times 2$，$A[0]\times 3$和$A[0]\times5$中的最小值，结果是2，因此increment对应2的计数器$x$。所以$A[1]=2$
+\item 接下来 $A[2] = \min(A[1]\times2, A[0]\times 3, A[0]\times 5)$。显然是$A[0]\times 3$最小，因此increment对应3的计数器$y$。
+\item 以此类推，如果遇到相同的情况，比如6，那么对应的2和3的计数器都要increment。
+\end{itemize}
+\setcounter{algorithm}{0}
+\begin{algorithm}[H]
+\caption{Dynamic Programming}
+\begin{algorithmic}[1]
+\Procedure{NthUglyNumber}{$n$}
+\State $\star$ 创建一个size为$n$的array$A$
+\State $\star$ 初始化$x$, $y$, $z$为0，分别代表2,3和5的次数
+\State $A[0]\gets 1$ \Comment The first ugly number is 1
+\For{$i:=1$ \textbf{to} n-1}
+\State $A[i]\gets \min(A[x]\times 2, A[y]\times 3, A[z]\times 5)$
+\EndFor
+\algstore{264algo}
+\end{algorithmic}
+\end{algorithm}
+\begin{algorithm}[H]
+\begin{algorithmic}[1]
+\algrestore{264algo}
+\If{$A[i]=A[x]\times 2$}
+\State $x\gets x+1$ \Comment Increments the count of 2
+\EndIf
+\If{$A[i]=A[y]\times 3$}
+\State $y\gets y+1$ \Comment Increments the count of 3
+\EndIf
+\If{$A[i]=A[z]\times 5$}
+\State $z\gets z+1$ \Comment Increments the count of 5
+\EndIf
+\State \Return $A[n-1]$ \Comment The last element in $A$ is the nth ugly number
+\EndProcedure
+\end{algorithmic}
+\end{algorithm}

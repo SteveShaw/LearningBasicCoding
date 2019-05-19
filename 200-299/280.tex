@@ -1,0 +1,74 @@
+ \section{280 --- Wiggle Sort}
+Given an unsorted array $A$, reorder it in-place such that $A[0] \leq A[1] \geq A[2] \leq A[3] \ldots$
+\par
+For example, 
+\par
+given $A = [3, 5, 2, 1, 6, 4]$, one possible answer is $[1, 6, 2, 5, 3, 4]$.
+\subsection{Swap Inline}
+根据题意，
+\begin{itemize}
+    \item 在even index $i$, 有$A[i]\leq A[i+1]$
+    \item 而在odd index $j$, $A[j]\geq A[j+1]$。
+\end{itemize}
+因此，
+\begin{itemize}
+    \item 如果在even index $i$， $A[i]> A[i+1]$，则swap这两个数。
+    \item 同样，如果在odd index $j$，$A[j]< A[j+1]$，也swap这两个数。
+\end{itemize}
+证明如下：
+\begin{itemize}
+    \item 假设在某个even index i有
+$A[i]>A[i+1]\geq A[i+2]$，即even index $i$上大小关系不满足，而在odd index $i+1$上大小关系符合要求，swap $A[i]$和$A[i+1]$后，仍然有$A[i+1] \geq A[i+2]$，而$A[i]\leq A[i+1]$
+\item 如果
+$A[i]\leq A[i+1]<A[i+2]$，即even index $i$上大小关系符合要求，而在odd index $i+1$上大小关系不满足，这时候
+swap $A[i+1]$和$A[i+2]$，仍然有$A[i]\leq A[i+1]$，而$A[i+1]\geq A[i+2]$
+\item 如果
+$A[i]>A[i+1]<A[i+2]$，即even index和odd index上大小关系都不满足，这时候先swap $A[i]$和$A[i+1]$，然后下次循环到$i+1$时，又会比较$A[i+1]$和$A[i+2]$，建立正确的大小关系。
+\end{itemize}
+综上所述，按照之前描述的操作，就能建立符合条件的wiggle sort数组。
+\setcounter{algorithm}{0}
+\begin{algorithm}[H]
+\caption{Swap Inline}
+\begin{algorithmic}[1]
+\Procedure{WiggleSort}{$A, L$}
+\For{$i:=0$ \textbf{to} $L-1$}
+\algstore{280algo}
+\end{algorithmic}
+\end{algorithm}
+\begin{algorithm}[H]
+\begin{algorithmic}[1]
+\algrestore{280algo}
+\If{$i$ is odd \textbf{and} $A[i]< A[i+1]$} \Comment $A[i]\geq A[i+1]$ on odd index $i$ is not satisfied
+\State $\star$ Swap $A[i]$ and $A[i+1]$
+\ElsIf{$i$ is even \textbf{and} $A[i]>A[i+1]$} \Comment $A[i]\leq A[i+1]$ on even index $i$ is not satisfied
+\State $\star$ Swap $A[i]$ and $A[i+1]$
+\EndIf
+\EndFor
+\EndProcedure
+\end{algorithmic}
+\end{algorithm}
+\setcounter{lstlisting}{0}
+\begin{lstlisting}[style=customc, caption={Swap Inline}]
+void wiggleSort( vector<int> &nums )
+{
+    int L = static_cast< int >( nums.size() );
+
+    for( int i = 0; i < L - 1; ++i )
+    {
+        if( i & 1 )
+        {
+            if( nums[i] < nums[i + 1] )
+            {
+                swap( nums[i + 1], nums[i] );
+            }
+        }
+        else
+        {
+            if( nums[i] > nums[i + 1] )
+            {
+                swap( nums[i], nums[i + 1] );
+            }
+        }
+    }
+}
+\end{lstlisting}

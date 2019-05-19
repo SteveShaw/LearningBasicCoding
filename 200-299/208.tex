@@ -1,0 +1,113 @@
+\section{208 --- Implement Trie (Prefix Tree)}
+Implement a \textbf{trie} with \texttt{insert}, \texttt{search}, and \texttt{startsWith} methods.
+\paragraph{Example:}
+\setcounter{lstlisting}{0}
+\begin{lstlisting}[style=customc, caption={Example}]
+Trie trie = new Trie();
+
+trie.insert("apple");
+trie.search("apple");   // returns true
+trie.search("app");     // returns false
+trie.startsWith("app"); // returns true
+trie.insert("app");   
+trie.search("app");     // returns true
+\end{lstlisting}
+\paragraph{Note:}
+\begin{itemize}
+\item You may assume that all inputs are consist of lowercase letters a--z.
+\item All inputs are guaranteed to be non-empty strings.
+\end{itemize}
+\subsection{Array Of Pointers}
+\begin{CJK*}{UTF8}{gbsn}
+几个要点
+\begin{itemize}
+\item 需要一个root，不包含任何字符
+\item 每个node需要一个标志位，表示是否代表一个单词。
+\end{itemize}
+\end{CJK*}
+\setcounter{lstlisting}{0}
+\begin{lstlisting}[style=customc, caption={Trie Class}]
+class Trie
+{
+public:
+    /** Initialize your data structure here. */
+    Trie()
+    {
+        m_root = new node();
+    }
+
+    /** Inserts a word into the trie. */
+    void insert( string word )
+    {
+        auto p = m_root;
+
+        for( auto c : word )
+        {
+            int i = c - 'a';
+            if( !p->m_children[i] )
+            {
+                p->m_children[i] = new node();
+            }
+            p = p->m_children[i];
+        }
+
+		// This is a word
+        p->m_isWord = true;
+    }
+
+    /** Returns if the word is in the trie. */
+    bool search( string word )
+    {
+        auto p = m_root;
+
+        for( auto c : word )
+        {
+            if( !p->m_children[c - 'a'] )
+            {
+                return false;
+            }
+
+            p = p->m_children[c - 'a'];
+
+        }
+
+        return p->m_isWord;
+    }
+
+    /** Returns if there is any word in the trie that starts with the given prefix. */
+    bool startsWith( string prefix )
+    {
+        auto p = m_root;
+
+        for( auto c : prefix )
+        {
+            if( !p->m_children[c - 'a'] )
+            {
+                return false;
+            }
+
+            p = p->m_children[c - 'a'];
+
+
+        }
+
+        return true;
+    }
+
+    struct node
+    {
+        vector<node*> m_children;
+        bool m_isWord;
+
+        node()
+            : m_children( 26, nullptr )
+            , m_isWord( false )
+        {}
+    };
+
+	// Need a root as the start node
+    node* m_root;
+};
+
+
+\end{lstlisting}

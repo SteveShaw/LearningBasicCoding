@@ -1,0 +1,47 @@
+\section{88 --- Merge Sorted Array}
+Given two sorted integer arrays $A$ and $B$, merge $A$ into $B$ as one sorted array.
+\paragraph{Note:}
+\begin{itemize}
+    \item The number of elements initialized in $A$ and $B$ are $m$ and $n$ respectively.
+    \item You may assume that $A$ has enough space (size that is greater or equal to $m + n$) to hold additional elements from $B$.
+\end{itemize}
+\paragraph{Example:}
+\begin{flushleft}
+\textbf{Input}:
+\\
+$A = [1,2,3,0,0,0]$, $m = 3$
+\\
+$B = [2,5,6]$, $n = 3$
+\\
+\textbf{Output}: $[1,2,2,3,5,6]$
+\end{flushleft}
+\subsection{Analysis}
+\begin{CJK*}{UTF8}{gbsn}
+由于合并后$A$数组的大小必定是$m+n$，所以从最后面开始往前赋值，先比较$A$和$B$中最后一个元素的大小，把较大的那个插入到$m+n-1$的位置上，再依次向前处理。如果当$A$循环结束，$B$中还有元素没加入$A$，则把$B$中剩下的数fill到$A$中剩下的位置。否则的话，意味着A中剩下的元素保持位置不变，不做任何处理。
+\end{CJK*}
+\subsubsection{Code}
+\setcounter{algorithm}{0}
+\begin{algorithm}[H]
+\caption{Reversed Fill}
+\begin{algorithmic}[1]
+\Procedure{Merge}{$A, n, B, m$}
+\State $k:=n+m-1$
+\State $\alpha:=n-1, \beta=m-1$
+\While{$\alpha \geq 0$ \textbf{and} $\beta \geq 0$}
+\If{$A[\alpha] \leq B[\beta]$}
+\State $A[k]\gets B[\beta]$
+\State $\beta\gets \beta-1$ \Comment Move $\beta$ 
+\Else
+\State $A[k]\gets A[\alpha]$
+\State $\alpha\gets \alpha-1$ \Comment Move $\alpha$ 
+\EndIf
+\State $k\gets k-1$ \Comment Decrements the merged position
+\EndWhile
+\While{$\beta \geq 0$} \Comment $B$ still have elements remains
+\State $A[k]\gets B[\beta]$
+\State $\beta\gets \beta-1$
+\State $k\gets k-1$
+\EndWhile
+\EndProcedure
+\end{algorithmic}
+\end{algorithm}

@@ -1,0 +1,204 @@
+\section{250 --- Count Univalue Subtrees}
+Given a binary tree, count the number of uni-value subtrees.
+\par
+A Uni-value subtree means all nodes of the subtree have the same value.
+\par
+For example:
+\begin{flushleft}
+\textbf{Input}:
+\begin{figure}[H]
+\begin{tikzpicture}
+[mynode/.style={draw,circle,minimum size=5mm, fill=gray!20!}]
+\node(){};
+\node[mynode](A) {5};
+\node[mynode](D)[below=8mm of A, xshift=-11mm] {1};
+\node[mynode](E)[below=8mm of A, xshift=11mm] {5};
+\node[mynode](X)[below=8mm of D, xshift=-8mm] {5};
+\node[mynode](Y)[below=8mm of D, xshift=8mm] {5};
+\node[mynode](Z)[below=8mm of E, xshift=8mm] {5};
+\draw (A) -- (D);
+\draw (A) -- (E);
+\draw (D) -- (X);
+\draw (D) -- (Y);
+\draw (E) -- (Z);
+\end{tikzpicture}
+\end{figure}
+\textbf{Output}: 4
+\end{flushleft}
+\subsection{Recursion On Every Node}
+先序遍历树的所有的节点，然后对每一个节点调用判断以当前节点为根的字数的所有节点是否相同。
+\begin{itemize}
+\item 需要一个function检查以当前节点为根节点的tree是否是uni-value tree。
+\item 另外需要一个辅助函数进行递归处理，以得到uni-value tree的个数。
+\end{itemize}
+\setcounter{algorithm}{0}
+\begin{algorithm}[H]
+\caption{Main Function}
+\begin{algorithmic}[1]
+\Procedure{CountUnivalSubtrees}{$T$}
+\State $x:=0$ \Comment $x$ is the number of uni-value subtrees
+\State \Call{DFS}{$T, x$} \Comment Call helper function \texttt{DFS}
+\State \Return $x$
+\EndProcedure
+\end{algorithmic}
+\end{algorithm}
+下面的辅助函数\texttt{DFS}的输入参数包括当前节点和当前的uni-value subtree的个数
+\begin{algorithm}[H]
+\caption{Helper Function 1}
+\begin{algorithmic}[1]
+\Procedure{DFS}{$T,x$}
+\If{$T$ is null node}
+\State \Return
+\EndIf
+\State $\star$ 调用辅助函数\texttt{IsUnival}判定以$T$为根节点的tree是不是uni-value tree
+\If{Tree with root node $T$ is uni-value tree}
+\State $x\gets x+1$ \Comment 找到了一个uni-value tree
+\EndIf
+\State $\star$ 对$T$的left subtree递归调用\texttt{DFS}
+\State $\star$ 对$T$的right subtree递归调用\texttt{DFS}
+\EndProcedure
+\end{algorithmic}
+\end{algorithm}
+辅助函数\texttt{IsUnival}判定以$T$为根节点的tree是不是uni-value tree。其输入参数包括当前节点$T$以及当前节点的value $v$。因为$T$所有的subtree的nodes的value都要和这个值相等。
+\begin{algorithm}[H]
+\caption{Helper Function To Check If A Tree Is A Uni-Value Tree}
+\begin{algorithmic}[1]
+\Procedure{IsUnival}{$T, v$}
+\If{$T$ is null node}
+\State \Return \texttt{true} \Comment Null node 肯定是Uni-value subtree
+\EndIf
+\If{$T$'s value is \textbf{not} equal to $v$} \Comment 节点值不相等
+\State \Return \texttt{false}
+\EndIf
+\State $\star$ 对$T$的left subtree递归调用\texttt{IsUnival}。如果返回\texttt{false}，就直接返回\texttt{false}
+\State $\star$ 对$T$的right subtree递归调用\texttt{IsUnival}。如果返回\texttt{false}，就直接返回\texttt{false}
+\State \Return \texttt{true} \Comment 如果能到达这里，说明$T$就是一个uni-value tree
+\EndProcedure
+\end{algorithmic}
+\end{algorithm}
+\setcounter{lstlisting}{0}
+\begin{lstlisting}[style=customc, caption={Recursive On Each NOde}]
+int countUnivalSubtrees( TreeNode* root )
+{
+    int ans = 0;
+
+    dfs( root, ans );
+
+    return ans;
+}
+
+void dfs( TreeNode* node, int &ans )
+{
+    if( !node )
+    {
+        return;
+    }
+
+    if( is_unival( node, node->val ) )
+    {
+        //Found a uni-value tree
+        ++ans;
+    }
+
+    dfs( node->left, ans );
+    dfs( node->right, ans );
+}
+
+bool is_unival( TreeNode* node, int val )
+{
+    if( !node )
+    {
+        return true;
+    }
+
+    if( node->val != val )
+    {
+        return false;
+    }
+
+    if( !is_unival( node->left, node->val ) )
+    {
+        return false;
+    }
+
+    if( !is_unival( node->right, node->val ) )
+    {
+        return false;
+    }
+
+    return true;
+}
+\end{lstlisting}
+\subsection{Recursion}
+上述解法不是很高效，含有大量的重复check。可以采用如下方法进行优化
+\begin{itemize}
+\item 采用后序遍历的顺序，
+\item 对于当前遍历到的节点，如果对其左右子节点分别递归调用函数，返回均为\texttt{true}，那么说明当前节点的值和左右子树的值都相同，因此找到了一个以当前节点为根节点的uni-value tree。
+\item 由于递归函数返回当前树是不是uni-value tree，因此判断当前节点的value和给定的value是否相同。
+\item 这就相当于把上述的\texttt{DFS}和\texttt{IsUnival}进行合并。
+\item 区别在与，这时候，无论左右子树递归结果如何，我们都要在对这两个子树做完递归调用后，再确定是否返回\texttt{true}/\texttt{false}。否则如果在进行完左子树调用后，发现不是uni-value tree就立刻返回\texttt{false}，就会skip 右子树的检查了。
+\item 最后由于返回的是当前节点的值和其父节点的值是否相等，对于整个树的root node，这个值设为一个和root node的值不相同的数。
+\end{itemize}
+\begin{algorithm}[H]
+\caption{Main Function (More Efficient Approach)}
+\begin{algorithmic}[1]
+\Procedure{CountUnivalSubtrees}{$T$}
+\State $x:=0$
+\State \Call{IsUnival2}{$T, \varnothing, x$} \Comment Root node $T$'s parent node is null node
+\State \Return $x$
+\EndProcedure
+\end{algorithmic}
+\end{algorithm}
+辅助函数\texttt{IsUnival2}判定以$T$为根节点的tree是不是uni-value tree。其输入参数包括当前节点$T$以及当前节点的父节点的value $v$以及当前uni-value tree的总数 $x$。
+\begin{algorithm}[H]
+\caption{Helper Function To Check If A Tree Is A Uni-Value Tree}
+\begin{algorithmic}[1]
+\Procedure{IsUnival2}{$T, v, x$}
+\If{$T$ is a null node}
+\State \Return \texttt{true}
+\EndIf
+\State $\star$ 对$T$的left subtree递归调用\texttt{IsUnival}。返回结果为$b_0$
+\State $\star$ 对$T$的right subtree递归调用\texttt{IsUnival}。返回结果为$b_1$
+\If{$b_0$ is \texttt{false} \textbf{or} $b_1$ is \texttt{false}}
+\State \Return \texttt{false} \Comment $T$为根节点的tree不是uni-value tree
+\Else
+\State $x\gets x+1$ \Comment 找到了一个uni-value tree，以$T$为root node
+\EndIf
+\If{$T$'s value is equal to $v$}
+\State \Return \texttt{true}
+\Else
+\State \Return \texttt{false}
+\EndIf
+\EndProcedure
+\end{algorithmic}
+\end{algorithm}
+\begin{lstlisting}[style=customc,caption={More Efficient Recursive Approach}]
+{
+    int ans = 0;
+
+    is_unival( root, -1, ans );
+
+    return ans;
+}
+
+bool is_unival( TreeNode* node, int val, int& ans )
+{
+    if( !node )
+    {
+        return true;
+    }
+
+    //we must do the recursive processing for both subtrees
+    bool b_left = is_unival( node->left, node->val, ans );
+    bool b_right = is_unival( node->right, node->val, ans );
+
+    if( !b_left || !b_right )
+    {
+        return false;
+    }
+
+    ++ans;
+
+    return node->val == val;
+}
+\end{lstlisting}

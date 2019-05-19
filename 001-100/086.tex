@@ -1,0 +1,85 @@
+\section{86 -- Partition List}
+\tikzset
+{
+llstyle/.style={>=stealth',auto,node distance=7mm},
+mynode/.style={circle, draw, minimum size=5mm, fill=gray!15}
+}
+
+Given a linked list $L$ and a value $x$, partition it such that all nodes less than x come before nodes greater than or equal to $x$.
+\par
+You should preserve the original relative order of the nodes in each of the two partitions.
+\paragraph{Example:}
+\begin{flushleft}
+\textbf{Input}: $x=3$
+\begin{figure}[H]
+\begin{tikzpicture}[llstyle]
+\node(){};
+\node[mynode](1){1};
+\node[mynode,right=of 1](4){4};
+\node[mynode,right=of 4](3){3};
+\node[mynode,right=of 3](2){2};
+\node[mynode,right=of 2](5){5};
+\node[mynode,right=of 5](2a){2};
+\draw[->,>=stealth'] (1)--(4);
+\draw[->,>=stealth'] (4)--(3);
+\draw[->,>=stealth'] (3)--(2);
+\draw[->,>=stealth'] (2)--(5);
+\draw[->,>=stealth'] (5)--(2a);
+\end{tikzpicture}
+\end{figure}
+\textbf{Output}:
+\begin{figure}[H]
+\begin{tikzpicture}[llstyle]
+\node(){};
+\node[mynode](1){1};
+\node[mynode,right=of 1](2){2};
+\node[mynode,right=of 2](2a){2};
+\node[mynode,right=of 2a](4){4};
+\node[mynode,right=of 4](3){3};
+\node[mynode,right=of 3](5){5};
+\draw[->,>=stealth'] (1)--(2);
+\draw[->,>=stealth'] (2)--(2a);
+\draw[->,>=stealth'] (2a)--(4);
+\draw[->,>=stealth'] (4)--(3);
+\draw[->,>=stealth'] (3)--(5);
+\end{tikzpicture}
+\end{figure}
+\end{flushleft}
+\subsection{Two Dummy Nodes Approach}
+\begin{CJK*}{UTF8}{gbsn}
+首先创建两个dummy node $\alpha$和$\beta$，其中一个是用于链接小于$x$的nodes， 另外一个用于链接大于$x$的nodes。然后遍历链表，每次完成所需的链接后，必须把链接的节点的\texttt{next}指针设为空。否则会造成无限循环。
+\end{CJK*}
+\subsubsection{Code}
+Procedure \texttt{Partition} arranges the input linked list $L$ per $x$
+\setcounter{algorithm}{0}
+\begin{algorithm}[H]
+\caption{Two Dummy Nodes Approach}
+\begin{algorithmic}[1]
+\Procedure{Partition}{$L, x$}
+\State Create $\alpha$ and $\beta$ as two nodes
+\State $H_{\alpha}:=\alpha,\; H_{\beta} := \beta$ \Comment Save the headers 
+\State $\ell:=L$
+\State $p:=\varnothing$ \Comment Helper pointer
+\algstore{86algo}
+\end{algorithmic}
+\end{algorithm}
+\begin{algorithm}[H]
+\begin{algorithmic}[1]
+\algrestore{86algo}
+\While{$\ell\neq \varnothing$}
+\If{$V(\ell) < x$}
+\State $\alpha_n\gets \ell$ \Comment Link node less than $x$
+\State $\alpha\gets \alpha_n$ \Comment Move forward to next in $\alpha$
+\Else
+\State $\beta_n\gets \ell$ \Comment Link node no less than $x$
+\State $\beta\gets \beta_n$ \Comment Move forward to next in $\beta$
+\EndIf
+\State $p\gets \ell$ \Comment Save current node to $p$
+\State $\ell\gets \ell_n$ \Comment Move to next in $L$
+\State $p_n\gets \varnothing$ \Comment Set current node's next pointer to empty
+\EndWhile
+\State $\alpha_n \gets (H_{\beta})_n$ \Comment Link $\alpha$ and $\beta$
+\State \Return $(H_{\alpha})_n$ \Comment The new linked list start from next of $\alpha$
+\EndProcedure
+\end{algorithmic}
+\end{algorithm}

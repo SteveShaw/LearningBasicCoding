@@ -1,0 +1,66 @@
+\section{20 --- Valid Parentheses}
+Given a string containing just the characters `(', `)', `\{', `\}', `[' and `]', determine if the input string is valid.
+\par
+An input string is valid if:
+\begin{itemize}
+\item Open brackets must be closed by the same type of brackets.
+\item Open brackets must be closed in the correct order.
+\end{itemize}
+\subsection{Stack}
+\begin{itemize}
+\item Create a stack.
+\item if current character is open symbol, push into the stack.
+\item Otherwise, check if the top of the stack is the corresponding open symbol. If it is not, return \texttt{false} immediately. Otherwise, pop the top from the stack.
+\item Finally, check if the stack is empty.
+\end{itemize}
+\setcounter{lstlisting}{0}
+\begin{lstlisting}[style=customc, caption={Stack}]
+bool isValid( string s )
+{
+    if( s.empty() )
+    {
+        return true;
+    }
+
+    stack<char> stk;
+
+    for( auto c : s )
+    {
+        switch( c )
+        {
+        case '{':
+        case '(':
+        case '[':
+            stk.push( c );
+            break;
+
+        //need to check if the stack is empty or not
+        case '}':
+            if( stk.empty() || stk.top() != '{' )
+            {
+                return false;
+            }
+            stk.pop();
+            break;
+
+        case ')':
+            if( stk.empty() || stk.top() != '(' )
+            {
+                return false;
+            }
+            stk.pop();
+            break;
+
+        case ']':
+            if( stk.empty() || stk.top() != '[' )
+            {
+                return false;
+            }
+            stk.pop();
+            break;
+        }
+    }
+
+    return stk.empty();
+}
+\end{lstlisting}

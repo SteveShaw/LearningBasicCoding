@@ -1,0 +1,118 @@
+\section{241 --- Different Ways to Add Parentheses}
+Given a string of numbers and operators, return all possible results from computing all the different possible ways to group numbers and operators. The valid operators are $+$, $-$ and $\times$.
+
+\paragraph{Example 1:}
+\begin{flushleft}
+Input: $2-1-1$
+\\
+Output: $[0, 2]$
+\\
+Explanation: 
+\\
+$((2-1)-1) = 0$
+\\
+$(2-(1-1)) = 2$
+\end{flushleft}
+
+\paragraph{Example 2:}
+\begin{flushleft}
+Input: $2\times3-4\times5$
+\\
+Output: $[-34, -14, -10, -10, 10]$
+\\
+Explanation:
+\\ 
+$(2\times(3-(4\times5))) = -34 $
+\\
+$((2\times3)-(4\times5)) = -14 $
+\\
+$((2\times(3-4))\times5) = -10 $
+\\
+$(2\times((3-4)\times5)) = -10 $
+\\
+$(((2\times3)-4)\times5) = 10$
+\end{flushleft}
+\subsection{Recursion}
+\begin{CJK*}{UTF8}{gbsn}
+\begin{itemize}
+\item 遍历输入数组，每次遇到操作符号时，就从这个地方分成左右两个部分。
+\item 分别对左右两个部分进行递归，返回结果就是各个部分运算得到的结果数组
+\item 将两个数组中的结果两两组合即得到当前该操作符的所有运算结果。
+\item 如果输入字符串只包含数字，则将该数字作为输出数组中的唯一元素。
+\item 可以用memorize的方法减少重复的搜索。
+\end{itemize}
+\end{CJK*}
+\setcounter{lstlisting}{0}
+\begin{lstlisting}[style=customc, caption={Recursion Without Memorization}]
+vector<int> diffWaysToCompute( string input )
+{
+    vector<int> results;
+
+    int num = 0;
+
+    for( size_t i = 0; i < input.size(); ++i )
+    {
+        auto c = input[i];
+
+        //if input has only number, num will be the number
+        if( ( c >= '0' ) && ( c <= '9' ) )
+        {
+            num = num * 10 + ( c - '0' );
+            continue;
+        }
+
+        //we break input into two parts
+        //and recursively apply function to the two parts
+        vector<int> left = diffWaysToCompute( input.substr( 0, i ) );
+        vector<int> right = diffWaysToCompute( input.substr( i + 1 ) );
+
+        //calculate results from the output arrays
+        calc( left, right, results, c );
+
+        num = 0;
+    }
+
+    // input contains only number
+    if( results.empty() )
+    {
+        results.push_back( num );
+    }
+
+    return results;
+}
+
+
+void calc( vector<int>& left, vector<int>& right, vector<int>& results, char oper )
+{
+    if( oper == '*' )
+    {
+        for( auto l : left )
+        {
+            for( auto r : right )
+            {
+                results.push_back( l * r );
+            }
+        }
+    }
+    else if( oper == '-' )
+    {
+        for( auto l : left )
+        {
+            for( auto r : right )
+            {
+                results.push_back( l - r );
+            }
+        }
+    }
+    else if( oper == '+' )
+    {
+        for( auto l : left )
+        {
+            for( auto r : right )
+            {
+                results.push_back( l + r );
+            }
+        }
+    }
+}
+\end{lstlisting}

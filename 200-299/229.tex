@@ -1,0 +1,164 @@
+\section{229 --- Majority Element II}
+Given an integer array $A$ of size $n$, find all elements that appear more than $\lfloor n/3 \rfloor$ times.
+\par
+Note: The algorithm should run in linear time and in O(1) space.
+
+\paragraph{Example 1:}
+
+\begin{flushleft}
+\textbf{Input}: $[3,2,3]$
+\\
+\textbf{Output}: $[3]$
+\end{flushleft}
+
+\paragraph{Example 2:}
+
+\begin{flushleft}
+\textbf{Input}: $[1,1,1,3,3,2,2,2]$
+\\
+\textbf{Output}: $[1,2]$
+\end{flushleft}
+\subsection{Boyer-Moore Voting Algorithm}
+In the first pass, we generate a single candidate value which is the majority value if there is a majority. The second pass simply counts the frequency of that value to confirm. The first pass is the interesting part.
+\par
+In the first pass, we need 2 values:
+\begin{itemize}
+\item A candidate value, initially set to any value.
+\item A count, initially set to 0.
+\end{itemize}
+For each element in our input list, we first examine the count value. If the count is equal to 0, we set the candidate to the value at the current element. Next, first compare the element's value to the current candidate value. If they are the same, we increment count by 1. If they are different, we decrement count by 1.
+\par
+At the end of all of the inputs, the candidate will be the majority value if a majority value exists. A second O(N) pass can verify that the candidate is the majority element.
+\subsection{Two Candidates}
+\begin{CJK*}{UTF8}{gbsn}
+\begin{itemize}
+\item 仍然是基于上述的Boyer-Moore Voting算法。
+\item 由于这时候的candidates至多是两个(因为出现次数要大于$L/3$)，所以需要两个counter。
+\item 遍历$A$时，条件判断的顺序非常重要。必须先判定candidate是否和当前的数相等，再判断counter是否为零。如果顺序颠倒，那么当其中一个counter变为零时，会将当前数设置为对应的candidate，有可能和另一个candidate重复。比如$[1, 2, 2, 3, 2, 1, 1, 3]$
+\end{itemize}
+\end{CJK*}
+\setcounter{algorithm}{0}
+\begin{algorithm}[H]
+\caption{Two Candidate Voting Algorithm}
+\begin{algorithmic}[1]
+\Procedure{MajorityElement}{$A, L$}
+\State $\star$ Initialize two counters $\alpha$, $\beta$ as zeros
+\State $\star$ Initialize two candidates $x$, $y$ as any value.
+\For{Each number $n$ in $A$}
+\State $\star$ The following sequence of condition checking cannot be changed
+\If{$n=x$}
+\State $\alpha\gets\alpha+1$ \Comment Increments counter associated with $x$
+\ElsIf{$n=y$}
+\State $\beta\gets\beta+1$ \Comment Increments counter associated with $y$
+\ElsIf{$\alpha=0$}
+\State $x\gets n$ \Comment Update candidate $x$
+\State $\alpha\gets 1$
+\ElsIf{$\beta=0$}
+\State $y\gets n$ \Comment Update candidate $y$
+\State $\beta\gets1$
+\Else
+\State $\alpha\gets\alpha-1$ \Comment Decrements counter associated with $x$
+\State $\beta\gets\beta-1$ \Comment Decrements counter associated with $y$
+\EndIf
+\EndFor
+\State $\ast$ Check if $x$ and $y$ are actually the major elements
+\State $\alpha\gets 0$
+\State $\beta\gets 0$
+\For{Each number $n$ in $A$}
+\If{$n=x$}
+\State $\alpha\gets\alpha+1$
+\ElsIf{$n=y$}
+\State $\beta\gets\beta+1$
+\algstore{229algo}
+\end{algorithmic}
+\end{algorithm}
+\begin{algorithm}[H]
+\begin{algorithmic}[1]
+\algrestore{229algo}
+\EndIf
+\EndFor
+\If{$\alpha > L/3$}
+\State $\star$ Add $x$ to the final list 
+\EndIf
+\If{$\beta > L/3$}
+\State $\star$ Add $y$ to the final list
+\EndIf
+\State $\star$ Return the final list
+\EndProcedure
+\end{algorithmic}
+\end{algorithm}
+\setcounter{lstlisting}{0}
+\begin{lstlisting}[style=customc, caption={Two Candidates Voting Algorithm}]
+vector<int> majorityElement( vector<int>& nums )
+{
+    int n1 = 0;
+    int n2 = 0;
+    int count1 = 0;
+    int count2 = 0;
+
+    // The following condition checking sequence
+    // cannot be changd.
+    for( auto n : nums )
+    {
+        if( n1 == n )
+        {
+            ++count1;
+        }
+        else if( n2 == n )
+        {
+            ++count2;
+        }
+        else if( count1 == 0 )
+        {
+            n1 = n;
+            ++count1;
+        }
+        else if( count2 == 0 )
+        {
+            n2 = n;
+            ++count2;
+        }
+        else if( n2 == n )
+        {
+            ++count2;
+        }
+        else
+        {
+            --count1;
+            --count2;
+        }
+    }
+
+    count1 = 0;
+    count2 = 0;
+
+    for( auto n : nums )
+    {
+        if( n == n1 )
+        {
+            ++count1;
+        }
+        else if( n == n2 )
+        {
+            ++count2;
+        }
+    }
+
+    //The threshold for major elements
+    int th = static_cast<int>( nums.size() ) / 3;
+
+    vector<int> ans;
+
+    if( count1 > th )
+    {
+        ans.push_back( n1 );
+    }
+
+    if( count2 > th )
+    {
+        ans.push_back( n2 );
+    }
+
+    return ans;
+}
+\end{lstlisting}

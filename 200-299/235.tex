@@ -1,0 +1,117 @@
+\section{235 --- Lowest Common Ancestor of a Binary Search Tree}
+Given a binary search tree (\texttt{BST}), find the lowest common ancestor (\texttt{LCA}) of two given nodes in the \texttt{BST}.
+\par
+According to the definition of \texttt{LCA} on \textbf{Wikipedia}: \textit{The lowest common ancestor is defined between two nodes $p$ and $q$ as the lowest node in $T$ that has both $p$ and $q$ as descendants (where we allow \textbf{a node to be a descendant of itself}).}
+
+\paragraph{Example 1:}
+
+\begin{flushleft}
+\textbf{Input}: 
+\begin{figure}[H]
+\begin{tikzpicture}
+[mynode/.style={draw,circle,minimum size=5mm, fill=gray!20!}]
+\node(){};
+\node[mynode](1) {6};
+\node[mynode](2)[below=8mm of 1, xshift=-13mm] {2};
+\node[mynode](3)[below=8mm of 1, xshift=13mm] {8};
+\node[mynode](4)[below=8mm of 2, xshift=-7mm] {0};
+\node[mynode](5)[below=8mm of 2, xshift=7mm] {4};
+\node[mynode](6)[below=8mm of 3, xshift=-7mm] {7};
+\node[mynode](7)[below=8mm of 3, xshift=7mm] {9};
+\node[mynode](8)[below=8mm of 5, xshift=-7mm] {3};
+\node[mynode](9)[below=8mm of 5, xshift=7mm] {5};
+\draw (1) -- (2);
+\draw (1) -- (3);
+\draw (2) -- (4);
+\draw (2) -- (5);
+\draw (3) -- (6);
+\draw (3) -- (7);
+\draw (5) -- (8);
+\draw (5) -- (9);
+\end{tikzpicture}
+\end{figure}
+$p = 2$, $q = 8$
+\\
+\textbf{Output}: 6
+\\
+\textbf{Explanation}: 
+\\
+The LCA of nodes 2 and 8 is 6.
+\end{flushleft}
+
+\paragraph{Example 2:}
+
+\begin{flushleft}
+\textbf{Input}:
+\begin{figure}[H]
+\begin{tikzpicture}
+[mynode/.style={draw,circle,minimum size=5mm, fill=gray!20!}]
+\node(){};
+\node[mynode](1) {6};
+\node[mynode](2)[below=8mm of 1, xshift=-13mm] {2};
+\node[mynode](3)[below=8mm of 1, xshift=13mm] {8};
+\node[mynode](4)[below=8mm of 2, xshift=-7mm] {0};
+\node[mynode](5)[below=8mm of 2, xshift=7mm] {4};
+\node[mynode](6)[below=8mm of 3, xshift=-7mm] {7};
+\node[mynode](7)[below=8mm of 3, xshift=7mm] {9};
+\node[mynode](8)[below=8mm of 5, xshift=-7mm] {3};
+\node[mynode](9)[below=8mm of 5, xshift=7mm] {5};
+\draw (1) -- (2);
+\draw (1) -- (3);
+\draw (2) -- (4);
+\draw (2) -- (5);
+\draw (3) -- (6);
+\draw (3) -- (7);
+\draw (5) -- (8);
+\draw (5) -- (9);
+\end{tikzpicture}
+\end{figure}
+$p = 2$, $q = 4$
+\\
+\textbf{Output}: 2
+\\
+\textbf{Explanation}: 
+\\
+The LCA of nodes 2 and 4 is 2, since a node can be a descendant of itself according to the LCA definition.
+\end{flushleft}
+
+\paragraph{Note:}
+
+\begin{itemize}
+\item All of the nodes' values will be unique.
+\item $p$ and $q$ are different and both values will exist in the \texttt{BST}.
+\end{itemize}
+\subsection{BST Search}
+\begin{CJK*}{UTF8}{gbsn}
+借助\texttt{BST}的特性，由于题目中说明了每个节点的value都是unique的，所以
+\begin{itemize}
+\item 当根节点的value比$p$和$q$的value都大时，说明$p$和$q$的\texttt{LCA}在左子树，因此递归到左子树寻找。
+\item 当根节点的value比$p$和$q$的value都大小时，说明$p$和$q$的\texttt{LCA}在右子树，因此递归到右子树寻找。
+\item 否则，根节点的value处于$p$和$q$的value中间，因此根节点就是$p$和$q$的\texttt{LCA}。
+\end{itemize}
+\end{CJK*}
+\setcounter{lstlisting}{0}
+\begin{lstlisting}[style=customc, caption={BST Properties}]
+TreeNode* LCA( TreeNode* root, TreeNode* p, TreeNode* q )
+{
+    if( !root )
+    {
+        return root;
+    }
+
+    if( ( root->val > p->val ) && ( root->val > q->val ) )
+    {
+        //LCA in left subtree
+        return LCA( root->left, p, q );
+    }
+
+    if( ( root->val < p->val ) && ( root->val < q->val ) )
+    {
+        //LCA in right subtree
+        return LCA( root->right, p, q );
+    }
+
+    return root;
+}
+
+\end{lstlisting}

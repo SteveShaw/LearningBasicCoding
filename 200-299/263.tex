@@ -1,0 +1,70 @@
+\section{263 -- Ugly Number}
+Write a program to check whether a given number is an ugly number.
+\par
+Ugly numbers are positive numbers whose prime factors only include 2, 3, 5.
+
+\paragraph{Example 1:}
+
+\begin{flushleft}
+\textbf{Input}: 6
+\\
+\textbf{Output}: \texttt{true}
+\\
+\textbf{Explanation}: $6 = 2 \times 3$
+\end{flushleft}
+
+
+\paragraph{Example 2:}
+
+\begin{flushleft}
+\textbf{Input}: 8
+\\
+\textbf{Output}: \texttt{true}
+\\
+\textbf{Explanation}: $8 = 2 \times 2 \times 2$
+\end{flushleft}
+
+\paragraph{Example 3:}
+
+\begin{flushleft}
+\textbf{Input}: 14
+\\
+\textbf{Output}: \texttt{false} 
+\\
+\textbf{Explanation}: 
+\\
+14 is not ugly since it includes another prime factor 7.
+\end{flushleft}
+
+\paragraph{Note:}
+\begin{itemize}
+\item 1 is typically treated as an ugly number.
+\item Input is within the 32-bit signed integer range: $[−2^{31},  2^{31} − 1]$.
+\end{itemize}
+根据定义，用$n$除以2，3，5一直到不能被这三个数整除。看最后$n$是不是为1。
+\setcounter{lstlisting}{0}
+\begin{lstlisting}[style=customc, caption={Divide}]
+bool isUgly( int num )
+{
+    while( num >= 2 )
+    {
+        if( ( num % 2 ) == 0 )
+        {
+            num /= 2;
+        }
+        else if( ( num % 3 ) == 0 )
+        {
+            num /= 3;
+        }
+        else if( ( num % 5 ) == 0 )
+        {
+            num /= 5;
+        }
+        else
+        {
+            return false;
+        }
+    }
+    return num == 1;
+}
+\end{lstlisting}

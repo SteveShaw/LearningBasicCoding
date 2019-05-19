@@ -1,0 +1,257 @@
+\section{10 --- Regular Expression Matching}
+Given an input string $S$ and a pattern $P$, implement regular expression matching with support for dot (.) and $\ast$.
+\begin{itemize}
+\item A dot (.) Matches any single character.
+\item A $\ast$ Matches zero or more of the preceding element.
+\end{itemize}
+The matching should cover the entire input string (not partial).
+
+\paragraph{Note:}
+
+\begin{itemize}
+\item $S$ could be empty and contains only lowercase letters $a$ to $z$.
+\item $P$ could be empty and contains only lowercase letters $a$ to $z$, and characters like dot (.) or $\ast$.
+\end{itemize}
+
+\paragraph{Example 1:}
+\begin{flushleft}
+
+\textbf{Input}: $S$ = \texttt{aa}, $P$ = \texttt{a}
+\\
+\textbf{Output}: \texttt{false}
+\\
+\textbf{Explanation}: $\texttt{a}$ does not match the entire string \texttt{aa}.
+\end{flushleft}
+
+\paragraph{Example 2:}
+
+\begin{flushleft}
+\textbf{Input}: $S$ = \texttt{aa}, $P$ = \texttt{a}$\ast$
+\\
+\textbf{Output}: \texttt{true}
+\\
+\textbf{Explanation}: 
+\\
+$\ast$ means zero or more of the preceding element, \texttt{a}. Therefore, by repeating \texttt{a} once, it becomes \texttt{aa}.
+\end{flushleft}
+
+\paragraph{Example 3:}
+
+\begin{flushleft}
+\textbf{Input}: $S$ = \texttt{ab}, $P=.\ast$
+\\
+\textbf{Output}: \texttt{true}
+\\
+\textbf{Explanation}: $.\ast$ means zero or more ($\ast$) of any character ($.$).
+\end{flushleft}
+
+\paragraph{Example 4:}
+
+\begin{flushleft}
+\textbf{Input}: $S$ = \texttt{aab}, $P$ = \texttt{c}$\ast$\texttt{a}$\ast$b
+\\
+\textbf{Output}: \texttt{true}
+\\
+\textbf{Explanation}: $c$ can be repeated 0 times, $a$ can be repeated 1 time. Therefore it matches \texttt{aab}.
+\end{flushleft}
+
+\paragraph{Example 5:}
+
+\begin{flushleft}
+\textbf{Input}: $S$ = \texttt{mississippi}, $P$ = \texttt{mis}$\ast$is$\ast$p$\ast$
+\\
+\textbf{Output}: \texttt{false}
+\end{flushleft}
+
+\subsection{Recursive}
+\begin{itemize}
+\item $\ast$不可能是$P$的第一个character，因为$\ast$是和其preceding element相关的。
+\item 如果$P$中没有$\ast$, 只需要从左到右检查$S$和$P$的每个character是否match。
+\item 如果$P$中有$\ast$，那么其必然出现在$P[1]$
+\begin{itemize}
+\item 假定$\ast$表示一个或者多个$P[0]$，如果 $S[0]=P[0]$, $P[0]$匹配了$S$的第一个character，因此需要下一步递归处理$S[1\ldots L_S]$和$P[0\ldots L_P]$。即$S$更新为$S[1\ldots L_S]$，而$P$则不变。
+\item 如果 $\ast$ 表示nothing，因此$P[0]$是不存在的。因此下一步递归处理$S[0,L_S]$和$P[2\ldots L_P]$，即$S$不变，$P$则更新为$P[2\ldots L_P]$。
+\end{itemize}
+\end{itemize}
+
+\setcounter{algorithm}{0}
+\begin{algorithm}[H]
+\caption{Recursion}
+\begin{algorithmic}[1]
+\Procedure{IsMatch}{$S$, $P$}
+\If{$P$ is empty} \Comment pattern $P$ is empty
+\If{$S$ is empty}
+\State \Return \texttt{true} \Comment Only if $S$ is empty, $S$ and $P$ is matched.
+\Else
+\State \Return \texttt{false}
+\EndIf
+\EndIf
+\State $b:=\texttt{false}$ \Comment $a$ Indicate if $S[0]$ is matched against $P[0]$
+\If{$S$ is not empty \textbf{and} ( $S[0] = P[0]$ \textbf{or} $P[0]$ is dot ) } \Comment check if the first character is matched
+\State $b\gets \texttt{true}$ \Comment $S[0]=P[0]$
+\EndIf
+\If{$L_{P} \geq 2$ \textbf{and} $P[1]$ is $\ast$} \label{010ifast}
+\State $\star$依据分析，这时候有两种情况需要进行递归
+\State $\hat{S}:=S[1\ldots L_S-1]$ \Comment substring of $S$ from 1 to $L_S-1$
+\State $\ast$首先检查$\hat{S}$和$P$的递归结果，即$\ast$代表一个或多个$P[0]$
+\algstore{010algo}
+\end{algorithmic}
+\end{algorithm}
+\begin{algorithm}[H]
+\begin{algorithmic}[1]
+\algrestore{010algo}
+\If{$b$ is \texttt{true} \textbf{and} \Call{IsMatch}{$\hat{S}, P$} is true} \label{010if001}
+\State \Return \texttt{true}
+\Else\\
+\State $\hat{P}:=P[2\ldots L_P-1]$ \Comment substring of $P$ from 2 to $L_P-1$
+\State $\ast$ 如果上述匹配不成功，测试$\ast$为nothing的case，即检查$S$和$\hat{P}$的递归结果
+\If{\Call{IsMatch}{$\hat{S}, P$} is true}
+\State \Return \texttt{true}
+\EndIf
+\EndIf \Comment End[\ref{010if001}]
+\Else
+\State $\hat{S}:=S[1\ldots L_S-1]$ \Comment substring of $S$ from 1 to $L_S-1$
+\State $\hat{P}:=P[1\ldots L_P-1]$ \Comment substring of $P$ from 2 to $L_P-1$
+\State $\ast$ $P[1]$不是$\ast$，如果$S[0]$和$P[0]$匹配，则检查$\hat{S}$和$\hat{P}$的递归结果。
+\If{$b$ is \texttt{true} \textbf{and} \Call{IsMatch}{$\hat{S},\hat{P}$} is \texttt{true}} \label{010if002}
+\State \Return \texttt{true}
+\EndIf \Comment End[\ref{010if002}]
+\EndIf \Comment End[\ref{010ifast}]
+\State \Return \texttt{false} \Comment 算法如果到这一步，表明无法匹配$S$和$P$
+\EndProcedure
+\end{algorithmic}
+\end{algorithm}
+\setcounter{lstlisting}{0}
+\begin{lstlisting}[style=customc, caption={Recursion}]
+bool isMatch( string s, string p )
+{
+    if( p.empty() )
+    {
+        return s.empty();
+    }
+
+    bool b = false; //indicate if s[0] match p[0]
+
+    //s[0] is matched against p[0]
+    if( !s.empty() && ( ( s[0] == p[0] )  || ( p[0] == '.' ) ) )
+    {
+        b = true;
+    }
+
+    //p[1] is *
+    if( ( p.size() >= 2 ) && ( p[1] == '*' ) )
+    {
+        //suppose p[1] matches one or more p[0]
+        if( b && isMatch( s.substr( 1 ), p ) )
+        {
+            return true;
+        }
+        else
+        {
+            //otherwise suppose p[1] matches nothing
+            if( isMatch( s, p.substr( 2 ) ) )
+            {
+                return true;
+            }
+        }
+    }
+    else
+    {
+        //p[1] is not *
+        if( b && isMatch( s.substr( 1 ), p.substr( 1 ) ) )
+        {
+            return true;
+        }
+    }
+
+    return false;
+}
+
+\end{lstlisting}
+\subsection{Dynamic Programming}
+需要采用2D的数组。假设$F[i][j]$表示$S[0\ldots i]$和$P[0\ldots j]$是否匹配，和上面的递归方法中的分析一样有下面三种情况
+\begin{enumerate}
+\item 如果$P[j-1]$ is not $\ast$，同时$S[i-1]$ match $P[j-1]$ (当$P[j-1]$ is dot的时候也是match的)，这时候$F[i][j]=F[i-1][j-1]$
+\item 如果$P[j-1]$ is $\ast$，suppose 这个$\ast$ representstch nothing，这时候$F[i][j] = F[i][j-2]$。
+\item 如果$P[j-1]$ is $\ast$，suppose 这个$\ast$ represents one or more $P[j-2]$，那么当$S[i-1]$和$P[j-2]$ match时，$F[i][j] = F[i-1][j]$
+\end{enumerate}
+\begin{algorithm}[H]
+\caption{Dynamic Programming}
+\begin{algorithmic}[1]
+\Procedure{IsMatch}{$S,m,P,n$} \Comment $m$ is size of $S$ and $n$ is size of $P$
+\State $\star$ 创建一个二维数组$F$，大小为$(m+1)\times(n+1)$。所有元素为0
+\State $F[0][0]:=1$ \Comment $S$和$P$都为empty时是matched
+\For{$i:=0$ \textbf{to} $m$}
+\For{$j:=1$ \textbf{to} $n$}
+\If{$j>1$ \textbf{and} $P[j-1]$ is $\ast$} \label{010if201}
+\State $\star$要把两种情况都update到$F[i][j]$中
+\State $\star$ $F[j-1]$ represents nothing
+\State $F[i][j] \gets F[i][j-2]$
+\If{$i>0$ \textbf{and} ($S[i-1]=F[j-2]$ \textbf{or} $F[j-2]$ is dot)}  
+\State $\star$ $F[j-1]$ represents one or more $F[j-2]$
+\State $\star$ $S[i-1]$和$F[j-2]$ match
+\State $F[i][j]\gets F[i][j]\lor F[i-1][j]$
+\EndIf
+\Else
+\If{$i>0$ \textbf{and} ($S[i-1]=F[j-1]$ \textbf{or} $F[j-1]$ is dot)}
+\State $\star$ $S[i-1]$和$F[j-1]$ match
+\State $F[i][j]\gets F[i-1][j-1]$
+\EndIf
+\EndIf \Comment End[\ref{010if201}]
+\algstore{010algo}
+\end{algorithmic}
+\end{algorithm}
+\begin{algorithm}[H]
+\begin{algorithmic}[1]
+\algrestore{010algo}
+\EndFor
+\EndFor
+\State \Return $F[m][n]$
+\EndProcedure
+\end{algorithmic}
+\end{algorithm}
+\begin{lstlisting}[style=customc, caption={Dynamic Programming}]
+bool isMatch( string s, string p )
+{
+    auto m = s.size();
+    auto n = p.size();
+
+    vector<vector<unsigned char>> F( m + 1, vector<unsigned char>( n + 1, 0 ) );
+
+    F[0][0] = 1; //empty s match empty p
+
+    for( size_t i = 0; i <= m; ++i )
+    {
+        for( size_t j = 1; j <= n; ++j )
+        {
+            if( ( j > 1 ) && ( p[j - 1] == '*' ) )
+            {
+                //p[j-1] represents one or more p[j-2]
+                //check if s[i-1] and p[j-2] is matched or not
+                if( i > 0 &&
+                        ( ( s[i - 1] == p[j - 2] ) || ( p[j - 2] == '.' ) ) )
+                {
+
+                    F[i][j] = F[i - 1][j];
+                }
+
+                //p[j-1] represents nothing
+                F[i][j] = F[i][j] | F[i][j - 2];
+            }
+            else
+            {
+                //p[j-1] is not *
+                //check if s[i-1] and p[j-1] is matched or not
+                if( i > 0 &&
+                        ( ( s[i - 1] == p[j - 1] ) || ( p[j - 1] == '.' ) ) )
+                {
+                    F[i][j] = F[i - 1][j - 1];
+                }
+            }
+        }
+    }
+
+    return F[m][n];
+}
+
+\end{lstlisting}
