@@ -1,0 +1,172 @@
+\section{1000 --- Minimum Cost to Merge Stones}
+There are $N$ piles of stones $S$ arranged in a row. The $i$-th pile has $S[i]$ stones.
+\par
+A move consists of merging exactly $K$ consecutive piles into one pile, and the cost of this move is equal to the total number of stones in these $K$ piles.
+\par
+Find the minimum cost to merge all piles of stones into one pile.  If it is impossible, return $-1$.
+
+ 
+
+\paragraph{Example 1:}
+
+\begin{flushleft}
+\textbf{Input}: $S = [3,2,4,1]$, $K = 2$
+\\
+\textbf{Output}: 20
+\\
+\textbf{Explanation}: 
+We start with [3, 2, 4, 1].
+\\
+We merge [3, 2] for a cost of 5, and we are left with [5, 4, 1].
+\\
+We merge [4, 1] for a cost of 5, and we are left with [5, 5].
+\\
+We merge [5, 5] for a cost of 10, and we are left with [10].
+\\
+The total cost was 20, and this is the minimum possible.
+\end{flushleft}
+
+\paragraph{Example 2:}
+
+\begin{flushleft}
+\textbf{Input}: $S = [3,2,4,1]$, $K = 3$
+\\
+\textbf{Output}: $-1$
+\\
+\textbf{Explanation}:
+\\
+After any merge operation, there are 2 piles left, and we can't merge anymore.  So the task is impossible.
+\end{flushleft}
+
+\paragraph{Example 3:}
+
+\begin{flushleft}
+\textbf{Input}: stones = [3,5,1,2,6], K = 3
+\\
+\textbf{Output}: 25
+\\
+\textbf{Explanation}: 
+\\
+We start with [3, 5, 1, 2, 6].
+\\
+We merge [5, 1, 2] for a cost of 8, and we are left with [3, 8, 6].
+\\
+We merge [3, 8, 6] for a cost of 17, and we are left with [17].
+\\
+The total cost was 25, and this is the minimum possible.
+\end{flushleft}
+ 
+\paragraph{Note:
+}
+\begin{itemize}
+\item $1 \leq |S| \leq 30$
+\item $2 \leq K \leq 30$
+\item $1 \leq S[i] \leq 100$
+\end{itemize}
+\subsection{Dynamic Programming}
+\begin{itemize}
+\item 实际上这是一个3-D Dynamic Programming，对应的function $F[i][j][p]$表示minimum cost to merge from $S[i]$ to $S[j]$ to $p$ piles。为了方便起见， $p$的范围是$[1,K]$而不是$[0,K-1]$。
+\item 首先要看$S$能否通过merge 连续$K$个元素的方式最终得到一个元素。假设经过$x$次merge后，$S$变为一个元素的数组，那么就有$L-K+1-K+1-\ldots-K+1=L-x\times(K-1)=1$，即$L-1=x\times(K-1)$，因此$(L-1)\bmod(K-1)=0$，如果不满足这个条件，是不能merge成一个元素的。
+\item 首先需要找到$F[i][j][K]$，这个需要通过双重循环来做到，其中$p$从2一直到$K$循环，然后逐个测试在$[i,j]$范围内的每个位置$t$，看$F[i][j][p]$和$F[i][t][p-1]+F[t+1][j][1]$哪个更小。
+\item $F[i][t][p-1]+F[t+1][j][1]$的意思是从$S[i]$到$S[t]$形成$p-1$个piles所需的minimum cost和从$S[t+1]$到$S[j]$形成1个pile所需的minimum cost之和。
+\item 得到$F[i][j][K]$后，就知道了$F[i][j][1]$的cost了，即$F[i][j][1] = F[i][j][K] + \sum\limits_{y=i}^{j}S[y]$，因为这个$K$个能形成一个pile
+\end{itemize}
+\setcounter{algorithm}{0}
+\begin{algorithm}[H]
+\caption{}
+\begin{algorithmic}[1]
+\Procedure{MergeStones}{$S, L, K$}
+\If{$(L-1)\bmod (K-1)\neq 0$} \Comment 这种merge成一个pile的操作无法完成
+\State \Return $-1$
+\EndIf
+\State $\star$ Initialize a 3-d array $F$. $F$ has dimension $L\times L \times (K+1)$ and $F[i][j][p]:=+\infty$.
+\State $\ast$ 很显然$F[i][i][1]=0$，因为已经$S[i]$本身就是一个pile了，不需要merge
+\For{$i:=0$ \textbf{to} $L-1$}
+\State $F[i][i][1]\gets 0$
+\EndFor 
+\State $\ast$ 接下来进行bottom-up 的Dynamic Programming
+\For{$l:=2$ \textbf{to} $L$} \Comment 这种3D的DP一般都以长度作为最外层循环
+\For{$i:=0$ \textbf{to} $i+l-1<L$} \Comment $[i, i+l-1]$长度为$l$
+\State $j:=i+l-1$
+\algstore{1000algo}
+\end{algorithmic}
+\end{algorithm}
+\begin{algorithm}[H]
+\begin{algorithmic}[1]
+\algrestore{1000algo}
+\State $\ast$ 这时候进行$F[i][j][K]$的DP计算过程
+\For{$p:=2$ \textbf{to} $K$} \Comment piles 从2到$K$
+\State $\ast$ 对于$[i,j-1]$中的每个位置$t$，
+\State $\ast$ 获得区间$[i,t]$中获得$p-1$个堆和$[t+1,j]$中获得一个堆的cost总和
+\For{$t:=i$ \textbf{to} $j$} 
+\State $F[i][j][p]\gets \min(F[i][j][p], F[i][t][p-1] + F[t+1][j][1])$
+\EndFor
+\EndFor
+\State $\ast$ 这时候已经得到$F[i][j][K]$，接下来计算merge 这$K$个piles到1个pile的cost了
+\State $F[i][j][1]\gets F[i][j][K] + \sum\limits_{y=i}^{j}S[y]$
+\EndFor
+\EndFor
+\State $\ast$ $F[0][L-1][1]$就是minimum cost to merge $S[0]$ to $S[L-1]$ into one pile
+\State \Return $F[0][L-1][1]$
+\EndProcedure
+\end{algorithmic}
+\end{algorithm}
+在代码实现中，为了快速获得$\sum\limits_{y=i}^{j}S[y]$，采用prefix sum array的方法。
+\setcounter{lstlisting}{0}
+\begin{lstlisting}[style=customc, caption={Dynamic Programming}]
+int mergeStones( vector<int>& stones, int K )
+{
+    int L = static_cast< int >( stones.size() );
+
+    if( ( L - 1 ) % ( K - 1 ) != 0 )
+    {
+        return -1;
+    }
+
+    vector<vector<vector<int>>> F( L, vector<vector<int>> ( L, vector<int> ( K + 1, 99999 ) ) );
+
+    for( int i = 0; i < L; ++i )
+    {
+        F[i][i][1] = 0;
+    }
+
+    vector<int> v_presum( L, 0 );
+    v_presum[0] = stones[0];
+
+    for( int i = 1; i < L; ++i )
+    {
+        v_presum[i] = stones[i] + v_presum[i - 1];
+    }
+
+    for( int l = 2; l <= L; ++l )
+    {
+        for( int i = 0; i + l - 1 < L; ++i )
+        {
+            int j = i + l - 1;
+
+
+            for( int t = i; t < j; ++t )
+            {
+                for( int piles = 2; piles <= K; ++piles )
+                {
+                    F[i][j][piles] = ( min )( F[i][j][piles], F[i][t][piles - 1] + F[t + 1][j][1] );
+                }
+            }
+
+            //v_presum[0] = S[0]
+            //So we need to check if i=0, otherwise i-1 is invalid
+            if( i == 0 )
+            {
+                F[i][j][1] = F[i][j][K] + v_presum[j];
+            }
+            else
+            {
+                F[i][j][1] = F[i][j][K] + v_presum[j] - v_presum[i - 1];
+            }
+
+        }
+    }
+
+    return F[0][L - 1][1];
+}
+\end{lstlisting}

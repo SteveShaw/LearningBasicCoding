@@ -86,7 +86,7 @@ Given the output $ S $ of this traversal, recover the tree and return its root.
 
 \subsection{Hash Map}
 \begin{itemize}
-\item 创建一个hash map $M$，其key为level的number，而value为数组，存放当前level所有create出的tree node以及该tree node对应的parent node。
+\item 创建一个hash map $M$，其key为level的number，而value为数组，存放当前level所有create出的tree node以及该tree node对应的parent node。每个node和其parent node是紧邻着的。
 \item 遍历原数组，对于每个数字，创建相应的Tree Node。然后根据相应的level，找到上一层即level-1对应的parent。由于preorder的特性，以及我们设计的数据结构的特点，上一层的level对应的数组的倒数第二个node即为当前create出的node的parent。(最后一个node是这个parent的parent node)。
 \item 最后从level = 1开始，将每个node与其parent node相连，先检查parent node的left child是否为null，如果是，将当前node设置为parent node的left child，否则设置为right child。(题目中说明了如果只有一个child，必定是left child)。
 \end{itemize}
