@@ -1,0 +1,175 @@
+\section{466 --- Count The Repetitions}
+Define $S = [s,n]$ as the string $S$ which consists of $n$ connected strings s. For example, [ \texttt{abc}, 3 ] = \texttt{abcabcabc}.
+
+On the other hand, we define that string $s_1$ can be obtained from string $s_2$ if we can remove some characters from $ s_2 $ such that it becomes $ s_1 $. For example, \texttt{abc} can be obtained from \texttt{abdbec} based on our definition, but it can not be obtained from \texttt{acbbe}.
+
+You are given two non-empty strings $ s_1 $ and $ s_2 $ (each at most 100 characters long) and two integers $0 \leq n_1 \leq 10^6$ and $1 \leq n_2 \leq 10^6$. Now consider the strings $S_1$ and $S_2$, where $S_1=[s_1,n_1]$ and $S_2=[s_2,n_2]$. Find the maximum integer $M$ such that $[S_2,M]$ can be obtained from $S_1$.
+
+\section{Example:}
+
+\begin{flushleft}
+\textbf{Input}:
+
+$s_1=\texttt{acb}$, $n_1=4$
+
+$s_2=\texttt{ab}$, $n_2=2$
+
+\textbf{Return}: 2
+
+\end{flushleft}
+
+\subsection{Brute Force}
+According to the question, we need to find $m$ such that $[S_2,m]$ is the largest subsequence (not substring) that can be found in $S_1$. Notice that $S_2$ is $s_2$ repeats for $n_2$ times and $S_1$ is $s_1$ repeats for $n_1$ times. Therefore, we can find the number of times which are how many $s_2$ repeats in $[s_1,n_1]$, denote as $x$. Then the number of times $S_2$ which is $[s_2,n_2]$ repeats in $S_1$ is $(x/n_2)$
+
+\setcounter{algorithm}{0}
+\begin{algorithm}[H]
+\caption{Brute Force}
+\begin{algorithmic}[1]
+\Procedure{GetMaxRepetitions}{$s_1, L_1, n_1, s_2, L_2, n_2$}
+\State $p := 0$ \Comment The current index in $s_2$ to be checked against $s_1$
+\State $x := 0$ \Comment the number of times $s_2$ repeats in $S_1$
+\For{$i:=1$ \textbf{to} $n_1$}
+\For{$j:=0$ \textbf{to} $L_1-1$}
+\If{$s_2[p] = s_1[j]$}
+\State $p = p+1$
+\EndIf
+\algstore{466algo}
+\end{algorithmic}
+\end{algorithm}
+\begin{algorithm}[H]
+\begin{algorithmic}[1]
+\algrestore{466algo}
+\If{$p = L_2$} \Comment $s_2$ has completed one repetition 
+\State $x \gets x + 1$ \Comment Repeat count increments
+\State $p \gets 0$ \Comment Reset index in $s_2$ to zero
+\EndIf
+\EndFor
+\EndFor
+\State \Return $x/n_2$
+\EndProcedure
+\end{algorithmic}
+\end{algorithm}
+
+\subsection{Improved Scanning Strategy}
+We need to scan $s_1$ for $n_1$ times. After completely scanning of $i$-th $s_1$ block, we will have
+
+\begin{itemize}
+\item The accumulative count of $s_2$ repeated so far.
+\item The next position $p$ in $s_2$. We will search $s_2[p]$ first in the $(i+1)$th $s_1$ block.
+\end{itemize}
+
+For example, Suppose $s_1=\texttt{abc}$, $s_2=\texttt{bac}$, after scanning the first $s_1$ block, we have found $s_2[0]$. We will look for $s_2[1]$ in the second $s_1$ block. Therefore $p=1$. The values for $p$ is in the range $[0, \lvert s_2\rvert]$. Therefore, by the \textbf{Pigeonhole principle}, we must have two same $p$ after scanning ($\lvert s_2\rvert + 1$) $s_1$ blocks.
+
+The following picture shows how $p$ and count of $s_2$ are updated where we have 
+
+\begin{itemize}
+\item $s_1=\texttt{abaacdbac}$ and $n_1=100$
+\item $s_2=\texttt{adcbd}$ and $n_2=4$
+\end{itemize}
+
+\begin{figure}[H]
+\begin{tikzpicture}
+[my/.style={draw, rectangle split, rectangle split parts=2, color=blue, fill=gray!20!, minimum height=1cm}]
+\matrix[every node/.style={anchor=base}, column sep=-1mm]
+{
+\node(a0){a};& \node{b}; & \node{a};& \node{a};& \node{c};& \node{d};& \node{b};& \node{a};& \node(t0){c}; & \node(a1){a};& \node{b}; & \node{a};& \node{a};& \node{c};& \node{d};& \node{b};& \node{a};& \node(t1){c}; 
+& \node(a2){a};& \node{b}; & \node{a};& \node{a};& \node{c};& \node{d};& \node{b};& \node{a};& \node(t2){c};
+
+& \node(a3){a};& \node{b}; & \node{a};& \node{a};& \node{c};& \node{d};& \node{b};& \node{a};& \node(t3){c};
+
+& \node(a4){a};& \node{b}; & \node{a};& \node{a};& \node{c};& \node{d};& \node{b};& \node{a};& \node(t4){c};
+
+\\
+\node(b0){\textcolor{red}{a}}; & \node{}; & \node{}; & \node{};& \node{};& \node{\textcolor{red}{d}}; & \node{};& \node{};& \node{\textcolor{red}{c}}; & \node(b1){}; & \node{\textcolor{red}{b}}; & \node{}; & \node{};& \node{};& \node(e0){\textcolor{red}{d}}; & \node{};& \node{\textcolor{red}{a}};& \node{};\node{}; 
+& \node(b2){}; & \node{}; & \node{};& \node{};& \node{}; & \node{\textcolor{red}{d}};& \node{};& \node{}; & \node{\textcolor{red}{c}}; 
+
+& \node(b3){}; & \node{\textcolor{red}{b}}; & \node{};& \node{};& \node{}; & \node(e1){\textcolor{red}{d}};& \node{};& \node{\textcolor{red}{a}}; & \node{};
+
+& \node(b4){}; & \node{}; & \node{};& \node{};& \node{}; & \node{\textcolor{red}{d}};& \node{};& \node{}; & \node{\textcolor{red}{c}}; \\
+};
+
+\node[my](i0) [below=1.5cm of b0.south, anchor=north west] {$p=0$\nodepart{two}$\delta=0$};
+\draw[>=stealth, ->] (i0.north west) -- (b0.south);
+
+\node[my](i1) [below=1.5cm of b1.south, anchor=north west] {$p=3$\nodepart{two}$\delta=0$};
+\draw[>=stealth, ->] (i1.north west) -- (b1.south);
+
+\node[my](i2) [below=1.5cm of b2.south, anchor=north west] {$p=1$\nodepart{two}$\delta=1$};
+\draw[>=stealth, ->] (i2.north west) -- (b2.south);
+
+\node[my](i3) [below=1.5cm of b3.south, anchor=north west] {$p=3$\nodepart{two}$\delta=1$};
+\draw[>=stealth, ->] (i3.north west) -- (b3.south);
+
+\node[my](i4) [below=1.5cm of b4.south, anchor=north west] {$p=1$\nodepart{two}$\delta=2$};
+\draw[>=stealth, ->] (i4.north west) -- (b4.south);
+
+\draw[very thick, blue!30!red!70!] ($(t0.north east) + (0.25mm, 1mm)$) -- ($(t0.south east) + (0.25mm, 0)$);
+\draw[very thick, blue!30!red!70!] ($(t1.north east) + (0.25mm, 1mm)$) -- ($(t1.south east) + (0.25mm, 0)$);
+
+\draw[very thick, blue!30!red!70!] ($(t2.north east) + (0.25mm, 1mm)$) -- ($(t2.south east) + (0.25mm, 0)$);
+
+\draw[very thick, blue!30!red!70!] ($(t3.north east) + (0.25mm, 1mm)$) -- ($(t3.south east) + (0.25mm, 0)$);
+\draw[very thick, green!30!blue!50!] ($(e0.north east) + (0.25mm, 1mm)$) -- ($(e0.south east) + (0.25mm, 0)$);
+\draw[very thick, green!30!blue!50!] ($(e1.north east) + (0.25mm, 1mm)$) -- ($(e1.south east) + (0.25mm, 0)$);
+\end{tikzpicture}
+\end{figure}
+
+\paragraph{Outline}
+
+\begin{itemize}
+\item Maintain two arrays (or two hash maps to improve efficiency) $a$ and $b$. Both of them have the size equal to $\lvert s_2\rvert+1$ as mentioned before.
+\item $a$ records $p$ while $b$ saves the accumulative count of $s_2$ at the start of each $s_1$ block in $S_1$.
+\item Loop over $n_1$ $s_1$ blocks. At current $i$th $s_1$ block, we check if a repetition of $p$ can be found in $a$. That is, if there exits a $k$ such that $a[k] = p$ and $0\leq k\leq (i-1)$.
+\item If we find a $a[k]=p$, it means the a complete pattern is across from $k+1$th to $(i)$th block (the pattern restarts after $k$ th block). Hence, the pattern's \textbf{length} is $i-k$ blocks. Take the picture above as the example, we find $p=3$ at 2nd $s_1$ block and 4rd block. The pattern spans 2 blocks (3rd and 4th block).
+\item From $(k+1)$th block to $n_1-1$th block, there are $n_1-k-1$ blocks. By considering the length of one pattern, we would have $q= \lfloor (n_1-k-1)/(i-k)\rfloor$ patterns.
+\item In each pattern, $s_2$ appears $b[i] - b[k]$ times. As a result, the total counts of $s_2$ in all repeated patterns are $q\times (b[i]-b[k])$.  Take the picture above as the example, there are only one $s_2$ subsequence from 3rd block to 4th block.
+\item If $(n_1-k-1)$ does not divided by $i-k$, the remainder $r$ is number of blocks after the whole patterns. These $r$ blocks do not contain the pattern. The number of $s_2$ in these $r$ blocks are $\delta[n_1-1] - \delta[k+(i-k)\times q] = \delta[k+(i-k)\times q + r] - \delta[k+(i-k)\times q]$. Since the pattern repeats for $q$ times, the increments of the number of $s_2$ also repeats. Then we get $\delta[k+(i-k)\times q + r] - \delta[k+(i-k)\times q] = \delta[k+r]-\delta[k]$. 
+\item We also need to know how many $s_2$ exist before the pattern starts. This is indeed is $b[k]$.
+\item Edge case: If no repeating pattern is found, this implies $n_1 < \lvert s_2\rvert+1$ by the above analysis. In this case, the counts of $s_2$ in $s_1$ is $b[n_1-1]/(n_2)$.
+\end{itemize}
+
+\begin{algorithm}[H]
+\caption{Improved Brute Force Solution}
+\begin{algorithmic}[1]
+\Procedure{GetMaxRepetitions}{$s_1$, $L_1$, $n_1$, $s_2$, $L_2$, $n_2$}
+\State $\star$ Initialize an array $a$ with length $L_1+1$ to store index of $s_2$ at start of each $s_1$ block
+\State $\star$ Initialize an array $b$ with length $L_1+1$ to store count of $s_2$ at start of each $s_1$ block
+\State $p := 0$
+\State $\delta := 0$
+\For{$i:=0$ \textbf{to} $n_1-1$} \label{466Loop1}
+\For{$j:=0$ \textbf{to} $L_2-1$} \label{466Loop2}
+\If{$s_1[i] = s_2[j]$}
+\State $p\gets p+1$
+\EndIf
+\algstore{466algo}
+\end{algorithmic}
+\end{algorithm}
+\begin{algorithm}[H]
+\begin{algorithmic}[1]
+\algrestore{466algo}
+\If{$p = L_2$}
+\State $p \gets 0$
+\State $\delta \gets \delta + 1$
+\EndIf
+\EndFor \Comment End[\ref{466Loop2}]
+\State $b[i] \gets \delta$
+\State $a[i] \gets p$
+\For{$k:=0$ \textbf{to} $i-1$} \label{466Loop3}
+\If{$p = a[k]$}
+\State $\alpha := i - k$ \Comment The interval of pattern
+\State $q := (n_1-k)/(\alpha)$ \Comment The repeat times of pattern
+\State $r := (n_1-k) - q \times \alpha$ \Comment The blocks does not contain the pattern
+\State $z := (b[i]-b[k])\times q$ \Comment The total $s_2$ in all patterns
+\State $\hat{z}:=(b[k+r] - b[k])$ \Comment total $s_2$ after the patterns
+\State $p:=b[k]$ \Comment total $s_2$ before the patterns.
+\State $x:=(z+\hat{z}+p) / n_2$ \Comment Total $S_2$ in $S_1$
+\State \Return $x$
+\EndIf
+\EndFor \Comment End line [\ref{466Loop3}]
+\EndFor \Comment End line [\ref{466Loop1}]
+\State $\ast$ If no repeating pattern is found, the whole count of $s_2$ divided by $n_2$ is the result
+\State \Return $b[n_1-1]/n_2$
+\EndProcedure
+\end{algorithmic}
+\end{algorithm}
+

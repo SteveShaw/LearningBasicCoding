@@ -1,0 +1,270 @@
+\section{480 --- Sliding Window Median}
+Median is the middle value in an ordered integer list. If the size of the list is even, there is no middle value. So the median is the mean of the two middle value.
+
+Given an array $A$, there is a sliding window of size $k$ which is moving from the very left of the array to the very right. You can only see the $k$ numbers in the window. Each time the sliding window moves right by one position. Your job is to output the median array for each window in the original array.
+
+\paragraph{Example:}
+
+\begin{flushleft}
+\textbf{Input}:  $A = [1,3,-1,-3,5,3,6,7]$, $k=3$
+
+\textbf{Output}: $[1,-1,-1,3,5,6]$
+
+\textbf{Explanation}
+
+\begin{table}[H]
+\begin{tabular}{cc}
+Window Position & Median \\
+\hline
+$[1 \; 3 \; -1]$  $-3\   5\   3 \  6 \ 7$ & $1$ \\
+1 $[3  -1  -3]$ 5  3  6  7 & $-1$ \\
+1  3 [$-1$  $-3$  5] 3  6  7 &       $-1$ \\
+1  3  $-1$ [$-3 $ 5  3] 6  7   &    3 \\
+1  3  $-1$  $-3$ [5  3  6] 7   &    5 \\ 
+1  3  $-1$  $-3$  5 [3  6  7]      6
+\end{tabular}
+\end{table}
+
+\end{flushleft}
+
+\paragraph{Note: }
+\begin{itemize}
+\item You may assume $k$ is always valid, ie: $k$ is always smaller than input array's size for non-empty array.
+\end{itemize}
+
+
+\subsection{Median For Stream Values}
+
+\setcounter{lstlisting}{0}
+\begin{lstlisting}[style=customc, caption={Using Two Heaps}]
+class Solution
+{
+public:
+    vector<double> medianSlidingWindow( vector<int>& nums, int k )
+    {
+        auto L = static_cast<int>( nums.size() );
+
+        //put first k elements into lower half
+        for( int i = 0; i < k; ++i )
+        {
+            pq_low.push( nums[i] );
+        }
+
+        //put k/2 upper elements from pq_low
+        //to pq_up
+
+        for( int i = 0; i < k / 2; ++i )
+        {
+            pq_up.push( pq_low.top() );
+            pq_low.pop();
+        }
+
+        auto get_median = [this]( int k ) -> double
+        {
+            if( k & 1 )
+            {
+                return this->pq_low.top();
+            }
+
+            auto x = static_cast<double>( this->pq_up.top() );
+            auto y = static_cast<double>( this->pq_low.top() );
+
+            return ( x + y ) * .5;
+        };
+
+        vector<double> ans;
+
+
+        for( int i = k; i < L; ++i )
+        {
+            if( pq_low.empty() )
+            {
+                //this cannot happen
+                break;
+            }
+
+            ans.emplace_back( get_median( k ) );
+
+            int left = nums[i - k]; //the element to be removed
+            int n = nums[i];
+
+            //changes of difference between
+            //the number elements of lower half and
+            //upper half
+            int delta_diff = 0;
+
+            //remove left from two queues
+            remove( left, delta_diff );
+
+            //insert new elements
+            insert( n, delta_diff );
+
+            //rebalance two queues
+            //make sure difference between
+            //the number elements of lower half and
+            //upper half is same as before
+            reblance( delta_diff );
+
+            //clean up the two queues
+            //remove those elements that should be removed
+            //but still in each queue's top. These elements
+            //may effect the computation of median value
+            clean();
+        }
+
+        //we have not add the last window's median value
+        ans.emplace_back( get_median( k ) );
+
+        return ans;
+    }
+
+private:
+
+    void remove( int n, int& delta )
+    {
+        bool is_top = false;
+
+        if( n <= pq_low.top() )
+        {
+            //n is inside lower half
+            //the delta of difference decrements
+            //since we will remove n from lower half
+            --delta;
+            if( pq_low.top() == n )
+            {
+                is_top = true;
+                pq_low.pop();
+            }
+        }
+        else
+        {
+            //n is inside upper half
+            //the delta of difference increments
+            //since we will remove n from upper half
+            ++delta;
+
+            if( pq_up.top() == n )
+            {
+                is_top = true;
+                pq_up.pop();
+            }
+        }
+
+        if( !is_top )
+        {
+            //put it into the map
+            //records the elements
+            //should be removed
+
+            //we cannot remove them right now
+            //because they may decide the
+            //median value
+            auto it = m_remove.find( n );
+            if( it == m_remove.end() )
+            {
+                m_remove.emplace( n, 1 );
+            }
+            else
+            {
+                ++it->second;
+            }
+        }
+
+    }
+
+    void insert( int n, int& delta )
+    {
+        if( !pq_low.empty() && ( n <= pq_low.top() ) )
+        {
+            //n belongs to lower half
+            //increments the delta of difference
+            ++delta;
+
+            pq_low.push( n );
+        }
+        else
+        {
+            //n may belong to upper half
+            --delta;
+            pq_up.push( n );
+        }
+    }
+
+    void reblance( int delta )
+    {
+        if( delta < 0 )
+        {
+            //lower half have fewer items
+            //add smallest item from upper half
+            pq_low.push( pq_up.top() );
+            pq_up.pop();
+        }
+        else if( delta > 0 )
+        {
+            //upper half have fewer items
+            //add largest item from lower half
+            pq_up.push( pq_low.top() );
+            pq_low.pop();
+        }
+    }
+
+    void clean()
+    {
+        while( !pq_low.empty() )
+        {
+            auto it = m_remove.find( pq_low.top() );
+            if( it == m_remove.end() )
+            {
+                break;
+            }
+
+            //since the element should be removed
+            //is at the top of queue
+            //we must remove it, otherwise, the median
+            //maybe wrong
+            pq_low.pop();
+            it->second -= 1;
+            if( it->second == 0 )
+            {
+                //the element has been removed
+                m_remove.erase( it );
+            }
+        }
+
+        while( !pq_up.empty() )
+        {
+            auto it = m_remove.find( pq_up.top() );
+            if( it == m_remove.end() )
+            {
+                break;
+            }
+
+            //since the element should be removed
+            //is at the top of queue
+            //we must remove it, otherwise, the median
+            //maybe wrong
+            pq_up.pop();
+            it->second -= 1;
+            if( it->second == 0 )
+            {
+                //the element has been removed
+                m_remove.erase( it );
+            }
+        }
+    }
+
+private:
+
+    //lower half
+    priority_queue<int> pq_low;
+
+    //upper half
+    priority_queue<int, vector<int>, greater<int>> pq_up;
+
+    //the hash map that contains the
+    //elements would be removed
+    //but still kept in the two queues
+    unordered_map<int, int> m_remove;
+
+};
+\end{lstlisting}

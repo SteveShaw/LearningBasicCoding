@@ -1,0 +1,114 @@
+\section{28 --- Implement strStr()}
+Implement function \texttt{strStr}().
+
+Return the index of the first occurrence of \textbf{needle} in \textbf{haystack}, or $-1$ if \textbf{needle} is not part of \textbf{haystack}.
+
+\paragraph{Example 1:}
+
+\begin{flushleft}
+\textbf{Input}: \textbf{haystack} = \texttt{hello}, \textbf{needle} = \texttt{ll}
+
+
+\textbf{Output}: 2
+\end{flushleft}
+
+\paragraph{Example 2:}
+
+\begin{flushleft}
+\textbf{Input}: \textbf{haystack} = \texttt{aaaaa}, \textbf{needle} = \texttt{bba}
+
+\textbf{Output}: $-1$
+\end{flushleft}
+
+\paragraph{Clarification}:
+
+\begin{flushleft}
+What should we return when needle is an empty string? This is a great question to ask during an interview.
+
+For the purpose of this problem, we will return 0 when needle is an empty string. 
+\end{flushleft}
+
+\subsection{KMP}
+\begin{itemize}
+\item 网上很多KMP算法介绍中，table包含$-1$。
+\item 这里的KMP算法中的table不包含$-1$，因此当找到两个不匹配的字符时，如果pattern的当前位置$y$不为零，则$y\gets f(y-1)$，其中$f$为得到的pattern字符串的table。而如果$y$为零，则increments被搜寻字符串中的index $x$。
+\end{itemize}
+
+\setcounter{lstlisting}{0}
+\begin{lstlisting}[style=customc, caption={KMP}]
+int strStr( string haystack, string needle )
+{
+    if( needle.empty() )
+    {
+        return 0;
+    }
+
+    if( haystack.empty() )
+    {
+        return -1;
+    }
+
+    vector<int> f( needle.size(), 0 );
+
+    int t = 0;
+
+    //generate pattern table for needle
+    for( size_t i = 1; i < needle.size(); ++i )
+    {
+        t = f[i - 1];
+
+        while( ( t > 0 ) && ( needle[i] != needle[t] ) )
+        {
+            t = f[t - 1];
+        }
+
+        if( needle[i] == needle[t] )
+        {
+            t = t + 1;
+        }
+
+        f[i] = t;
+    }
+
+    //index in haystack
+    size_t x = 0;
+    //index in needle
+    size_t y = 0;
+
+    while( x < haystack.size() )
+    {
+        if( haystack[x] == needle[y] )
+        {
+            ++x;
+            ++y;
+
+            if( y == needle.size() )
+            {
+                //returns the start index
+                //of the matching
+                return x - y;
+            }
+        }
+        else
+        {
+            if( y > 0 )
+            {
+                //get the next search index
+                //in the pattern from f[y-1]
+                y = f[y - 1];
+            }
+            else
+            {
+                //otherwise
+                //increments the index in
+                //haystack
+                ++x;
+            }
+        }
+
+    }
+
+    return -1;
+
+}
+\end{lstlisting}

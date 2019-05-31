@@ -1,0 +1,89 @@
+\section{479 --- Largest Palindrome Product}
+Find the largest palindrome made from the product of two $n$-digit numbers.
+
+Since the result could be very large, you should return the largest palindrome mod 1337.
+ 
+
+\paragraph{Example:}
+\begin{flushleft}
+
+\textbf{Input}: 2
+
+\textbf{Output}: 987
+
+\textbf{Explanation}: $99 \times 91 = 9009$, $9009 \bmod 1337 = 987$
+
+\end{flushleft}
+ 
+
+\paragraph{Note:}
+
+\begin{itemize}
+\item The range of $n$ is $[1,8]$.
+\end{itemize}
+
+\subsection{Try All From Largest}
+
+\setcounter{lstlisting}{0}
+\begin{lstlisting}[style=customc, caption={Try All From Largest}]
+int largestPalindrome( int n )
+{
+    if( n == 1 )
+    {
+        return 9;
+    }
+
+    //generate the maximum and minimum number
+    //for n-digit number
+    int r = 1; //upper bound
+
+    for( int i = 1; i <= n; ++i )
+    {
+        r *= 10;
+    }
+
+    --r;
+
+    int l = 1;//lower bound
+    for( int i = 1; i < n; ++i )
+    {
+        l *= 10;
+    }
+
+    for( int x = r; x >= l; --x )
+    {
+        //form the palindrome
+        auto z = palindrome( x );
+
+        //since we test starting from the larger number
+        //we should stop when y^2 >= z since after that
+        //y will be smaller than z/y, it will repeat
+        //so y >= z/y ==> y ^2 >=z
+        for( long long y = r; y * y >= z; --y )
+        {
+            if( ( z % y ) == 0 )
+            {
+                return ( z % 1337 );
+            }
+        }
+    }
+
+    return 0;
+}
+
+long long palindrome( int n )
+{
+    long long x = static_cast<long long>( n );
+
+    while( n )
+    {
+        int q = n / 10;
+        int r = n - q * 10;
+
+        x = x * 10 + r;
+        n = q;
+    }
+
+    return x;
+}
+\end{lstlisting}

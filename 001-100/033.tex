@@ -1,0 +1,49 @@
+\section{33 --- Search in Rotated Sorted Array}
+\begin{figure}[H]
+	\begin{center}
+		\includegraphics[width=18cm]{033.png}
+	\end{center}
+\end{figure}
+\subsection{Find Rotation Place}
+\begin{CJK*}{UTF8}{gbsn}
+首先用二分法查找出最小值的位置，这时候中间值需要和最右端的值进行比较以决定搜索范围。如果中间值大于最右边的值，则最小值出现在右半端，否则在左半端。
+\par
+找到最小值的位置后，那么当前数组中每个数字所在的位置$P_1$与其在没有旋转前的数组中的位置$P_0$之间的关系就是$P_0 = (P_1 + P_r) \bmod L$，其中$P_r$就是最小值的位置，也就是发生旋转的地方，$L$是数组的长度。同样知道了在未旋转数组中的位置，也就知道了其在当前数组中的位置，即$P_1 = (P_0+P_r) \bmod L$
+\par
+以题中给的例子说明，$(4,5,6,7,0,1,2)$中最小值的位置在4，那么数字5目前的位置$P_1=1$，其在未旋转数组中的位置就是$(1+4)\bmod 7 = 5$，，基于这个关系，就可以应用普通的二分查找来寻找\texttt{target}了。
+\end{CJK*}
+\subsubsection{Algorithm}
+\setcounter{algorithm}{0}
+\begin{algorithm}[H]
+\caption{Problem 33}
+\begin{algorithmic}[1]
+\Procedure{SEARCH}{$A$, $T$}
+\State $l : =0$
+\State $r := L_A- 1$
+\While{$l<r$}
+\State $M: =\dfrac{l+r}{2}$ 
+\If{$A[M] > A[r]$} \Comment The minimum value must be in right half
+\State $l \gets M+1$
+\Else
+\State $r \gets M$ \Comment Search in left half
+\EndIf
+\EndWhile
+\State $P_r := l$ \Comment $l$ is the index of mininum value
+\State $l\gets 0$
+\State $r \gets L_A-1$
+\While{$l\leq r$}
+\State $P_{M_0}: =\dfrac{l+r}{2}$  \Comment Index of midpoint in original array.
+\State $M =: (P_{M_0}+P_r) \bmod L_A$ \Comment Get the current index in the rotated array
+\If{$A[M] = T$} \Comment Found the target
+\State \Return $M$
+\EndIf
+\If{$A[M] > T$} \Comment Target is smaller than the value in the mid point
+\State $l \gets P_{M_0}+1$
+\Else
+\State $r \gets P_{M_0}-1$
+\EndIf
+\EndWhile
+\State \Return $-1$ \Comment Cannot find the target
+\EndProcedure
+\end{algorithmic}
+\end{algorithm}

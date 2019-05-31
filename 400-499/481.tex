@@ -1,0 +1,104 @@
+\section{481 --- Magical String}
+A magical string $S$ consists of only 1 and 2 and obeys the following rules:
+
+The string $S$ is magical because concatenating the number of contiguous occurrences of characters 1 and 2 generates the string $S$ itself.
+
+The first few elements of string $ S $ is the following: $S = 1221121221221121122\ldots$
+
+If we group the consecutive 1s and 2s in S, it will be:
+
+$1\  22\  11\  2\  1\  22\  1\  22\  11\  2\  11\  22\ \ldots $
+
+and the occurrences of 1s or 2s in each group are:
+
+$1\  2\ 	2 \ 1\  1\  2\  1\  2\  2\  1\  2\  2\ \ldots$
+
+You can see that the occurrence sequence above is the $S$ itself.
+
+Given an integer $N$ as input, return the number of 1s in the first $N$ number in the magical string $S$.
+
+\paragraph{Note:} 
+\begin{itemize}
+\item $N$ will not exceed 100,000.
+\end{itemize}
+
+\paragraph{Example 1:}
+\begin{flushleft}
+\textbf{Input}: 6
+
+\textbf{Output}: 3
+
+\textbf{Explanation}: The first 6 elements of magical string $S$ is 12211 and it contains three 1s, so return 3.
+\end{flushleft}
+
+\subsection{Double Pointers}
+\begin{itemize}
+\item 根据第三个数字2开始往后生成数字，此时生成两个1，
+\item 然后根据第四个数字1，生成一个2，
+\item 再根据第五个数字1，生成一个1，以此类推，生成的数字1或2可能通过$3 - x$来交替生成，在生成的过程中同时统计1的个数即可
+\end{itemize}
+
+\setcounter{lstlisting}{0}
+\begin{lstlisting}[style=customc, caption={Read And Write Pointers}]
+int magicalString( int n )
+{
+    if( n == 0 )
+    {
+        return 0;
+    }
+
+    if( n <= 3 )
+    {
+        return 1;
+    }
+
+    vector<int> s( n, 0 );
+
+    s[0] = 1;
+    s[1] = 2;
+    s[2] = 2;
+
+    //the index to write
+    int write = 3;
+    //the index to read
+    int read = 2;
+
+    //the next number we will write
+    int next = 1;
+
+    //the first 3 numbers has one 1
+    int ans = 1;
+
+    while( write < n )
+    {
+        for( int i = 0; i < s[read]; ++i )
+        {
+            //count of next number is s[read]
+            if( write >= n )
+            {
+                break;
+            }
+
+            s[write] = next;
+
+            if( next == 1 )
+            {
+                //the problem asks for
+                //the number of 1s
+                ++ans;
+            }
+
+            ++write;
+        }
+
+        //change the next number to be write
+        next = 3 - next;
+
+        //the count of next numbers to be write
+        ++read;
+    }
+
+    return ans;
+}
+
+\end{lstlisting}

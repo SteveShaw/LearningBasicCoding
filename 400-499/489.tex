@@ -1,0 +1,160 @@
+\section{488 --- Zuma Game}
+Think about Zuma Game. You have a row of balls on the table, colored red($ R $), yellow($ Y $), blue($ B $), green($ G $), and white($ W $). You also have several balls in your hand.
+
+Each time, you may choose a ball in your hand, and insert it into the row (including the leftmost place and rightmost place). Then, if there is a group of 3 or more balls in the same color touching, remove these balls. Keep doing this until no more balls can be removed.
+
+Find the minimal balls you have to insert to remove all the balls on the table. If you cannot remove all the balls, output $-1$.
+
+\paragraph{Examples:}
+
+\begin{flushleft}
+
+\textbf{Input}: \texttt{WRRBBW}, \texttt{RB}
+
+\textbf{Output}: -1
+
+\textbf{Explanation}: \texttt{WRRBBW} $\rightarrow$ \texttt{WRR[R]BBW} $\rightarrow$ \texttt{WBBW} $ \rightarrow $ \texttt{WBB[B]W} $ \rightarrow $ \texttt{WW}
+
+\textbf{Input}: \texttt{WWRRBBWW}, \texttt{WRBRW}
+
+\textbf{Output}: 2
+
+\textbf{Explanation}: \texttt{WWRRBBWW} $\longrightarrow$ \texttt{WWRR[R]BBWW} $\longrightarrow$ \texttt{WWBBWW} $\longrightarrow$ \texttt{WWBB[B]WW} $\longrightarrow$ \texttt{WWWW} $\longrightarrow$ empty
+
+\textbf{Input}:\texttt{G}, \texttt{GGGGG}
+
+\textbf{Output}: 2
+
+\textbf{Explanation}: \texttt{G} $\longrightarrow$ \texttt{G[G]} $\longrightarrow$ \texttt{GG[G]} $\longrightarrow$ $\emptyset$
+
+
+\textbf{Input}: \texttt{RBYYBBRRB}, \texttt{YRBGB}
+
+\textbf{Output}: 3
+
+\textbf{Explanation}: \texttt{RBYYBBRRB} $\longrightarrow$ \texttt{RBYY[Y]BBRRB} $\longrightarrow$ \texttt{RBBBRRB} $\longrightarrow$ \texttt{RRRB} $\longrightarrow$ \texttt{B} $\longrightarrow$ \texttt{B[B]} $\longrightarrow$ \texttt{BB[B]} $\longrightarrow \emptyset$
+
+\end{flushleft}
+
+\paragraph{Note:}
+\begin{itemize}
+\item You may assume that the initial row of balls on the table won’t have any 3 or more consecutive balls with the same color.
+\item The number of balls on the table won't exceed 20, and the string represents these balls is called board in the input.
+\item The number of balls in your hand won't exceed 5, and the string represents these balls is called hand in the input.
+\item Both input strings will be non-empty and only contain characters $ R $, $ Y $, $ B $, $ G $, $ W $.
+\end{itemize}
+
+\subsection{Recursion}
+
+\begin{itemize}
+\item 遍历所有可能的情况来找出最优解，
+\item 用hash map来统计hand中每种球的个数，
+\item 然后遍历board，找连续相同球的个数，在没有可以消除的情况下，连续的个数只能是1个或2个，然后用3减去连续个数，就是需要补充的球数以使其可以被消除，
+\item 那么在hash map中看该类型的球够不够，如果enough就表示可以消除，在哈希表中减去需要使用掉的球数，然后将消掉的球移除，对新的字符串调用递归，如果可以成功消除，会返回一个结果，该结果加上之前需要的球数用来更新结果，
+\item 调用完递归要恢复hash map。
+\item 另外在刚进入递归函数时，需要去除当前字符串中连续3个相同球的情况。
+\end{itemize}
+
+\setcounter{lstlisting}{0}
+\begin{lstlisting}[style=customc, caption={DFS}]
+int findMinStep( string board, string hand )
+{
+    //create a hash map for hand
+    unordered_map<char, int> m;
+    m['R'] = 0;
+    m['Y'] = 0;
+    m['B'] = 0;
+    m['G'] = 0;
+    m['W'] = 0;
+    for( auto c : hand )
+    {
+        m[c] += 1;
+    }
+
+    //push back a special character
+    //to make sure the process can be
+    //triggered even if board last segments are
+    //consecutive characters
+    board.push_back( '#' );
+
+    int count = 10; //notice hand can only have 5 balls
+
+    count = dfs( board, m );
+
+    return count == 10 ? -1 : count;
+}
+
+int dfs( string board, unordered_map<char, int>& m )
+{
+    //remove the adjacent more than 2 balls
+    board = play( board );
+    if( board[0] == '#' )
+    {
+        //no any ball is needed
+        return 0;
+    }
+
+    int L = static_cast<int>( board.size() );
+    int count = 10;
+
+    for( int left = 0, right = 0; right < L; ++right )
+    {
+        if( board[left] == board[right] )
+        {
+            continue;
+        }
+
+        //now board[right] != board[left]
+        //but board[right-1] = board[left]
+        //so the balls with same colors from left
+        //are (right - left)
+        int balls_needed = 3 - ( right - left );
+
+        if( m[board[left]] >= balls_needed )
+        {
+            m[board[left]] -= balls_needed;
+
+            auto next = board.substr( 0, left );
+            next += board.substr( right );
+
+            int next_count = balls_needed + dfs( next, m );
+
+            count = ( min )( count, next_count );
+
+            //restore m[board[left]] for next time
+
+            m[board[left]] += balls_needed;
+        }
+
+        //update start index of next color ball
+        left = right;
+    }
+
+    return count;
+}
+//remove adjacent same balls
+string play( string board )
+{
+    for( size_t left = 0, right = 0; right < board.size(); ++right )
+    {
+        if( board[left] == board[right] )
+        {
+            continue;
+        }
+
+        if( right - left >= 3 )
+        {
+            //remove the same balls
+            auto next = board.substr( 0, left );
+            next += board.substr( right );
+
+            return play( next );
+        }
+
+        //update the start of next color ball
+        left = right;
+    }
+
+    return board;
+}
+\end{lstlisting}

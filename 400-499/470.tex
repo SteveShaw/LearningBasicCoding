@@ -1,0 +1,240 @@
+\section{470 --- Implement Rand10() Using Rand7()}
+Given a function \texttt{rand7} which generates a uniform random integer in the range 1 to 7, write a function \texttt{rand10} which generates a uniform random integer in the range 1 to 10.
+
+\paragraph{Example 1:}
+
+\begin{flushleft}
+\textbf{Input}: 1
+
+\textbf{Output}: [7]
+\end{flushleft}
+
+\paragraph{Example 2:}
+
+\begin{flushleft}
+\textbf{Input}: 2
+
+\textbf{Output}: [8,4]
+\end{flushleft}
+
+\paragraph{Example 3:}
+
+\begin{flushleft}
+\textbf{Input}: 3
+
+\textbf{Output}: [8,1,10]
+\end{flushleft}
+ 
+
+\paragraph{Note:}
+
+\begin{itemize}
+\item \texttt{rand7} is predefined.
+\item Each testcase has one argument: $n$, the number of times that rand10 is called.
+\end{itemize}
+ 
+
+\paragraph{Follow up:}
+
+\begin{itemize}
+\item What is the expected value for the number of calls to rand7() function?
+\item Could you minimize the number of calls to rand7()?
+\end{itemize}
+
+\subsection{Rejection Sampling}
+
+This solution is based upon \textbf{Rejection Sampling}. The main idea is when generating a number in the desired range, output that number immediately. If the number is out of the desired range, reject it and re-sample again. As each number in the desired range has the same probability of being chosen, a uniform distribution is produced.
+
+Obviously, \texttt{rand7()} function has to be run at least twice, as there are not enough numbers in the range of 1 to 10. Running \texttt{rand7} twice can generate integers from 1 to 49 uniformly. Why?
+
+\[
+\begin{bmatrix}
+ & \mathit{1} & \mathit{2} & \mathit{3} & \mathit{4} & \mathit{5} & \mathit{6} & \mathit{7} \\
+\mathit{1} & 1 & 2 & 3 & 4 & 5 & 6 & 7 \\ 
+\mathit{2} & 8 & 9 & 10 & 1 & 2 & 3 & 4 \\
+\mathit{3} & 5 & 6 & 7 & 8 & 9 & 10 & 1\\
+\mathit{4} & 2 & 3 & 4 & 5 & 6 & 7 & 8 \\
+\mathit{5} & 9 & 10 & 1 & 2 & 3 & 4 & 5 \\
+\mathit{6} & 6 & 7 & 8 & 9 & 10 & \ast & \ast \\
+\mathit{7} & \ast & \ast & \ast & \ast & \ast & \ast & \ast \\
+\end{bmatrix}
+\]
+
+As this table shows, Calling \texttt{rand7} twice will get row and column index that corresponds to a unique position in the table above. If a randomly chosen number from the table above hit a number, return that number immediately. If hit a $\ast$ , repeat the process again until hit a number.
+
+Since 49 is not a multiple of 10, reject sampling needs to be used to generate the number from the desired range which is $[1, 40]$. Therefore, if the number is in the range $[1, 40]$, return it immediately, otherwise, reject it and re-sample again.
+
+The expected value for the number of calls to \texttt{rand7} can be computed as follows
+\begin{itemize}
+\item Running 2 times and then get the number in range $[1, 40]$, the probability is $\dfrac{40}{49}$
+\item Running 4 times and then get the number in range $[1, 40]$. This means the first round only get number in $[41,49]$, therefore, the jointed probability is $\dfrac{9}{49}\times\dfrac{40}{49}$
+\item  依次类推 $\ldots$  
+\end{itemize}
+
+\begin{align*}
+E &= 2\times \dfrac{40}{49} + 4\times \dfrac{9}{40} \times \dfrac{40}{49} + 6\times \left(\dfrac{9}{40}\right)^{2} \times \dfrac{40}{49} +\ldots \\
+  &= \sum\limits_{i=1}^{\infty}\left(\dfrac{9}{40}\right)^{i-1}\left(\dfrac{40}{49}\right) \\
+  & = \dfrac{80}{49\times \left(1-\dfrac{9}{49}\right)^2} = 2.45
+\end{align*}
+
+\setcounter{algorithm}{0}
+\begin{algorithm}[H]
+\caption{Rejection Sampling}
+\begin{algorithmic}[1]
+\Procedure{Rand10}{}
+\Repeat
+\State $\ast$ To generate from range $[1,40]$, we have $(r-1)\times 7 +c$
+\State $r \gets$ \Call{rand7}{}
+\State $r\gets R-1$
+\State $c \gets$ \Call{rand7}{}
+\State $x \gets r\times 7 + c$
+\Until{$x \leq 40$}
+\State \Return $1+(x-1)\bmod 10$
+\EndProcedure
+\end{algorithmic}
+\end{algorithm}
+
+
+\setcounter{lstlisting}{0}
+\begin{lstlisting}[style=customc, caption={Rejection Sampling}]
+int rand10()
+{
+    //using rand7 generate
+    //row and column respectively
+    //To make the loop start
+    //set x to a large value
+    int x = 49;
+
+    //we need to select sample between [1,40]
+    //because 40 is multiple of 10
+    while( x > 40 )
+    {
+        int r = rand7();
+        int c = rand7();
+
+        x = ( r - 1 ) * 7 + c;
+    }
+
+    //generate number between [1,10]
+    return 1 + ( x - 1 ) % 10;
+}
+\end{lstlisting}
+
+
+\subsection{Out-of-range Sample Utilization}
+Here are a total of \textbf{2.45} calls to \textbf{rand7()} on average when using the first approach. However, the average number of calls to rand7() can be improved by about 10\%.
+
+The idea is that the \textbf{out-of-range} samples should not be disregarded, but instead use them to increase the chances of finding an in-range sample on the successive call to \textbf{rand7}.
+
+The algorithm process is listed as below:
+
+\begin{itemize}
+\item Starting by generating a random integer in the range 1 to 49 using the table same as in rejection sampling. 
+\item In the event that a generated number is outside the desired range $[1,40]$, it is equally likely that each number in $[41,49]$ would be chosen. In other words, integers in the range of 1 to 9 can be obtained uniformly. 
+\item Now, run \texttt{rand7} again to obtain integers in the range $[1,63]$ uniformly. Apply rejection sampling where the desired range is $[1,60]$ since 60 is the multiple of 10. 
+\item If the generated number is in the desired range $[1,60]$, return it. 
+\item Otherwise, at least integers of 1 to 3 can be obtained uniformly. Run \texttt{rand7} again to obtain integers in the range $[1,21]$ uniformly. The desired range is $[1,20]$, and in the unlikely event when a 21 is obtained, reject it and repeat the entire process again.
+\item 由于在上述 range $[1,21]$，只有一个数out side of range，即21，已经到达极限了，所以可以终止上述过程了。
+\end{itemize}
+
+The expected value for the number of calls to \texttt{rand7} can be computed as follows
+\begin{align*}
+E &= 2\times \dfrac{40}{49} + 3\times \dfrac{9}{40} \times \dfrac{60}{63} + 4\times \dfrac{9}{40} \times \dfrac{60}{63} \times \dfrac{20}{21}  \\
+  &+ \dfrac{9}{40} \times \dfrac{60}{63} \times \dfrac{1}{20} \times \left(6\times \dfrac{40}{49} + 7 \times \dfrac{9}{40} \times \dfrac{60}{63} + 8 \times \times \dfrac{9}{40} \times \dfrac{60}{63} \times \dfrac{20}{21}\right) \\
+  &+ \left(\dfrac{9}{40} \times \dfrac{60}{63} \times \dfrac{1}{20}\right)^2\times \left(10\times \dfrac{40}{49} + 11 \times \dfrac{9}{40} \times \dfrac{60}{63} + 12 \times \times \dfrac{9}{40} \times \dfrac{60}{63} \times \dfrac{20}{21}\right) \\
+  &+ \ldots \\
+  &= 2.2123 
+\end{align*}
+
+\subsubsection{Algorithm}
+\begin{algorithm}[H]
+\caption{Rejection Sampling With Out-of-range Utilization}
+\begin{algorithmic}[1]
+\Procedure{Rand10}{}
+\Loop
+\State $\ast$ Generate number in $[1,49]$
+\State $r \gets $ \Call{rand7}{}
+\State $c \gets $ \Call{rand7}{}
+\State $x \gets (r-1)\times 7 + c$
+\If{$x \leq 40$}
+\State \Return $1+(x-1)\bmod 10$ \Comment Return when in range $[1,40]$
+\EndIf
+\State $\ast$ Otherwise, generate $[1,63]$ for number in $[41,49]$
+\State $x\gets x - 40$ \Comment $x\in[1,9]$
+\State $\ast$ Generate another number in $[1,7]$
+\State $y \gets $ \Call{rand7}{}
+\State $x \gets (x-1)\times 7 + y$  \Comment $x\in [1, 63]$
+\If{$x \leq 60$}
+\State \Return $1+(x-1)\bmod 10$ \Comment Return when in range $[1,60]$
+\EndIf
+\State $\ast$ Otherwise, generate $[1,21]$ for number in $[1,3]$
+\State $x\gets x - 60$ \Comment $x \in [1,3]$
+\State $\ast$ Generate another number in $[1,7]$
+\State $y \gets $ \Call{rand7}{}
+\State $x \gets (x-1)\times 7 + y$  \Comment $x\in [1, 21]$
+\If{$x \leq 20$}
+\State \Return $1+(x-1)\bmod 10$
+\EndIf
+\EndLoop
+\EndProcedure
+\end{algorithmic}
+\end{algorithm}
+
+\setcounter{lstlisting}{0}
+\begin{lstlisting}[style=customc, caption={Out-of-range Utilization}]
+// The rand7() API is already defined for you.
+// int rand7();
+// @return a random integer in the range 1 to 7
+
+int rand10()
+{
+    while( true )
+    {
+        //generate [1,49]
+        int r = rand7();
+        int c = rand7();
+
+        int x = ( r - 1 ) * 7 + c;
+
+        if( x <= 40 )
+        {
+            //40 is multiple of 10
+            return 1 + ( x - 1 ) % 10;
+        }
+
+        //utilize out-of-range samples
+        //generate [1,63] for [41,49]
+        x -= 40;
+        int y = rand7();
+
+        x = ( x - 1 ) * 7 + y;
+
+        if( x <= 60 )
+        {
+            //60 is multiple of 10
+            return 1 + ( x - 1 ) % 10;
+        }
+
+        //utilize out-of-range samples
+        //generate [1,21] for [1,3]
+        x -= 60;
+        y = rand7();
+
+        x = ( x - 1 ) * 7 + y;
+
+        if( x <= 20 )
+        {
+            //20 is multiple of 10
+            return 1 + ( x - 1 ) % 10;
+        }
+        //since only 21 is the out-of-range sample
+        //no need to further the steps before
+        //start the process again
+    }
+
+    //this will never get
+    //only for compilation
+    return 0;
+}
+
+\end{lstlisting}

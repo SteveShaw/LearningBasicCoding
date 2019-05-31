@@ -1,0 +1,175 @@
+\section{487 --- Max Consecutive Ones II}
+\textcolor{red}{\large Locked}
+
+Given a binary array, find the maximum number of consecutive 1s in this array if you can flip at most one 0.
+
+\paragraph{Example 1:}
+
+\begin{flushleft}
+\textbf{Input}: $[1,0,1,1,0]$
+
+\textbf{Output}: 4
+
+\textbf{Explanation}: 
+
+Flip the first zero will get the the maximum number of consecutive 1s. After flipping, the maximum number of consecutive 1s is 4.
+\end{flushleft}
+ 
+
+\paragraph{Note:}
+
+\begin{itemize}
+\item The input array will only contain 0 and 1.
+\item The length of input array is a positive integer and will not exceed 10,000
+\end{itemize} 
+
+\paragraph{Follow up:}
+\begin{itemize}
+\item What if the input numbers come in one by one as an infinite stream? In other words, you can't store all numbers coming from the stream as it's too large to hold in memory. Could you solve it efficiently?
+\end{itemize}
+
+\subsection{Two Counters}
+\begin{itemize}
+\item 用两个counters $\alpha$和$\beta$
+\begin{enumerate}
+\item $\alpha$表示代表上一个0之前的length of consecutive ones
+\item $\beta$则表示当前0之前的length of consecutive ones
+\end{enumerate}
+\item 遍历数组，累加$\beta$，
+\item 如果遇到0，由于可以将一个0进行flip，因此可以不用decrements $\beta$。将$\alpha$ update为  $\beta$， 然后reset $\beta$ 为零，表示要重新计数当前的length of consecutive ones
+\item 另外将结果更新为$\alpha+\beta$。当没有遇到零时，$\beta$一直在累加，因此结果也在increments。
+\end{itemize}
+
+\setcounter{lstlisting}{0}
+\begin{lstlisting}[style=customc, caption={Two Counters}]
+int findMaxConsecutiveOnes( vector<int>& nums )
+{
+    //count 1s is the length of
+    //consecutive 1s before last 0
+    int count_1s = 0;
+
+    //cur_1s is number of consecutive 1s from last 0
+    int cur_1s = 0;
+
+    int ans = 0;
+
+    for( int n : nums )
+    {
+        //increments length of consecutive 1s
+        //from last 0
+        ++cur_1s;
+
+        if( n == 0 )
+        {
+            //since we can flipp one 0
+            //therefore we can assign to
+            //count_1s, no need to decrement
+            count_1s = cur_1s;
+
+            //reset current length of consecutive 1s
+            cur_1s = 0;
+        }
+
+        //if n is 1, cur_1s is incrementing
+        //therefore the result is also incrementing
+        ans = ( max )( ans, cur_1s + count_1s );
+    }
+
+    return ans;
+}
+\end{lstlisting}
+
+\subsection{Maintain A Slide Window}
+和字符串处理的slide window相似，
+\begin{itemize}
+\item 用两个变量$l$和$r$分别代表slide window的左右边界。
+\item 移动右边界$r$。如果遇到zero，就累加counts of zeros $\delta$。
+\item 如果$\delta$大于$k$(这里$k=1$)，那么就移动左边界$l$，直到sliding windows中只有$k$个zero。
+\item 然后将最终输出结果$\ell$更新为slide window的长度和当前$\ell$的较大值。
+\end{itemize}
+
+\begin{lstlisting}[style=customc, caption={Sliding Window}]
+int findMaxConsecutiveOnes( vector<int>& nums )
+{
+    //left boundary of sliding window
+    int l = 0;
+
+    int L = static_cast<int>( nums.size() );
+
+    //number of zeros
+    int delta = 0;
+
+    //how many zeros can contain in the sliding window
+    int k = 1;
+
+    int ans = 0;
+
+    for( int r = 0; r < L; ++r )
+    {
+        if( nums[r] == 0 )
+        {
+            ++delta;
+        }
+
+        //move left boundary of sliding window
+        //make sure there are only k zeros
+        //where k = 1
+        while( delta > k )
+        {
+            if( nums[l] == 0 )
+            {
+                --delta;
+            }
+            ++l;
+        }
+
+        //update the final result
+        ans = ( max )( ans, r - l + 1 );
+    }
+
+    return ans;
+}
+}
+\end{lstlisting}
+
+\subsection{Follow Up}
+由于不能保存之前的数字，因此上述sliding window的方法行不通，但是可以保存下0的位置，这样当sliding window中的zeros超过$k$时，可以从保存的队首的0的位置进行计算。最佳的数据结构是queue，这样需要弹出最前面的$0$时，只需从queue的队首开始处理。
+
+\begin{lstlisting}[style=customc, caption={Queue}]
+int findMaxConsecutiveOnes( vector<int>& nums )
+{
+    queue<int> q;
+
+    int L = static_cast<int>( nums.size() );
+
+    size_t k = 1;
+
+    int ans = 0;
+
+    int l = 0;
+
+    for( int r = 0; r < L; ++r )
+    {
+        if( nums[r] == 0 )
+        {
+            //push current zero's position
+            //into the queue
+            q.push( r );
+        }
+
+        if( q.size() > k )
+        {
+            //l will updated to the right element
+            //of q.front() because range [l,r]
+            //only contain k zeros
+            l = q.front() + 1;
+            q.pop();
+        }
+
+        ans = ( max )( ans, r - l + 1 );
+    }
+
+    return ans;
+
+}
+\end{lstlisting}

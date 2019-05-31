@@ -1,0 +1,58 @@
+\section{36 --- Valid Sudoku}
+Determine if a $9\times 9$ Sudoku board $B$ is valid. Only the filled cells need to be validated according to the following rules:
+
+\begin{itemize}
+\item Each row must contain the digits 1--9 without repetition.
+\item Each column must contain the digits 1--9 without repetition.
+\item Each of the 9 $3\times 3$ sub-boxes of the grid must contain the digits 1--9 without repetition.
+\end{itemize}
+
+The Sudoku board could be partially filled, where empty cells are filled with the character dot.
+
+\subsection{Bit Operation}
+\begin{itemize}
+\item 题目明确要求只验证fill的数字
+\item 由于只有9个数字，因此可以用位运算，用三个大小为9的数字分别存放行和列，以及block的flag结果。
+\item 对于当前位置$(r,c)$，其所在block的index为$r/3\times 3+c/3$.
+\end{itemize}
+
+\setcounter{lstlisting}{0}
+\begin{lstlisting}[style=customc, caption={Bit Operation}]
+bool isValidSudoku( vector<vector<char>>& board )
+{
+    vector<int> row_flag( 9, 0 );
+    vector<int> col_flag( 9, 0 );
+    vector<int> block_flag( 9, 0 );
+
+    for( int r = 0; r < 9; ++r )
+    {
+        for( int c = 0; c < 9; ++c )
+        {
+            if( board[r][c] == '.' )
+            {
+                continue;
+            }
+
+            //get the block index
+            int blk = r / 3 * 3 + c / 3;
+            //get the bit mask for current number
+            int mask = 1 << ( board[r][c] - '0' );
+
+            //check if current row r, current column c
+            //and current block has this number
+            if( ( row_flag[r] & mask ) || ( col_flag[c] & mask ) || ( block_flag[blk] & mask ) )
+            {
+                //the number has been appeared
+                return false;
+            }
+
+            row_flag[r] |= mask;
+            col_flag[c] |= mask;
+
+            block_flag[blk] |= mask;
+        }
+    }
+
+    return true;
+}
+\end{lstlisting}

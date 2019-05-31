@@ -1,0 +1,338 @@
+\section{32 --- Longest Valid Parentheses}
+Given a string $s$ containing just the characters left and right parenthesis, find the length of the longest valid (well-formed) parentheses substring.
+
+\paragraph{Example 1:}
+
+\begin{flushleft}
+\textbf{Input}: \texttt{(()}
+
+\textbf{Output}: 2
+
+\textbf{Explanation}: The longest valid parentheses substring is \texttt{()}
+\end{flushleft}
+
+\paragraph{Example 2:}
+\begin{flushleft}
+
+\textbf{Input}: \texttt{)()())}
+
+\textbf{Output}: 4
+
+\textbf{Explanation}: The longest valid parentheses substring is \texttt{()()}
+\end{flushleft}
+
+\subsection{Dynamic Programming}
+
+\begin{itemize}
+\item Denote $F(i)$ as the length of the longest valid substring ending at index $i$.
+\item The valid substring must end with \texttt{)}.
+\item Thus any substring ending with \texttt{)} at index $i$ will have $F(i)=0$ because it is not a valid substring. So, $F(i)$ is updated only when \texttt{)} is encountered.
+\end{itemize}
+
+To fill $F$, we will check every two consecutive characters of the string and if
+
+\begin{itemize}
+\item When $s[i-1]=\texttt{(}$, $s[i]=\texttt{)}$, obviously we have $F(i) = F(i-2)+2$. 
+\item When $s[i] = \text{)}$ and $s[i-1] = \text{)}$, we need to check the letter $c$ at index $i-F(i-1)-1$. If it is \texttt{(}, $F(i)\gets F(i-1) +  F(i-F(i-1)-2)+2$.
+\begin{enumerate}
+\item if $s[i-1]$ was a part of a valid substring $x$ and the substring $y$ ending at $i$ is also valid, there must be a left parentheses lies before $x$, i.e. $s$ looks like  $\ldots(x)$. Therefore $F(i)$ will include the length of $x$ which is $F(i-1)$ plus 2.
+\item Also, at the index $k = i - F(i-1) - 2$ which is before the left parenthesis lies before $x$, i.e. $\ldots s[k](x)$, there is also a valid substring ending at index $k$. This substring length is thus $F(i - F(i-1)-2)$.
+\end{enumerate}
+\end{itemize}
+
+\setcounter{algorithm}{0}
+\begin{algorithm}[H]
+\caption{Dynamic Programming}
+\begin{algorithmic}[1]
+\Procedure{LongestValidParentheses}{$S, L$}
+\State $\star$ Create an array $F$ with size $L$ and intialized all elements to zero
+\State $\ell:=0$ \Comment The result of maximum length
+\For{$i:=1$ \textbf{to} $L-1$}
+\If{$S[i]$ is \texttt{)}}
+\If{$S[i-1]$ is \texttt{(}} \Comment Condition 1
+\If{$i \ge 2$}
+\State $F[i] \gets F[i-2]+2 $
+\Else
+\State $F[i]\gets 2$
+\EndIf
+\Else 
+\State $p := i - F[i-1] - 1$
+\If{$p \ge 0$ \textbf{and} $S[p]$ is \texttt{(}} \Comment Condition 2
+\State $F[i] \gets F[i-1]+2 $
+\State $k := p-1$
+\If{$k\ge 0$} \Comment Add the length of valid substring ending at $k$
+\State $F[i] \gets F[i] + F[k]$
+\EndIf
+\EndIf
+\EndIf
+\EndIf
+\State $\ell \gets \max\left(F[i], \ell\right)$
+\EndFor
+\State \Return $\ell$
+\EndProcedure
+\end{algorithmic}
+\end{algorithm}
+
+\setcounter{lstlisting}{0}
+\begin{lstlisting}[style=customc, caption={Dynamic Programming}]
+int longestValidParentheses( string s )
+{
+
+    //DP array
+    vector<int> F( s.size(), 0 );
+
+    int L = static_cast<int>( s.size() );
+
+    int ans = 0;
+
+    for( int i = 1; i < L ; ++i )
+    {
+        if( s[i] == ')' )
+        {
+            if( s[i] == '(' )
+            {
+                //condition 1
+                //...()
+                F[i] = i >= 2 ? ( F[i - 2] + 2 ) : 2;
+            }
+            else
+            {
+                int p = i - F[i - 1] - 1;
+
+                if( ( p >= 0 ) && ( s[p] == '(' ) )
+                {
+                    //condition 2
+                    //....(x)
+                    F[i] = F[i - 1] + 2;
+
+                    if( p >= 1 )
+                    {
+                        //...s[p-1](x)
+                        F[i] += F[p - 1];
+                    }
+                }
+            }
+        }
+
+        //get the maximum length so far
+        ans = ( max )( ans, F[i] );
+    }
+
+    return ans;
+}
+\end{lstlisting}
+%
+\subsection{Stack}
+
+\begin{itemize}
+\item For every left parenthesis encountered, we push its index onto the stack $\Phi$.
+\item For every right parenthesis encountered, 
+\begin{enumerate}
+\item pop the top element $t_0$ from the stack.
+\item If $\Phi$ is empty, push current index $i$ into the stack.
+\item otherwise, $i-t$ gives the length of the current valid string of parentheses ($t$ is the current top of the stack). The reason is that $t$ must be on the left of $t_0$, i.e. $t = t_0-1$. Otherwise, it means there are some other left parenthesis between $t$ and $t_0$, but these left parenthesis are popped by some right parenthesis, this is \textbf{impossible}. Therefore, the length of current valid substring should be $i - t_0 + 1 = i-t$
+\end{enumerate}
+\item At beginning, push $-1$ onto the stack. It will bring two benefits: 
+\begin{enumerate}
+\item It will let the computation of valid substring length to be consistent, i.e. the length always be the current index minus the top element of stack.
+\item If the number of right parenthesis is larger than the number of left parenthesis, the pop of stack can always happen before checking if the stack is empty.
+\end{enumerate}
+\end{itemize}
+
+\begin{algorithm}[H]
+\caption{Stack Based Algorithm}
+\begin{algorithmic}[1]
+\Procedure{LongestValidParentheses}{$S, L$}
+\State $\star$ Initialize an empty stack $\Phi$
+\State $\star$ Push $-1$ to $\Phi$
+\State $\ell:=0$ \Comment The maximum length of valid substring
+\For{$i:=0$ \textbf{to} $L-1$}
+\If{$S[i]$ is left parenthesis}
+\State $\star$ Push $i$ into $\Phi$
+\Else
+\State $\star$ Pop from $\Phi$
+\If{$\Phi$ is empty}
+\State $\star$ Push $i$ into $\Phi$
+\Else
+\State $x := i - \Phi(0)$ \Comment The length of valid substring is the $i$ minus the top of $\Phi$
+\State $\ell\gets \max(\ell, x)$ \Comment Update the maximum length so far
+\EndIf
+\EndIf
+\EndFor
+\State \Return $\ell$
+\EndProcedure
+\end{algorithmic}
+\end{algorithm}
+
+\begin{lstlisting}[style=customc, caption={Stack}]
+int longestValidParentheses( string s )
+{
+    stack<int> stk;
+    //add -1 to unify the
+    //length calculation
+    stk.push( -1 );
+
+    int L = static_cast<int>( s.size() );
+    int ans = 0;
+    for( int i = 0; i < L; ++i )
+    {
+        if( s[i] == '(' )
+        {
+            //add index of left parenthesis to
+            //the stack
+            stk.push( i );
+        }
+        else
+        {
+            stk.pop();
+            if( stk.empty() )
+            {
+                //add current index to
+                //stack
+                stk.push( i );
+            }
+            else
+            {
+                //we found a valid substring
+                //with length i - stk.top()
+                ans = ( max )( ans, i - stk.top() );
+            }
+        }
+    }
+
+    return ans;
+}
+\end{lstlisting}
+
+
+\subsection{Two Counters}
+使用两个counter $x$和$y$分别记录左括号和右括号的个数。
+\begin{enumerate}
+\item 从左到右遍历$s$。当前是左括号时，increments $x$。否则，increments $y$。
+\item 如果$x=y$，那么找到了一个valid substring，记录其长度，并更新输出的最大长度。如果$x>y$，则将$x$和$y$都reset为零。
+\item 接着, 从右到左遍历$s$。$x$和$y$也是和上述方法一样更新，不过当$x<y$时，则将两个都reset为零。
+\end{enumerate}
+
+\begin{algorithm}[H]
+\caption{Two Counters}
+\begin{algorithmic}[1]
+\Procedure{LongestValidParentheses}{$S, L$}
+\State $\ell := 0$
+\State $\ast$ Initialize two counters $x :=0$ and $y := 0$ 
+\State $\ast$ Scanning from left to right
+\For{$i:=0$ \textbf{to} $L-1$}
+\If{$S[i]$ is left parenthesis}
+\State $x \gets x+1$
+\Else
+\State $y \gets y+1$
+\EndIf
+\If{$x<y$}
+\State $\ast$ Invalid substring, reset both counters
+\State $x \gets 0$
+\State $y\gets 0$
+\ElsIf{$x = y$} 
+\State $\ast$ Found a valid substring, the length is $x\times 2$
+\State $\ell \gets \max(\ell, 2x)$
+\EndIf
+\EndFor
+\State $\ast$ Scanning from right to left
+\State $x\gets 0$
+\State $y\gets 0$
+\For{$i:=L-1$ \textbf{to} $0$}
+\If{$S[i]$ is left parenthesis}
+\State $x \gets x+1$
+\Else
+\State $y \gets y+1$
+\EndIf
+\algstore{032algo}
+\end{algorithmic}
+\end{algorithm}
+\begin{algorithm}[H]
+\begin{algorithmic}[1]
+\algrestore{032algo}
+\If{$x > y$}
+\State $\ast$ Invalid substring, reset both counters
+\State $x \gets 0$
+\State $y\gets 0$
+\ElsIf{$x = y$}
+\State $\ast$ Found a valid substring, the length is $x\times 2$
+\State $\ell \gets \max(\ell, 2x)$
+\EndIf
+\EndFor
+\State \Return $\ell$
+\EndProcedure
+\end{algorithmic}
+\end{algorithm}
+
+\begin{lstlisting}[style=customc, caption={Double Counters}]
+int longestValidParentheses( string s )
+{
+
+    //number of left p when scanning from left to right
+    int x1 = 0;
+    //number of right p when scanning from left to right
+    int y1 = 0;
+
+    //number of left p when scanning from right to left
+    int x2 = 0;
+    //number of right p when scanning from right to left
+    int y2 = 0;
+
+    int ans = 0;
+
+    for( size_t i = 0; i < s.size(); ++i )
+    {
+        if( s[i] == '(' )
+        {
+            ++x1;
+        }
+        else
+        {
+            ++y1;
+        }
+
+        if( x1 < y1 )
+        {
+            //scanning from left to right
+            //x1 < y1 means we cannot find enough
+            //left p to match right p
+            x1 = 0;
+            y1 = 0;
+        }
+        else if( x1 == y1 )
+        {
+            ans = ( max )( ans, 2 * x1 );
+        }
+
+        //get information from right to left
+        auto j = s.size() - i - 1;
+
+        if( s[j] == '(' )
+        {
+            ++x2;
+        }
+        else
+        {
+            ++y2;
+        }
+
+
+        if( x2 > y2 )
+        {
+            //scanning from right to left
+            //y2 < x2 means we cannot find enough
+            //right p to match left p
+            x2 = 0;
+            y2 = 0;
+        }
+        else if( x2 == y2 )
+        {
+            ans = ( max )( ans, 2 * x2 );
+        }
+
+    }
+
+    return ans;
+}
+
+\end{lstlisting}

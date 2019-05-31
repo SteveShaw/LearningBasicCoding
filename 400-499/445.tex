@@ -1,0 +1,197 @@
+\section{445 --- Add Two Numbers II}
+You are given two non-empty linked lists representing two non-negative integers. The most significant digit comes first and each of their nodes contain a single digit. Add the two numbers and return it as a linked list.
+
+You may assume the two numbers do not contain any leading zero, except the number 0 itself.
+
+\paragraph{Follow up:}
+
+\begin{itemize}
+\item What if you cannot modify the input lists? In other words, reversing the lists is not allowed.
+\end{itemize}
+
+\paragraph{Example:}
+\begin{flushleft}
+
+\textbf{Input}:
+
+\begin{figure}[H]
+\begin{tikzpicture}
+[every node/.style={draw, circle,
+ minimum size=6mm, fill=gray!20!},
+  node distance=8mm, 
+  every join/.style={>=stealth,->},
+ thick
+]
+{
+[start chain]
+\node[on chain](0) {7};
+\node[on chain, join] {2};
+\node[on chain, join] {4};
+\node[on chain, join] {3};
+}
+
+{
+[start chain]
+\node[on chain,below = 7mm of 0] {5};
+\node[on chain, join] {6};
+\node[on chain, join] {4};
+}
+
+\end{tikzpicture}
+\end{figure}
+
+\textbf{Output}:
+
+\begin{figure}[H]
+\begin{tikzpicture}
+[start chain, 
+every node/.style={draw, circle,
+ minimum size=6mm, fill=gray!20!},
+  node distance=8mm, 
+  every join/.style={>=stealth,->},
+ thick
+]
+\node[on chain] {7};
+\node[on chain, join] {8};
+\node[on chain, join] {0};
+\node[on chain, join] {7};
+\end{tikzpicture}
+\end{figure}
+
+\end{flushleft}
+
+
+\subsection{Record Last Non-Nine Node}
+\begin{itemize}
+\item 技巧是记录链表中最后一个值不是9的node的位置，然后从这个位置往后，如果有进位发生，则该位置上的值加1，而后面的则都变为零。
+\end{itemize}
+
+
+\setcounter{lstlisting}{0}
+\begin{lstlisting}[style=customc, caption={Record Last Non-Nine Node}]
+/**
+ * Definition for singly-linked list.
+ * struct ListNode {
+ *     int val;
+ *     ListNode *next;
+ *     ListNode(int x) : val(x), next(NULL) {}
+ * };
+ */
+ListNode* addTwoNumbers( ListNode* l1, ListNode* l2 )
+{
+
+    int len1 = get_length( l1 );
+    int len2 = get_length( l2 );
+
+    //always set l1 as the longer list
+    if( len1 < len2 )
+    {
+        swap( l1, l2 );
+        swap( len1, len2 );
+    }
+
+    ListNode* dummy = new ListNode( 0 );
+
+    auto cur = dummy;
+
+    //the last node with value < 9
+    ListNode* last = cur;
+
+    int diff = len1 - len2;
+
+    auto x = l1;
+    auto y = l2;
+
+    //we first link the pre-parts of l1
+    while( diff )
+    {
+        cur->next = new ListNode( x->val );
+
+        if( x->val != 9 )
+        {
+            last = cur->next;
+        }
+
+        cur = cur->next;
+        x = x->next;
+
+        --diff;
+    }
+
+    //now do addition for both lists
+    while( y )
+    {
+        int val_x = x->val;
+        int val_y = y->val;
+
+        int sum = val_x + val_y;
+
+        if( sum >= 10 )
+        {
+            sum -= 10;
+
+            //the last node with
+            //value < 9
+            //increments its value
+            auto z = last;
+            z->val += 1;
+
+            //set values of all nodes after this node
+            //in the new list to zero
+            //since 9+1=10
+            while( z->next )
+            {
+                z->next->val = 0;
+                z = z->next;
+            }
+
+            //since its value set to zero
+            //this will be a possible last node
+            //with value < 9
+            last = z;
+        }
+
+        //Add a new node to the new list
+        cur->next = new ListNode( sum );
+        cur = cur->next;
+
+        if( cur->val != 9 )
+        {
+            //update the last node in the new list
+            //with value < 9
+            last = cur;
+        }
+
+        x = x->next;
+        y = y->next;
+    }
+
+    if( dummy->val == 0 )
+    {
+        return dummy->next;
+    }
+
+    //The first node has 1
+    //we need to return the whole list
+    return dummy;
+}
+
+//helper function to get length of each list
+int get_length( ListNode* head )
+{
+    auto node = head;
+
+    int l = 0;
+
+    while( node )
+    {
+        ++l;
+        node = node->next;
+    }
+
+    return l;
+}
+
+\end{lstlisting}
+
+

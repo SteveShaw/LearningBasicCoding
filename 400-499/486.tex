@@ -1,0 +1,213 @@
+\section{486 --- Predict the Winner}
+Given an array of scores $A$ that are non-negative integers. Player 1 picks one of the numbers from either end of the array followed by the player 2 and then player 1 and so on. Each time a player picks a number, that number will not be available for the next player. This continues until all the scores have been chosen. The player with the maximum score wins.
+
+Given an array of scores, predict whether player 1 is the winner. You can assume each player plays to maximize his score.
+
+\paragraph{Example 1:}
+
+\begin{flushleft}
+\textbf{Input}: $[1, 5, 2]$
+
+\textbf{Output}: \texttt{False}
+
+\textbf{Explanation}: 
+
+Initially, player 1 can choose between 1 and 2. 
+
+If he chooses 2 (or 1), then player 2 can choose from 1 (or 2) and 5. If player 2 chooses 5, then player 1 will be left with 1 (or 2). 
+
+So, final score of player 1 is $1 + 2 = 3$, and player 2 is 5. 
+
+Hence, player 1 will never be the winner and you need to return False.
+
+\end{flushleft}
+
+\paragraph{Example 2:}
+
+\begin{flushleft}
+\textbf{Input}: $[1, 5, 233, 7]$
+
+\textbf{Output}: \texttt{True}
+
+\textbf{Explanation}: 
+
+Player 1 first chooses 1. Then player 2 have to choose between 5 and 7. No matter which number player 2 choose, player 1 can choose 233.
+
+Finally, player 1 has more score (234) than player 2 (12), so you need to return True representing player1 can win.
+
+\end{flushleft}
+
+\paragraph{Note:}
+\begin{itemize}
+\item $1 \leq \lvert A\rvert \leq 20$.
+\item Any scores in the given array are non-negative integers and will not exceed 10,000,000.
+\item If the scores of both players are equal, then player 1 is still the winner.
+\end{itemize}
+
+\subsection{Min-Max Algorithm}
+
+采用Min-Max方法: denote player 1 as $x$ and player 2 as $y$. Also, denote $S(x)$ and $S(y)$ as the scores of $x$ and $y$
+
+\begin{itemize}
+\item If $x$ win, then $S(x) \geq S(y)$.
+\end{itemize}
+
+Thus, for the turn of $x$, we can add $S(x)$ to the total score $T$ and for $y$'s turn, subtract $S(y)$ from the total score $T$. At the end, we can check if $T\geq 0$ to predict that $x$ will be the winner.
+
+\paragraph{The Recursive Function}
+\begin{itemize}
+\item The recursive function $F$ will take $A$ with boundary $b$ and $e$. $F$ also needs to be told who is playing now. Therefore, add another variable $p$ to indicate who is playing. $p=0$ is $x$ playing and $p=1$ means $y$ is playing. 
+
+\item In every turn, we can either pick up the first ($A[b]$) or the last($A[e]$) element of the current subarray. Since both the players are assumed to be playing smartly and making the best move at every step, both will tend to maximize their scores. Thus, we can make use of $F$ to determine the maximum score possible for any of the players.
+
+\item Now, at every step of the recursive process, we determine the maximum score possible for the current player. It will be the maximum one possible out of the scores obtained by picking the first or the last element of the current subarray.
+
+\item To obtain the score possible from the remaining subarray, we can again make use of the same $F$ function and add the score corresponding to the point picked in the current function call. But, we need to take care of whether to add or subtract this score to the total score $T$ available. If it is $x$'s turn, we add the current number's score to the total score, otherwise, we need to subtract the score.
+
+\item Thus, at every step, we need update the search space appropriately based on the element chosen and also change $p$'s value to indicate the turn change among the players. 
+
+\begin{enumerate}
+\item From $x$'s perspective, the total value $T$ we defined should be as maximum as possible. Therefore, $x$ will always choose the maximum one from the 2 selections.
+\item From $y$'s perspective, the total value $T$ we defined should be as minimum as possible. Therefore, $y$ will always choose the minimum one from the 2 selections.
+\end{enumerate}
+
+\item The is is a general criteria for any arbitrary two player game and is commonly known as the \textbf{Min-Max} algorithm.
+\end{itemize}
+
+
+\setcounter{lstlisting}{0}
+\begin{lstlisting}[style=customc, caption={Min-Max Recursive Approach}]
+bool PredictTheWinner( vector<int>& nums )
+{
+    int L = static_cast<int>( nums.size() );
+
+    int v = dfs( nums, 0, L - 1, 0, 0 );
+
+    return v >= 0;
+}
+
+//the return result is the score that the person p plays can get
+//total is the total score before person p plays
+//start and end is current range of array that player p can choose
+int dfs( vector<int>& A, int start, int end, int total, unsigned char p )
+{
+    if( start == end )
+    {
+        return p ? total - A[start] : total + A[start];
+    }
+
+    int x = total;
+    int y = total;
+
+    if( p )
+    {
+        //person 2 is playing
+        //from person 2's perspective
+        //the defined total value from playing the game
+        //should be as minimal as possible
+        x = dfs( A, start + 1, end, total - A[start], 1 - p );
+        y = dfs( A, start, end - 1, total - A[end], 1 - p );
+
+        return ( min )( x, y );
+    }
+
+    //person 1 is now playing
+    //from person 1's perspective
+    //the defined total value from playing the game
+    //should be as maximum as possible
+    x = dfs( A, start + 1, end, total + A[start], 1 - p );
+    y = dfs( A, start, end - 1, total + A[end], 1 - p );
+
+    return ( max )( x, y );
+}
+
+\end{lstlisting}
+
+\subsection{Recursive Without Knowing Who is Playing}
+我们可以忽略判断当前是谁在playing。
+
+\begin{itemize}
+\item If the current turn belongs to Player 1 $x$, pick up an element $t$ from either end, and give the turn to Player 2 $y$. Then we call the recursive function to get the score for player 2, i.e. $S(y)$. Since Player 2 is competing against Player 1, this score should be subtracted from Player 1's current score $t$ to obtain the effective score of Player 1.
+
+\item Similar argument holds true for Player 2's turn as well i.e. we can subtract Player 1's score $S(x)$ for the remaining subarray from Player 2's current score to obtain its effective score. 
+
+\item For each function call, we just return the larger of two effective scores choosing either the first or the last element from the currently available subarray. Rest of the process remains the same as the last approach.
+
+\item In order to remove the duplicate function calls, we can make use of a 2-D memoization array, $M$ such that we can store the result obtained for the function call for a subarray with starting and ending indices being $b$ and $e$ at $M[s][e]$.
+\end{itemize}
+
+\setcounter{lstlisting}{0}
+\begin{lstlisting}[style=customc, caption={Recursive With Memorization}]
+bool PredictTheWinner( vector<int>& nums )
+{
+    int L = static_cast<int>( nums.size() );
+
+    //the memorization of the result for range [b,e]
+    vector<vector<int>> memo( nums.size(), vector<int>( nums.size(), -1 ) );
+
+    return dfs( nums, 0, L - 1, memo ) >= 0;
+}
+
+int dfs( vector<int>& A, int start, int end, vector<vector<int>>& memo )
+{
+    if( start == end )
+    {
+        return A[start];
+    }
+
+    if( memo[start][end] >= 0 )
+    {
+        return memo[start][end];
+    }
+
+    //get the effective score for current player
+    //when select the first item of subarray of A
+    int x = A[start] - dfs( A, start + 1, end, memo );
+
+    //get the effective score for current player
+    //when select the last item of subarray of A
+    int y = A[end] - dfs( A, start, end - 1, memo );
+
+    memo[start][end] = ( max )( x, y );
+
+    return ( max )( x, y );
+}
+
+\end{lstlisting}
+
+\subsection{2D Dynamic Programming}
+上述的memorization可以转换为bottom-up的Dynamic Programming。
+
+\textbf{TODO: show the deduction process for this formula}
+
+Denote $F[s][e]$ as the maximum effective scores can be obtained for current player in subarray $A[s\ldots e]$. Then we have the recursive relationship: $F[s][e] = \max(A[s] - F[s1][e], A[e] - F[s][e-1])$. Finally, we check if $F[0][L-1]$ is equal or larger than zero. ($L=\lvert A\rvert$).
+
+
+\setcounter{lstlisting}{0}
+\begin{lstlisting}[style=customc, caption={2D Dynamic Programming}]
+bool PredictTheWinner( vector<int>& nums )
+{
+    int L = static_cast<int>( nums.size() );
+
+    vector<vector<int>> F( nums.size(), vector<int>( nums.size(), -1 ) );
+
+    for( int i = 0; i < L; ++i )
+    {
+        F[i][i] = nums[i];
+    }
+
+    for( int l = 2; l <= L; ++l )
+    {
+        for( int s = 0; s + l - 1 < L; ++s )
+        {
+            int e = s + l - 1;
+
+            //The effective score
+            F[s][e] = max( nums[s] - F[s + 1][e], nums[e] - F[s][e - 1] );
+        }
+    }
+
+    return F[0][L - 1] >= 0;
+}
+
+\end{lstlisting}

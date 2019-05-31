@@ -1,0 +1,148 @@
+\section{34 --- Find First and Last Position of Element in Sorted Array}
+Given an array of integers $A$ sorted in ascending order, find the starting and ending position of a given target value.
+
+Your algorithm's runtime complexity must be in the order of $O(log n)$.
+
+If the target is not found in the array, return $[-1, -1]$.
+
+\paragraph{Example 1:}
+
+\begin{flushleft}
+\textbf{Input}: $A = [5,7,7,8,8,10]$, $T = 8$
+
+\textbf{Output}: $[3,4]$
+\end{flushleft}
+
+\paragraph{Example 2:}
+
+\begin{flushleft}
+\textbf{Input}: $A = [5,7,7,8,8,10]$, $T = 6$
+
+\textbf{Output}: $[-1,-1]$
+\end{flushleft}
+
+\subsection{Binary Search}
+实际上是有重复元素的二分搜索，或者是lower bound和upper bound的结合，
+
+Given an array $A$ of $n$ elements with values $A_0, A_1, \ldots, A_{n-1}$, sorted such that $A_0 \leq A_1 \leq \ldots \leq A_{n-1}$, and target value $T$
+To find the leftmost element, the following procedure can be used:
+\begin{enumerate}
+    \item Set $L$ to 0 and $R$ to $n$.
+    \item If $L \geq R$, go to step \ref{bs-step6}. \label{bs-step2}
+    \item Set $m$ (the position of the middle element) to the floor of $\dfrac{L + R}{2}$, which is the greatest integer less than or equal to $\dfrac{L + R}{2}$
+    \item If $A_m < T$, set $L$ to $m + 1$ and go to step \ref{bs-step2}.
+    \item Otherwise, if $A_m \geq T$, set $R$ to $m$ and go to step \ref{bs-step2}.
+    \item Now $L = R$, the search is done, return $L$. \label{bs-step6}
+\end{enumerate}
+If $L < n$ and $A_L = T$, then $A_L$ is the \textbf{leftmost} element that equals $T$. Even if $T$ is not in the array, $L$ is the rank of in the array, or the number of elements in the array that are less than T.
+\setcounter{algorithm}{0}
+\begin{algorithm}[H]
+\caption{Leftmost Binary Search}
+\begin{algorithmic}[1]
+\Function{BinarySearchLeftmost}{$A$, $n$, $T$}
+\State $L := 0$
+\State $R := n$
+\While{$L < R$}
+\State $M := \lfloor\dfrac{L+R}{2}\rfloor$
+\If{$A[M] < T$}
+\State $L\gets M+1$
+\Else
+\State $R\gets M$
+\EndIf
+\EndWhile
+\State \Return $L$
+\EndFunction
+\end{algorithmic}
+\end{algorithm}
+
+To find the rightmost element, the following procedure can be used
+\begin{enumerate}
+    \item Set $L$ to 0 and $R$ to $n$.
+    \item If $L \geq R$, go to step \ref{bsr-step6}. \label{bsr-step2}
+    \item Set $m$ (the position of the middle element) to the floor of $\dfrac{L + R}{2}$, which is the greatest integer less than or equal to $\dfrac{L + R}{2}$
+    \item If $A_m \leq T$, set $L$ to $m + 1$ and go to step \ref{bs-step2}.
+    \item Otherwise, if $A_m \geq T$, set $R$ to $m$ and go to step \ref{bsr-step2}.
+    \item Now $L = R$, the search is done, return $L$. \label{bsr-step6}
+\end{enumerate}
+If $L > 0$ and $A_{L-1} = T$, then $A_{L-1}$ is the \textbf{rightmost} element that equals $T$. Even if $T$ is not in the array, $(n - 1) - L$ is the number of elements in the array that are greater than T.
+\begin{algorithm}[H]
+\caption{Rightmost Binary Search}
+\begin{algorithmic}[1]
+\Function{BinarySearchRightmost}{$A$, $n$, $T$}
+\State $L := 0$
+\State $R := n$
+\While{$L < R$}
+\State $M := \lfloor\dfrac{L+R}{2}\rfloor$
+\If{$A[M] \geq T$}
+\State $L\gets M+1$
+\Else
+\State $R\gets M$
+\EndIf
+\EndWhile
+\State \Return $L$
+\EndFunction
+\end{algorithmic}
+\end{algorithm}
+
+\setcounter{lstlisting}{0}
+\begin{lstlisting}[style=customc, caption={Leftmost And Rightmost Binary Search}]
+vector<int> searchRange( vector<int>& nums, int target )
+{
+    if( nums.empty() )
+    {
+        return {-1, -1};
+    }
+
+    int l = 0;
+    int r = static_cast<int>( nums.size() );
+
+    //find the first number that is >= target
+    while( l < r )
+    {
+        int mid = ( l + r ) / 2;
+        if( nums[mid] < target )
+        {
+            l = mid + 1;
+        }
+        else
+        {
+            r = mid;
+        }
+    }
+
+    if( l == static_cast<int>( nums.size() ) )
+    {
+        //no element equal to target
+        return {-1, -1};
+    }
+
+    if( nums[l] != target )
+    {
+        //nums[l] > target not equal
+        return {-1, -1};
+    }
+
+    vector<int> ans{l, l};
+
+    r = static_cast<int>( nums.size() );
+
+    //find the first number that > target
+    while( l < r )
+    {
+        int mid = ( l + r ) / 2;
+        if( nums[mid] <= target )
+        {
+            l = mid + 1;
+        }
+        else
+        {
+            r = mid;
+        }
+    }
+
+    //appreantly, the nums[l-1]=target
+    ans[1] = l - 1;
+
+    return ans;
+}
+\end{lstlisting}

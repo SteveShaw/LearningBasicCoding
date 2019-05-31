@@ -1,0 +1,98 @@
+\section{29 --- Divide Two Integers}
+Given two integers $A$ and $B$, divide $A$ by $B$ without using multiplication, division and mod operator.
+
+Return the quotient after dividing dividend by divisor.
+
+The integer division should truncate toward zero.
+
+\paragraph{Example 1:}
+
+\begin{flushleft}
+\textbf{Input}: $A = 10$, $B = 3$
+
+\textbf{Output}: 3
+\end{flushleft}
+
+\paragraph{Example 2:}
+
+\begin{flushleft}
+\textbf{Input}: $A = 7$, $B = -3$
+
+\textbf{Output}: $-2$
+\end{flushleft}
+
+\paragraph{Note:}
+
+\begin{itemize}
+\item Both dividend $A$ and divisor $B$ will be 32-bit signed integers.
+\item The divisor $B$ will never be 0.
+\item Assume we are dealing with an environment which could only store integers within the 32-bit signed integer range: $[−2^{31},  2^{31} − 1]$. For the purpose of this problem, assume that your function returns $2^{31} − 1$ when the division result overflows.
+\end{itemize}
+
+\subsection{Left Shift}
+\begin{itemize}
+\item 由于每次左移相当于乘以2，因此每次尽量将divisor左移，看最多能左移多少位仍然小于被除数。
+\item 找到这个最大的左移位数 $s$ 后，将被除数减去divisor左移这么多位后的结果，同时累加$2^s$到商中。
+\item 如果被除数仍然大于或者等于除数，继续上述过程。
+\end{itemize}
+
+\setcounter{lstlisting}{0}
+\begin{lstlisting}[style=customc, caption={Left Shift}]
+int divide( int dividend, int divisor )
+{
+
+    if( ( dividend == INT_MIN ) && ( divisor == -1 ) )
+    {
+        return INT_MAX;
+    }
+
+
+    int sign = 1;
+    if( ( dividend > 0 ) && ( divisor < 0 ) )
+    {
+        sign = -1;
+    }
+
+    if( ( dividend < 0 ) && ( divisor > 0 ) )
+    {
+        sign = -1;
+    }
+
+    //change to long long to avoid overflow
+    auto x = static_cast<long long>( dividend );
+    auto y = static_cast<long long>( divisor );
+
+    //change both to
+    //positive numbers
+    x = abs( x );
+    y = abs( y );
+
+
+    long long q = 0;
+
+
+    //the condition is x>=y
+    //not x>y because when x can be divided by y
+    //quotient is 1
+    while( x >= y )
+    {
+        auto z = y;
+        long long count = 1;
+        //find 2^{count} * z <= x
+        while( ( z << 1 ) < x )
+        {
+            z <<= 1;
+            count <<= 1;
+        }
+
+        //add the number of z
+        //2^{count}
+        q += count;
+        //remove from x
+        x -= z;
+    }
+
+    return q * sign;
+}
+
+\end{lstlisting}

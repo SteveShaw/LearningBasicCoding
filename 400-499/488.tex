@@ -1,0 +1,45 @@
+\section{488 --- Zuma Game}
+Think about Zuma Game. You have a row of balls on the table, colored red($ R $), yellow($ Y $), blue($ B $), green($ G $), and white($ W $). You also have several balls in your hand.
+
+Each time, you may choose a ball in your hand, and insert it into the row (including the leftmost place and rightmost place). Then, if there is a group of 3 or more balls in the same color touching, remove these balls. Keep doing this until no more balls can be removed.
+
+Find the minimal balls you have to insert to remove all the balls on the table. If you cannot remove all the balls, output $-1$.
+
+\paragraph{Examples:}
+
+\begin{flushleft}
+
+\textbf{Input}: \texttt{WRRBBW}, \texttt{RB}
+
+\textbf{Output}: -1
+
+\textbf{Explanation}: \texttt{WRRBBW} $\rightarrow$ \texttt{WRR[R]BBW} $\rightarrow$ \texttt{WBBW} $ \rightarrow $ \texttt{WBB[B]W} $ \rightarrow $ \texttt{WW}
+
+\textbf{Input}: \texttt{WWRRBBWW}, \texttt{WRBRW}
+
+\textbf{Output}: 2
+
+\textbf{Explanation}: \texttt{WWRRBBWW} $\longrightarrow$ \texttt{WWRR[R]BBWW} $\longrightarrow$ \texttt{WWBBWW} $\longrightarrow$ \texttt{WWBB[B]WW} $\longrightarrow$ WWWW $\longrightarrow$ empty
+
+\textbf{Input}:\texttt{G}, \texttt{GGGGG}
+
+\textbf{Output}: 2
+
+\textbf{Explanation}: \texttt{G} $\longrightarrow$ \texttt{G[G]} $\longrightarrow$ \texttt{GG[G]} $\longrightarrow$ $\emptyset$
+
+
+\textbf{Input}: RBYYBBRRB, YRBGB
+
+\textbf{Output}: 3
+
+\textbf{Explanation}: \texttt{RBYYBBRRB} $\longrightarrow$ \texttt{RBYY[Y]BBRRB} $\longrightarrow$ \texttt{RBBBRRB} $\longrightarrow$ \texttt{RRRB} $\longrightarrow$ \texttt{B} $\longrightarrow$ \texttt{B[B]} $\longrightarrow$ \texttt{BB[B]} $\longrightarrow \emptyset$
+
+\end{flushleft}
+
+\paragraph{Note:}
+\begin{itemize}
+\item You may assume that the initial row of balls on the table won’t have any 3 or more consecutive balls with the same color.
+\item The number of balls on the table won't exceed 20, and the string represents these balls is called board in the input.
+\item The number of balls in your hand won't exceed 5, and the string represents these balls is called hand in the input.
+\item Both input strings will be non-empty and only contain characters $ R $, $ Y $, $ B $, $ G $, $ W $.
+\end{itemize}

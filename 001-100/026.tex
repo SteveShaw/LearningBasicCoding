@@ -1,0 +1,105 @@
+\section{26 --- Remove Duplicates from Sorted Array}
+
+Given a sorted array $A$, remove the duplicates in-place such that each element appear only once and return the new length.
+
+Do not allocate extra space for another array, you must do this by modifying the input array in-place with $O(1)$ extra memory.
+
+\paragraph{Example 1:}
+
+\begin{flushleft}
+\textbf{Input}: $A = [1,1,2]$
+
+\textbf{Output}: 2
+
+\textbf{Explanation}: Your function should return length equal to 2 with the first two elements of $A$ being 1 and 2 respectively.
+\end{flushleft}
+
+\paragraph{Example 2:}
+
+\begin{flushleft}
+\textbf{Input}: $A = [0,0,1,1,1,2,2,3,3,4]$
+
+\textbf{Output}: 5
+
+\textbf{Explanation}: 
+Your function should return length equal to 5, with the first five elements of nums being modified to 0, 1, 2, 3, and 4 respectively. 
+
+It doesn't matter what values are set beyond the returned length.
+\end{flushleft}
+
+\subsection{Binary Search With Two Pointers}
+\begin{itemize}
+\item 用一个write指针代表写入的位置，用read指针从$A$中读取数字。
+\item 遇到重复数字，用rightmost binary search快速定位第一个与当前数字不同的数字。
+\end{itemize}
+
+\setcounter{lstlisting}{0}
+\begin{lstlisting}[style=customc, caption={Binary Search With Two Pointers}]
+int removeDuplicates( vector<int>& nums )
+{
+    int L = static_cast<int>( nums.size() );
+
+    int write = 0;
+
+    int i = 0;
+
+    while( i < L )
+    {
+        if( i == L - 1 )
+        {
+            nums[write] = nums[i];
+            ++write;
+            break;
+        }
+
+        if( nums[i] == nums[i + 1] )
+        {
+            //search for the end of duplicate
+            //by binary search
+
+            int l = i;
+            int r = L;
+
+            //rightmost binary search
+            //find the first element
+            //that is larger than nums[i]
+
+            while( l < r )
+            {
+                int m = ( l + r ) / 2;
+                if( nums[m] <= nums[i] )
+                {
+                    l = m + 1;
+                }
+                else
+                {
+                    r = m;
+                }
+            }
+
+            //write current element into write
+            nums[write] = nums[i];
+            //increments the write
+            ++write;
+
+            //set next start at l
+            i = l;
+        }
+        else
+        {
+            //nums[i] is not duplicate
+            //directly put into write
+            nums[write] = nums[i];
+            //increments the write
+            ++write;
+            //increments i
+            ++i;
+        }
+    }
+
+    //nums[0...write-1] are all unique elements
+    return write;
+}
+\end{lstlisting}
+
+

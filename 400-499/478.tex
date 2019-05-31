@@ -1,0 +1,122 @@
+\section{478 --- Generate Random Point in a Circle}
+Given the radius $r$ and $(x,y)$ positions of the center of a circle, write a function which generates a uniform random point in the circle.
+
+\paragraph{Note:}
+
+\begin{itemize}
+\item input and output values are in floating-point.
+\item $r$ and $(x,y)$ position of the center of the circle is passed into the class constructor.
+\item a point on the circumference of the circle is considered to be in the circle.
+\item Function returns a size 2 array containing $x$-position and $y$-position of the random point, in that order.
+
+\end{itemize}
+
+\subsection{Inverse Transform}
+To generate random values according to a custom distribution by using a function that generates uniform random values between 0 and 1, we can use the inverse transform sampling method.
+
+\begin{itemize}
+\item Create the cumulative distribution function (\texttt{CDF})
+\item Mirror the \texttt{CDF} along $y = x$
+\item Apply the resulting function to a uniform value between 0 and 1
+\end{itemize}
+
+For example, Suppose we want to generate a random point with the following distribution:
+
+\begin{itemize}
+\item $1/5$ of the points uniformly between 1 and 2, and
+\item $4/5$ of the points uniformly between 2 and 3.
+\end{itemize}
+
+The \textbf{probability density function} (PDF) in this case would look like this:
+\[
+P(x) = 
+\begin{cases}
+0  &  x < 1 \\
+\frac{1}{5}  & 1\leq x<2 \\
+\frac{4}{5} & 2\leq x <3 \\
+0 & x\geq 3
+\end{cases}
+\]
+
+\paragraph{Step 1: Create the CDF}
+
+
+The \texttt{CDF} is, as the name suggests, the cumulative version of the \texttt{PDF}. Intuitively: While \texttt{PDF} $p(x)$ describes the number of random values at $x$, \texttt{CDF} $\Phi(x)$ describes the number of random values less than $x$.
+
+Since we're working with reals, the \texttt{CDF} is expressed as the integral of the \texttt{PDF}. In this case the \texttt{CDF} would look like:
+
+\[
+\Phi(x) = 
+\begin{cases}
+0 & x < 1 \\
+\int_{1}^{x}\frac{1}{5}dx = \frac{1}{5}(x-1) & 1\leq x < 2 \\
+\frac{1}{5} + \int_{2}^{x}\frac{4}{5}dx = \frac{1}{5} + \frac{4}{5}(x-2) & 2\leq x < 3 \\
+1 & x \geq 3
+\end{cases}
+\]
+
+
+\paragraph{Step 2: Inverse the CDF}
+
+By inversing the \texttt{CDF}, we get $\Phi^{-1}(x)$. Mathematically this boils down to swapping $x$ and $y$ and solving for $y$. For example, suppose $\Phi(x) = x^2$. Denote $y=\Phi(x)$. 
+
+\begin{enumerate}
+\item Swap $x$ and $y$, we get $x=y^2$
+\item Solve $y$ by $x$, we get $y=\sqrt{x}$
+\item Thus $\Phi^{-1}(x) = \sqrt{x}$
+\end{enumerate}
+
+
+\paragraph{Step 3: Apply the resulting function to a uniform value between 0 and 1}
+
+With the $\Phi^{-1}(x)$ we have all we need. We now simply feed it with uniformly random values between 0 and 1 through function $f$: $\Phi^{-1}(f())$. The result is random values with the desired distribution. Taking the example in Step 2, we get the inverse CDF $\Phi^{-1}(x) = \sqrt{x}$, thus we can get the random values from the uniform random input from the function $\sqrt{f()}$.
+
+In this problem, to generate uniformly distributed numbers within a circle of radius $R$ in the $(x,y)$ plane. At first polar coordinates seems like a great idea, and the naive solution is to pick a radius $r$ uniformly distributed in $[0, R]$, and then an angle $\theta$ uniformly distributed in $[0, 2\pi]$. But, we will end up with an excess of points near the origin $(0, 0)$.  This is wrong because if we look at a certain angle interval, say $[\theta, \theta+\Delta\theta]$, there needs to be more points generated further out (at large $r$), than close to zero. As a result, the radius $r$ must not be picked from a uniform distribution, but a \texttt{pdf} function $p(r) = 2r/R^2$.
+
+By integral, we get the \texttt{CDF} function $\Phi(r) = \int_{-\infty}^{r}\dfrac{2r}{R^2} = \dfrac{r^2}{R^2}$. Apply the process in Step 2
+\begin{enumerate}
+\item Swap $r$ and $y$: $r=\dfrac{y^2}{R^2}$
+\item Solve $y$ by $r$: $y=\sqrt{R^2 r}=R\sqrt{r}$
+\item We generate random uniform values for $r$ and get $y$ through $y=R\sqrt(r)$ to get the uniform values of radius.
+\end{enumerate}
+
+Lastly, we generate the uniform angle $\theta$ in $[0, 2\pi]$. Then convert from polar coordinate to Cartesian coordinate, we get
+\begin{align*}
+x &= r\times \cos\theta\\
+y &= r\times \sin\theta
+\end{align*}
+
+
+\setcounter{lstlisting}{0}
+\begin{lstlisting}[style=customc, caption={Inverse Transform}]
+class Solution
+{
+public:
+    Solution( double radius, double x_center, double y_center )
+        : m_r( radius )
+        , m_x( x_center )
+        , m_y( y_center )
+    {
+        random_device rd;  //Will be used to obtain a seed for the random number engine
+        m_gen.seed( rd() ); //Standard mersenne_twister_engine seeded with rd()
+    }
+
+    vector<double> randPoint()
+    {
+        //generate angle
+        double theta = m_dis( m_gen ) * 2 * 3.1415926;
+        //generate raidus
+        double r = sqrt( m_dis( m_gen ) ) * m_r;
+
+        return {m_x + r * cos( theta ), m_y + r * sin( theta )};
+
+    }
+
+    mt19937 m_gen;
+    uniform_real_distribution<> m_dis;
+
+    double m_r;
+    double m_x;
+    double m_y;
+};
+\end{lstlisting}
