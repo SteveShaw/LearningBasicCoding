@@ -1,0 +1,89 @@
+\section{43 --- Multiply Strings}
+Given two non-negative integers $A$ and $B$ represented as strings, return the product of $A$ and $B$, also represented as a string.
+
+\paragraph{Example 1:}
+
+\begin{flushleft}
+\textbf{Input}: $A = 2$, $B = 3$
+
+\textbf{Output}: 6
+\end{flushleft}
+
+\paragraph{Example 2:}
+
+\begin{flushleft}
+\textbf{Input}: $A = 123$, $B = 456$
+
+\textbf{Output}: 56088
+\end{flushleft}
+
+\paragraph{Note:}
+
+\begin{itemize}
+\item The length of both $A$ and $B$ is less than 110.
+\item Both $A$ and $B$ contain only digits $0--9$.
+\item Both $A$ and $B$ do not contain any leading zero, except the number 0 itself.
+\item You must not use any built-in \textbf{BigInteger} library or convert the inputs to integer directly.
+\end{itemize}
+
+\subsection{Mathematical Way}
+\begin{itemize}
+\item 需要一个额外的数组用来存放中间的运算过程。
+\item 最后需要移除前面的零。
+\end{itemize}
+
+
+\setcounter{lstlisting}{0}
+\begin{lstlisting}[style=customc, caption={Mathematical Way}]
+string multiply( string num1, string num2 )
+{
+    size_t len_1 = num1.size();
+    size_t len_2 = num2.size();
+
+    //the maximum size of the product
+    //is len_1 + len_2
+    vector<int> product( len_1 + len_2, 0 );
+
+    //reverse input numbers
+    //so that the multiply is starting
+    //from the beginning
+    reverse( begin( num1 ), end( num1 ) );
+    reverse( begin( num2 ), end( num2 ) );
+
+    for( size_t i = 0; i < len_1; ++i )
+    {
+        for( size_t j = 0; j < len_2; ++j )
+        {
+            int v = ( num1[i] - '0' ) * ( num2[j] - '0' );
+
+            product[i + j] += v;
+            //accumulate the carry into next position
+            product[i + j + 1] += product[i + j] / 10;
+            //keep the number less than 10 in current position
+            product[i + j] %= 10;
+        }
+    }
+
+    //remove prefix zeros
+    while( !product.empty() && ( product.back() == 0 ) )
+    {
+        product.pop_back();
+    }
+
+    if( product.empty() )
+    {
+        return "0";
+    }
+
+    string ans;
+
+    //we need to reverse the array
+    for( size_t i = 0; i < product.size(); ++i )
+    {
+        auto j = product.size() - 1 - i;
+        ans.push_back( product[j] + '0' );
+    }
+
+    return ans;
+}
+\end{lstlisting}

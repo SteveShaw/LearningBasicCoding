@@ -1,0 +1,121 @@
+\section{45 --- Jump Game II}
+Given an array of non-negative integers $A$, you are initially positioned at the first index of the array.
+
+Each element in the array represents your maximum jump length at that position.
+
+Your goal is to reach the last index in the minimum number of jumps.
+
+\paragraph{Example:}
+
+\begin{flushleft}
+\textbf{Input}: $[2,3,1,1,4]$
+
+\textbf{Output}: 2
+
+\textbf{Explanation}: 
+
+The minimum number of jumps to reach the last index is 2. 
+
+Jump 1 step from index 0 to 1, then 3 steps to the last index.
+\end{flushleft}
+
+
+\paragraph{Note:}
+
+\begin{itemize}
+\item You can assume that you can always reach the last index.
+\end{itemize}
+
+
+\subsection{BFS}
+可以把每次所能到达的位置按照所需的jump数排成一个树状结构。例如，按照给定的例子，可以有如下的graph
+
+%\begin{tikzpicture}[modal][H]
+%\node[world] (2) [label=left:{level 0:}]{$2$};
+%\node[world] (3) [label=left:{level 1:}, below = 2mm of 2]{$3$};
+%\node[world] (1) [right = 2mm of 3]{$1$};
+%\node[world] (11) [label=left:{level 2:}, below = 2mm of 3]{$1$};
+%\node[world] (4) [right = 2mm of 11]{$4$};    
+%\end{tikzpicture}
+\begin{itemize}
+\item 第0层就是位置为0的节点，它所能跳到的位置为1和2，也就是第1层的两个节点。
+\item 第1层有位置为1和2的两个节点，其中位置1的节点，它能跳到位置2，3，4，而位置2已经在第1层了，所以第2层有位置3和4，位置2的节点，它能跳到位置3，所以第2层有位置3
+\item 综合第1层的分析，第2层就有位置3和4的节点，而位置4已经是最后一个位置了，所以跳到4至少需要2步。
+\end{itemize}
+
+算法实现中，需要维护当前level所能跳到的最大位置，以及下一个level所能跳到的最大位置，然后遍历当前level，更新下一个level的最大位置，如果已经到达最后一个位置，就直接返回层数。
+
+\setcounter{algorithm}{0}
+\begin{algorithm}[H]
+\caption{BFS}
+\begin{algorithmic}[1]
+\Procedure{Jump}{$A, n$}
+\If{$n = 1$}
+\State \Return 0 \Comment We already in the final position
+\EndIf
+\State $e_0 := 0$ \Comment The maximum position of current level
+\State $e_1 := 0$ \Comment The maximum position of next level
+\State $P:=0$ \Comment The current position
+\State $\ell := 1$ \Comment We already in the zero level, next level will be level 1
+\State $\ast$ Update next level's positions that can be reached
+\While{$P \leq e_0$}
+\State $e_1 \gets \max(e_1, A[P]+P)$ \Comment Update the maximum position of next level
+\If{$e_1 \geq n-1$} \Comment Next level will contain the final position
+\State \Return $\ell$
+\EndIf
+\If{$P = e_0$} \Comment Already in the end of current level
+\State $e_0 \gets e_1$ \Comment Update as the maximum position of next level
+\EndIf
+\State $P \gets P+1$ \Comment Move to next position
+\EndWhile
+\State \Return $\infty$ \Comment Cannot jump to the final position
+\EndProcedure
+\end{algorithmic}
+\end{algorithm}
+
+\setcounter{lstlisting}{0}
+\begin{lstlisting}[style=customc, caption={BFS}]
+int jump( vector<int>& nums )
+{
+    if( nums.size() == 1 )
+    {
+        return 0;
+    }
+
+    int L = static_cast<int>( nums.size() );
+
+    int pos = 0;
+
+    int cur_end = 0;
+    int next_end = 0;
+
+    //since current end is not the final end
+    //we at least requires 1 jump
+    int jumps = 1;
+
+    while( pos <= cur_end )
+    {
+        next_end = ( max )( pos + nums[pos], next_end );
+
+        if( next_end >= L - 1 )
+        {
+            //can jump to the final position
+            return jumps;
+        }
+
+        if( pos == cur_end )
+        {
+            //move to next level
+            cur_end = next_end;
+            //increment the number of jumps
+            ++jumps;
+        }
+
+        //test next position
+        pos = pos + 1;
+    }
+
+    //cannot jump to final position
+    return -1;
+}
+\end{lstlisting}
