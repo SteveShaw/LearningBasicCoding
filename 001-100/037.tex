@@ -1,0 +1,168 @@
+\section{37 --- Sudoku Solver}
+Write a program to solve a Sudoku puzzle by filling the empty cells.
+
+A sudoku solution must satisfy all of the following rules:
+
+\begin{itemize}
+\item Each of the digits $1--9$ must occur exactly once in each row.
+\item Each of the digits $1--9$ must occur exactly once in each column.
+\item Each of the the digits 1-9 must occur exactly once in each of the 9 $3\times 3$ sub-boxes of the grid.
+\item Empty cells are indicated by the character dot.
+\end{itemize}
+
+\subsection{Depth First Fill}
+
+\begin{itemize}
+\item 从$[0,0]$开始填充，
+\item 对于每个需要填入数字的空格，从1到9逐个进行测试，看是否在其所在行，列以及所处的九宫格里没有重复数字，如果没有就继续下一次递归（下面的算法中首先进行列的填充）。如果无法成功，则需要把把数字重新设为dot做backtracking。
+\item 判断新加入的数字是否合法时，只需要判定当前数字是否合法，不需要判定这个数组是否为数独数组，因为之前加进的数字都是合法的。
+\item 对于block的判断：假设当前在 cell $[r,c]$，那么这个格子所在的九宫格的左上角起始位置坐标为$[\lfloor r/3\rfloor\times 3, \lfloor c/3\rfloor\times 3]$
+\end{itemize}
+\subsubsection{Algorithm}
+\setcounter{algorithm}{0}
+\begin{algorithm}[H]
+\caption{Solve Sudoku}
+\begin{algorithmic}[1]
+\Procedure{SolveSudoku}{$B$}
+\State \Call{Solve}{$B, 0,0$}
+\EndProcedure
+\end{algorithmic}
+\end{algorithm}
+
+Function \texttt{Solve} recursively solves the sudoko by backtracking. This function try to fill each column first and then each row.
+\begin{algorithm}[H]
+\caption{Backtracking}
+\begin{algorithmic}[1]
+\Function{Solve}{$B, r, c$}
+\If{$r = 9$}
+\State \Return \texttt{True} \Comment Completely fill all blanks
+\EndIf
+\If{$c = 9$}
+\State \Call{Solve}{$B, r+1, 0$} \Comment Completely fill column $c$, go to next row $r+1$.
+\EndIf
+\If{$B[r][c]$ is not filled} \Comment This is a blank field
+\For{$i:=1$ \textbf{to} 9} \label{037DFSLoop1}
+\State $B[r][c] \gets i$ \Comment fill number $i$
+\State $b:=$\Call{IsValid}{$B, r, c$} \Comment Check if the filled cell can make board valid
+\If{$b$ is \texttt{true}}
+\State $\hat{b}\gets$\Call{Solve}{$B, r, c+1$} \Comment Recursively going to next column
+\If{$\hat{b}$ is \texttt{true}} 
+\State \Return \texttt{true} \Comment Successfully solved the sudoko
+\EndIf
+\EndIf
+\State Reset $B[r][c]$ to blank \Comment Backtracking
+\EndFor \Comment End \ref{037DFSLoop1}
+\Else
+\State $\hat{b}\gets$\Call{Solve}{$B, r, c+1$} \Comment This cell is already filled, go to next column
+\State \Return $\hat{b}$
+\EndIf
+\EndFunction
+\end{algorithmic}
+\end{algorithm}
+
+Function \texttt{IsValid} checks if the input board is valid sudoko 
+\begin{algorithm}[H]
+\caption{Check If The Board Is Valid}
+\begin{algorithmic}[1]
+\Function{IsValid}{$B, r, c$}
+\For{$i:=0$ \textbf{to} 8}
+\If{$i\neq c$ \textbf{and} $B[r][c] = B[r][i]$}
+\State \Return \texttt{false} \Comment Found duplicate number in column $i$
+\EndIf
+\If{$i\neq r$ \textbf{and} $B[r][c] = B[i][c]$}
+\State \Return \texttt{false} \Comment Found duplicate number in row $i$
+\EndIf
+\State $x:=\lfloor r/3\rfloor \times 3 + \lfloor i/3\rfloor$ \Comment The row index of $i$th element in current block
+\State $y:=\lfloor c/3\rfloor \times 3 + i\bmod 3$ \Comment The column index of $i$th element in current block
+\If{$x\neq r$ \textbf{or} $y \neq c$}
+\If{$B[r][c] = B[x][y]$}
+\State \Return \texttt{false} \Comment Found duplicate number in $i$th element of current block
+\EndIf
+\EndIf
+\EndFor
+\State \Return \textbf{true} \Comment The board is valid
+\EndFunction
+\end{algorithmic}
+\end{algorithm}
+
+\setcounter{lstlisting}{0}
+\begin{lstlisting}[style=customc, caption={Backtrack}]
+void solveSudoku( vector<vector<char>>& board )
+{
+    solve( board, 0, 0 );
+}
+
+bool solve( vector<vector<char>>& B, int r, int c )
+{
+    if( r == 9 )
+    {
+        return true;
+    }
+
+    if( c == 9 )
+    {
+        return solve( B, r + 1, 0 );
+    }
+
+    if( B[r][c] != '.' )
+    {
+        //this cell is filled
+        //try next column
+        return solve( B, r, c + 1 );
+    }
+
+    for( char d = '1'; d <= '9'; ++d )
+    {
+        B[r][c] = d;
+
+        if( is_valid( B, r, c ) )
+        {
+            if( solve( B, r, c + 1 ) )
+            {
+                return true;
+            }
+        }
+    }
+
+    //no success
+    //reset to blank to backtrack
+    B[r][c] = '.';
+    return false;
+}
+
+bool is_valid( vector<vector<char>>& B, int r, int c )
+{
+    auto d = B[r][c];
+    for( int i = 0; i < 9; ++i )
+    {
+        if( ( i != r ) && ( B[i][c] == d ) )
+        {
+            //duplate cell in row i
+            return false;
+        }
+
+        if( ( c != i ) && ( B[r][i] == d ) )
+        {
+            //duplicate cell in column i
+            return false;
+        }
+
+        //the row and column
+        //of i-th element in current block
+        int br = r / 3 * 3 + i / 3;
+        int bc = c / 3 * 3 + i % 3;
+
+        if( ( br != r ) || ( bc != c ) )
+        {
+            if( B[br][bc] == d )
+            {
+                //duplicate at i-th element
+                //of current block
+                return false;
+            }
+        }
+    }
+
+    return true;
+}
+\end{lstlisting}

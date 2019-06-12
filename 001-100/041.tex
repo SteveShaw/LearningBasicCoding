@@ -1,0 +1,101 @@
+\section{41 --- First Missing Positive}
+Given an unsorted integer array $A$, find the smallest missing positive integer.
+
+\paragraph{Example 1:}
+
+\begin{flushleft}
+\textbf{Input}: $[1,2,0]$
+
+\textbf{Output}: 3
+
+\end{flushleft}
+
+\paragraph{Example 2:}
+
+\begin{flushleft}
+\textbf{Input}: $[3,4,-1,1]$
+
+\textbf{Output}: 2
+
+\end{flushleft}
+
+\paragraph{Example 3:}
+
+\begin{flushleft}
+\textbf{Input}: $[7,8,9,11,12]$
+
+\textbf{Output}: 1
+\end{flushleft}
+
+\paragraph{Note:}
+
+\begin{itemize}
+\item Your algorithm should run in $O(n)$ time and uses constant extra space.
+\end{itemize}
+
+\subsection{Fill 1 to n}
+$A$的长度记作$n$。方法是将$1$到$n$存入$A$，使得$A[i]=i+1$。这样$A$中如果有数字$k$在$1$到$n$，那么最后这个数字会在$A[k-1]$处。不在$[1,n]$范围内的数字，会占据$[1,n]$中缺失的数字的位置。
+
+\setcounter{algorithm}{0}
+\begin{algorithm}[H]
+\caption{Swapping Positions To Find Missing Number}
+\begin{algorithmic}[1]
+\Procedure{FirstMissingPositive}{$A$, $n$}
+\For{$i:=0$ \textbf{to} $n-1$}
+\State $k:=A[i]$
+\State $\ast$ put $k$ to $A[k-1]$
+\While{$k>0$ \textbf{and} $k\leq n$ \textbf{and} $A[k-1] \neq k$}
+\State \textbf{Swap} $A[k-1]$ and $A[i]$ \Comment Make sure that $A[k-1] = k$
+\State $k \gets A[i]$ \Comment $k$ is updated as current $A[i]$
+\EndWhile
+\EndFor
+\algstore{041algo}
+\end{algorithmic}
+\end{algorithm}
+\begin{algorithm}[H]
+\begin{algorithmic}[1]
+\algrestore{041algo}
+\For{$i:=0$ \textbf{to} $n-1$}
+\If{$A[i] \neq i+1$}
+\State \Return $i+1$ \Comment Found the first missing number in $[1,n]$
+\EndIf
+\EndFor
+\State \Return $n+1$ \Comment All numbers in the array are in $[1,n]$
+\EndProcedure
+\end{algorithmic}
+\end{algorithm}
+
+\setcounter{lstlisting}{0}
+\begin{lstlisting}[style=customc, caption={Swap}]
+int firstMissingPositive( vector<int>& nums )
+{
+    int n = static_cast<int>( nums.size() );
+
+    for( size_t i = 0; i < nums.size(); ++i )
+    {
+        int k = nums[i];
+
+        //put k to nums[k-1]
+        while( ( k > 0 ) && ( k <= n ) && ( nums[k - 1] != k ) )
+        {
+            swap( nums[i], nums[k - 1] );
+            //now we need to put nums[i] to
+            //appropriate position
+            k = nums[i];
+        }
+    }
+
+    for( int k = 0; k < n; ++k )
+    {
+        if( nums[k] != k + 1 )
+        {
+            //found first missing numbers
+            //in [1,n]
+            return k + 1;
+        }
+    }
+
+    //all numbers in nums are in [1,n]
+    return n + 1;
+}
+\end{lstlisting}

@@ -1,0 +1,124 @@
+\section{39 --- Combination Sum}
+Given a set of candidate numbers ($A$) (without duplicates) and a target number ($T$), find all unique combinations in $A$ where the candidate numbers sums to $T$.
+
+The same repeated number may be chosen from candidates unlimited number of times.
+
+\paragraph{Note:}
+
+\begin{itemize}
+\item All numbers (including target) will be positive integers.
+\item The solution set must not contain duplicate combinations.
+\end{itemize}
+
+\paragraph{Example 1:}
+
+\begin{flushleft}
+\textbf{Input}: $A = [2,3,6,7]$, $T = 7$,
+
+\textbf{Output}:
+
+A solution set is:
+
+\begin{table}[H]
+\begin{tabular}{l}
+$[7]$ \\
+$[2,2,3]$
+\end{tabular}
+\end{table}
+
+\end{flushleft}
+
+\paragraph{Example 2:}
+
+\begin{flushleft}
+\textbf{Input}: $A = [2,3,5]$, $T = 8$,
+
+\textbf{Output}:
+
+A solution set is:
+
+\begin{table}[H]
+\begin{tabular}{l}
+$[2,2,2,2]$ \\
+$[2,3,3]$ \\
+$[3,5]$
+\end{tabular}
+\end{table}
+\end{flushleft}
+
+\subsection{Depth First Search}
+题目中指明每个数字可以重复使用，所以在递归中，需要一个循环，循环中每次递归仍然是从当前的起始位置开始，而不是跳到下一个，另外，判断递归退出的条件并不是当前的起始位置已经到达数组的末尾，而是当前的和是否大于目标值，否则递归会无限制下去。如果当前和等于目标值，就将其加入目标列表中。
+
+\setcounter{algorithm}{0}
+\begin{algorithm}[H]
+\caption{Depth First Search}
+\begin{algorithmic}[1]
+\Procedure{CombinationSum}{$A, n, T$}
+\State $\ell := \emptyset$ \Comment The result list
+\State $v := \emptyset$ \Comment The array to store selected numbers
+\State \Call{F}{$A, n, T, x=0, t=0, \ell, v$} \Comment start from index 0 and current sum is zero
+\State \Return $\ell$
+\EndProcedure
+\end{algorithmic}
+\end{algorithm}
+
+Function $F$ get the a list of numbers that sum to target $T$
+\begin{algorithm}[H]
+\caption{The Helper Function For Depth First Search}
+\begin{algorithmic}[1]
+\Function{F}{$A, n, T, x, t, \ell, v$}
+\If{$t > T$} \Comment Current total sum is larger than target, just quit
+\State \Return 
+\EndIf
+\If{$t = T$} \Comment Current total sum is equal to the target
+\State $\star$ Add current array of selected numbers to result $\ell$
+\EndIf
+\For{$i:=x$ \textbf{to} $n-1$}
+\State $\star$ Add $A[i]$ to $v$ 
+\State \Call{F}{$A, n, T, i, t + A[i], \ell, v$} \Comment Recursive on same index by considering repeated numbers
+\State $\star$ Remove $A[i]$ from $v$ for backtracking
+\EndFor
+\EndFunction
+\end{algorithmic}
+\end{algorithm}
+
+\setcounter{lstlisting}{0}
+\begin{lstlisting}[style=customc, caption={DFS}]
+vector<vector<int>> combinationSum( vector<int>& candidates, int target )
+{
+    //store the selected numbers during process
+    vector<int> v;
+
+    vector<vector<int>> ans;
+
+    F( candidates, target, 0, 0, v, ans );
+
+    return ans;
+}
+
+//helper function to depth first search
+void F( vector<int>& A, int T, int start, int sum, vector<int>& v, vector<vector<int>>& ell )
+{
+    if( sum > T )
+    {
+        return;
+    }
+
+    if( sum == T )
+    {
+        ell.emplace_back( v.begin(), v.end() );
+        return;
+    }
+
+    for( size_t i = start; i < A.size(); ++i )
+    {
+        v.push_back( A[i] );
+        //try next number from i
+        //because of possible repeated numbers
+        F( A, T, i, sum + A[i], v, ell );
+
+        //remove A[i] to backtrack
+        v.pop_back();
+    }
+}
+\end{lstlisting}

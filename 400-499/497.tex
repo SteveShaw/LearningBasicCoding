@@ -1,0 +1,107 @@
+\section{497 --- Random Point in Non-overlapping Rectangles}
+Given a list of non-overlapping axis-aligned rectangles rects, write a function \texttt{pick} which randomly and uniformily picks an integer point in the space covered by the rectangles.
+
+\paragraph{Note:}
+
+\begin{itemize}
+\item An integer point is a point that has integer coordinates. 
+\item A point on the perimeter of a rectangle is included in the space covered by the rectangles. 
+\item $i$-th rectangle $A[i] = [x_1,y_1,x_2,y_2]$, where $[x_1, y_1]$ are the integer coordinates of the bottom-left corner, and $[x_2, y_2]$ are the integer coordinates of the top-right corner.
+\item length and width of each rectangle does not exceed 2000.
+\item $1 \leq \lvert A\rvert \leq 100$
+\item \texttt{pick} return a point as an array of integer coordinates $[p_x, p_y]$
+\item \texttt{pick} is called at most 10000 times.
+\end{itemize}
+
+\subsection{Inverse Sampling}
+类似的题目是528，主要是计算出PDF，然后转换成CDF.两个问题都和权重有关，本题中的权重来自于矩形的面积，显然面积越大的矩形，从其pick point的概率越高。
+
+假设有$n$个矩形$A_1, \ldots A_n$，某一个点落在矩形$A_x$的概率为$p:=S_x/\sum\limits_{i=1}^{n}S_i$。其中$S_i$为矩形$A_i$的面积。也就是说矩形$A_x$被选中的概率为$p(i=x) = S_x/\sum\limits_{i=1}^{n}S_i$。对应的CDF则为 $P(i\leq x) = \sum\limits_{i=1}^{x}S_i / \sum\limits_{i=1}^{n}S_i$。
+
+接下来需要做inverse sampling:即 从$[0,1]$的uniform distribution中随机选取一个数 $y$。$y$其实是$P(i\leq x)$ for a unknow $x$。接下来需要知道 $x$是多少，由于已经知道了CDF，因此$x$可以从$y$得到，即$\sum\limits_{i=1}^{x}S_i / \sum\limits_{i=1}^{n}S_i = y$。分母是所有矩形面积之和，这个值是固定的，记作 $z$。因此只需要找到某个矩形$A_x$，使得$\sum\limits_{i=1}^{x}S_i \geq y\times z$。
+
+找到对应矩形$A_x$后，根据其长度和宽度以及bottom-right坐标随机产生出一个point。为了能够快速定位矩形$x$，可以累计矩形的面积和，即$S_1, S_1+S_2, S_1+S_2+S_3, \ldots, \sum\limits_{i=1}^{n}S_i$，由于这些面积和是递增的，就可以通过binary search找到第一个矩形$x$使得$\sum\limits_{i=1}^{x}S_i \geq y\times z$。
+
+To avoid floating point computation, we can generate a random integer $y$ from $[0,z]$ and find the first rectangle $x$ so that $\sum\limits_{i=1}^{x}S_i \geq y$
+
+\setcounter{lstlisting}{0}
+\begin{lstlisting}[style=customc, caption={Inverse Sampling}]
+class Solution
+{
+public:
+    Solution( vector<vector<int>>& rects ):
+        m_rects( rects ),
+        m_gen( m_rd() ),
+        m_sum( rects.size(), 0 )
+    {
+        z = 0;
+
+        for( size_t i = 0; i < m_rects.size(); ++i )
+        {
+            const auto&v = m_rects[i];
+
+            //some test cases have zero area
+            //Add 1 for length and width to avoid
+            int area = ( v[2] - v[0] + 1 ) * ( v[3] - v[1] + 1 );
+            z += area;
+
+            m_sum[i] = z;
+        }
+    }
+
+    vector<int> pick()
+    {
+        //generate a random area between [0,z]
+        uniform_int_distribution<> int_dis( 0, z );
+        int y = int_dis( m_gen );
+
+
+        //find index i so that (s_0+...+s_i) >= y
+        size_t l = 0;
+        size_t r = m_sum.size();
+
+        while( l < r )
+        {
+            auto mid = ( l + r ) / 2;
+
+            if( m_sum[mid] < y )
+            {
+                l = mid + 1;
+            }
+            else
+            {
+                r = mid;
+            }
+        }
+
+
+        vector<int> ans( 2 );
+
+        {
+            //generate random x
+            uniform_int_distribution<> int_dis( m_rects[l][0], m_rects[l][2] );
+            ans[0] = int_dis( m_gen );
+        }
+
+        {
+            //generate random y
+            uniform_int_distribution<> int_dis( m_rects[l][1], m_rects[l][3] );
+            ans[1] = int_dis( m_gen );
+        }
+
+
+        return ans;
+
+    }
+
+    int z; //the total areas of rectangles
+    vector<int> m_sum; //the sum of areas until rectangle i
+
+    vector<vector<int>>& m_rects;
+
+    //random generator
+    random_device m_rd;  //Will be used to obtain a seed for the random number engine
+
+    mt19937 m_gen;
+};
+\end{lstlisting}

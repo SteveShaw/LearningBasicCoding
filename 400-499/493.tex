@@ -1,0 +1,231 @@
+\section{493 --- Reverse Pairs}
+Given an array $A$, we call $(i, j)$ an important reverse pair if $i < j$ and $A[i] > 2\times A[j]$.
+
+You need to return the number of important reverse pairs in the given array.
+
+\paragraph{Example 1:}
+
+\begin{flushleft}
+\textbf{Input}: $[1,3,2,3,1]$
+
+\textbf{Output}: 2
+
+\end{flushleft}
+
+\paragraph{Example 2:}
+
+\begin{flushleft}
+\textbf{Input}: $[2,4,3,5,1]$
+
+\textbf{Output}: 3
+\end{flushleft}
+
+\paragraph{Note:}
+\begin{itemize}
+\item The length of the given array will not exceed 50,000.
+\item All the numbers in the input array are in the range of 32-bit integer.
+\end{itemize}
+
+\subsection{Merge Sort}
+We can count the number of reversed pairs during merge process.
+
+\setcounter{lstlisting}{0}
+\begin{lstlisting}[style=customc, caption={Merge Sort}]
+int reversePairs( vector<int>& nums )
+{
+    return merge_sort( nums, 0, static_cast<9int>( nums.size() ) - 1 );
+}
+
+//merge two halves
+void merge( vector<int>& A, int l, int mid, int r )
+{
+    int sz_l = mid - l + 1;
+    int sz_r = r - mid;
+
+    vector<int> L( A.begin() + l, A.begin() + mid + 1 );
+    vector<int> R( A.begin() + mid + 1, A.begin() + r + 1 );
+
+
+    int il = 0;
+    int ir = 0;
+
+    int k = 0;
+
+    for( int k = l; k <= r; ++k )
+    {
+        if( ( ir >= sz_r ) || ( ( il < sz_l ) && ( L[il] < R[ir] ) ) )
+        {
+            A[k] = L[il];
+            ++il;
+        }
+        else
+        {
+            A[k] = R[ir];
+            ++ir;
+        }
+    }
+}
+
+//modified merge sort
+int merge_sort( vector<int>& A, int l, int r )
+{
+    if( l >= r )
+    {
+        return 0;
+    }
+
+    int mid = ( l + r ) / 2;
+
+    int count = merge_sort( A, l, mid ) + merge_sort( A, mid + 1, r );
+
+    for( int i = l; i <= mid; ++i )
+    {
+        auto y = static_cast<long long>( A[i] );
+
+        //find the first item in right half
+        //that is no less than 2 * A[i]
+        int x = leftmost( A, mid + 1, r + 1, y );
+        //then, there are (x-(mid+1)) items
+        //less than 2 * A[i]
+        count += x - ( mid + 1 );
+    }
+
+    merge( A, l, mid, r );
+
+    return count;
+}
+
+int leftmost( vector<int>& A, int l, int r, long long target )
+{
+    while( l < r )
+    {
+        int mid = ( l + r ) / 2;
+
+        auto x = static_cast<long long>( A[mid] ) * 2;
+
+        if( x < target )
+        {
+            l = mid + 1;
+        }
+        else
+        {
+            r = mid;
+        }
+    }
+
+    return l;
+}
+
+\end{lstlisting}
+
+
+\subsection{BIT}
+\begin{itemize}
+\item Create an BIT array for sorted array
+\item Each item in BIT is the number of items that are larger than current element.
+\end{itemize}
+
+\setcounter{lstlisting}{0}
+\begin{lstlisting}[style=customc, caption={BIT Tree}]
+int reversePairs( vector<int>& nums )
+{
+
+    vector<long long> sorted_nums( nums.begin(), nums.end() );
+    sort( sorted_nums.begin(), sorted_nums.end() );
+
+    vector<int> BIT( nums.size() + 1, 0 );
+
+    int ans = 0;
+
+    for( size_t i = 0; i < nums.size(); ++i )
+    {
+        auto target = static_cast<long long>( nums[i] );
+
+        //find the first item in sorted array
+        //that is larger than nums[i]*2
+        auto pos = rightmost( sorted_nums, target * 2 );
+
+        //query how many items are larger than nums[i]
+        //through BIT. Since BIT is updated when travesing
+        //nums, the count is updated accordingly.
+        ans += queryBIT( BIT, pos + 1 );
+
+        //find the position of the first item in sorted array
+        //that is no less than nums[i]
+        pos = leftmost( sorted_nums, target );
+
+        //update from 0 until pos+1, the count of items
+        //that is no less than nums[i]
+        //in sorted array
+        updateBIT( BIT, pos + 1, 1 );
+    }
+
+    return ans;
+}
+
+size_t leftmost( vector<long long>& B, long long target )
+{
+    size_t l = 0;
+    size_t r = B.size();
+
+    while( l < r )
+    {
+        auto mid = ( l + r ) / 2;
+
+        if( B[mid] < target )
+        {
+            l = mid + 1;
+        }
+        else
+        {
+            r = mid;
+        }
+    }
+
+    return l;
+}
+
+size_t rightmost( vector<long long>& B, long long target )
+{
+    size_t l = 0;
+    size_t r = B.size();
+
+    while( l < r )
+    {
+        auto mid = ( l + r ) / 2;
+
+        if( B[mid] <= target )
+        {
+            l = mid + 1;
+        }
+        else
+        {
+            r = mid;
+        }
+    }
+
+    return l;
+}
+
+void updateBIT( vector<int>& B, size_t index, int val )
+{
+    while( index > 0 )
+    {
+        B[index] += val;
+        index -= ( index & ( -index ) );
+    }
+}
+
+int queryBIT( vector<int>& B, size_t index )
+{
+    int sum = 0;
+
+    while( index < B.size() )
+    {
+        sum += B[index];
+        index += ( index & ( -index ) );
+    }
+
+    return sum;
+}
+\end{lstlisting}

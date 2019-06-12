@@ -1,0 +1,137 @@
+\section{39 --- Combination Sum}
+Given a set of candidate numbers ($A$) (without duplicates) and a target number ($T$), find all unique combinations in $A$ where the candidate numbers sums to $T$.
+
+Each number in candidates may only be used \textbf{once} in the combination.
+
+\paragraph{Note:}
+
+\begin{itemize}
+\item All numbers (including target) will be positive integers.
+\item The solution set must not contain duplicate combinations.
+\end{itemize}
+
+\paragraph{Example 1:}
+
+\begin{flushleft}
+\textbf{Input}: $A = [10,1,2,7,6,1,5]$, $T = 8$,
+
+\textbf{Output}:
+
+A solution set is:
+
+\begin{table}[H]
+\begin{tabular}{l}
+$ [1, 7] $ \\
+$ [1, 2, 5] $ \\
+$ [2, 6] $ \\
+$ [1, 1, 6] $
+\end{tabular}
+\end{table}
+
+\end{flushleft}
+
+\paragraph{Example 2:}
+
+\begin{flushleft}
+\textbf{Input}: $A = [2,5,2,1,2]$, $T = 5$,
+
+\textbf{Output}:
+
+A solution set is:
+
+\begin{table}[H]
+\begin{tabular}{l}
+$[1,2,2]$ \\
+$[5]$ 
+\end{tabular}
+\end{table}
+\end{flushleft}
+
+\subsection{Depth First Search}
+本题中数字不能重复使用，同时也要求不能出现重复的组合，比如$[2,7]$和$[7,2]$就是重复的组合。因此需要先将原始数组排序，然后跳过重复的元素。如果采用记录数字是否已经被访问过的方式，只能保证某个位置的数字不重复，但是不保证不出现重复的组合。
+
+\setcounter{algorithm}{0}
+\begin{algorithm}[H]
+\caption{Depth First Search}
+\begin{algorithmic}[1]
+\Procedure{CombinationSum}{$A, n, T$}
+\State $\ell := \emptyset$ \Comment The result list
+\State $v := \emptyset$ \Comment The array to store selected numbers
+\State $\star$ Sort $A$ as ascending order
+\State \Call{F}{$A, n, T, x=0, t=0, \ell, v$} \Comment start from index 0 and current sum is zero
+\State \Return $\ell$
+\EndProcedure
+\end{algorithmic}
+\end{algorithm}
+
+Function $F$ get the a list of numbers that sum to target $T$
+\begin{algorithm}[H]
+\caption{The Helper Function For Depth First Search}
+\begin{algorithmic}[1]
+\Function{F}{$A, n, T, x, t, \ell, v$}
+\If{$t > T$} \Comment Current total sum is larger than target, just quit
+\State \Return 
+\EndIf
+\If{$t = T$} \Comment Current total sum is equal to the target
+\State $\star$ Add current array of selected numbers to result $\ell$
+\EndIf
+\For{$i:=x$ \textbf{to} $n-1$}
+\If{$i > x$ \textbf{and} $A[i-1] = A[i]$}
+\State \texttt{continue} \Comment Skip duplicate numbers
+\EndIf
+\State $\star$ Add $A[i]$ to $v$ 
+\State \Call{F}{$A, n, T, i+1, t + A[i], \ell, v$} \Comment Recursive to $i+1$
+\State $\star$ Remove $A[i]$ from $v$ for backtracking
+\EndFor
+\EndFunction
+\end{algorithmic}
+\end{algorithm}
+
+\setcounter{lstlisting}{0}
+\begin{lstlisting}[style=customc, caption={DFS}]
+vector<vector<int>> combinationSum2( vector<int>& candidates, int target )
+{
+
+    vector<int> v;
+    vector<vector<int>> ans;
+
+    //sort first to avoid duplicate numbers
+    sort( candidates.begin(), candidates.end() );
+
+    F( candidates, target, 0, 0, v, ans );
+
+    return ans;
+}
+
+//Helper function to generate elements
+void F( vector<int>& A, int T, size_t x, int sum, vector<int>&v, vector<vector<int>>& ans )
+{
+    if( sum > T )
+    {
+        return;
+    }
+
+    if( sum == T )
+    {
+        ans.emplace_back( v.begin(), v.end() );
+        return;
+    }
+
+    for( size_t i = x; i < A.size(); ++i )
+    {
+        if( ( i > x ) && ( A[i - 1] == A[i] ) )
+        {
+            //skip duplicate numbers
+            continue;
+        }
+
+        //add A[i] to selected elements
+        v.push_back( A[i] );
+
+        F( A, T, i + 1, sum + A[i], v, ans );
+
+        //remove A[i] and backtracking
+        v.pop_back();
+    }
+}
+\end{lstlisting}
