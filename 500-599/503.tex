@@ -1,0 +1,72 @@
+\section{503 --- Next Greater Element II}
+Given a circular array $A$ (the next element of the last element is the first element of the array), print the Next Greater Number for every element. The Next Greater Number of a number $x$ is the first greater number to its traversing-order next in the array, which means you could search circularly to find its next greater number. If it doesn't exist, output -1 for this number.
+
+\paragraph{Example 1:}
+\begin{flushleft}
+\textbf{Input}: $[1,2,1]$
+
+\textbf{Output}: $[2,-1,2]$
+
+\textbf{Explanation}: 
+
+The first 1's next greater number is 2; 
+
+The number 2 can't find next greater number; 
+
+The second 1's next greater number needs to search circularly, which is also 2.
+\end{flushleft}
+
+\subsection{Stack}
+\begin{itemize}
+\item 同Next Greater Element I解法类似，需要一个stack $\Omega$。在stack中保存的是element在数组中的index。
+\item 同样先遍历原数组，然后从$\Omega$中弹出所有的小于当前number的element，这些数的next greater element即为当前的number。然后将当前index压入$\Omega$中。
+\item 由于array是循环数组，因此还需要再循环一遍，在这次循环中，仍然重复上述过程，但是不再压入新的元素。
+\end{itemize}
+
+\setcounter{lstlisting}{0}
+\begin{lstlisting}[style=customc, caption={Stack}]
+vector<int> nextGreaterElements( vector<int>& nums )
+{
+    stack<size_t> stk;
+
+    vector<int> ans( nums.size(), -1 );
+
+    for( size_t i = 0; i < nums.size(); ++i )
+    {
+        //pop all elements in stack
+        //that is less than current number
+        //these elements' next greater elements
+        //is nums[i]
+        while( !stk.empty() && ( nums[stk.top()] < nums[i] ) )
+        {
+            auto t = stk.top();
+            ans[t] = nums[i];
+            stk.pop();
+        }
+
+        //push current index to stack
+        stk.push( i );
+    }
+
+    //since array is circular
+    //we still need to run a loop again to
+    //find next greater element in the remaining
+    //elements in the stack
+    for( size_t i = 0; i < nums.size(); ++i )
+    {
+        while( !stk.empty() && ( nums[stk.top()] < nums[i] ) )
+        {
+            auto t = stk.top();
+            ans[t] = nums[i];
+            stk.pop();
+        }
+
+        if( stk.empty() )
+        {
+            break;
+        }
+    }
+
+    return ans;
+}
+\end{lstlisting}

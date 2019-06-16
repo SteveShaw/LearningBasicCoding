@@ -1,0 +1,96 @@
+\section{500 --- Keyboard Row}
+Given a List of words $W$, return the words that can be typed using letters of alphabet on only one row's of American keyboard.
+
+ 
+\paragraph{Example:}
+
+\begin{flushleft}
+\textbf{Input}: [Hello, Alaska, Dad, Peace]
+
+\textbf{Output}: [Alaska, Dad]
+\end{flushleft}
+ 
+
+\paragraph{Note:}
+
+\begin{itemize}
+\item You may use one character in the keyboard more than once.
+\item You may assume the input string will only contain letters of alphabet.
+\end{itemize}
+
+\subsection{Hash Map}
+很简单的题目，将每个字符按照所在行建立hash map。然后检查每个word，看是否有不同row的letter出现。
+
+\setcounter{lstlisting}{0}
+\begin{lstlisting}[style=customc, caption={Hash Map}]
+vector<string> findWords( vector<string>& words )
+{
+
+    //create hash map for
+    //letter and its row
+    unordered_map<char, int> m;
+
+    string s = "qwertyuiop";
+    for( auto c : s )
+    {
+        m.emplace( c, 1 );
+    }
+
+    s = "asdfghjkl";
+    for( auto c : s )
+    {
+        m.emplace( c, 2 );
+    }
+
+    s = "zxcvbnm";
+    for( auto c : s )
+    {
+        m.emplace( c, 3 );
+    }
+
+    //we need to change all uppercases
+    //to lowercases
+    auto to_lower = []( char c ) -> char
+    {
+        if( ( c >= 'A' ) && ( c <= 'Z' ) )
+        {
+            return ( c - 'A' ) + 'a';
+        }
+
+        return c;
+    };
+
+    vector<string> ans;
+
+    for( const auto& word : words )
+    {
+        if( word.empty() )
+        {
+            continue;
+        }
+
+        auto c = to_lower( word[0] );
+        int row = m[c];
+
+        bool same_row = true;
+
+        for( size_t i = 1; i < word.size(); ++i )
+        {
+            c = to_lower( word[i] );
+            if( m[c] != row )
+            {
+                same_row = false;
+                break;
+            }
+        }
+
+        if( same_row )
+        {
+            ans.emplace_back( word );
+        }
+
+    }
+
+    return ans;
+}
+\end{lstlisting}

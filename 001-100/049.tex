@@ -1,0 +1,91 @@
+\section{49 --- Group Anagrams}
+Given an array of strings $A$, group anagrams together.
+
+\paragraph{Example:}
+\begin{flushleft}
+
+\textbf{Input}: [eat, tea, tan, ate, nat, bat]
+
+
+\textbf{Output}:
+
+\begin{table}[H]
+\begin{tabular}{lll}
+ate & eat & tea \\
+nat & tan & \\
+bat & &
+\end{tabular}
+\end{table}
+
+\end{flushleft}
+\paragraph{Note:}
+
+\begin{itemize}
+\item All inputs will be in lowercase.
+\item The order of your output does not matter.
+\end{itemize}
+
+\subsection{Counting Sort}
+\begin{itemize}
+\item 遍历输入字符串数组，对每一个字符串$S$，用一个大小为26的数组来统计每个单词中字符出现的次数，然后按照从$a$--$z$的顺序来组成一个字符串作为hash map的key。
+\item 为了优化，hash map的value是存放每个字符串在字符串数组中的index。
+\end{itemize}
+
+\setcounter{lstlisting}{0}
+\begin{lstlisting}[style=customc, caption={Counting Sort}]
+vector<vector<string>> groupAnagrams( vector<string>& strs )
+{
+    //optimize memory and runtime performance
+    //use array of index as the value of the
+    //hash map
+    unordered_map<string, vector<size_t>> m;
+
+    int chars[26] = {0};
+
+    for( size_t i = 0; i < strs.size(); ++i )
+    {
+        const auto&str = strs[i];
+
+        for( auto c : str )
+        {
+            chars[c - 'a'] += 1;
+        }
+
+        string key;
+
+        //contruct the key
+        for( int i = 0; i < 26; ++i )
+        {
+            key.append( chars[i], i + 'a' );
+            chars[i] = 0;
+        }
+
+        auto it = m.find( key );
+
+        if( it == m.end() )
+        {
+            m.emplace( key, initializer_list<size_t> {i} );
+        }
+        else
+        {
+            it->second.emplace_back( i );
+        }
+    }
+
+    vector<vector<string>> ans( m.size() );
+
+    size_t j = 0;
+
+    for( const auto&p : m )
+    {
+        for( size_t i : p.second )
+        {
+            ans[j].emplace_back( strs[i].c_str() );
+        }
+
+        ++j;
+    }
+
+    return ans;
+}
+\end{lstlisting}

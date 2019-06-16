@@ -1,0 +1,182 @@
+\section{50 --- Pow(x, n)}
+Implement \texttt{pow}($x, n$), which calculates $x$ raised to the power $n$ ($x^n$).
+
+\paragraph{Example 1:}
+
+\begin{flushleft}
+\textbf{Input}: $2.00000, 10$
+
+\textbf{Output}: $1024.00000$
+\end{flushleft}
+
+\paragraph{Example 2:}
+
+\begin{flushleft}
+\textbf{Input}: $2.10000, 3$
+
+\textbf{Output}: $9.26100$
+\end{flushleft}
+
+\paragraph{Example 3:}
+
+\begin{flushleft}
+\textbf{Input}: $2.00000, -2$
+
+\textbf{Output}: $0.25000$
+
+\textbf{Explanation}: $2^{-2} = 1/2^2 = 1/4 = 0.25$
+\end{flushleft}
+
+
+\paragraph{Note:}
+
+\begin{itemize}
+\item $-100.0 < x < 100.0$
+\item $n$ is a 32-bit signed integer, within the range $[−2^{31}, 2^{31} − 1]$
+\end{itemize}
+
+\subsection{Divide And Conquer}
+The most difficult is dealing with maximum integer type and minimum integer type. Therefore, we need to compute the result of half of the exponent at the first time.
+\setcounter{algorithm}{0}
+\begin{algorithm}[H]
+\caption{Divide And Conquer}
+\begin{algorithmic}[1]
+\Procedure{MyPow}{$x, n$}
+\If{$n = 0$}
+\State \Return 1 \Comment $x^0 = 1$
+\EndIf
+\State $\alpha :=$ \Call{MyPow}{$x, n/2$} \Comment Get $x^{n/2}$
+\algstore{50algo}
+\end{algorithmic}
+\end{algorithm}
+\begin{algorithm}[H]
+\begin{algorithmic}[1]
+\algrestore{50algo}
+\If{$n \bmod 2 = 0$}
+\State \Return $\alpha^2$ \Comment $x^n = x^{n/2} \times x^{n/2}$
+\ElsIf{$n > 0$}
+\State \Return $\alpha^2\times x$ \Comment $x^n = {x^{n/2}}^2\times x$
+\Else
+\State \Return $\alpha^2 / x$ \Comment $x^n = {x^{n/2}}^2 / x$
+\EndIf
+\EndProcedure
+\end{algorithmic}
+\end{algorithm}
+
+\setcounter{lstlisting}{0}
+\begin{lstlisting}[style=customc, caption={Divide And Conquer}]
+double myPow( double x, int n )
+{
+
+    //convert to long long type
+    //to avoid data type overflow
+    auto exp = static_cast<long long>( n );
+
+    if( exp >= 0 )
+    {
+
+        return f( x, exp );
+    }
+
+    exp *= -1;
+    return 1 / f( x, exp );
+}
+
+double f( double x, long long n )
+{
+    if( n == 0 )
+    {
+        return 1;
+    }
+
+    if( n == 1 )
+    {
+        return x;
+    }
+
+    auto exp = n / 2;
+    auto y = f( x, exp );
+
+    y *= y;
+
+    if( n & 1 )
+    {
+        //odd exponent
+        return x * y;
+    }
+
+    return y;
+}
+\end{lstlisting}
+
+
+\subsection{Iterative Method}
+假设需要计算$x^{13}$。
+\begin{itemize}
+\item 13的二进制为$1101$。由于有4个bits，所以需要4 iterations。
+\item First, initialize the result to 1: $r\gets 1 = x^0$。然后从左到右扫描bits
+\begin{enumerate}
+\item $r\gets r^2 = x^0$, bit 1 is 1, so $r\gets r\times x = x^1$
+\item $r\gets r^2 = x^2$, bit 2 is 0, so $r\gets r\times x = x^3$
+\item $r\gets r^2 = x^6$, bit 3 is 0, so $r\gets r\times x^0 = x^6$
+\item $r\gets r^2 = x^{12}$, bit 4 is 1, so $r\gets r\times x = x^{13}$
+\end{enumerate} 
+\end{itemize}
+\begin{algorithm}[H]
+\caption{Iterative Method}
+\begin{algorithmic}[1]
+\Procedure{MyPow}{$x,n$}
+\State $r := 1$ \Comment $r = x^n$ 
+\State $i:=n$
+\While{$i \neq 0$}
+\If{$i \bmod 2 = 1$}
+\State $r \gets r \times x$
+\EndIf
+\State $x\gets x^2$
+\State $i \gets i / 2$
+\EndWhile
+\If{$n < 0$}
+\State \Return $1/r$
+\Else
+\State \Return $r$
+\EndIf
+\EndProcedure
+\end{algorithmic}
+\end{algorithm}
+
+\setcounter{lstlisting}{0}
+\begin{lstlisting}[style=customc, caption={Iterative}]
+double myPow( double x, int n )
+{
+    double r = 1.0;
+    auto i = static_cast<long long>( n );
+
+    if( i < 0 )
+    {
+        i = -i;
+    }
+
+    while( i )
+    {
+
+        if( i & 1 )
+        {
+            //multiply x
+            //for bit 1
+            r *= x;
+        }
+
+        //always do x<--x*x
+        x *= x;
+
+        i /= 2;
+    }
+
+    if( n < 0 )
+    {
+        return 1 / r;
+    }
+
+    return r;
+}
+\end{lstlisting}

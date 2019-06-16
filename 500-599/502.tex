@@ -1,0 +1,190 @@
+\section{502 --- IPO}
+Suppose LeetCode will start its IPO soon. In order to sell a good price of its shares to Venture Capital, LeetCode would like to work on some projects to increase its capital before the IPO. Since it has limited resources, it can only finish at most $k$ distinct projects before the IPO. Help LeetCode design the best way to maximize its total capital after finishing at most k distinct projects.
+
+You are given several projects. For each project $i$, it has a pure profit $P_i$ and a minimum capital of $C_i$ is needed to start the corresponding project. Initially, you have $W$ capital. When you finish a project, you will obtain its pure profit and the profit will be added to your total capital.
+
+To sum up, pick a list of at most $k$ distinct projects from given projects to maximize your final capital, and output your final maximized capital.
+
+\paragraph{Example 1:}
+
+\begin{flushleft}
+\textbf{Input}: $k=2$, $W=0$, $P=[1,2,3]$, $C=[0,1,1]$.
+
+\textbf{Output}: 4
+
+\textbf{Explanation}: 
+
+Since your initial capital is 0, you can only start the project indexed 0.
+
+After finishing it you will obtain profit 1 and your capital becomes 1.
+
+With capital 1, you can either start the project indexed 1 or the project indexed 2.
+
+Since you can choose at most 2 projects, you need to finish the project indexed 2 to get the maximum capital.
+
+Therefore, output the final maximized capital, which is $0 + 1 + 3 = 4$.
+\end{flushleft}
+
+\paragraph{Note:}
+
+\begin{itemize}
+\item You may assume all numbers in the input are non-negative integers.
+\item The length of Profits array and Capital array will not exceed 50,000.
+\item The answer is guaranteed to fit in a 32-bit signed integer.
+\end{itemize}
+
+\subsection{Greedy By Two Priority Queues}
+\begin{itemize}
+\item We need two priority queues. one is maximum queue $Q_1$ and another minimum queue $Q_2$.
+\item Iterate over the profits and capitals, put (captial, profit) pair into the maximum queue $Q_1$. Then the smallest capital project is at the top of $Q_1$
+\item Run a loop for $k$ times. At each loop, pop out all pairs with capital $c$ less than or equal to current $W$ and push (profit, capital) pair into $Q_2$.
+\item Add the profit to $W$ from top of $Q_2$ which is the maximum profit we can get so far.
+\end{itemize}
+
+\setcounter{lstlisting}{0}
+\begin{lstlisting}[style=customc, caption={Greedy By Two Prority Queue}]
+int findMaximizedCapital( int k, int W, vector<int>& Profits, vector<int>& Capital )
+{
+    //minimum queue: the largest value is at the top
+    priority_queue<pair<int, int>> pq_pros;
+    //maximum queue: the smallest value is at the top
+    priority_queue<pair<int, int>, vector<pair<int, int>>, greater<pair<int, int>>> pq_caps;
+
+    //put (capital, proift) into maximum priority queue
+    //the top of the queue is the minimum capital
+    for( size_t i = 0; i < Profits.size(); ++i )
+    {
+        pq_caps.emplace( Capital[i], Profits[i] );
+    }
+
+    for( int i = 0; i < k; ++i )
+    {
+        //try to remove all projects that
+        //has capital requirements less than or
+        //equal to W
+        while( !pq_caps.empty() )
+        {
+            if( pq_caps.top().first > W )
+            {
+                break;
+            }
+
+            auto t = pq_caps.top();
+
+            pq_caps.pop();
+
+            //add (profit, capital) into
+            //profit queue which has
+            //the maximum profit at the top
+            pq_pros.emplace( t.second, t.first );
+        }
+
+        if( pq_pros.empty() )
+        {
+            break;
+        }
+
+        auto t = pq_pros.top();
+        pq_pros.pop();
+
+        //add current maximum profit we get
+        //to total captial W
+        W += t.first;
+    }
+
+    return W;
+}
+\end{lstlisting}
+
+\subsection{Modified Greedy Without Priority Queue}
+\begin{itemize}
+\item 上述算法的复杂度为$O(nk\log k)$，而$\log k$来自于prority queue的push和pop操作。
+\item 而其实可以通过mark的方法来确定某个project不能够被再次使用，复杂度降为constant。
+\item 实际测试时，最后一个test case发生LTE，因此需要先判断是否所有的projects都能够使用。如果所有的projects都可以用，那么直接统计$k$ largest profits即可。
+\end{itemize}
+
+\begin{lstlisting}[style=customc, caption={Greedy By Marking}]
+int findMaximizedCapital( int k, int W, vector<int>& Profits, vector<int>& Capital )
+{
+
+    //first we check if all projects
+    //can be used
+    //Otherwise, we cannot pass
+    //the last testcase
+    bool b_all = true;
+
+    for( int cap : Capital )
+    {
+        if( cap > W )
+        {
+            b_all = false;
+            break;
+        }
+    }
+
+    if( b_all )
+    {
+        //if all projects can be used
+        //just get k most largest profits
+        //projects
+        priority_queue<int, vector<int>, greater<int>> pq;
+
+        for( int pro : Profits )
+        {
+            pq.emplace( pro );
+
+            if( pq.size() > k )
+            {
+                pq.pop();
+            }
+        }
+
+        while( !pq.empty() )
+        {
+            W += pq.top();
+            pq.pop();
+        }
+
+        return W;
+    }
+
+    int L = static_cast<int>( Profits.size() );
+
+    int end = ( min )( k, L );
+
+    for( int i = 0; i < end; ++i )
+    {
+        int max_profit = 0;
+        int sel = -1;
+
+        for( int p = 0; p < L; ++p )
+        {
+            if( Capital[p] < 0 )
+            {
+                //project p has been used
+                continue;
+            }
+
+            if( Capital[p] <= W )
+            {
+                if( max_profit < Profits[p] )
+                {
+                    max_profit = Profits[p];
+                    sel = p;
+                }
+            }
+        }
+
+        if( sel < 0 )
+        {
+            break;
+        }
+
+        W += max_profit;
+
+        Capital[sel] = -1;
+    }
+
+    return W;
+}
+\end{lstlisting}

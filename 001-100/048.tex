@@ -1,0 +1,112 @@
+\section{48 --- Rotate Image}
+You are given an $n \times n$ 2D matrix representing an image.
+
+Rotate the image by 90 degrees (clockwise).
+
+\paragraph{Note:}
+
+\begin{itemize}
+\item You have to rotate the image in-place, which means you have to modify the input 2D matrix directly. \textbf{DO NOT} allocate another 2D matrix and do the rotation.
+\end{itemize}
+
+\paragraph{Example 1:}
+\begin{flushleft}
+\textbf{Input}:
+\begin{table}[H]
+\begin{tabular}{ccc}
+1 & 2 & 3\\
+4 & 5 & 6\\
+7 & 8 & 9
+\end{tabular}
+\end{table}
+\textbf{Output}:
+\begin{table}[H]
+\begin{tabular}{ccc}
+7 & 4 & 1\\
+8 & 5 & 2\\
+9 & 6 & 3
+\end{tabular}
+\end{table}
+\end{flushleft}
+
+\paragraph{Example 2:}
+\begin{flushleft}
+\textbf{Input}:
+\begin{table}[H]
+\begin{tabular}{cccc}
+5 &  1 &  9 & 11\\
+2 &  4 &  8 & 10\\
+13 &  3 &  6 &  7\\
+15 & 14 & 12 & 16
+\end{tabular}
+\end{table}
+\textbf{Output}:
+\begin{table}[H]
+\begin{tabular}{cccc}
+15 & 13 &  2 &  5\\
+14 &  3 &  4 &  1\\
+12 &  6 &  8 &  9\\
+16 &  7 & 10 & 11
+\end{tabular}
+\end{table}
+\end{flushleft}
+
+\subsection{Transpose and then reverse}
+\begin{enumerate}
+\item The obvious idea would be to transpose the matrix first and then reverse each row. 
+\end{enumerate}
+
+\setcounter{lstlisting}{0}
+\begin{lstlisting}[style=customc, caption={Transpose Then Reverse}]
+void rotate( vector<vector<int>>& matrix )
+{
+    int n = static_cast<int>( matrix.size() );
+
+    //transpose
+    for( int x = 0; x < n; ++x )
+    {
+        //notice each column starting
+        //from x
+        for( int y = x; y < n; ++y )
+        {
+            swap( matrix[x][y], matrix[y][x] );
+        }
+    }
+
+    //reverse each row
+
+    for( int x = 0; x < n; ++x )
+    {
+        reverse( matrix[x].begin(), matrix[x].end() );
+    }
+
+}
+\end{lstlisting}
+
+\subsection{Rotate four numbers}
+每次移动4个数字
+
+\setcounter{lstlisting}{0}
+\begin{lstlisting}[style=customc, caption={Rotate 4 Numbers Each Time}]
+void rotate( vector<vector<int>>& matrix )
+{
+    auto n = matrix.size();
+
+    //move 4 number at each time
+    for( size_t x = 0; x < n / 2; ++x )
+    {
+        for( size_t y = x; y < n - 1 - x; ++y )
+        {
+            int tmp = matrix[x][y];
+            //overwrite top left by bottom left
+            matrix[x][y] = matrix[n - 1 - y][x];
+            //overwrite bottom left by bottom right
+            matrix[n - 1 - y][x] = matrix[n - 1 - x][n - 1 - y];
+            //overwrite bottom right by top right
+            matrix[n - 1 - x][n - 1 - y] = matrix[y][n - 1 - x];
+            //overwrite top right by value from top left
+            matrix[y][n - 1 - x] = tmp;
+        }
+    }
+}
+\end{lstlisting}

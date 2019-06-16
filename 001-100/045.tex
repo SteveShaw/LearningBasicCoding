@@ -65,6 +65,7 @@ Jump 1 step from index 0 to 1, then 3 steps to the last index.
 \EndIf
 \If{$P = e_0$} \Comment Already in the end of current level
 \State $e_0 \gets e_1$ \Comment Update as the maximum position of next level
+\State $\ell\gets \ell+1$ \Comment Increments the number of levels
 \EndIf
 \State $P \gets P+1$ \Comment Move to next position
 \EndWhile

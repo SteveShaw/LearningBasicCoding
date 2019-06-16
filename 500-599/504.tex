@@ -1,0 +1,96 @@
+\section{504 --- Base 7}
+Given an integer $n$, return its base 7 string representation.
+
+\paragraph{Example 1:}
+
+\begin{flushleft}
+\textbf{Input}: 100
+
+\textbf{Output}: 202
+
+\end{flushleft}
+
+\paragraph{Example 2:}
+
+\begin{flushleft}
+\textbf{Input}: $-7$
+
+\textbf{Output}: $-10$
+\end{flushleft}
+
+\paragraph{Note:} 
+
+\begin{itemize}
+\item The input will be in range of $[-10^{7}, 10^{7}]$.
+\end{itemize}
+
+\subsection{Iterative}
+每次除以7，余数放入结果字符串，从得到的商继续。
+
+\setcounter{lstlisting}{0}
+\begin{lstlisting}[style=customc, caption={Iterative}]
+string convertToBase7( int num )
+{
+    if( num == 0 )
+    {
+        return "0";
+    }
+
+    string ans;
+
+    int n = num;
+    int sign = 1;
+
+    if( num < 0 )
+    {
+        n *= -1;
+        sign = -1;
+    }
+
+    while( n )
+    {
+        int q = n / 7;
+        int r = n - q * 7;
+
+        ans.push_back( r + '0' );
+        n = q;
+    }
+
+    if( sign < 0 )
+    {
+        ans.push_back( '-' );
+    }
+
+    //since we add low positions first
+    //reverse whole result
+    reverse( begin( ans ), end( ans ) );
+
+    return ans;
+}
+\end{lstlisting}
+
+
+
+\subsection{Recursive}
+\begin{itemize}
+\item $n$可以分为除以7的商和对7的余数两个部分。
+\item 分别对这两个部分递归调用函数。
+\end{itemize}
+
+\begin{lstlisting}[style=customc, caption={Recursion}]
+string convertToBase7( int num )
+{
+    if( num < 0 )
+    {
+        return "-" + convertToBase7( -num );
+    }
+
+    if( num < 7 )
+    {
+        //value less than 7 is itself
+        return to_string( num );
+    }
+
+    return convertToBase7( num / 7 ) + convertToBase7( num % 7 );
+}
+\end{lstlisting}

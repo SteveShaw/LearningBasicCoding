@@ -1,0 +1,178 @@
+\section{46 --- Permutations}
+Given a collection of distinct integers $A$, return all possible permutations.
+
+\paragraph{Example:}
+
+\begin{flushleft}
+\textbf{Input}: $[1,2,3]$
+
+\textbf{Output}:
+
+\begin{table}[H]
+\begin{tabular}{ccc}
+1 & 2 & 3\\
+1 & 3 & 2\\
+2 & 1 & 3\\
+2 & 3 & 1\\
+3 & 1 & 2\\
+3 & 2 & 1
+\end{tabular}
+\end{table}
+\end{flushleft}
+
+\subsection{Backtracking By Setting Visited Status}
+In this approach, when visit a number that does not visit before, mark its visited status as \texttt{true}. After recursive function ends, reset its visited status as \texttt{false}. In the recursive function, the loop will start from zero, since we need to enumerate all numbers.
+
+\setcounter{algorithm}{0}
+\begin{algorithm}[H]
+\caption{Recursive With Visited Status}
+\begin{algorithmic}[1]
+\Procedure{Permute}{$A, n$}
+\State $\star$ Create an empty array $v$ to save one permutation
+\State $\star$ Create an empty array $\Phi$ for each number's visited status
+\State $\star$ Create an empty array $P$ as the result.
+\State \Call{DFS}{$A, n, \delta=0, v, \Phi, P$} 
+\State \Return $P$
+\EndProcedure
+\end{algorithmic}
+\end{algorithm}
+
+The following function \texttt{DFS} recursively generate all permutations of input array $A$. The result is $P$, while $\Phi$ is for recording each number's visited status. $\delta$ is the count of numbers that have been visited.
+\begin{algorithm}[H]
+\caption{Helper function}
+\begin{algorithmic}[1]
+\Function{DFS}{$A, n, \delta, v, \Phi, P$}
+\If{$\delta = n$} \Comment Iterate all elements in $A$
+\State $\star$ Add $v$ into the final list
+\Else
+\For{$i:=0$ \textbf{to} $n-1$}
+\If{$\Phi[i] = 1$} \Comment $A[i]$ has been visited
+\State \texttt{continue} \Comment Skip this number
+\EndIf
+\State $\Phi[i] \gets 1$ \Comment Mark $A[i]$ as visited
+\State $v \gets v + A[i]$ \Comment Add $A[i]$ into $V$
+\State \Call{DFS}{$A, n, \delta=\delta+1, v, \Phi, P$} \Comment Recursively generate permutation from next number
+\State $v \gets v - A[i]$ \Comment Remove $A[i]$ from $v$
+\State $\Phi[i] \gets 0$ \Comment Reset $A[i]$ as not visited
+\EndFor
+\EndIf
+\EndFunction
+\end{algorithmic}
+\end{algorithm}
+
+\setcounter{lstlisting}{0}
+\begin{lstlisting}[style=customc, caption={Recursive With Visited Status}]
+vector<vector<int>> permute( vector<int>& nums )
+{
+    vector<int> seen( nums.size(), 0 );
+
+    vector<int> cur; //save current permutation result
+
+    cur.reserve( nums.size() );
+
+    vector<vector<int>> ans;
+
+    dfs( nums, seen, cur, ans );
+
+    return ans;
+}
+
+//helper function for recursion
+void dfs( const vector<int>& A, vector<int>& seen, vector<int>& cur, vector<vector<int>>& ans )
+{
+    if( cur.size() == A.size() )
+    {
+        //all numbers have been visited
+        ans.emplace_back( cur.begin(), cur.end() );
+        return;
+    }
+
+    for( size_t i = 0; i < A.size(); ++i )
+    {
+        if( seen[i] )
+        {
+            continue;
+        }
+
+        seen[i] = 1;
+        cur.push_back( A[i] );
+
+        dfs( A, seen, cur, ans );
+
+        //backtrack
+        seen[i] = 0;
+        cur.pop_back();
+    }
+}
+\end{lstlisting}
+
+\subsection{Backtracking By Swapping}
+\begin{itemize}
+\item In this approach, we swap the current first item $A[p]$ with each number starting from position $p$. 
+\item If starting from position $p+1$, we will miss the arrays that start with $A[p]$
+\end{itemize}
+
+
+\begin{algorithm}[H]
+\caption{Backtrack With Swap}
+\begin{algorithmic}[1]
+\Procedure{Permute}{$A,n$}
+\State $\star$ Create an empty array $\Omega$ as the result.
+\State \Call{DFS}{$A, n, p=0, \Omega$} 
+\State \Return $P$
+\EndProcedure
+\end{algorithmic}
+\end{algorithm}
+
+
+The following helper function \texttt{DFS2} swap $A[p]$ with each number starting from index $p$ and recursively going to next number.
+
+\begin{algorithm}[H]
+\caption{Helper Function}
+\begin{algorithmic}[1]
+\Function{DFS2}{$A, n, p, \Omega$}
+\If{$p = n$} \Comment All numbers are permutated once
+\State $\star$ Add current $A$ into result list $\Omega$
+\State \Return
+\Else
+\For{$i:= p$ \textbf{to} $n-1$}
+\State $\star$ Swap $A[p]$ with $A[i]$ 
+\State \Call{DFS2}{$A, n, p = p+1, \Omega}$ \Comment Generate permutation starting with $A[p+1]$
+\State $\star$ Swap $A[p]$ with $A[i]$ to backtrack 
+\EndFor
+\EndIf
+\EndFunction
+\end{algorithmic}
+\end{algorithm}
+
+\setcounter{lstlisting}{0}
+\begin{lstlisting}[style=customc, caption={Backtrack With Swap}]
+vector<vector<int>> permute( vector<int>& nums )
+{
+    vector<vector<int>> ans;
+
+    dfs( nums, 0, ans );
+
+    return ans;
+}
+//Helper function to generate permutation lists
+void dfs( vector<int>& A, size_t start, vector<vector<int>>& ans )
+{
+    if( start == A.size() )
+    {
+        ans.emplace_back( A.begin(), A.end() );
+        return;
+    }
+
+    for( size_t i = start; i < A.size(); ++i )
+    {
+        swap( A[i], A[start] );
+
+        //permut starting from A[start+1]
+        dfs( A, start + 1, ans );
+
+        //swap back to backtrack
+        swap( A[i], A[start] );
+    }
+}
+\end{lstlisting}

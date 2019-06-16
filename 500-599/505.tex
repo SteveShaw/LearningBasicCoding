@@ -1,0 +1,449 @@
+\section{505 --- The Maze II}
+There is a ball in a maze with empty spaces and walls. The ball can go through empty spaces by rolling up, down, left or right, but it won't stop rolling until hitting a wall. When the ball stops, it could choose the next direction.
+
+Given the ball's start position $S$, the destination $D$ and the maze $G$, find the shortest distance for the ball to stop at the destination. The distance is defined by the number of empty spaces traveled by the ball from the start position (excluded) to the destination (included). If the ball cannot stop at the destination, return $-1$.
+
+The maze is represented by a binary 2D array. 1 means the wall and 0 means the empty space. You may assume that the borders of the maze are all walls. The start and destination coordinates are represented by row and column indexes.
+ 
+
+\paragraph{Example 1:}
+
+\begin{flushleft}
+\textbf{Input}: 
+
+a maze represented by a 2D array
+
+\begin{table}[H]
+\begin{tabular}{ccccc}
+0 & 0 & 1 & 0 & 0 \\
+0 & 0 & 0 & 0 & 0 \\
+0 & 0 & 0 & 1 & 0 \\
+1 & 1 & 0 & 1 & 1 \\
+0 & 0 & 0 & 0 & 0
+\end{tabular}
+\end{table}
+
+Sart coordinate: $S = (0, 4)$
+
+Destination coordinate: $D = (4, 4)$
+
+\textbf{Output}: 12
+
+\textbf{Explanation}: 
+
+One shortest way is : left $\longrightarrow$ down $\longrightarrow$ left $\longrightarrow$ down $\longrightarrow$ right $\longrightarrow$ down $\longrightarrow$ right. 
+
+The total distance is $1 + 1 + 3 + 1 + 2 + 2 + 2 = 12$.
+
+\begin{figure}[H]
+\begin{tikzpicture}
+[ thick]
+\draw[step=5mm, help lines] (0,0) grid (3.5,3.5);
+\foreach \x in {0, 0.5, ..., 3}
+{
+\draw[fill=gray!20!] (\x,0) rectangle ++(0.5,0.5);
+}
+\foreach \x in {0.5, 1, ..., 3}
+{
+\draw[fill=gray!20!] (0, \x) rectangle ++(0.5,0.5);
+}
+
+\foreach \x in {0.5, 1,..., 3}
+{
+\draw[fill=gray!20!] (\x,3) rectangle ++(0.5,0.5);
+}
+
+\foreach \x in {0.5, 1,..., 2.5}
+{
+\draw[fill=gray!20!] (3,\x) rectangle ++(0.5,0.5);
+}
+
+\draw[fill=gray!20!] (1.5, 2.5) rectangle ++(0.5,0.5);
+\draw[fill=gray!20!] (0.5, 1) rectangle ++(0.5,0.5);
+\draw[fill=gray!20!] (1, 1) rectangle ++(0.5,0.5);
+\draw[fill=gray!20!] (2, 1) rectangle ++(0.5,0.5);
+\draw[fill=gray!20!] (2.5, 1) rectangle ++(0.5,0.5);
+\draw[fill=gray!20!] (2, 1.5) rectangle ++(0.5,0.5);
+\node[star, minimum size=0.2cm, draw] at (2.75, 0.75) {};
+\draw (2.75, 2.75) circle (0.25cm);
+\end{tikzpicture}
+\end{figure}
+\end{flushleft}
+
+\paragraph{Example 2:}
+
+\begin{flushleft}
+\textbf{Input}: a maze represented by a 2D array
+
+\begin{table}[H]
+\begin{tabular}{ccccc}
+0 & 0 & 1 & 0 & 0 \\
+0 & 0 & 0 & 0 & 0 \\
+0 & 0 & 0 & 1 & 0 \\
+1 & 1 & 0 & 1 & 1 \\
+0 & 0 & 0 & 0 & 0
+\end{tabular}
+\end{table}
+
+Start coordinate: $S = (0, 4)$
+
+Destination coordinate: $D = (3, 2)$
+
+\textbf{Output}: $-1$
+
+\textbf{Explanation}: 
+
+There is no way for the ball to stop at the destination.
+
+
+\begin{figure}[H]
+\begin{tikzpicture}
+[ thick]
+\draw[step=5mm, help lines] (0,0) grid (3.5,3.5);
+\foreach \x in {0, 0.5, ..., 3}
+{
+\draw[fill=gray!20!] (\x,0) rectangle ++(0.5,0.5);
+}
+\foreach \x in {0.5, 1, ..., 3}
+{
+\draw[fill=gray!20!] (0, \x) rectangle ++(0.5,0.5);
+}
+
+\foreach \x in {0.5, 1,..., 3}
+{
+\draw[fill=gray!20!] (\x,3) rectangle ++(0.5,0.5);
+}
+
+\foreach \x in {0.5, 1,..., 2.5}
+{
+\draw[fill=gray!20!] (3,\x) rectangle ++(0.5,0.5);
+}
+
+\draw[fill=gray!20!] (1.5, 2.5) rectangle ++(0.5,0.5);
+\draw[fill=gray!20!] (0.5, 1) rectangle ++(0.5,0.5);
+\draw[fill=gray!20!] (1, 1) rectangle ++(0.5,0.5);
+\draw[fill=gray!20!] (2, 1) rectangle ++(0.5,0.5);
+\draw[fill=gray!20!] (2.5, 1) rectangle ++(0.5,0.5);
+\draw[fill=gray!20!] (2, 1.5) rectangle ++(0.5,0.5);
+\node[star, minimum size=0.2cm, draw] at (1.75, 1.25) {};
+\draw (2.75, 2.75) circle (0.25cm);
+\end{tikzpicture}
+\end{figure}
+
+\end{flushleft}
+ 
+
+\paragraph{Note:}
+
+\begin{itemize}
+\item There is only one ball and one destination in the maze.
+\item Both the ball and the destination exist on an empty space, and they will not be at the same position initially.
+\item The given maze does not contain border (like the red rectangle in the example pictures), but you could assume the border of the maze are all walls.
+\item The maze contains at least 2 empty spaces, and both the width and height of the maze won't exceed 100.
+\end{itemize}
+
+\subsection{Depth First Search}
+\begin{itemize}
+\item 需要maintain一个和maze大小相同的array $D$，用于记录每个位置从开始位置出发的最小距离。
+\item 从当前位置出发，一直move下去。直到遇到wall或者越界，然后回到发生越界或者遇到wall的前的最后一个节点，如果这时候这个节点到出发点的距离比在$D$中记录的还要小，则将该节点的距离更新为当前距离，然后继续递归下去。
+\end{itemize}
+
+\setcounter{lstlisting}{0}
+\begin{lstlisting}[style=customc, caption={DFS}]
+int shortestDistance( vector<vector<int>>& maze, vector<int>& start, vector<int>& destination )
+{
+    //records each node's minimum distance
+    //to the start node
+    vector<vector<int>> dists( maze.size(), vector<int>( maze[0].size(), INT_MAX ) );
+    dists[start[0]][start[1]] = 0;
+
+    dfs( maze, dists, start[0], start[1], destination );
+
+    int x = dists[destination[0]][destination[1]];
+    return x == INT_MAX ? -1 : x;
+}
+
+
+void dfs( vector<vector<int>>& G, vector<vector<int>>& dists, int r, int c, vector<int>& dest )
+{
+    if( ( r == dest[0] ) && ( c == dest[1] ) )
+    {
+        //we are at the destination
+        return;
+    }
+
+    int dr[] = {-1, 0, 1, 0};
+    int dc[] = {0, -1, 0, 1};
+
+    int m = static_cast<int>( G.size() );
+    int n = static_cast<int>( G[0].size() );
+
+    //test each possible direction
+    for( int i = 0; i < 4; ++i )
+    {
+        int nr = r;
+        int nc = c;
+
+        int dist = dists[r][c];
+
+        while( ( nr >= 0 ) && ( nr < m ) && ( nc >= 0 ) && ( nc < n ) && ( G[nr][nc] == 0 ) )
+        {
+            nr += dr[i];
+            nc += dc[i];
+
+            ++dist;
+        }
+
+        //back off to the
+        //last node before
+        //over the bounday or hit the wall
+
+        nr -= dr[i];
+        nc -= dc[i];
+
+        --dist;
+
+        int x = dists[nr][nc];
+
+        if( dist < x )
+        {
+            //only do recursive when
+            //dist is less than the recorded distance
+            //for (nr,nc)
+            dists[nr][nc] = dist;
+            dfs( G, dists, nr, nc, dest );
+        }
+    }
+}
+\end{lstlisting}
+
+\subsection{BFS}
+Instead of making use of DFS for exploring the search space, we can make use of BFS as well. In this approach, instead of exploring the search space on a depth basis, we traverse the search space(tree) on a level by level basis i.e. we explore all the new positions that can be reached starting from the current position first, before moving onto the next positions that can be reached from these new positions.
+
+\setcounter{lstlisting}{0}
+\begin{lstlisting}[style=customc, caption={BFS}]
+int shortestDistance( vector<vector<int>>& maze, vector<int>& start, vector<int>& destination )
+{
+
+    //BFS
+    using node_t = array<int, 2>;
+    queue<node_t> q;
+
+    //the distance array to record minimum distance from
+    //start to each position
+    vector<vector<int>> dists( maze.size(), vector<int>( maze[0].size(), INT_MAX ) );
+    dists[start[0]][start[1]] = 0;
+
+    q.push( node_t{start[0], start[1]} );
+
+    //directions offsets
+    array<int, 4> dr( {-1, 0, 1, 0} );
+    array<int, 4> dc( {0, -1, 0, 1} );
+
+    int m = static_cast<int>( maze.size() );
+    int n = static_cast<int>( maze[0].size() );
+
+    while( !q.empty() )
+    {
+        auto t = q.front();
+        q.pop();
+
+        int r = t[0];
+        int c = t[1];
+
+
+        for( int i = 0; i < 4; ++i )
+        {
+            int nr = r;
+            int nc = c;
+
+            int dist = dists[nr][nc];
+
+            //rolling the ball until
+            //hitting the wall or
+            //out of boundary
+            while( ( nr >= 0 ) && ( nr < m ) && ( nc >= 0 ) && ( nc < n ) && ( maze[nr][nc] == 0 ) )
+            {
+                nr += dr[i];
+                nc += dc[i];
+                ++dist;
+            }
+
+            //backward to last node before hitting the wall
+            //or out of boundary
+            nr -= dr[i];
+            nc -= dc[i];
+            --dist;
+
+            if( dist < dists[nr][nc] )
+            {
+                //only when we get a less distance
+                //from start, then push to the queue
+                dists[nr][nc] = dist;
+                q.emplace( node_t{nr, nc} );
+            }
+        } //end for
+    }//end while
+
+    int x = dists[destination[0]][destination[1]];
+    return x == INT_MAX ? -1 : x;
+}
+\end{lstlisting}
+
+\subsection{Dijkstra Algorithm}
+
+The given problem is also a shortest distance finding problem with a slightly different set of rules. Thus, we can make use of Dijkstra's Algorithm to determine the minimum number of steps to reach the destination.
+
+The methodology remains the same as the \textbf{DFS} or \textbf{BFS} Approach discussed above, except the order in which the current positions are chosen. We again make use of an array $D$ to keep a track of the minimum number of steps needed to reach every position from the \textit{start} position. At every step, we choose a position which hasn't been marked as \textbf{visited} and which is at the shortest distance from the \textit{start} position to be the current position. We mark this position as visited so that we don't consider this position as the current position again.
+
+To do the above operations efficiently, we can make use of a priority queue, $Q$. This priority queue is a maximum queue: the top element is the node which is unvisited and at the smallest distance from the \textit{start} node. Thus, the node to be chosen as the current node, is always at the top of $Q$.
+
+For every current node, we again try to traverse in all the possible directions. We determine the minimum number of steps(till now) required to reach all the end points possible from the current node. If any such end point can be reached in a less number of steps through the current path than the paths previously considered, we need to update its distance entry in array $D$.
+
+Further, we add an entry corresponding to this node in $Q$, since its distance entry has been updated and we need to consider this node as the competitors for the next current node choice. Thus, the process remains the same as the last approach, except the way in which the pick out the current node (which is the unvisited node at the shortest distance from the \textit{start} node).
+
+\begin{lstlisting}[style=customc, caption={Dijkastra Algorithm}]
+int shortestDistance( vector<vector<int>>& maze, vector<int>& start, vector<int>& destination )
+{
+    auto cmp = []( const array<int, 3>& a1, const array<int, 3>& a2 )
+    {
+        return a1[2] > a2[2];
+    };
+
+    //maximum priority queue for Dijkastra
+    priority_queue<array<int, 3>, vector<array<int, 3>>, decltype( cmp )> pq( cmp );
+
+    pq.emplace( array<int, 3> {start[0], start[1], 0} );
+
+    //We still need this 2d array
+    //to record each position's minimum distance from start
+    vector<vector<int>> dists( maze.size(), vector<int>( maze[0].size(), INT_MAX ) );
+    dists[start[0]][start[1]] = 0;
+
+    array<int, 4> dr( {-1, 0, 1, 0} );
+    array<int, 4> dc( {0, -1, 0, 1} );
+
+    int m = static_cast<int>( maze.size() );
+    int n = static_cast<int>( maze[0].size() );
+
+    while( !pq.empty() )
+    {
+        auto t = pq.top();
+        pq.pop();
+
+        if( dists[t[0]][t[1]] < t[2] )
+        {
+            //(t[0],t[1]) distance recorded
+            //is less than the calculated
+            //ignore
+            continue;
+        }
+
+        int r = t[0];
+        int c = t[1];
+
+
+        for( int i = 0; i < 4; ++i )
+        {
+            int nr = r;
+            int nc = c;
+            int dist = dists[r][c];
+
+            while( ( nr >= 0 ) && ( nr < m ) && ( nc >= 0 ) && ( nc < n ) && ( maze[nr][nc] == 0 ) )
+            {
+                nr += dr[i];
+                nc += dc[i];
+                ++dist;
+            }
+
+            //back to the last node
+            //before hitting the wall
+            //or out of boundary
+            nr -= dr[i];
+            nc -= dc[i];
+            --dist;
+
+            if( dist < dists[nr][nc] )
+            {
+                //only push to queue
+                //when a less distance is
+                //found
+                dists[nr][nc] = dist;
+                pq.emplace( array<int, 3> {nr, nc, dist} );
+            }
+        }
+    }
+
+    int x = dists[destination[0]][destination[1]];
+
+    return x == INT_MAX ? -1 : x;
+}
+\end{lstlisting}
+
+\subsection{Overview Of Dijkastra Algorithm}
+Dijkstra's Algorithm is a very famous graph algorithm, which is used to find the shortest path from any start node to any destination node in the given weighted graph(the edges of the graph represent the distance between the nodes).
+
+The algorithm consists of the following steps:
+\begin{enumerate}
+\item Assign a tentative distance value to every node: set it to zero for our start node and to $\infty$ for all other nodes.
+\item Set the start node as current node. Mark it as visited.
+\item For the current node, consider all of its neighbors and calculate their tentative distances. Compare the newly calculated tentative distance to the current assigned value and assign the smaller one to all the neighbors. For example, if the current node $A$ is marked with a distance of 6, and the edge connecting it with a neighbor $B$ has length 2, then the distance to $B$ (through $A$) will be $6 + 2 = 8$. If $B$ was previously marked with a distance greater than 8 then change it to 8. Otherwise, keep the current value.
+\item When we are done considering all of the neighbors of the current node, mark the current node as visited. A visited node will never be checked again.
+\item If the destination node has been marked \textbf{visited} or if the \textbf{smallest} tentative distance among all the nodes left is $\infty$ (indicating that the destination can't be reached), then stop. The algorithm has finished.
+\item Otherwise, select the \textit{unvisited} node that is marked with the smallest tentative distance, set it as the new \textbf{current} node, and go back to step 3.
+\end{enumerate}
+
+The working of this algorithm can be understood by taking two simple examples. Consider the first set of nodes as shown below.
+
+\begin{figure}[H]
+\begin{tikzpicture}
+[my/.style={draw, circle,
+ minimum size=1cm, fill=gray!20!},
+ thick
+]
+
+\node[my](a) at(0,0) {$a$};
+\node[my](b) [above=0.5cm of a, xshift=3cm] {$b$};
+\node[my](c) [below=3cm of b, xshift=2.5cm] {$e$};
+\node[my](d) [below=4cm of b, xshift=-0.3cm] {$c$};
+\draw (a) -- (b) node[pos=0.5, auto] {4};
+\draw (b) -- (c) node[pos=0.5, auto] {6};
+\draw (c) -- (d) node[pos=0.5, auto] {2};
+\draw (d) -- (a) node[pos=0.5, auto] {6};
+\end{tikzpicture}
+\end{figure}
+
+Suppose that the node $b$ is at a shorter distance from the start node $a$ as compared to $c$, but the distance from $a$ to the destination node, $e$, is shorter through the node $c$ itself. In this case, we need to check if the \textbf{Dijkstra}'s algorithm works correctly, since the node $b$ is considered first while selecting the nodes being at a shorter distance from $a$. Let's look into this.
+
+\begin{enumerate}
+\item Firstly, we choose $a$ as the start node, mark it as \textit{visited} and update the distance values of $b$ and $c$, say $D_b$ and $D_c$.
+\item Since $D_b < D_c$, $b$ is chosen as the next node for calculating the distances. We mark $b$ as \textit{visited}. Now, we update the distance value of $e$, $D_e$, as $D_b+W(b,e)$ where $W(b,e)$ is the weight from $b$ to $e$.
+\item Now, $c$ is obviously the next node to be chosen because $D_c < D_b + W(b,e)$. From $c$, we determine the distance to node $e$. Since $D_c+ W(c, e) < D_e$, we update $D_e$ as this shorter value.
+\item We choose $e$ as the current node. No other distances need to be updated. Thus, we mark $e$ as visited. $D_e$  now gives the required shortest distance.
+\end{enumerate}
+
+The above example proves that even if a locally closer node is chosen as the current node first, the ultimate shortest distance to any node is calculated correctly.
+
+Let's take another example to demonstrate that the visited node needs not be chosen again as the current node.
+
+\begin{figure}[H]
+\begin{tikzpicture}
+[my/.style={draw, circle,
+ minimum size=1cm, fill=gray!20!},
+ thick
+]
+
+\node[my](a) at(0,0) {$a$};
+\node[my](b) [above=0.5cm of a, xshift=4cm] {$b$};
+\node[my](c) [below=0.3cm of a, xshift=3cm] {$c$};
+\node[my](d) [below=1pt of b, xshift=3cm] {$e$};
+\draw (a) -- (b) node[pos=0.5, auto] {5};
+\draw (b) -- (c) node[pos=0.5, auto] {2};
+\draw (c) -- (a) node[pos=0.5, auto] {2};
+\draw (b) -- (d) node[pos=0.5, auto] {3};
+\end{tikzpicture}
+\end{figure}
+
+
+Suppose $a$ is the start node and $e$ is the destination node. Now, suppose we visit $b$ first and mark it as visited, but later on we find that another path exists through $c$ to $b$, which makes the distance value of $b$, $D_b$, shorter than the previous value. But, because of this, we need to consider $b$ as the current node again, since it would affect the value of $D_e$. But, if we observe closely, such a situation would never occur, because $W(a,c) + W(c,b) < W(a,b)$ and $W(a,c) < W(a,b)$ in the first place. Thus, $b$ would never be marked \textbf{visited} before $c$, which contradicts the first assumption. This proves that the \textit{visited} node needs not be chosen as the current node again.
+
