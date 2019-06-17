@@ -1,0 +1,71 @@
+\section{400 --- Nth Digit}
+Find the $n$th digit of the infinite integer sequence 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, $\ldots$
+
+\paragraph{Note:}
+\begin{itemize}
+\item $ n $ is positive and will fit within the range of a 32-bit signed integer ($n < 2^{31}$).
+\end{itemize}
+
+\paragraph{Example 1:}
+
+\begin{flushleft}
+\textbf{Input}: 3
+\textbf{Output}: 3
+\end{flushleft}
+
+\paragraph{Example 2:}
+
+\begin{flushleft}
+\textbf{Input}: 11
+\textbf{Output}: 0
+\textbf{Explanation}:
+\\
+The 11th digit of the sequence 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, $\ldots$ is a 0, which is part of the number 10.
+\end{flushleft}
+
+\subsection{Mathematical Induction}
+问题可以分为三个部分
+\begin{enumerate}
+\item 计算包含第$n$个digit的number $x$是几位数。
+\item 找到$x$。
+\item 找到包含在$x$中的第$n$个digit
+\end{enumerate}
+例如，假设需要找到第250个digit,
+\begin{enumerate}
+\item 很容易找到$x$是三位数，因为1--9有9个数字，而10--99有180个数字，$250 - 9 - 90 \times 2 = 61$。即$n$是3位数中从100开始的第61个数字。
+\item 找到$x$： 由于计数是从1开始，所以$x=100+(61-1)/3=120$。
+\item 最后在$x$中找到第$n$th digit: 因为$(n-1)\bmod 3=0$，所以$x$中第0个数字即为$n$th digit。即1。
+\end{enumerate}
+
+\setcounter{lstlisting}{0}
+\begin{lstlisting}[style=customc, caption={Mathematical Induction}]
+int findNthDigit( int n )
+{
+    long long base = 9;
+    long long z = 1; //number of digits
+    long long start = 1; // start=1,10,100,....
+
+    auto ln = static_cast<long long>( n );
+
+    while( ln > base * z )
+    {
+        ln -= base * z;
+        base *= 10;
+        ++z;
+        start *= 10;
+    }
+
+    //get number x that contains nth digit
+    auto x = start + ( ( ln - 1 ) / z );
+
+    //get the index of nth digit in x
+    //from left to right
+    auto i = ( ( ln - 1 ) % z );
+
+    //convert to string
+    auto s = to_string( x );
+
+    return s[i] - '0';
+
+}
+\end{lstlisting}

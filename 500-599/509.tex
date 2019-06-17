@@ -1,0 +1,46 @@
+\section{509 --- Fibonacci Number}
+The Fibonacci numbers, commonly denoted $F(n)$ form a sequence, called the Fibonacci sequence, such that each number is the sum of the two preceding ones, starting from 0 and 1. That is,
+\begin{align*}
+F(0) &= 0 \\
+F(1) &= 1 \\
+F(N) &= F(N - 1) + F(N - 2) \quad N > 1.
+\end{align*}
+
+Given $N$, calculate $F(N)$.
+
+\paragraph{Note:}
+
+\begin{itemize}
+\item $0 \leq N \leq 30$.
+\end{itemize}
+
+\subsection{Dynamic Programming}
+\begin{itemize}
+\item classical dynamic programming problem.
+\item Since $F(N)$ depends only on $F(N-1)$ and $F(N-2)$, we can use two variables $x$ and $y$ to replace.
+\end{itemize}
+
+\setcounter{lstlisting}{0}
+\begin{lstlisting}[style=customc, caption={Dynamic Programming}]
+int fib( int N )
+{
+    if( N <= 1 )
+    {
+        return N;
+    }
+
+    int x = 0;
+    int y = 1;
+
+    for( int i = 2; i <= N; ++i )
+    {
+        int z = x + y;
+        //update F[N-2]
+        x = y;
+        //update F[N-1]
+        y = z;
+    }
+
+    return y;
+}
+\end{lstlisting}

@@ -1,0 +1,71 @@
+\section{404 --- Sum of Left Leaves}
+Find the sum of all left leaves in a given binary tree.
+
+\paragraph{Example:}
+\begin{flushleft}
+\textbf{Input}:
+\begin{figure}[H]
+\begin{tikzpicture}
+[my/.style={draw, fill=gray!20, circle, minimum size=5mm}]
+\node[my](0) at (0,0) {3};
+\node[my](1) [below = 8mm of 0, xshift=-12mm] {9};
+\node[my](2) [below = 8mm of 0, xshift=12mm] {20};
+\node[my](3) [below = 8mm of 2, xshift=-9mm] {15};
+\node[my](4) [below = 8mm of 2, xshift=9mm] {7};
+\draw[thick] (0) -- (1);
+\draw[thick] (0) -- (2);
+\draw[thick] (2) -- (3);
+\draw[thick] (2) -- (4);
+\end{tikzpicture}
+\end{figure}
+\textbf{Output}: 24
+\\
+\textbf{Explanation}: There are two left leaves in the binary tree, with values 9 and 15 respectively. Return 24.
+\end{flushleft}
+
+\subsection{Depth First Search}
+\begin{itemize}
+\item We need to add boolean flag as one of parameters in the recursive function to indicate if the current node is left or right.
+\item If the root has no child, we must return 0.
+\end{itemize}
+
+\setcounter{lstlisting}{0}
+\begin{lstlisting}[style=customc, caption={Depth First Search}]
+int sumOfLeftLeaves( TreeNode* root )
+{
+
+    int ans = 0;
+
+    //if root has no children,
+    //we must return 0
+    dfs( root, false, ans );
+
+    return ans;
+}
+
+//helper function, add is_left to indicate
+//if the node is left or right
+void dfs( TreeNode* node, bool is_left, int& sum )
+{
+    if( !node )
+    {
+        return;
+    }
+
+    if( !node->left && !node->right )
+    {
+        if( is_left )
+        {
+            //only add sum for left node
+            sum += node->val;
+        }
+    }
+    else
+    {
+        dfs( node->left, true, sum );
+        dfs( node->right, false, sum );
+    }
+}
+\end{lstlisting}
+
+

@@ -1,0 +1,19 @@
+\section{412 --- Fizz Buzz}
+Write a program that outputs the string representation of numbers from 1 to $ n $.
+\par
+But for multiples of three it should output \texttt{Fizz} instead of the number and for the multiples of five output \texttt{Buzz}. For numbers which are multiples of both three and five output FizzBuzz.
+
+\paragraph{Example:}
+\begin{flushleft}
+\textbf{Input}: 15
+\\
+\textbf{Output}: $[\;1,2,\texttt{Fizz}, 4, \texttt{Bizz}, \texttt{Fizz}, 7, 8, \texttt{Fizz}, \texttt{Buzz}, 11, \texttt{Fizz}, 13, 14, \texttt{FizzBuzz}\;]$
+\end{flushleft}
+
+\subsection{String Concatenation}
+\begin{itemize}
+\item Initially set current string is empty
+\item If current number can be divide by 3, add \texttt{Fizz}
+\item If current number can be divide by 5, add \texttt{Buzz}
+\item If the string is still empty, the current number cannot be divided by 3 and 5, so set the string to current number itself
+\end{itemize}

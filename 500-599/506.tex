@@ -1,0 +1,73 @@
+\section{506 --- Relative Ranks}
+Given scores of $N$ athletes, find their relative ranks and the people with the top three highest scores, who will be awarded medals: \textbf{Gold Medal}, \textbf{Silver Medal} and \textbf{Bronze Medal}.
+
+\paragraph{Example 1:}
+
+\begin{flushleft}
+\textbf{Input}: $[5, 4, 3, 2, 1]$
+
+\textbf{Output}: [Gold Medal, Silver Medal, Bronze Medal, 4, 5]
+
+\textbf{Explanation}: 
+
+The first three athletes got the top three highest scores, so they got Gold Medal, Silver Medal and Bronze Medal. 
+
+For the left two athletes, you just need to output their relative ranks according to their scores.
+\end{flushleft}
+
+\paragraph{Note:}
+\begin{itemize}
+\item $N$ is a positive integer and won't exceed 10,000.
+\item All the scores of athletes are guaranteed to be unique.
+\end{itemize}
+
+\subsection{Priority Queue}
+其实就是找到排序后原来的元素在排序后的位置。可以用priority queue作为数据结构。
+
+\setcounter{lstlisting}{0}
+\begin{lstlisting}[style=customc, caption={Priority Queue}]
+vector<string> findRelativeRanks( vector<int>& nums )
+{
+    priority_queue<pair<int, size_t>> pq;
+
+    for( size_t i = 0; i < nums.size(); ++i )
+    {
+        pq.emplace( nums[i], i );
+    }
+
+    vector<string> ans( nums.size() );
+
+    if( !pq.empty() )
+    {
+        auto t = pq.top();
+        ans[t.second] = "Gold Medal";
+        pq.pop();
+    }
+
+    if( !pq.empty() )
+    {
+        auto t = pq.top();
+        ans[t.second] = "Silver Medal";
+        pq.pop();
+    }
+
+    if( !pq.empty() )
+    {
+        auto t = pq.top();
+        ans[t.second] = "Bronze Medal";
+        pq.pop();
+    }
+
+    int next = 4;
+
+    while( !pq.empty() )
+    {
+        auto t = pq.top();
+        pq.pop();
+        ans[t.second] = to_string( next );
+        ++next;
+    }
+
+    return ans;
+}
+\end{lstlisting}

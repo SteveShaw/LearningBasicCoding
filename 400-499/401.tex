@@ -1,0 +1,87 @@
+\section{401 --- Binary Watch}
+A binary watch has 4 LEDs on the top which represent the hours (0--11), and the 6 LEDs on the bottom represent the minutes (0--59).
+\par
+Each LED represents a zero or one, with the least significant bit on the right. So the 4 LEDs represent hours 8, 4, 2 and 1. The 6 LEDs represent the minutes 32, 16, 8, 4, 2 and 1 respectively.
+\par
+Given a non-negative integer $ n $ which represents the number of LEDs that are currently on, return all possible times the watch could represent.
+
+\paragraph{Example:}
+
+\begin{flushleft}
+\textbf{Input}: $ n = 1 $
+\\
+\textbf{Output}: [ 1:00, 2:00, 4:00, 8:00, 0:01, 0:02, 0:04, 0:08, 0:16, 0:32 ]
+
+\end{flushleft}
+
+\paragraph{Note:}
+
+\begin{itemize}
+\item  The order of output does not matter.
+\item The hour must not contain a leading zero, for example 01:00 is not valid, it should be 1:00.
+\item The minute must be consist of two digits and may contain a leading zero, for example 10:2 is not valid, it should be 10:02.
+\end{itemize}
+
+\subsection{Combination}
+总共要取$n$个，首先在代表hours的4个LEDs里面取$h$个，然后在代表minutes的6个LEDs里面取$n-h$个，分别对hours和minutes进行递归处理，然后将符合范围的hour和minute组合起来，放入输出array中。
+
+\setcounter{lstlisting}{0}
+\begin{lstlisting}[style=customc, caption={Combination}]
+vector<string> readBinaryWatch( int num )
+{
+    const int hours[4] = {8, 4, 2, 1};
+    const int minutes[6] = {32, 16, 8, 4, 2, 1};
+
+    vector<string> ans;
+    for( int h = 0; h <= num; ++h )
+    {
+        //get all possible hours for h leds
+        vector<int> hs;
+        dfs( hours, 4, 0, h, 0, hs );
+
+        //get all possible minutes for (n-h) leds
+        vector<int> ms;
+        dfs( minutes, 6, 0, num - h, 0, ms );
+
+        for( auto x : hs )
+        {
+            if( ( x >= 0 ) && ( x <= 11 ) )
+            {
+                //hour is between [0,11]
+                for( auto y : ms )
+                {
+                    if( ( y >= 0 ) && ( y <= 59 ) )
+                    {
+                        //minute is between [0,59]
+                        string s_time = to_string( x );
+                        s_time.push_back( ':' );
+                        //make sure minute has leading zero for [0,9]
+                        s_time += ( y < 10 ) ? ( "0" + to_string( y ) ) : to_string( y );
+                        ans.emplace_back( s_time );
+                    }
+                }//end for
+            } //end if
+        } //end for
+    }
+
+    return ans;
+}
+
+//helper function: recursively genenrate hours with *count* leds
+void dfs( const int* a, int len, int start, int count, int t, vector<int>& res )
+{
+    if( count == 0 )
+    {
+        //we have already used *count* leds
+        res.push_back( t );
+        return;
+    }
+
+    for( int i = start; i < len; ++i )
+    {
+        //since this is combination
+        //try next from (i+1)
+        dfs( a, len, i + 1, count - 1, t + a[i], res );
+    }
+}
+\end{lstlisting}

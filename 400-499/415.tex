@@ -1,0 +1,96 @@
+\section{415 --- Add Strings}
+Given two non-negative integers $A$ and $B$ represented as string, return the sum of $A$ and $B$.
+
+\paragraph{Note:}
+
+\begin{itemize}
+\item  The length of both $A$ and $B$ is less than 5100.
+\item Both $A$ and $B$ contains only digits 0--9.
+\item Both $A$ and $B$ does not contain any leading zero.
+\item You must not use any built-in library or convert the inputs to integer directly.
+\end{itemize}
+
+\subsection{Just Add}
+\begin{itemize}
+\item An easy problem: just add the number and record the carry.
+\item If carry is still 1 at the end, prepend 1 to the final result.
+\end{itemize}
+
+\setcounter{lstlisting}{0}
+\begin{lstlisting}[style=customc, caption={Just Add}]
+string addStrings( string num1, string num2 )
+{
+    if( num1.empty() )
+    {
+        return num2;
+    }
+
+    if( num2.empty() )
+    {
+        return num1;
+    }
+
+    if( num1.size() < num2.size() )
+    {
+        swap( num1, num2 );
+    }
+
+    int lx = static_cast<int>( num1.size() );
+    int ly = static_cast<int>( num2.size() );
+
+
+    int ix = lx - 1;
+    int iy = ly - 1;
+
+    int carry = 0;
+
+    while( iy >= 0 )
+    {
+        int x = num1[ix] - '0';
+        int y = num2[iy] - '0';
+
+        int sum = x + y + carry;
+
+        if( sum > 9 )
+        {
+            carry = 1;
+            sum -= 10;
+        }
+        else
+        {
+            carry = 0;
+        }
+
+        num1[ix] = sum + '0';
+
+        --ix;
+        --iy;
+    }
+
+    while( ix >= 0 )
+    {
+        int x = num1[ix] - '0';
+        int sum = x + carry;
+
+        if( sum > 9 )
+        {
+            carry = 1;
+            sum -= 10;
+        }
+        else
+        {
+            carry = 0;
+        }
+
+        num1[ix] = sum + '0';
+        --ix;
+    }
+
+    if( carry == 1 )
+    {
+        return "1" + num1;
+    }
+
+    return num1;
+}
+\end{lstlisting}

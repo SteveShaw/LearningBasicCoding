@@ -1,0 +1,201 @@
+\section{420 --- Strong Password Checker}
+A password is considered strong if below conditions are all met:
+
+\begin{itemize}
+\item It has at least 6 characters and at most 20 characters.
+\item It must contain at least one lowercase letter, at least one uppercase letter, and at least one digit.
+\item It must NOT contain three repeating characters in a row (...\texttt{aaa}... is weak, but ...\texttt{aa}...\texttt{a}..." is strong, assuming other conditions are met).
+\end{itemize}
+
+Write a function \texttt{strongPasswordChecker}, that takes a string $s$ as input, and return the \textbf{MINIMUM} change required to make $ s $ a strong password. If $ s $ is already strong, return 0.
+\par
+\textbf{Insertion}, \textbf{deletion} or \textbf{replace} of any one character are all considered as one change.
+
+\subsection{Greedy Algorithm}
+Try to find a greedy way to use as few as possible deletions, insertions and replacements. Per the description, there are three cases to be dealt with: e need to change letters to solve 3 cases
+\begin{enumerate}
+\item The length of password: $\ell$
+\item Missing any kind of uppercase, lowercase or digit.
+\item The repeating characters.
+\end{enumerate}
+The required changes for the password can be divided into 3 scenarios
+\begin{enumerate}
+\item $\ell <  6$: 这种情况下重复字符个数的范围为$[3,5]$
+\begin{itemize}
+\item 如果有3个重复字符，那么增加3个字符的操作可以同时解决case 3，例如 $\texttt{aaa} \longrightarrow \texttt{a1BCaa}$；
+\item 如果有4个重复字符，那么增加2个字符的操作也可以解决case 3，例如$\texttt{aaaa} \longrightarrow \texttt{aa1Baa})$；
+\item 如果有5个重复字符，那么insertion和replace能同时解决case 3，例如 $\texttt{aaaaa}\longrightarrow \texttt{aa1aaB}$。
+\end{itemize}
+所以需要计算出minimum changes to solve the case 1 and 2.首先计算出当前密码串需要insert几个字符才能得到长度6，即$6-\ell$。由于insert也能同时解决case 2，所以当缺失的字符种类个数小于或者$6-\ell$时，insert就能解决问题。反之，如果缺失的字符种类个数大于$6-\ell$时，还需要额外的replace操作。所以$\ell < 6$的时候，所需要的最少change为$\max(6-\ell, k)$。其中$k$为缺失的字符\textbf{种类}个数。
+\item $6\leq \ell \leq 20$. 这种情况下，case 1不存在，因此只需要replace。。
+\item $\ell > 20$，这时候需要尽量减少deletion的次数，而最佳的替换是replace。,
+\end{enumerate}
+因此，需要找到方法尽可能的用replace operation。这里的trick在于: 
+\begin{itemize}
+\item For a sequence with $x$ repeating character, instead of changing it into a sequence of length 2 by deleting to fix case 3, we first reduce $x$ to $y$ where $y$ is the largest number that no less than $x$ and $y\bmod 3=2$. As such, there will have
+\begin{enumerate}
+\item When $x\bmod 3=0$, $y=x-1$
+\item When $x\bmod 3=1$, $y=x-2$
+\item When $x\bmod 3=2$, $y=x-3$
+\end{enumerate}
+\item  The reason behind this trick is that for any sequence with $3\times n+2$ repeating character, we can use \textbf{replace} $n$ characters to solve case 3.
+\item Of course, if the remaining changes are less than the calculated replacement changes, we just use the minimum ones.
+\end{itemize}
+According the analysis above, the process for calculating the minimum changes is as below:
+\begin{enumerate}
+\item Get the number of \textbf{replace} changes first. This will be the sum of length of each sequence with more than 2 letters divide by 3 as we need to replace one character every 3 letters. 
+\item At the same time, we get the number of deletion to change each sequence with $x$ repeating characters to $y$. 
+\begin{itemize}
+\item When $x\bmod 3=0$, each sequence need to delete one letter, therefore increments the number of deletions to delete one letter, denote as $d_1$. Before deletion, the sequence need $x/3$ replacements. After 1 letter is deleted, $\lfloor(x-1)/3\rfloor$ replacements is required which is $x/3-1$. So, the total replacement changes will decrease by 1.
+\item When $x\bmod 3=1$, each sequence need to delete 2 letters, therefore increase the number of deletions to delete two letters by 2, denote as $d_2$. Before deletion, the sequence need $\lfloor x/3\rfloor$ replacements. After 2 letter is deleted, $\lfloor(x-2)/3\rfloor$ replacements is required which is $\lfloor x/3\rfloor - 1$. So, the total replacement changes will decrease by 1.
+\item When $x\bmod 3=2$, each sequence need to delete 3 letters, therefore increase the number of deletions to delete three letters by 3, denote as $d_3$.  Before deletion, the sequence need $\lfloor x/3\rfloor$ replacements. After 3 letter is deleted, $\lfloor(x-3)/3\rfloor$ replacements is required which is $\lfloor x/3\rfloor - 1$. So, the total replacement changes will decrease by 1.
+\end{itemize}
+\item Therefore, when finish iterating over $s$, total replace changes will be changed by the following rules:
+\begin{itemize}
+\item For deletion of 1 characters, the number of replace changes will be decreased by $d_1$
+\item For deletion of 2 characters, the number of replace changes will be decreased by $d_2 / 2$.
+\item For deletion of 3 characters, the number of replace changes will be decreased by $d_3 / 3$.
+\end{itemize}
+\item We have to compare $d_1+d_2+d_3$ with required $\ell-20$ deletions since we do not want to do unnecessary deletions. To try to maximize the effect of decreasing the replace operation, we will do deletion of 1 character first and then deletion of 2 character. After that,  if the remaining required deletions $d$ is less than or equal to $d_3$, we just do $d$ deletions to decrease replace operations by $d/3$. But if $d$ is larger than $d_3$, notice a fact: all the remaining sequences are $3\times n +2$, we can do as many as deletions to decrease replace operations, so the replace operation will be decreased by $d/3$. In either case, only $d$ will decide how many replace operations will be decreased. Hence, $d_3$ is no longer needed.
+\item In the end, compare the final number of replacement changes with the required changes to fix case 2. The maximum plus $\ell-20$ is the answer. 
+\end{enumerate}
+
+\setcounter{lstlisting}{0}
+\begin{lstlisting}[style=customc, caption={Change to $3\times n+2$ sequence}]
+int strongPasswordChecker( string s )
+{
+    int last_c = 0;
+
+    int uppercase = 1;
+    int lowercase = 1;
+    int digit = 1;
+
+    int count = 1;
+
+    int num_replaces = 0;
+    int num_del1 = 0;
+    int num_del2 = 0;
+    int num_del3 = 0;
+
+    int L = static_cast<int>( s.size() );
+
+    auto check_case2 = [&uppercase, &lowercase, &digit]( char c )
+    {
+        if( ( c >= '0' ) && ( c <= '9' ) )
+        {
+            //digit exist, no change is needed to insert digit
+            digit = 0;
+        }
+        else if( ( c >= 'a' ) && ( c <= 'z' ) )
+        {
+            //lowercase exist, no change is needed to insert lowercase
+            lowercase = 0;
+        }
+        else if( ( c >= 'A' ) && ( c <= 'Z' ) )
+        {
+            //uppercase exist, no change is needed to insert uppercase
+            uppercase = 0;
+        }
+    };
+
+    for( auto c : s )
+    {
+
+        check_case2( c );
+
+        if( c == last_c )
+        {
+            ++count;
+        }
+        else
+        {
+            if( count >= 3 )
+            {
+                //need to replace each letter every 3 letters
+                num_replaces += ( count / 3 );
+                if( ( count % 3 ) == 0 )
+                {
+                    //delete one letter
+                    ++num_del1;
+                }
+                else if( ( count % 3 ) == 1 )
+                {
+                    //delete two letters
+                    num_del2 += 2;
+                }
+                else
+                {
+                    //delete three letters
+                    num_del3 += 3;
+                }
+            }
+
+            count = 1;
+        }
+
+        last_c = c;
+    }
+
+    //process the last character. The count may be larger than 3 but we
+    //have not processed
+
+    if( count >= 3 )
+    {
+        num_replaces += ( count / 3 ); //need to replace each letter every 3 letters
+        if( ( count % 3 ) == 0 )
+        {
+            //delete one letter
+            ++num_del1;
+        }
+        else if( ( count % 3 ) == 1 )
+        {
+            //delete two letters
+            num_del2 += 2;
+        }
+        //the following is not needed
+        // else
+        // {
+        // //delete three letters
+        // num_del3 += 3;
+        // }
+    }
+
+    int add_missing = uppercase + lowercase + digit;
+    //length < 6
+    if( L < 6 )
+    {
+        return ( max )( add_missing, 6 - L );
+    }
+
+    if( ( L >= 6 ) && ( L <= 20 ) )
+    {
+        //only replacement is needed
+        return ( max )( add_missing, num_replaces );
+    }
+
+    //length > 20
+    int del_needed = L - 20;
+
+    //delete 1 letter for 3k sequence, the number of replace can be decreased by 1
+    num_replaces -= ( min )( del_needed, num_del1 );
+
+    //delete 2 letter for 3k+1 sequence, the number of replace can be decreased by 1
+    int remaining_del_needed = ( max )( del_needed - num_del1, 0 );
+    num_replaces -= ( min )( remaining_del_needed, num_del2 ) / 2;
+
+    //delete 3 letter for 3k+2 sequence, the number of replace can be decreased by 1
+    remaining_del_needed = ( max )( remaining_del_needed - num_del2, 0 );
+    //Notice: we do not use (min)(remaining_del_needed, num_del3) /3 here
+    //when remaining_del_needed < num_del3, we can only decrease by remaining_del_needed/3
+    //otherwise, after we delete num_del3 /3, we can still delete more letters from
+    //all remaining 3n+2 sequence(notice: all sequences remainings are 3n+2)
+    num_replaces -= ( max )( remaining_del_needed, 0 ) / 3;
+
+    //now compare number of replaces with the number of add missing letter kinds
+    //we want the maximum since they can cover each other
+
+    return del_needed + ( max )( add_missing, num_replaces );
+}
+
+\end{lstlisting}
+

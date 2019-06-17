@@ -1,0 +1,124 @@
+\section{403 --- Frog Jump}
+A frog is crossing a river. The river is divided into $x$ units and at each unit there may or may not exist a stone. The frog can jump on a stone, but it must not jump into the water.
+\par
+Given a list of stones' positions $A$ (in units) in sorted ascending order, determine if the frog is able to cross the river by landing on the last stone. Initially, the frog is on the first stone and assume the first jump must be 1 unit.
+\par
+If the frog's last jump was $ k $ units, then its next jump must be either $ k - 1 $, $ k $, or $ k + 1 $ units. Note that the frog can only jump in the forward direction.
+
+\paragraph{Note:}
+
+\begin{itemize}
+\item The number of stones $2\leq \lvert A\rvert < 1100$
+\item Each stone's position will be a non-negative integer $< 2^{31}$.
+\item The first stone's position is always 0.
+\end{itemize}
+
+\paragraph{Example 1:}
+\begin{flushleft}
+\textbf{Input}: $[0,1,3,5,6,8,12,17]$
+\\
+\textbf{Output}: \texttt{true}
+\\
+\textbf{Explanation}:  There are a total of 8 stones.
+\\
+The first stone at the 0th unit, second stone at the 1st unit, third stone at the 3rd unit, and so on. The last stone at the 17th unit.
+\\
+The frog can jump to the last stone by jumping 
+1 unit to the 2nd stone, then 2 units to the 3rd stone, then 
+2 units to the 4th stone, then 3 units to the 6th stone, 
+4 units to the 7th stone, and 5 units to the 8th stone.
+\end{flushleft}
+
+\paragraph{Example 2:}
+
+\begin{flushleft}
+\textbf{Input}: $[0,1,2,3,4,8,9,11]$
+\\
+\textbf{Output}: \texttt{false}
+\\
+\textbf{Explanation}: There is no way to jump to the last stone as the gap between the 5th and 6th stone is too large.
+\end{flushleft}
+
+\subsection{Dynamic Programming}
+\begin{itemize}
+\item Suppose we are at $i$th stone and it take $x$ steps to jump from $(i-1)$th stone to current one.
+\item Then from $(i+1)$th stone until last one, if the gap to $i$th stone is between $[x-1,x+1]$, we can jump to that stone. If the gap is larger than $x+1$, we can stop the searching because all stones from this one will not be reachable.
+\item For any reachable stone $j$, recursively to find if the frog can jump to the last stone from $j$.
+\item To minimize the memory impact, we can use a hash map to memorize. The map's key is the combination of the stone's index $i$ and the steps $x$ that the frog takes to jump from $(i-1)$th stone. We can transform $i$ and $x$ to string and concatenate with a special character such as \# to form the key.
+\end{itemize}
+
+\setcounter{lstlisting}{0}
+\begin{lstlisting}[style=customc, caption={Dynamic Programming}]
+bool canCross( vector<int>& stones )
+{
+    //memorization for dynamic programming
+    unordered_map<string, unsigned char> memo;
+
+    auto can_jump = dfs( stones, 0, 1, memo );
+
+    return can_jump != 0;
+}
+//Helper function to find if the frog can jump to last stone starting from ith stone
+unsigned char dfs( vector<int>& positions, size_t i, int step, unordered_map<string, unsigned char>& memo )
+{
+    //form the key
+    auto key = to_string( i ) + "#" + to_string( step );
+
+    //find if we already have the value for given stone index (i) and
+    //the step from (i-1)th stone
+    auto it = memo.find( key );
+
+    if( it != memo.end() )
+    {
+        return it->second;
+    }
+
+    //Can jump to the last stone
+    //return true directly
+    if( i >= positions.size() - 1 )
+    {
+        memo.emplace( key, 1 );
+        return 1;
+    }
+
+    unsigned char can_jump = 0;
+
+    int last_pos = positions[i];
+
+    for( size_t k = i + 1; k < positions.size(); ++k )
+    {
+        int cur_pos = positions[k];
+        //the steps need to take to jump from ith stone
+        int gap = cur_pos - last_pos;
+
+        if( gap < step - 1 )
+        {
+            //too small step
+            //skip to next stone
+            continue;
+        }
+
+        if( gap > step + 1 )
+        {
+            //too big step
+            //break the searching
+            break;
+        }
+
+        //recursively to check if frog can reach last one
+        //when jumping from kth stone
+        can_jump = dfs( positions, k, gap, memo );
+
+        if( can_jump == 1 )
+        {
+            break;
+        }
+    }
+
+    //add to the memorization
+    memo.emplace( key, can_jump );
+
+    return can_jump;
+}
+
+\end{lstlisting}

@@ -1,0 +1,162 @@
+\section{417 --- Pacific Atlantic Water Flow}
+Given an $m \times n$ matrix of non-negative integers representing the height of each unit cell in a continent, the \textbf{Pacific ocean} touches the left and top edges of the matrix and the \textbf{Atlantic ocean} touches the right and bottom edges.
+\par
+Water can only flow in four directions (up, down, left, or right) from a cell to another one with height equal or lower.
+\par
+Find the list of grid coordinates where water can flow to both the Pacific and Atlantic ocean.
+
+\paragraph{Note:}
+\begin{itemize}
+\item The order of returned grid coordinates does not matter.
+\item Both m and n are less than 150.
+\end{itemize}
+
+\paragraph{Example:}
+\begin{flushleft}
+
+\begin{table}[H]
+\begin{tabular}{*{5}{c}}
+1 & 2 & 2 & 3 & (5) \\
+3 & 2 & 3 & (4) & (4) \\
+2 & 4 & (5) & 3 & 1 \\
+(6) & (7) & 1 & 4 & 5 \\
+(5) & 1 & 1 & 2 & 4
+\end{tabular}
+\end{table}
+\end{flushleft}
+
+\subsection{Depth First Search}
+\begin{itemize}
+\item Starting from the first row and first column, from each cell, go 4 directions to any cell with height equal to or larger than current one's height, and mark this cell as 1. This means the water from this cell can flow into \textbf{Pacific ocean}.
+\item Starting from the last row and last column, from each cell, go 4 directions to any cell with height equal to or larger than current one's height, and mark this cell as 2. This means the water from this cell can flow into \textbf{Atlantic ocean}. In this process, if the cell has already marked 1, this means the water can flow into both \textbf{Pacific ocean} and \textbf{Atlantic ocean}. Add this cell's row and column into the output array.
+\end{itemize}
+
+\setcounter{lstlisting}{0}
+\begin{lstlisting}[style=customc, caption={Depth First Search}]
+vector<vector<int>> pacificAtlantic( vector<vector<int>>& matrix )
+{
+    if( matrix.empty() || ( matrix[0].empty() ) )
+    {
+        return {};
+    }
+
+    int m = static_cast<int>( matrix.size() );
+    int n = static_cast<int>( matrix[0].size() );
+
+    vector<vector<unsigned char>> seen( m, vector<unsigned char>( n, 0 ) );
+
+    //color for pacifc ocean for first row
+    for( int c = 0; c < n; ++c )
+    {
+        if( seen[0][c] == 1 )
+        {
+            continue;
+        }
+        dfs( matrix, 0, c, seen );
+    }
+
+    //color for pacifc ocean for first column
+    for( int r = 0; r < m; ++r )
+    {
+        if( seen[r][0] == 1 )
+        {
+            continue;
+        }
+
+        dfs( matrix, r, 0, seen );
+    }
+
+    vector<vector<int>> ans;
+
+    //color for atlantic ocean for last row
+    for( int c = 0; c < n; ++c )
+    {
+        if( seen[m - 1][c] == 2 )
+        {
+            continue;
+        }
+
+        check( matrix, m - 1, c, seen, ans );
+    }
+
+    //color for atlantic ocean for last column
+    for( int r = 0; r < m; ++r )
+    {
+        if( seen[r][n - 1] == 2 )
+        {
+            continue;
+        }
+
+        check( matrix, r, n - 1, seen, ans );
+    }
+
+    return ans;
+}
+
+//color cell from which the water can flow into pacifc ocean
+void dfs( vector<vector<int>>& M, int r, int c, vector<vector<unsigned char>>& seen )
+{
+    seen[r][c] = 1;
+
+    int dr[4] = {0, -1, 0, 1};
+    int dc[4] = {1, 0, -1, 0};
+
+    int m = static_cast<int>( matrix.size() );
+    int n = static_cast<int>( matrix[0].size() );
+
+    for( int i = 0; i < 4; ++i )
+    {
+        int nr = r + dr[i];
+        int nc = c + dc[i];
+
+        if( ( nr < 0 ) || ( nc < 0 ) || ( nr >= m ) || ( nc >= n ) || ( seen[nr][nc] == 1 ) )
+        {
+            continue;
+        }
+
+        if( M[nr][nc] >= M[r][c] )
+        {
+            //only go to equal or higher height cell
+            dfs( M, nr, nc, seen );
+        }
+    }
+
+
+}
+
+//color cell from which the water can flow into atlantic ocean
+void check( vector<vector<int>>& M, int r, int c, vector<vector<unsigned char>>& seen, vector<vector<int>>& pts )
+{
+    if( seen[r][c] == 1 )
+    {
+        //this cell can also flow into pacifc
+        pts.emplace_back( initializer_list<int> {r, c} );
+    }
+
+    seen[r][c] = 2;
+
+    int m = static_cast<int>( matrix.size() );
+    int n = static_cast<int>( matrix[0].size() );
+
+    int dr[4] = {0, -1, 0, 1};
+    int dc[4] = {1, 0, -1, 0};
+
+    for( int i = 0; i < 4; ++i )
+    {
+        int nr = r + dr[i];
+        int nc = c + dc[i];
+
+        if( ( nr < 0 ) || ( nc < 0 ) || ( nr >= m ) || ( nc >= n ) || ( seen[nr][nc] == 2 ) )
+        {
+            continue;
+        }
+
+        if( M[nr][nc] >= M[r][c] )
+        {
+            //color cell from which the water can flow into atlantic ocean
+            check( M, nr, nc, seen, pts );
+        }
+    }
+}
+
+\end{lstlisting}

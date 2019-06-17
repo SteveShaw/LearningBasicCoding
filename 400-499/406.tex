@@ -1,0 +1,88 @@
+\section{406 --- Queue Reconstruction by Height}
+Suppose you have a random list of people standing in a queue. Each person is described by a pair of integers $(h, k)$, where $h$ is the height of the person and $k$ is the number of people in front of this person who have a height greater than or equal to h. Write an algorithm to reconstruct the queue.
+
+\paragraph{Note:}
+\begin{itemize}
+\item The number of people is less than 1,100.
+\end{itemize}
+
+\paragraph{Example}
+
+\begin{flushleft}
+\textbf{Input}: $[\; [7,0], [4,4], [7,1], [5,0], [6,1], [5,2]\;]$
+\\
+\textbf{Output}: $[\;[5,0], [7,0], [5,2], [6,1], [4,4], [7,1]\;]$
+\end{flushleft}
+
+\subsection{Sort}
+\begin{itemize}
+\item Sort the input list by the height from larger to smaller. If two persons have same heights, the one with smaller $k$ is placed in front.
+\item Starting from the second person in the sorted list, maintains a counter $\delta$ that records how many persons in front have a height greater than or equal to current person:
+\begin{enumerate}
+\item For current person $i$, for any person $j$ in front of $i$, if $h_j \geq h_i$, increments the counter $\delta$. 
+\item If $\delta$ equal to $k_i$, from $i-1$ to $j$, we swap each element with its previous one. When this process is completed, put $i$ into $j$ and this will place $i$ into the correct position
+\item Then stop and continue to person $i+1$.
+\end{enumerate}
+\end{itemize}
+
+\begin{lstlisting}[style=customc, caption={Sorting}]
+vector<vector<int>> reconstructQueue( vector<vector<int>>& people )
+{
+    //sort height first from larger to smaller
+    //then the order from smaller to larger
+    sort( people.begin(), people.end(), []( const vector<int>& p1, const vector<int>&p2 )
+    {
+        if( p1[0] > p2[0] )
+        {
+            return true;
+        }
+        else if( p1[0] == p2[0] )
+        {
+            return p1[1] < p2[1];
+        }
+
+        // return false;
+    } );
+
+    int L = static_cast<int>( people.size() );
+
+    for( int i = 1; i < L; ++i )
+    {
+        //The number of persons in front
+        //have a height larger or equal to i
+        int z = 0;
+        int h = people[i][0];
+        int k = people[i][1];
+
+        for( int j = 0; j < i; ++j )
+        {
+
+            if( k == z )
+            {
+                //Found the range of items that need to be replaced
+
+                //copy information from previous item
+                for( int x = i - 1; x >= j; --x )
+                {
+                    people[x + 1][0] = people[x][0];
+                    people[x + 1][1] = people[x][1];
+                }
+
+                //place i into j
+                people[j][0] = h;
+                people[j][1] = k;
+
+                break; //stop inner loop
+            }
+
+            //increment z
+            if( people[j][0] >= h )
+            {
+                ++z;
+            }
+        }
+    }
+
+    return people;
+}
+\end{lstlisting}

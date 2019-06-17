@@ -1,0 +1,227 @@
+\section{425 --- Word Squares}
+\textcolor{red}{Locked}
+\\
+Given a set of words (without duplicates) $W$, find all word squares you can build from them.
+\par
+A sequence of words forms a valid word square if the $ k $th row and column read the exact same string, where $0 \leq k < \max(R, C)$ where $R$ and $C$ are number of rows and columns respectively.
+\par
+For example, the word sequence [\texttt{ball},\texttt{area},\texttt{lead},\texttt{lady}] forms a word square because each word reads the same both horizontally and vertically.
+\begin{table}[H]
+\begin{tabular}{cccc}
+b & a & l & l\\
+a & r & e & a\\
+l & e & a & d\\
+l & a & d & y
+\end{tabular}
+\end{table}
+
+\paragraph{Note:}
+
+\begin{itemize}
+\item There are at least 1 and at most 1000 words.
+\item All words will have the exact same length.
+\item Word length is at least 1 and at most 5.
+\item Each word contains only lowercase English alphabet $a$--$z$.
+\end{itemize}
+ 
+
+\paragraph{Example 1:}
+
+\begin{flushleft}
+\textbf{Input}: [\texttt{area},\texttt{lead}, \texttt{wall}, \texttt{lady}, \texttt{ball}]
+\\
+\textbf{Output}:
+\begin{table}[H]
+\begin{tabular}{l}
+wall\\
+area\\
+lead\\
+lady\\
+\hline
+\hline
+ball\\
+area\\
+lead\\
+lady
+\end{tabular}
+\end{table}
+\textbf{Explanation}:
+\\
+The output consists of two word squares. The order of output does not matter (just the order of words in each word square matters).
+\end{flushleft}
+
+
+\paragraph{Example 2:}
+
+\begin{flushleft}
+\textbf{Input}: [\texttt{abat},\texttt{baba},\texttt{atan},\texttt{atal}]
+\\
+
+\textbf{Output}:
+\begin{table}[H]
+\begin{tabular}{l}
+\texttt{baba}\\
+\texttt{abat}\\
+\texttt{baba}\\
+\texttt{atan}\\
+\hline 
+\hline
+\texttt{baba}\\
+\texttt{abat}\\
+\texttt{baba}\\
+\texttt{atal}
+\end{tabular}
+\end{table}
+\textbf{Explanation}:
+\\
+The output consists of two word squares. The order of output does not matter (just the order of words in each word square matters).
+\end{flushleft}
+
+
+\subsection{Find Prefix}
+This problem's key is to match the prefix to the input words. We can use hash map or trie tree to find prefix.
+\begin{itemize}
+\item Iterate each word, find if we can build a matrix by putting this word into the first row.
+\item We need a recursive function to recursively build the matrix.
+\item Inside the recursive function, we build the prefix according to current \textbf{start} index and all the words in the current matrix to be completed.
+\begin{enumerate}
+\item Take [\texttt{area},\texttt{lead}, \texttt{wall}, \texttt{lady}, \texttt{ball}] as the example. Suppose we put \texttt{wall} in the first row for current matrix.
+\item The prefix for current index 0 is \texttt{w}. 
+\item Search the trie tree to find the next trie node from \texttt{w}. We also put each word's index into the trie node to facilitate quick location.
+\item We try each word by the index in the trie node from \texttt{w}, say we put \texttt{area} into the current matrix.
+\item Then, we recursively to deep into the next index. This time, the current index is 1, and we get the prefix from the words in current matrix at this index which is \texttt{ar}.
+\item Repeat the process until the current index is equal to the size of the word
+\item The build process for this example is shown as below
+\begin{figure}[H]
+\begin{center}
+\begin{tikzpicture}
+[my/.style={draw, rectangle, minimum size=7mm, fill=gray!20!}]
+\node[my](0) at (0.5, 0) {\texttt{wall}};
+\node[my](1) at (2.0, 0) {\texttt{w}};
+\node[rectangle split,rectangle split parts=2,draw, text centered, minimum size=7mm](2) [below=8mm of 0] {\texttt{wall} \nodepart{second} \texttt{area}};
+\node[rectangle split,rectangle split parts=2,draw, text centered, minimum size=7mm](3) [below=8mm of 1] {\texttt{w} \nodepart{second} \texttt{ar}};
+\node[rectangle split,rectangle split parts=3,draw](4) [below=8mm of 2] {\texttt{wall} \nodepart{second} \texttt{area} \nodepart{third} \texttt{lead}};
+\node[rectangle split,rectangle split parts=3,draw,text centered](5) [below=8mm of 3] {\texttt{w} \nodepart{second} \texttt{ar}\nodepart {third} \texttt{lea}};
+\node[rectangle split,rectangle split parts=4,draw,text centered](6) [below=8mm of 4] {\texttt{wall} \nodepart{second} \texttt{area} \nodepart{third} \texttt{lead} \nodepart{fourth} \texttt{lady}};
+\node[rectangle split,rectangle split parts=4,draw,text centered](7) [below=8mm of 5] {\texttt{w} \nodepart{second} \texttt{ar}\nodepart {third} \texttt{lea} \nodepart{fourth} \texttt{lady}};
+\end{tikzpicture}
+\end{center}
+\end{figure}
+\end{enumerate}
+\end{itemize}
+
+\setcounter{lstlisting}{0}
+\begin{lstlisting}[style=customc, caption={Trie Tree}]
+
+//trie struct definition
+struct Trie
+{
+    vector<Trie*> m_next;
+    //the index of the word contains the letter
+    vector<size_t> m_index;
+
+    Trie()
+        : m_next( 26, nullptr )
+    {}
+};
+
+vector<vector<string>> wordSquares( vector<string>& words )
+{
+    //build trie
+    Trie* root = new Trie;
+    for( size_t i = 0; i < words.size(); ++i )
+    {
+        build_trie( words[i], root, i );
+    }
+
+    //all words have same size
+    int wl = static_cast<int>( words[0].size() );
+
+
+    vector<vector<string>> ans;
+
+    for( const auto& word : words )
+    {
+        //test each word
+        //chec if a square can be built
+        //buy put word in the first row
+        vector<string> square( wl );
+
+        square[0] = word;
+
+        dfs( words, 1, square, ans, root );
+    }
+
+    return ans;
+}
+
+//W: the input word array
+//start: the current column index
+//M: the current word matrix
+//ans: the result
+//root: the root node of trie tree
+void dfs( vector<string>& W, size_t start, vector<string>& M, vector<vector<string>>& ans, Trie* root )
+{
+    auto L = W[0].size();
+
+    if( start == L )
+    {
+        //A word matrix is successfully built
+        //add to result array
+        ans.push_back( M );
+        return;
+    }
+
+    //generate the prefix
+
+    string prefix = "";
+
+    for( size_t i = 0; i < start; ++i )
+    {
+        prefix += M[i][start];
+    }
+
+    //we will look for any word in W with this prefix
+    //to put into the next row of word matrix
+    auto node = root;
+
+    for( auto c : prefix )
+    {
+        int ci = c - 'a';
+        if( !node->m_next[ci] )
+        {
+            //no any word has this prefix
+            return;
+        }
+
+        node = node->m_next[ci];
+    }
+
+    for( auto wi : node->m_index )
+    {
+        //W[wi] has the prefix
+        //put it into row <start>
+        M[start] = W[wi];
+        //recursively build the matrix from <start+1>
+        dfs( W, start + 1, M, ans, root );
+    }
+}
+
+
+void build_trie( const string& w, Trie* root, size_t index )
+{
+    auto node  = root;
+
+    for( auto c : w )
+    {
+        int ci = c - 'a';
+        if( !node->m_next[ci] )
+        {
+            node->m_next[ci] = new Trie;
+        }
+        node = node->m_next[c - 'a'];
+        //add current word index into the trie node
+        node->m_index.push_back( index );
+    }
+}
+\end{lstlisting}

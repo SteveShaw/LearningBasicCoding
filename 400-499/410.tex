@@ -1,0 +1,156 @@
+\section{410 --- Split Array Largest Sum}
+Given an array $A$ which consists of non-negative integers and an integer $ m $, you can split the array into $ m $ non-empty continuous subarrays. Write an algorithm to minimize the largest sum among these $ m $ subarrays.
+
+\paragraph{Note:}
+\begin{itemize}
+\item If $ n $ is the length of array, assume the following constraints are satisfied:
+
+\begin{enumerate}
+\item    $ 1 \leq n \leq 1000$
+\item    $ 1 \leq m \leq \min(50, n)$
+\end{enumerate}
+\end{itemize}
+
+\paragraph{Examples:}
+
+\begin{flushleft}
+\textbf{Input}: $A = [\;7,2,5,10,8\;]$, $m = 2$
+\\
+\textbf{Output}: 18
+\\
+\textbf{Explanation}: There are four ways to split nums into two subarrays. The best way is to split it into $[\;7,2,5\;]$ and $[\;10,8\;]$, where the largest sum among the two subarrays is only 18.
+\end{flushleft}
+
+\subsection{Binary Search}
+Denote $\lvert A\rvert = n$
+\begin{enumerate}
+\item 如果$m = n$，那么每个subarray就是$A$中的每个element，所以$A$中的最大值即为结果。而如果$m=1$，那么$\sum\limits_{i=0}^{n} A$就是结果。
+\item 因此题目要求的结果必然处于上述两个值中间，可以用binary search的方法。这时候binary search找到的是count，而不是value。
+\item 在binary search的过程中，按照当前的中间值对原数组进行划分，看是否存在有多于$m$个subarray，其sum小于或者等于当前的中间值。
+\begin{enumerate}
+\item 如果存在多于$m$个subarray，显然中间值偏小了。因此将左边界increment
+\item 如果subarray的个数等于$m$，则说明这个中间值刚好能够得到$m$个subarray，但是我们还需要找到更小的值，因此这时候需要将右边界decrements
+\item 而如果subarray的个数小于$m$，显然中间值偏大了，同样的，我们也需要把右边界decrements。
+\end{enumerate}
+\item 当binary search结束后，左边界即为所求结果。
+\end{enumerate}
+
+\setcounter{algorithm}{0}
+\begin{algorithm}[H]
+\caption{Binary Search}
+\begin{algorithmic}[1]
+\Procedure{SplitArray}{$A, L, m$}
+\State $\star$ Find sum of $A$ and maximum element in $A$, denote them as $x$ and $y$ respectively
+\State $\ast$ Binary search to find the minimum largest sum that can divide $A$ into $m$ subarrays
+\While{$x \leq y$}
+\State $z=(x+y)/2$
+\State $\ast$  Check if number of subarrays with sum no larger than $z$ is larger than $m$ or not
+\State $b:$= \Call{Find}{$ A, L, m, z $}
+\If{ $b$ is \texttt{false}} \Comment number of subarrays is larger than $m$
+\State $x\gets x+1$ \Comment This means $z$ is a little lower
+\Else
+\State $y\gets y-1$ \Comment This means $z$ is a little higher
+\EndIf
+\EndWhile
+\State \Return $x$ \Comment Finally $x$ is the result
+\EndProcedure
+\end{algorithmic}
+\end{algorithm}
+Function \texttt{Find} check if number of subarrays in $A$ with sum no larger than target $T$ is larger than $m$ or not.
+
+\begin{algorithm}[H]
+\caption{Helper function to get number of subarrays whose sum are no less than $T$}
+\begin{algorithmic}[1]
+\Procedure{Find}{$A, L, m, T$}
+\State $\delta:=1$ \Comment The count
+\State $t:=0$ \Comment The sum of subarray
+\For{Each number $n$ in $A$}
+\State $t\gets t+n$
+\If{$t> T$}
+\State $\delta\gets\delta+1$ \Comment The sum before adding $n$ is no larger than $T$
+\If{$\delta > m$}
+\State \Return \texttt{false} \Comment Too many subarrays are found
+\EndIf
+\State $t\gets n$ \Comment Reset $t$ to start getting subarray sum again
+\algstore{410algo}
+\end{algorithmic}
+\end{algorithm}
+\begin{algorithm}[H]
+\begin{algorithmic}[1]
+\algrestore{410algo}
+\EndIf
+\EndFor
+\State \Return \texttt{true}
+\EndProcedure
+\end{algorithmic}
+\end{algorithm}
+上述算法有两点需要注意
+\begin{enumerate}
+\item binary search的循环条件是$x\leq y$，而不是$x<y$，因为找到的subarray的个数小于等于$m$都会调整$x$，所以如果只有$x<y$，那么就会忽略$x=y$时的情况，这就会造成求出的largest sum会得到多于$m$个subarray，或者得到$m$个subarray，但不是最小的值。
+\item Function \texttt{Find}中，$\delta$的初始值是1，因为整个array作为一个整体肯定不小于$T$，毕竟右边界是整个array的sum。
+\end{enumerate}
+
+\setcounter{lstlisting}{0}
+\begin{lstlisting}[style=customc, caption={Binary Search}]
+int splitArray( vector<int>& nums, int m )
+{
+    using ll = long long;
+
+    ll x = 0;
+    ll y = 0;
+
+    for( int n : nums )
+    {
+        x = ( max )( static_cast<ll>( n ), x );
+        y += n;
+    }
+
+    if( m == 1 )
+    {
+        return y;
+    }
+
+    //we need to loop until x > y
+    //otherwise we will skip x=y
+    while( x <= y )
+    {
+        auto z = ( x + y ) / 2;
+        if( find( nums, m, z ) )
+        {
+            y = z - 1;
+        }
+        else
+        {
+            x = z + 1;
+        }
+    }
+
+    return static_cast<int>( x );
+}
+
+int find( vector<int>& A, int m, long long T )
+{
+    //at first, A itself is a subarray
+    //that has sum no less than T
+    int delta = 1;
+    long long t = 0;
+
+    for( int n : A )
+    {
+        t += n;
+        if( t > T )
+        {
+            ++delta;
+            if( delta > m )
+            {
+                //T is a little lower
+                return false;
+            }
+
+            t = n; //reset the subarray sum
+        }
+    }
+
+    return true;
+}
+\end{lstlisting}

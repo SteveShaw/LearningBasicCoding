@@ -1,0 +1,160 @@
+\section{426 --- Convert Binary Search Tree to Sorted Doubly Linked List}
+\textcolor{red}{Locked}
+\\
+Convert a BST to a sorted circular doubly-linked list in-place. Think of the left and right pointers as synonymous to the previous and next pointers in a doubly-linked list.
+\par
+Let's take the following BST as an example, it may help you understand the problem better:
+\begin{figure}[H]
+\begin{tikzpicture}
+[my/.style={draw, circle, fill=gray!20!, minimum size=7mm}]
+\node[my](0) at (0,0) {4};
+\node[my](1) [below=8mm of 0, xshift=-9mm] {2};
+\node[my](2) [below=8mm of 0, xshift=9mm] {5};
+\node[my](3) [below=8mm of 1, xshift=-7mm] {1};
+\node[my](4) [below=8mm of 1, xshift=7mm] {3};
+\draw[thick] (0) -- (1); 
+\draw[thick] (0) -- (2);
+\draw[thick] (1) -- (3);
+\draw[thick] (1) -- (4);
+\end{tikzpicture}
+\end{figure}
+
+We want to transform this BST into a \textbf{circular doubly linked list}. Each node in a doubly linked list has a \textbf{predecessor} and \textbf{successor}. For a circular doubly linked list, the \textbf{predecessor} of the first element is the last element, and the \textbf{successor} of the last element is the first element.
+\par
+The figure below shows the circular doubly linked list for the BST above. The \texttt{head} symbol means the node it points to is the smallest element of the linked list.
+ 
+\begin{figure}[H]
+\begin{tikzpicture}
+[my/.style={draw, rectangle, fill=gray!20!, minimum size=7mm}]
+\node[my](0) at (0,0) {1};
+\node[my](1) [right=12mm of 0] {2};
+\draw[>=stealth,->] (0.25) -- (1.155);
+\draw[>=stealth,->] (1.195) -- (0.345);
+\node[my](2) [right=12mm of 1] {3};
+\draw[>=stealth,->] (1.25) -- (2.155);
+\draw[>=stealth,->] (2.195) -- (1.345);
+\node[my](3) [right=12mm of 2] {4};
+\draw[>=stealth,->] (2.25) -- (3.155);
+\draw[>=stealth,->] (3.195) -- (2.345);
+\node[my](4) [right=12mm of 3] {5};
+\draw[>=stealth,->] (3.25) -- (4.155);
+\draw[>=stealth,->] (4.195) -- (3.345);
+\draw[>=stealth,->] (4.345) --  ++(3mm, 0) -- ++(0, -8mm) -| ($(0.195) - (3mm, 0)$) -- ++(3mm, 0);
+\draw[>=stealth,->] (4.25) --  ++(7mm, 0) -- ++(0, -14mm) -| ($(0.155) - (7mm, 0)$) -- ++(7mm, 0);
+\node[my](h) [above=8mm of 0.155, xshift=-10mm] {\texttt{h}};
+%get the intersection of two paths
+\path[name path=P1] ($(0.155)-(2mm, 0)$) -- ++(0, 20mm);
+\path[name path=P2] (h.25) -- ++(20mm, 0);
+\path[name intersections={of=P1 and P2, by={P0}}];
+%\path [name intersections={of=P1 and P2,by={CS}}];
+\draw[thick] (h.25) -- (P0) -- ($(0.155)-(2mm, 0)$);
+\end{tikzpicture}
+\end{figure}
+Specifically, we want to do the transformation in place. After the transformation, the left pointer of the tree node should point to its predecessor, and the right pointer should point to its successor. We should return the pointer to the first element of the linked list.
+
+The figure below shows the transformed BST. The solid line indicates the successor relationship, while the dashed line means the predecessor relationship.
+
+\begin{figure}[H]
+\begin{tikzpicture}
+[my/.style={draw, circle, fill=gray!20!, minimum size=7mm}]
+\node[my](0) at (0,0) {4};
+\node[my](1) [below=8mm of 0, xshift=-25mm] {2};
+\node[my](2) [below=8mm of 0, xshift=25mm] {5};
+\node[my](3) [below=8mm of 1, xshift=-25mm] {1};
+\node[my](4) [below=8mm of 1, xshift=25mm] {3};
+\draw[thick, >=stealth,->] (0.south) to [out=195, in=160] (4.north);
+\draw[dashed, thick, >=stealth,->] (4.north) to [out=35, in=335] (0.south);
+\draw[thick, >=stealth,->] (0.340) to [out=15, in=130] (2.110);
+\draw[dashed, thick, >=stealth,->] (2.110) to [out=190, in=260] (0.340);
+\draw[thick, >=stealth,->] (1.320) to [out=230, in=190] (4.150);
+\draw[dashed, thick, >=stealth,->] (4.150) to [out=120, in=335] (1.320);
+%1--2
+\draw[thick, >=stealth,->] (3.50) to [out=100, in=130] (1.165);
+\draw[dashed, thick, >=stealth,->] (1.165) to [out=230, in=335] (3.50);
+%1--5
+\draw[thick, >=stealth,->] (2.290) to [out=275, in=340] (3.south);
+\draw[dashed, thick, >=stealth,->] (3.south) to [out=295, in=290] (2.290);
+%head
+\node[my](h) [above=8mm of 3.155, xshift=-10mm] {\texttt{h}};
+\draw[thick, >=stealth,->] (h.south) to [out=275, in=95] (3.north);
+\end{tikzpicture}
+\end{figure}
+
+\subsection{Inorder Traverse}
+\begin{itemize}
+\item The inorder function need to update previous node and head node.
+\item If we found the head node is null, this is the first time we get to a node. Update head and previous node to current node.
+\item Otherwise, we connect previous node and current node with left and right pointers.
+\item Finally, we connect the last node and head node with left and right pointers, then return head node.
+\end{itemize}
+
+\setcounter{lstlisting}{0}
+\begin{lstlisting}[style=customc, caption={Inorder Traverse}]
+/*
+class Node
+{
+public:
+    int val;
+    Node* left;
+    Node* right;
+
+    Node() {}
+
+    Node( int _val, Node* _left, Node* _right )
+    {
+        val = _val;
+        left = _left;
+        right = _right;
+    }
+}
+*/
+Node* treeToDoublyList( Node* root )
+{
+    if( !root )
+    {
+        return nullptr;
+    }
+
+    Node* head = nullptr;
+    Node* pre = nullptr;
+
+    inorder( root, head, pre );
+
+    //connect the head node and the end node
+    head->left = pre;
+    pre->right = head;
+
+    return head;
+}
+
+void inorder( Node* node, Node*& head, Node*& pre )
+{
+    if( !node )
+    {
+        return;
+    }
+
+    inorder( node->left, head, pre );
+
+    if( !head )
+    {
+        //This is the first time
+        //to access a node
+        //this will be head node of the linked list
+        head = node;
+        pre = node;
+    }
+    else
+    {
+        //connect pre and node by
+        //left and right pointers.
+        pre->right = node;
+        node->left = pre;
+        pre = node;
+    }
+
+    inorder( node->right, head, pre );
+}
+
+
+\end{lstlisting}

@@ -1,0 +1,131 @@
+\section{422 --- Valid Word Square}
+\textcolor{red}{Locked}
+\\
+Given a sequence of words, check whether it forms a valid word square.
+\par
+A sequence of words forms a valid word square if the $ k $th row and column read the exact same string, where $0 \leq k < \max(R, C)$ where $R$ and $C$ are number of rows and columns respectively.
+
+\paragraph{Note:}
+
+\begin{itemize}
+\item The number of words given is at least 1 and does not exceed 500.
+\item Word length will be at least 1 and does not exceed 500.
+\item  Each word contains only lowercase English alphabet a-z.
+\end{itemize}
+
+
+\paragraph{Example 1:}
+
+\begin{flushleft}
+\textbf{Input}:
+\begin{table}[H]
+\begin{tabular}{l}
+\texttt{abcd} \\
+\texttt{bnrt} \\
+\texttt{crmy} \\
+\texttt{dtye}
+\end{tabular}
+\end{table}
+\textbf{Output}: \texttt{true}
+\\
+\textbf{Explanation}:
+The first row and first column both read \texttt{abcd}.
+\\
+The second row and second column both read \texttt{bnrt}.
+\\
+The third row and third column both read \texttt{crmy}.
+\\
+The fourth row and fourth column both read \texttt{dtye}.
+\\
+Therefore, it is a valid word square.
+\end{flushleft}
+
+ 
+
+\paragraph{Example 2:}
+
+\begin{flushleft}
+\textbf{Input}:
+\begin{table}[H]
+\begin{tabular}{l}
+\texttt{abcd} \\
+\texttt{bnrt} \\
+\texttt{crm} \\
+\texttt{dt}
+\end{tabular}
+\end{table}
+
+\textbf{Output}: \texttt{true}
+\\
+\textbf{Explanation}:
+\\
+The first row and first column both read \texttt{abcd}.
+\\
+The second row and second column both read \texttt{bnrt}.
+\\
+The third row and third column both read \texttt{crm}.
+\\
+The fourth row and fourth column both read \texttt{dt}.
+\\
+Therefore, it is a valid word square.
+\end{flushleft}
+
+
+\paragraph{Example 3:}
+\begin{flushleft}
+\textbf{Input}:
+\begin{table}[H]
+\begin{tabular}{l}
+  \texttt{ball} \\
+  \texttt{area} \\
+  \texttt{read} \\
+  \texttt{lady}
+\end{tabular}
+\end{table}
+\textbf{Output}: \texttt{true}
+\\
+\textbf{Explanation}:
+\\
+The third row reads \texttt{read} while the third column reads \texttt{lead}.
+\\
+Therefore, it is NOT a valid word square.
+\end{flushleft}
+
+\subsection{Matrix Compare}
+\begin{itemize}
+\item Compare $W[r][c]$ with $W[c][r]$
+\item Before comparing, need to check $r$ and $c$ are valid index.
+\end{itemize}
+
+\setcounter{lstlisting}{0}
+\begin{lstlisting}[style=customc, caption={Matrix Compare}]
+bool validWordSquare( vector<string>& words )
+{
+    if( words.empty() )
+    {
+        return true;
+    }
+
+    if( words[0].size() != words.size() )
+    {
+        //The first word need to have equal size
+        //as the input words size
+        return false;
+    }
+
+    for( size_t r = 0; r < words.size(); ++r )
+    {
+        for( size_t c = 0; c < words[i].size(); ++c )
+        {
+            //words[r][c]=words[c][r]
+            if( ( r >= words[c].size() ) || ( c >= words.size() ) || ( words[r][c] != words[c][r] ) )
+            {
+                return false;
+            }
+        }
+    }
+
+    return true;
+}
+
+\end{lstlisting}

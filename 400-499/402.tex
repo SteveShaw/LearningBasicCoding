@@ -1,0 +1,141 @@
+\section{402 --- Remove K Digits}
+Given a non-negative integer $n$ represented as a string, remove $k$ digits from the number so that the new number is the smallest possible.
+\par
+\paragraph{Note:}
+
+\begin{itemize}
+\item     The length of $ n $ is less than 10002 and will be no less than $ k $.
+\item     The given $ n $ does not contain any leading zero.
+
+\end{itemize}
+
+\paragraph{Example 1:}
+
+\begin{flushleft}
+\textbf{Input}: $n = 1432219$, $k = 3$
+\\
+\textbf{Output}: $1219$
+\\
+\textbf{Explanation}: Remove the three digits 4, 3, and 2 to form the new number 1219 which is the smallest.
+\end{flushleft}
+
+\paragraph{Example 2:}
+
+\begin{flushleft}
+\textbf{Input}: $n = 10200$, $k = 1$
+\\
+\textbf{Output}: 200
+\\
+\textbf{Explanation}: Remove the leading 1 and the number is 200. Note that the output must not contain leading zeroes.
+\end{flushleft}
+
+\paragraph{Example 3:}
+
+\begin{flushleft}
+\textbf{Input}: $n = 10$, $k = 2$
+\\
+\textbf{Output}: 0
+\\
+\textbf{Explanation}: Remove all the digits from the number and it is left with nothing which is 0.
+
+\end{flushleft}
+
+\subsection{Sliding Window}
+\begin{itemize}
+\item 采用sliding window的方法，maintain a double end queue: $q$
+\item 从头开始遍历$ n $，将第一个字符放入结果$q$中，然后继续，如果当前digit比$q$中的最后一个digit要大，从$q$中移除最后一个digit，直至$q$为空或者在当前$q$的最后digit不大于当前digit。同时记录从$q$中remove last digit的次数 $\delta$，如果$\delta=k$，就不能再remove last digit了。
+\item Remove $q$ 中可能的leading zeros。
+\item 最后，$q$中包含的digit个数可能会大于$n$的长度$\ell$减去$k$。原因是$n$中可能会有很多重复的比较小的digit。只需要从$q$中返回$\ell-k$个digits即可。
+\end{itemize}
+
+\setcounter{algorithm}{0}
+\begin{algorithm}[H]
+\caption{Sliding Window}
+\begin{algorithmic}[1]
+\Procedure{RemoveKdigits}{$n, \ell, k$}
+\State $\star$ Maintain a double end queue $q$
+\State $\delta:=0$ \Comment The count of removing digits
+\For{$i:=0$ \textbf{to} $\ell-1$}
+\State $d:=n[i]$
+\While{$q$ is not empty \textbf{and} $\delta < k$ \textbf{and} $q$'s last digit is less than $d$}
+\State $\star$ Remove last digit from $q$
+\State $\delta\gets\delta+1$ \Comment Increments the count of removing digits
+\EndWhile
+\State $\star$ Add $d$ to end of $q$
+\EndFor
+\State $\ast$ Remove leading zeros from $q$
+\While{$q$ is not empty \textbf{and} $q$'s first digit is zero}
+\State $\star$ Remove first digit from $q$
+\EndWhile
+\If{$q$ is empty}
+\State \Return 0 \Comment Only zero remains in $q$
+\EndIf
+\State $l:=\min(\ell-k, \lvert q\rvert)$ \Comment $q$ may contain more than $\ell-k$ digits because of duplicate smaller numbers
+\State $s=\emptyset$ \Comment The result number
+\For{$x:=0$ \textbf{to} $l-1$}
+\State $\star$ Add first digit of $q$ to $s$
+\State $\star$ Remove first digit from $q$
+\EndFor
+\If{$s$ is empty}
+\State \Return 0 \Comment All digits are removed from $n$
+\Else
+\State \Return $s$
+\EndIf
+\algstore{402algo}
+\end{algorithmic}
+\end{algorithm}
+\begin{algorithm}[H]
+\begin{algorithmic}[1]
+\algrestore{402algo}
+\EndProcedure
+\end{algorithmic}
+\end{algorithm}
+
+\setcounter{lstlisting}{0}
+\begin{lstlisting}[style=customc, caption={Sliding Window}]
+string removeKdigits( string num, int k )
+{
+    deque<char> q;
+    //the count of remove digits
+    int count = 0;
+
+    //process sliding window
+    for( auto c : num )
+    {
+        while( !q.empty() && ( count < k ) && ( q.back() > c ) )
+        {
+            q.pop_back();
+            ++count;
+        }
+        q.push_back( c );
+    }
+
+    while( !q.empty() && q.front() == '0' )
+    {
+        q.pop_front();
+    }
+
+    if( q.empty() )
+    {
+        return "0";
+    }
+
+    int ln = static_cast<int>( num.size() );
+    int lq = static_cast<int>( q.size() );
+
+    //q may contain more than ln-k digits because of duplicate smaller digits
+    int total = ( min )( ln - k, lq );
+
+    string ans;
+
+    for( int x = 0; x < total; ++x )
+    {
+        ans.push_back( q.front() );
+        q.pop_front();
+    }
+
+    //the result string may still be empty
+    //if total is zero
+    return ans.empty() ? "0" : ans;
+}
+\end{lstlisting}

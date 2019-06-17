@@ -1,0 +1,61 @@
+\section{507 --- Perfect Number}
+We define the Perfect Number is a positive integer that is equal to the sum of all its positive divisors except itself.
+
+Now, given an integer $n$, write a function that returns true when it is a perfect number and false when it is not.
+
+\paragraph{Example:}
+
+\begin{flushleft}
+\textbf{Input}: 28
+
+\textbf{Output}: \texttt{true}
+
+\textbf{Explanation}: $28 = 1 + 2 + 4 + 7 + 14$
+\end{flushleft}
+
+\paragraph{Note:} 
+\begin{itemize}
+\item The input number n will not exceed 100,000,000. $(10^8)$
+\end{itemize}
+
+\subsection{Optimal Solution}
+\begin{itemize}
+\item Suppose the given number $n$ has $m$ distinct factors, $f_1, f_2, \ldots, f_m$. 
+\item Since the number $n$ divisible by $f_i$, it is also divisible by $f_j=n/f_i$.
+\item Also, the largest number in such a pair can only be up to $\sqrt{n}$ ( because $\sqrt{n} \times \sqrt{n}=n$ ). Thus, we can get a significant reduction in the run-time by iterating only up to $\sqrt{n}$ and get such $f_i$ and $f_j$ in a single pass directly.
+\item \textbf{Note}: If $\sqrt{n}$ is also a factor, we have to consider the factor only once. 
+\item \textbf{Note}: While considering 1 as such a factor, $n$ will also be considered as the other factor. Thus, we need to subtract $n$ from the sum.
+\end{itemize}
+
+\setcounter{lstlisting}{0}
+\begin{lstlisting}[style=customc, caption={Optimal Approach}]
+bool checkPerfectNumber( int num )
+{
+    if( num <= 0 )
+    {
+        return false;
+    }
+
+    int sum = 0;
+
+    //only up to sqrt(num)
+    for( int i = 1; i * i <= num; ++i )
+    {
+        int q = num / i; //factor pair(i, q)
+        int r = num - q * i;
+
+        if( r == 0 )
+        {
+            if( q != i )
+            {
+                sum += q;
+                sum += i;
+            }
+        }
+    }
+
+    //for factor 1, the factor pair is (1, num)
+    //so need to subtract num from sum
+    return sum - num == num;
+}
+\end{lstlisting}

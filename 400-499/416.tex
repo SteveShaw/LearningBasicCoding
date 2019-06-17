@@ -1,0 +1,206 @@
+\section{416 --- Partition Equal Subset Sum}
+Given a non-empty array $A$ containing only positive integers, find if the array can be partitioned into two subsets such that the sum of elements in both subsets is equal.
+
+\paragraph{Note:}
+
+\begin{enumerate}
+\item Each of the array element will not exceed 100.
+\item The array size will not exceed 200.
+\end{enumerate}
+
+
+\paragraph{Example 1:}
+
+\begin{flushleft}
+\textbf{Input}: $[1, 5, 11, 5]$
+\\
+\textbf{Output}: \texttt{true}
+\\
+\textbf{Explanation}: The array can be partitioned as $[1, 5, 5]$ and $[11]$.
+\end{flushleft}
+
+ 
+\paragraph{Example 2:}
+
+\begin{flushleft}
+\textbf{Input}: $[1, 2, 3, 5]$
+\\
+\textbf{Output}: \texttt{false}
+\\
+\textbf{Explanation}: The array cannot be partitioned into equal sum subsets.
+\end{flushleft}
+
+\subsection{Top-Down Dynamic Programming}
+\begin{itemize}
+\item Maintain a hash map $M$, where the key is string and the value is a Boolean variable. The key is composed from two numbers: current number and target. The value will indicate if the target will be reached or not if the current number is included.
+\item Apparently, the sum must be even. Start the recursion to find if there some number that can be sum up to the half of the sum.
+\item In the recursive function, test each number from given start index and whenever the target is reached, the function will return \texttt{true} immediately.
+\end{itemize}
+
+\setcounter{algorithm}{0}
+\begin{algorithm}[H]
+\caption{Top-Down Dynamic Programming}
+\begin{algorithmic}[1]
+\Procedure{CanPartition}{$A, L$}
+\If{$\sum\limits A$ is odd}
+\State \Return \texttt{false}
+\EndIf
+\State $\star$ Create a hash map $M$ as memorization
+\State $b:=$\Call{DFS}{$ A, L, p = 0, T = (\sum\limits A)/2, M $}
+\If{$b=1$}
+\State \Return \texttt{true}
+\Else
+\State \Return \texttt{false}
+\EndIf
+\EndProcedure
+\end{algorithmic}
+\end{algorithm}
+
+Function \texttt{DFS} check if the target $ T $ can be obtained from in range $A[p\ldots L-1]$
+
+\begin{algorithm}[H]
+\caption{Helper function}
+\begin{algorithmic}[1]
+\Procedure{DFS}{$ A, L, p, T, M$}
+\If{$p \geq L$ \textbf{or} $T< 0$}
+\State \Return 1
+\EndIf
+\State $\star$ Make a string $k$ from $A[p]$ and $T$
+\If{$k$ is one of keys in $M$}
+\State \Return $M[k]$
+\EndIf
+\If{$T=0$} \Comment The target is reached
+\State $M[k]:=1$
+\State \Return 1
+\EndIf
+\State $b:=0$
+\For{$i:=p$ \textbf{to} $L-1$}
+\State $\ast$ Check if $T$ can be reached if $A[i]$ is included
+\State $b:=$\Call{DFS}{$ A, L, i+1, T - A[i], M $}
+\algstore{416algo}
+\end{algorithmic}
+\end{algorithm}
+\begin{algorithm}[H]
+\begin{algorithmic}[1]
+\algrestore{416algo}
+\If{$b=1$}
+\State \texttt{break} \Comment We can reach $T$ by including $A[i]$
+\EndIf
+\EndFor
+\State $M[k]:=b$ \Comment Add to memorization
+\State \Return $b$
+\EndProcedure
+\end{algorithmic}
+\end{algorithm}
+
+\setcounter{lstlisting}{0}
+\begin{lstlisting}[style=customc, caption={Top Down Dynamic Programming}]
+bool canPartition( vector<int>& nums )
+{
+    long long sum = 0;
+
+    for( int n : nums )
+    {
+        sum += n;
+    }
+
+    //only even sum can be partitioned
+    if( sum & 1 )
+    {
+        return false;
+    }
+
+    unordered_map<string, unsigned char> memo;
+
+    return dfs( nums, 0, sum / 2, memo );
+
+}
+
+bool dfs( vector<int>& nums, size_t start, long long target, unordered_map<string, unsigned char>& memo )
+{
+    if( ( start >= nums.size() ) || ( target < 0 ) )
+    {
+        //since all elements are positive numbers
+        //if target is less than zero,
+        //no way to reach.
+        return false;
+    }
+
+    //form the key by nums[start] and target
+    auto key = to_string( nums[start] ) + "#" + to_string( target );
+
+    auto it = memo.find( key );
+
+    if( it != memo.end() )
+    {
+        return it->second == 1;
+    }
+
+    if( target == 0 )
+    {
+        memo.emplace( key, 1 );
+        return true;
+    }
+
+    bool b = false;
+
+    for( size_t i = start; i < nums.size(); ++i )
+    {
+        //test if nums[i] is included, the target can be reached or not
+        b = dfs( nums, i + 1,  target - nums[i], memo );
+
+        if( b )
+        {
+            break;
+        }
+    }
+
+    memo.emplace( key, b ? 1 : 0 );
+
+    return b;
+}
+
+\end{lstlisting}
+
+\subsection{0/1 knapsack problem}
+\begin{itemize}
+\item Maintain an array $F$. The size is equal to $\sum\limits A /2 + 1$. $F[t]$ means if we can get sum $F[t]$ by a few numbers from $A$. 
+\item For each number $n$ in $A$, we have the option to choose or not choose (0/1 choice). If we choose this number, then we are leaving $t-n$ to be reached. Therefore $F[t] = F[t-n]$. Otherwise, $F[t]$ will be itself.
+\item In the algorithm, we have two loops. The outer loop is iterating $A$ and the inner loop will iterate from $\sum\limits A /2$ to current number $n$ because we cannot get negative sum from positive numbers. For current target $t$, if $F[t-n]$ is \texttt{true}, then $F[t]$ will be \texttt{true}.
+\item Finally, if $F[\sum\limits A /2]$ is \texttt{true}, it means we can partition $A$ into two parts with equal sum
+\end{itemize}
+
+\begin{lstlisting}[style=customc, caption={Bottom-up Dynamic Programming}]
+bool canPartition( vector<int>& nums )
+{
+    long long sum = 0;
+    for( int n : nums )
+    {
+        sum += n;
+    }
+
+    if( sum & 1 )
+    {
+        return false;
+    }
+
+    long long T = sum / 2;
+    vector<unsigned char> F( T + 1, 0 );
+
+    F[0] = 1;
+
+    for( int n : nums )
+    {
+        for( auto t = T; t >= n; --t )
+        {
+            //if F[t-n] is true, means
+            //we can get t by including n
+            F[t] = ( F[t] || F[t - n] );
+        }
+    }
+
+    return F[T] > 0;
+
+}
+\end{lstlisting}
+

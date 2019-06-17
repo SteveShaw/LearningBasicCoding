@@ -1,0 +1,66 @@
+\section{405 --- Convert a Number to Hexadecimal}
+Given an integer, write an algorithm to convert it to hexadecimal. For negative integer, two’s complement method is used.
+
+\paragraph{Note:}
+
+\begin{itemize}
+\item All letters in hexadecimal ($a$--$f$) must be in lowercase.
+\item The hexadecimal string must not contain extra leading 0s. If the number is zero, it is represented by a single zero character; otherwise, the first character in the hexadecimal string will not be the zero character.
+\item The given number is guaranteed to fit within the range of a 32-bit signed integer.
+\item You must not use any method provided by the library which converts/formats the number to hex directly.
+\end{itemize}
+
+\paragraph{Example 1:}
+
+\begin{flushleft}
+\textbf{Input}: 26
+\\
+\textbf{Output}: \texttt{1a}
+\end{flushleft}
+
+\paragraph{Example 2:}
+
+\begin{flushleft}
+\textbf{Input}: $-1$
+\\
+\textbf{Output}: \texttt{ffffffff}
+\end{flushleft}
+
+\subsection{Bit Operation}
+\begin{itemize}
+\item Basic idea: Right shift the number 4 bits, and then mask with 0xF. 
+\item To stop the shift, either the number is zero or the number has been right shifted 8 times. The latter is dealing with the case when number is $-1$. Without latter, the shift will continue forever.
+\end{itemize}
+
+\setcounter{lstlisting}{0}
+\begin{lstlisting}[style=customc, caption={Bit Manipulation}]
+string toHex( int num )
+{
+    if( num == 0 )
+    {
+        return "0";
+    }
+
+    string hex = "0123456789abcdef";
+
+    int mask = 15;
+
+    string ans;
+
+    int shifts = 0;
+
+    //stop when shift 8 times
+    //or num is zero
+    while( ( shifts < 8 ) && num )
+    {
+        ans.push_back( hex[num & mask] );
+        num >>= 4;
+        ++shifts;
+    }
+
+    reverse( ans.begin(), ans.end() );
+
+    return ans;
+}
+\end{lstlisting}
+

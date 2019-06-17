@@ -1,0 +1,75 @@
+\section{408 --- Valid Word Abbreviation}
+Given a non-empty string $S$ and an abbreviation $T$, return whether the string matches with the given abbreviation.
+
+A string such as \texttt{word} contains only the following valid abbreviations:
+
+[\texttt{word}, \texttt{1ord}, \texttt{w1rd}, \texttt{wo1d}, \texttt{wor1}, \texttt{2rd}, \texttt{w2d}, \texttt{wo2}, \texttt{1o1d}, \texttt{1or1}, \texttt{w1r1}, \texttt{1o2}, \texttt{2r1}, \texttt{3d}, \texttt{w3}, \texttt{4}]
+
+Notice that only the above abbreviations are valid abbreviations of the string word. Any other string is not a valid abbreviation of word.
+
+\paragraph{Note:}
+
+\begin{itemize}
+\item Assume $S$ contains only lowercase letters and $T$ contains only lowercase letters and digits.
+\end{itemize}
+
+\paragraph{Example 1:}
+\begin{flushleft}
+\textbf{Input}: $S = \texttt{internationalization}$, $T = \texttt{i12iz4n}$:
+
+\textbf{Output}: \texttt{true}
+\end{flushleft}
+
+\paragraph{Example 2:}
+
+\begin{flushleft}
+\textbf{Input}: $S = \texttt{apple}$, $T = \texttt{a2e}$:
+
+\textbf{Output}: \texttt{false}
+\end{flushleft}
+
+\setcounter{lstlisting}{0}
+\begin{lstlisting}[style=customc, caption={Iterative}]
+bool validWordAbbreviation( string word, string abbr )
+{
+    size_t j = 0;
+    size_t i = 0;
+
+    while( ( i < word.size() ) && ( j < abbr.size() ) )
+    {
+        if( ( abbr[j] >= '0' ) && ( abbr[j] <= '9' ) )
+        {
+            //number starting with zero
+            //is invalid
+            if( abbr[j] == '0' )
+            {
+                return false;
+            }
+
+            size_t count = 0;
+
+            while( ( j < abbr.size() ) && ( abbr[j] >= '0' ) && ( abbr[j] <= '9' ) )
+            {
+                count = count * 10 + ( abbr[j] - '0' );
+                ++j;
+            }
+
+            i += count;
+        }
+        else
+        {
+            if( word[i] != abbr[j] )
+            {
+                //if the lowercase letter
+                //is not matched
+                //the match is invalid
+                return false;
+            }
+
+            ++i;
+            ++j;
+        }
+    }
+    return ( i == word.size() ) && ( j == abbr.size() );
+}
+\end{lstlisting}

@@ -1,0 +1,81 @@
+\section{409 --- Longest Palindrome}
+Given a string $S$ which consists of lowercase or uppercase letters, find the length of the longest palindromes that can be built with those letters.
+\par
+This is case sensitive, for example \texttt{Aa} is not considered a palindrome here.
+
+\paragraph{Note:}
+\begin{itemize}
+\item Assume the length of given string will not exceed 1,010.
+\end{itemize}
+
+\paragraph{Example:}
+
+\begin{flushleft}
+\textbf{Input}: \texttt{abccccdd}
+\\
+\textbf{Output}: 7
+\\
+\textbf{Explanation}: One longest palindrome that can be built is \texttt{dccaccd}, whose length is 7.
+\end{flushleft}
+
+\subsection{Counting}
+\begin{itemize}
+\item We can only incorporate only one character with largest odd counts into the palindrome even if multiple characters may have same largest odd counts.
+\item For any other character with odd counts $x$ , we can incorporate this one with $x-1$ times into the palindrome.
+\item The fast way to do this is just add $x-1$ into the result when iterating over the counts array. Also, record the maximum odd counts $y$. At the end, we subtract $(y-1)$ from the result and add back $y$. This is effectively equal to add 1 to the result.
+\item Of course, If all characters are have even counts, there is no need to add 1 to the result.
+\end{itemize}
+
+\setcounter{lstlisting}{0}
+\begin{lstlisting}[style=customc, caption={Counting}]
+int longestPalindrome( string s )
+{
+    //lower case
+    int l[26] = {0};
+    //uppercase
+    int u[26] = {0};
+
+    for( auto c : s )
+    {
+        if( ( c >= 'a' ) && ( c <= 'z' ) )
+        {
+            l[c - 'a'] += 1;
+        }
+        else
+        {
+            u[c - 'A'] += 1;
+        }
+    }
+
+    int ans = 0;
+    int max_odd_len = 0;
+    for( int i = 0; i < 26; ++i )
+    {
+        if( l[i] & 1 )
+        {
+            //character i+'a' can be added at least l[i]-1 times
+            max_odd_len = ( max )( max_odd_len, l[i] );
+            ans += ( l[i] - 1 );
+        }
+        else
+        {
+            ans += l[i];
+        }
+
+        if( u[i] & 1 )
+        {
+            //character i+'A' can be added at least u[i]-1 times
+            max_odd_len = ( max )( max_odd_len, u[i] );
+            ans += ( u[i] - 1 );
+        }
+        else
+        {
+            ans += u[i];
+        }
+    }
+
+    //ans-(max_odd_len-1)+max_odd_len = ans + 1
+    //only happens when there exits odd counts characters
+    return max_odd_len == 0 ? ans : ans + 1;
+}
+\end{lstlisting}

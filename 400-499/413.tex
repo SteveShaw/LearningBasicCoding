@@ -1,0 +1,108 @@
+\section{413. Arithmetic Slices}
+A sequence of number is called arithmetic if it consists of at least three elements and if the difference between any two consecutive elements is the same.
+\par
+For example, these are arithmetic sequence:
+\par
+$1, 3, 5, 7, 9$
+\par
+$7, 7, 7, 7$
+\par
+$3, -1, -5, -9$
+\par
+The following sequence is not arithmetic.
+\par
+$1, 1, 2, 5, 7$
+\par
+A zero-indexed array $ A $ consisting of $ N $ numbers is given. A slice of that array is any pair of integers $(P, Q)$ such that $0 \leq P < Q < N$.
+\par
+A slice $(P, Q)$ of array A is called arithmetic if the sequence: $A[P], A[p + 1], \ldots, A[Q - 1], A[Q]$ is arithmetic. In particular, this means that $ P + 1 < Q $.
+\par
+The function should return the number of arithmetic slices in the array A.
+
+\paragraph{Example:}
+\begin{flushleft}
+\textbf{Input}: $A = [1, 2, 3, 4]$
+\\
+\textbf{Output}: 3
+\\
+\textbf{Explanation}: There are 3 arithmetic slices in A: $[1, 2, 3]$, $[2, 3, 4]$ and $[1, 2, 3, 4]$ itself.
+\end{flushleft}
+
+\subsection{Recursion}
+\begin{itemize}
+\item Suppose we have a recursive function $F(A,i)$ returns the number of arithmetic slices in the range $A[k,\ldots,i]$. But these slices are not a part of any range $A[k,\ldots, j]$ where $j<i$. 
+\item In addition, $F$ updates the total number of arithmetic slices $z$ in $A$.
+\item Thus, $k$ is the minimum index that $A[k,\ldots,i]$ is a valid arithmetic slice
+\item Now, suppose we have the number of arithmetic slices in $A[0\ldots i-1]$ end with element $A[i-1]$is $x$.
+\begin{enumerate}
+\item We do not care what is the minimum index $k$ that let $A[k\ldots i-1]$ is an arithmetic slice.
+\item What we are sure is that the differences between consecutive elements inside the slice are all the same.
+\end{enumerate}
+\item Hence, for the next element $A[i]$, if $A[i]-A[i-1]$ is same as $A[i-1]-A[i-2]$, then the number of arithmetic slices in $A[0\ldots i]$ end with element $A[i]$ is $x+1$.
+These slices comes from $A[k\ldots i]$, $\ldots$, $A[i-2\ldots i]$.Therefore, the total number of arithmetic slices are increased by $x+1$
+\item If $A[i]-A[i-1]$ is not equal to $A[i-1] - A[i-2]$, the number of slices end in $A[i]$ is zero. The total number of arithmetic doesn't change.
+\end{itemize}
+
+\setcounter{algorithm}{0}
+\begin{algorithm}[H]
+\caption{Recursion}
+\begin{algorithmic}[1]
+\Procedure{NumberOfArithmeticSlices}{$A, L$}
+\State $z:=0$ \Comment The total number of arithmetic slices
+\State \Call{F}{$A, L-1, z$}
+\State \Return $z$
+\EndProcedure
+\end{algorithmic}
+\end{algorithm}
+
+Function \texttt{F} take the input array $A$ and returns the number of arithmetic slices in range $A[0\ldots i]$ end with $A[i]$. \texttt{F} also updates the total number of arithmetic slices $z$.
+\begin{algorithm}[H]
+\caption{Helper function}
+\begin{algorithmic}[1]
+\Procedure{F}{$A, i, z$}
+\If{$i < 2$}
+\State \Return 0
+\EndIf
+\State $x:=0$ \Comment The number of arithmetic slices ending in $A[i]$
+\If{$A[i]- A[i-1] = A[i-1] - A[i-2]$}
+\State $\star$ $A[i]$ can be added to any arithmetic slice end in $A[i-1]$
+\State $x\gets 1 + F(A,i-1, z)$
+\State $z\gets x$
+\Else
+\State $F(A, i-1, z)$ \Comment No change for $z$
+\EndIf
+\State \Return $x$
+\EndProcedure
+\end{algorithmic}
+\end{algorithm}
+
+\subsection{Dynamic Programming}
+\begin{itemize}
+\item In the recursive approach, we start with the full range $A[0\ldots n-1]$. From the algorithm, we can see that the result for $A[0\ldots i]$ only depends on the elements in the range $A[0\ldots i]$, and not on any number beyond this range. This means dynamic programming is a possible approach.
+\item Suppose $F[i]$ is the number of arithmetic slices ending with element $A[i]$ in the range $A[k, i]$ (where $k$ is the minimum index that makes $A[k\ldots i]$ is a arithmetic slice).
+\item For element $A[i+1]$, if $A[i] - A[i-1] = A[i-1] - A[i-2]$, then $A[i]$ can be added to any arithmetic slice ending with $A[i]$. Hence, $F[i+1] = 1 + F[i]$ as discussed above. Then the total number is updated by adding $F[i]$.
+\item Since $F[i+1]$ only depends on $F[i]$, we can only use two variable to replace $F[i+1]$ and $F[i]$
+\end{itemize}
+
+\begin{algorithm}[H]
+\caption{Dynamic Programming}
+\begin{algorithmic}[1]
+\Procedure{NumberOfArithmeticSlices}{$A, L$}
+\If{$A$ is empty} \Comment Corner case
+\State \Return 0
+\EndIf
+\State $z:=0$ \Comment The total number
+\State $x:=0$ \Comment The number of arithmetic slice ending at $i$
+\For{$i:=2$ \textbf{to} $ L-1 $}
+\If{$A[i]- A[i-1] = A[i-1] - A[i-2]$}
+\State $A[i]$ can be added to any arithmetic slice end in $A[i-1]$
+\State $x\gets x+1$
+\State $z\gets z+x$ \Comment Update total number
+\Else
+\State $x\gets 0$ \Comment Reset $x$ to zero since no any arithmetic slice ending in $A[i]$
+\EndIf
+\EndFor
+\State \Return $ z $
+\EndProcedure
+\end{algorithmic}
+\end{algorithm}

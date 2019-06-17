@@ -1,0 +1,70 @@
+\section{414 --- Third Maximum Number}
+Given a non-empty array of integers $A$, return the third maximum number in this array. If it does not exist, return the maximum number. The time complexity must be in $O(n)$.
+
+\paragraph{Example 1:}
+
+\begin{flushleft}
+\textbf{Input}: $[3, 2, 1]$
+\\
+\textbf{Output}: 1
+\\
+\textbf{Explanation}: The third maximum is 1.
+\end{flushleft}
+
+\paragraph{Example 2:}
+
+\begin{flushleft}
+\textbf{Input}: [1, 2]
+\\
+\textbf{Output}: 2
+\\
+\textbf{Explanation}: The third maximum does not exist, so the maximum (2) is returned instead.
+\end{flushleft}
+
+\paragraph{Example 3:}
+
+\begin{flushleft}
+\textbf{Input}: [2, 2, 3, 1]
+\\
+\textbf{Output}: 1
+\\
+\textbf{Explanation}: Note that the third maximum here means the third maximum distinct number. Both numbers with value 2 are both considered as second maximum.
+\end{flushleft}
+
+\subsection{Swap}
+\begin{itemize}
+    \item 用三个变量$x$, $y$, $z$来分别保存第一大，第二大，和第三大的数
+    \item 然后我们遍历数组，如果遍历到的数字大于当前第一大的数$x$，那么$z\gets y$， $y\gets x$，$x$更新为当前数字。如果当前数字大于$y$，小于$x$，那么$z\gets y$，$x$更新为当前数字。如果当前数字大于$z$，小于$y$，那就只更新$z$为当前数字
+    \item 初始化$x$，$y$和$z$时要用长整型long的最小值，否则当数组中有int type的最小值存在时，就会出现错误。
+\end{itemize}
+
+\setcounter{lstlisting}{0}
+\begin{lstlisting}[style=customc, caption={Swap}]
+int thirdMax( vector<int>& nums )
+{
+    long long x = nums[0];
+    long long y = LLONG_MIN;
+    long long z = LLONG_MIN;
+
+    for( int n : nums )
+    {
+        if( n > x )
+        {
+            z = y;
+            y = x;
+            x = n;
+        }
+        else if( ( n > y ) && ( n < x ) ) //need to skip duplicate numbers
+        {
+            z = y;
+            y = n;
+        }
+        else if( ( n > z ) && ( n < y ) ) //need to skip duplicate numbers
+        {
+            z = n;
+        }
+    }
+
+    return z == LLONG_MIN ? x : z;
+}
+\end{lstlisting}
