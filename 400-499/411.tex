@@ -1,0 +1,171 @@
+\section{411 --- Minimum Unique Word Abbreviation}
+A string such as \texttt{word} contains only the following valid abbreviations:
+
+[\texttt{word}, \texttt{1ord}, \texttt{w1rd}, \texttt{wo1d}, \texttt{wor1}, \texttt{2rd}, \texttt{w2d}, \texttt{wo2}, \texttt{1o1d}, \texttt{1or1}, \texttt{w1r1}, \texttt{1o2}, \texttt{2r1}, \texttt{3d}, \texttt{w3}, \texttt{4}]
+
+Given a target string $T$ and a set of strings $A$ in a dictionary, find an abbreviation of this target string with the \textbf{smallest possible} length such that it does not conflict with abbreviations of the strings in the dictionary.
+
+Each number or letter in the abbreviation is considered length equal to 1. For example, the abbreviation \texttt{a32bc} has length 4.
+
+\paragraph{Note:}
+\begin{itemize}
+\item In the case of multiple answers as shown in the second example below, you may return any one of them.
+\item You may assume that $m=\lvert T\rvert \leq 21$, $n=\lvert A\rvert \leq 1000$, and $\log_2(n) + m \leq 20$.
+\end{itemize}
+
+\paragraph{Examples 1:}
+
+\begin{flushleft}
+\textbf{Input}: $T=\texttt{apple}$, $A=[\texttt{blade}]$
+
+\textbf{Output}: \texttt{a4}
+
+\textbf{Explanation}: because 5 or 4e conflicts with \texttt{blade}
+
+
+\end{flushleft}
+
+\paragraph{Example 2:}
+
+\begin{flushleft}
+\textbf{Input}: $T=\texttt{apple}$, $A=[\texttt{plain}, \texttt{amber}, \texttt{blade}]$
+
+\textbf{Output}: \texttt{1p3} (other valid answers include \texttt{ap3}, \texttt{a3e}, \texttt{2p2}, \texttt{3le}, \texttt{3l1}).
+\end{flushleft}
+
+\subsection{Bit Mask}
+此题需要灵活使用Bit Mask。如果不用bit mask，那么Solution非常直接，即
+\begin{enumerate}
+\item 找出target string $T$的所有缩写形式，并按照长度从短到长排序
+\item 从最短的缩写开始，和dictionary，$A$，中所有的单词一一进行验证，利用\textbf{Valid Word Abbreviation}中的方法，看其是否是合法的单词的缩写。
+\item 如果是，说明有冲突，直接break，进行下一个单词缩写的验证，
+\end{enumerate}
+
+使用bit mask，可以极大的减少内存消耗和提高效率，主要过程如下
+\begin{enumerate}
+\item Bypass the string that has \textbf{different} length as $T$.
+\item Compare each word in $A$ agains $T$. If the letters are different, set the corresponding bit to 1, otherwise, set to 0. For example: $T=\texttt{apple}$ and word is $\texttt{blpde}$. The result is $11010$.
+\item Generate all abbreviations of $T$ using bits. For example: one of abbreviation of \texttt{apple} is \texttt{a4}. The corresponding bits are $10000$. For the letter as it is, the corresponding bit is 1, otherwise, is 0. The number of zero bits is the number in the abbreviation. 
+\item For each abbreviation $u$, we need to check if it conflicts with words in dictionary. Since we have already transform all the words into the masks, for each mask $m$, if the result of $u\land m$ is non-zero, this means at least one letter in $u$ is not in the corresponding word for $m$. Therefore, $m$ and $u$ are not conflict only if $u\land m \neq 0$. 
+\end{enumerate}
+
+\setcounter{lstlisting}{0}
+\begin{lstlisting}[style=customc, caption={Bit Mask}]
+string minAbbreviation( string target, vector<string>& dictionary )
+{
+    int L = static_cast<int>( target.size() );
+
+    vector<int> masks;
+
+    //generate mask for each word
+    for( const auto& w : dictionary )
+    {
+        if( w.size() != target.size() )
+        {
+            //ignore word with different size
+            continue;
+        }
+
+        int b = 1 << ( L - 1 );
+        int mask = 0;
+
+        for( int i = 0; i < L; ++i )
+        {
+            if( target[i] != w[i] )
+            {
+                //set 1 when letters are different
+                mask |= b;
+            }
+
+            b >>= 1;
+        }
+
+        masks.push_back( mask );
+    }
+
+    int best = L + 1;
+    int best_abbr = 0;
+    //generate all abbreivations for the target
+    //and check if it is conflict with the any mask in masks
+    dfs( 0, L, 0, 0, best, best_abbr, masks );
+
+    //get string representation from integer best_abbr
+    int count_zeros = 0;
+    string ans;
+    for( int i = 0; i < L; ++i )
+    {
+        int mask = 1 << ( L - 1 - i );
+
+        if( mask & best_abbr )
+        {
+            if( count_zeros > 0 )
+            {
+                ans += to_string( count_zeros );
+                count_zeros = 0;
+            }
+            ans.push_back( target[i] );
+        }
+        else
+        {
+            //increments count of zeros
+            ++count_zeros;
+        }
+    }
+
+    //dealing with suffix zeros
+    if( count_zeros > 0 )
+    {
+        ans += to_string( count_zeros );
+    }
+
+    return ans;
+}
+
+void dfs( int start, int L, int len, int abbr, int& best, int& best_abbr, vector<int>& masks )
+{
+    //abbr is represented by 1/0 digits
+    //for example: one of apple's abbr is a4 = 10000
+    //this means, for the letter as it is, the corresponding bit is 1
+    //otherwise is zero.
+
+    if( start == L )
+    {
+        if( len < best )
+        {
+            //check if any conflict
+            for( int mask : masks )
+            {
+                if( ( abbr & mask ) == 0 )
+                {
+                    //this abbr conflict with one of word in dictionary
+                    return;
+                }
+            }
+
+            best = len;
+            best_abbr = abbr;
+        }
+
+        return;
+    }
+
+    //treat current letter as digit
+
+    if( ( abbr & 1 ) || ( start == 0 ) )
+    {
+        //if at start or previous one is chosen as the letter it is,
+        //the length of abbr increments
+        dfs( start + 1, L, len + 1, abbr << 1, best, best_abbr, masks );
+    }
+    else
+    {
+        //since the previous one is also a digit
+        //the length of abbr does not increment
+        dfs( start + 1, L, len, abbr << 1, best, best_abbr, masks );
+    }
+
+    //treat current letter as it is
+    //the length of abbr incrments and set corresponding bit to 1
+    dfs( start + 1, L, len + 1, ( abbr << 1 ) | 1, best, best_abbr, masks );
+}
+\end{lstlisting}
