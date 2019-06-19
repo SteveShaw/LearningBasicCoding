@@ -1,0 +1,134 @@
+\section{53 --- Maximum Subarray}
+Given an integer array $A$, find the contiguous subarray (containing at least one number) which has the largest sum and return its sum.
+\paragraph{Example:}
+\begin{flushleft}
+\textbf{Input}: $[-2,1,-3,4,-1,2,1,-5,4]$,
+\\
+\textbf{Output}: 6
+\\
+\textbf{Explanation}: 
+\\
+$[4,-1,2,1]$ has the largest sum 6.
+\end{flushleft}
+
+\paragraph{Follow up:}
+\begin{flushleft}
+If you have figured out the $O(n)$ solution, try coding another solution using the divide and conquer approach, which is more subtle.
+\end{flushleft}
+
+\subsection{Kadane Algorithm}
+\setcounter{algorithm}{0}
+\begin{algorithm}[H]
+\caption{Kadane Algorithm}
+\begin{algorithmic}[1]
+\Procedure{MaxSubArray}{$A$, $n$}
+\State $\alpha := A[0]$ \Comment Current maximum
+\State $\beta:=A[0]$ \Comment Maximum So far
+\For{$i:=1$ \textbf{to} $n-1$}
+\State $\alpha \gets A[i] + \max(\alpha, 0)$
+\State $\beta \gets \max(\beta, \alpha)$
+\EndFor
+\State \Return $\beta$
+\EndProcedure
+\end{algorithmic}
+\end{algorithm}
+
+\setcounter{lstlisting}{0}
+\begin{lstlisting}[style=customc, caption={Kadane Algorithm}]
+int maxSubArray( vector<int>& nums )
+{
+    int cur_max = nums[0];
+    int global_max = nums[0];
+
+    for( size_t i = 1; i < nums.size(); ++i )
+    {
+        cur_max = nums[i] + ( max )( cur_max, 0 );
+        global_max = ( max )( global_max, cur_max );
+    }
+
+    return global_max;
+}
+\end{lstlisting}
+
+\subsection{Divide And Conquer}
+The problem is a classical example of divide and conquer approach, and can be solved with the algorithm similar with the merge sort.
+
+The solution template for the divide and conquer problems is as follows:
+
+\begin{itemize}
+\item Define the base case(s).
+
+\item Split the problem into subproblems and solve them recursively.
+
+\item Merge the solutions for the subproblems to obtain the solution for the original problem.
+\end{itemize}
+
+应用到这个问题中,算法如下:
+
+\begin{enumerate}
+\item Base case: if $n=\lvert A\rvert=1$, return $A[0]$
+\item Get result $l$ for left sub-array, i.e., the first $n/2$ elements.
+\item Get result $r$ for right sub-array, i.e., the last $n/2$ elements.
+\item Get result $c$ that crossing the middle point.
+\item Merge the solutions above, i.e, return $\max(l, r, c)$
+\end{enumerate}
+
+\begin{lstlisting}[style=customc, caption={Divide And Conquer}]
+int maxSubArray( vector<int>& nums )
+{
+    int n = static_cast<int>( nums.size() );
+    return f( nums, 0, n - 1 );
+}
+
+//helper function for recursion
+int f( vector<int>& nums, int low, int high )
+{
+    if( low == high )
+    {
+        //base case:
+        return nums[low];
+    }
+
+    int middle = ( low + high ) / 2;
+
+    //find left half result
+    int l = f( nums, low, middle );
+    //find right half result
+    int r = f( nums, middle + 1, high );
+    //find cross sum
+    int c = max_crossing_sum( nums, low, high, middle );
+
+    //return the maximum result of (l, r, c)
+    int x = ( max )( l, r );
+    x = ( max )( x, c );
+    return x;
+}
+
+//get maximum sum cross the middle point
+int max_crossing_sum( vector<int>& A, int low, int high, int middle )
+{
+    //get maximum sum in [low,middle]
+    int left_sum = INT_MIN;
+    int sum = 0;
+
+    for( int i = middle; i >= low; --i )
+    {
+        sum += A[i];
+        left_sum = ( max )( sum, left_sum );
+    }
+
+    //get maximum sum in [middle+1, high]
+    int right_sum = INT_MIN;
+    sum = 0;
+    int max_right = middle;
+
+    for( int k = middle + 1; k <= high; ++k )
+    {
+        sum += A[k];
+        right_sum = ( max )( sum, right_sum );
+    }
+
+    //combine the two sum
+    return left_sum + right_sum;
+}
+\end{lstlisting}
