@@ -17,3 +17,44 @@ But for multiples of three it should output \texttt{Fizz} instead of the number 
 \item If current number can be divide by 5, add \texttt{Buzz}
 \item If the string is still empty, the current number cannot be divided by 3 and 5, so set the string to current number itself
 \end{itemize}
+
+\subsection{Naive Approach}
+循环四遍，
+\begin{enumerate}
+\item 第一遍所有的字符串设置为数字本身，
+\item 第二遍每隔3个数字，设置\texttt{Fizz}，
+\item 第三遍每隔5个数字，设置\texttt{Buzz}，
+\item 第四遍每隔15个数字，设置\texttt{FizzBuzz}，
+\end{enumerate}
+
+\setcounter{lstlisting}{0}
+\begin{lstlisting}[style=customc, caption={Naive Approach}]
+vector<string> fizzBuzz( int n )
+{
+    vector<string> ans;
+
+    ans.reserve( n );
+
+    for( int i = 1; i <= n; ++i )
+    {
+        ans.emplace_back( to_string( i ) );
+    }
+
+    for( int i = 3; i <= n; i += 3 )
+    {
+        ans[i - 1] = "Fizz";
+    }
+
+    for( int i = 5; i <= n; i += 5 )
+    {
+        ans[i - 1] = "Buzz";
+    }
+
+    for( int i = 15; i <= n; i += 15 )
+    {
+        ans[i - 1] = "FizzBuzz";
+    }
+
+    return ans;
+}
+\end{lstlisting}

@@ -1,4 +1,4 @@
-\section{413. Arithmetic Slices}
+\section{413 --- Arithmetic Slices}
 A sequence of number is called arithmetic if it consists of at least three elements and if the difference between any two consecutive elements is the same.
 \par
 For example, these are arithmetic sequence:
@@ -80,8 +80,8 @@ Function \texttt{F} take the input array $A$ and returns the number of arithmeti
 \begin{itemize}
 \item In the recursive approach, we start with the full range $A[0\ldots n-1]$. From the algorithm, we can see that the result for $A[0\ldots i]$ only depends on the elements in the range $A[0\ldots i]$, and not on any number beyond this range. This means dynamic programming is a possible approach.
 \item Suppose $F[i]$ is the number of arithmetic slices ending with element $A[i]$ in the range $A[k, i]$ (where $k$ is the minimum index that makes $A[k\ldots i]$ is a arithmetic slice).
-\item For element $A[i+1]$, if $A[i] - A[i-1] = A[i-1] - A[i-2]$, then $A[i]$ can be added to any arithmetic slice ending with $A[i]$. Hence, $F[i+1] = 1 + F[i]$ as discussed above. Then the total number is updated by adding $F[i]$.
-\item Since $F[i+1]$ only depends on $F[i]$, we can only use two variable to replace $F[i+1]$ and $F[i]$
+\item For element $A[i]$, if $A[i] - A[i-1] = A[i-1] - A[i-2]$, then $A[i]$ can be added to any arithmetic slice ending with $A[i-1]$. Hence, $F[i] = 1 + F[i-1]$ as discussed above. Then the total number is updated by adding $F[i]$. (这多出来的一个sequence 是$A[i-2], A[i-1], A[i]$).
+\item Since $F[i]$ only depends on $F[i-1]$, we can only use two variable to replace $F[i]$ and $F[i-1]$
 \end{itemize}
 
 \begin{algorithm}[H]

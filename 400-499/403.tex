@@ -51,10 +51,24 @@ The frog can jump to the last stone by jumping
 \begin{lstlisting}[style=customc, caption={Dynamic Programming}]
 bool canCross( vector<int>& stones )
 {
+    if( stones.empty() || ( stones.size() == 1 ) )
+    {
+        return true;
+    }
+
+    //make sure the first jump from index 0 to 1
+    //can make
+    if( stones[1] - stones[0] > 1 )
+    {
+        //the frog cannot go to the second stone
+        return false;
+    }
     //memorization for dynamic programming
     unordered_map<string, unsigned char> memo;
 
-    auto can_jump = dfs( stones, 0, 1, memo );
+    //we start from the second stone, stones[1],
+    //the last step is 1 which is from stones[0] to stones[1]
+    auto can_jump = dfs( stones, 1, 1, memo );
 
     return can_jump != 0;
 }

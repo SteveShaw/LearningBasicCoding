@@ -1,0 +1,174 @@
+\section{421 --- Maximum XOR of Two Numbers in an Array}
+Given a non-empty array of numbers, $a_0, a_1, a_2, \ldots, a_{n-1}$, where $0 \leq a_i < 2^{31}$.
+
+Find the maximum result of $a_i$ \texttt{XOR} $a_j$, where $0 \leq i, j < n$.
+
+Could you do this in $O(n)$ runtime?
+
+\paragraph{Example:}
+
+\begin{flushleft}
+\textbf{Input}: $[3, 10, 5, 25, 2, 8]$
+
+\textbf{Output}: 28
+
+Explanation: The maximum result is $5\ \texttt{XOR}\ 25 = 28$.
+\end{flushleft}
+
+\subsection{Binary Trie}
+\begin{itemize}
+\item 将每个number的bits放入一个trie树中，由于bit只有0和1，因此这个trie树实际上是一个二叉树。用left child代表0，right child代表1。
+\item 首先遍历数组，将所有number放入trie树中。
+\item 再次遍历数组，对当前的number，从高位到低位的每个bit，在trie树中，
+\begin{enumerate}
+\item 如果当前bit对应的节点有两个child,那么选择和bit不同的那个child，即bit 0选择right child，反之， bit 1选择left child，这样使得xor尽可能的大。
+\item 如果bit对应的节点只有一个child，就选择这个child，计算得到的xor值。
+\end{enumerate}
+\end{itemize}
+
+\setcounter{lstlisting}{0}
+\begin{lstlisting}[style=customc, caption={Binary Trie}]
+int findMaximumXOR( vector<int>& nums )
+{
+    trie* root = new trie;
+
+    //fill the trie tree
+    for( int n : nums )
+    {
+        auto t = root;
+        for( int b = 31; b >= 0; --b )
+        {
+            if( n & ( 1 << b ) )
+            {
+                //bit 1 goes to right
+                if( !t->right )
+                {
+                    t->right = new trie;
+                }
+
+                t =  t->right;
+            }
+            else
+            {
+                //bit 0 goes to left
+                if( !t->left )
+                {
+                    t->left = new trie;
+                }
+
+                t = t->left;
+            }
+
+        }
+    }
+
+    //calculate maximum xor
+    int best = 0;
+
+    for( int n : nums )
+    {
+        auto t = root;
+
+        int bxor = 0;
+
+        for( int b = 31; b >= 0; --b )
+        {
+            int x = ( n & ( 1 << b ) ); //x=0..1..0
+
+            int sel = 0; //the selected bit
+
+            if( t->left && t->right )
+            {
+                if( x )
+                {
+                    //bit 1 --- select 0
+                    t = t->left;
+                    sel = 0;
+                }
+                else
+                {
+                    //bit 0 --- select 1
+                    t = t->right;
+                    sel = 1;
+                }
+            }
+            else if( t->left )
+            {
+                //only has left child
+                //select this child
+                t = t->left;
+                sel = 0;
+            }
+            else
+            {
+                //only has right child
+                //select this child
+                t = t->right;
+                sel = 1;
+            }
+
+            bxor |= ( x ^ ( sel << b ) );
+        }
+
+        best = ( max )( best, bxor );
+    }
+
+    return best;
+}
+
+struct trie
+{
+    trie* left = nullptr;
+    trie* right = nullptr;
+};
+\end{lstlisting}
+
+\subsection{Hash Set}
+\begin{itemize}
+\item 首先按位循环，从最高位到最低位
+\item 然后遍历整个数组，与trie树类似，用一个从左往右的 mask，得到当前number的bits前缀，将其存入一个hash set中。
+\item 假设最大的xor值为$x$，首先将$x$的当前bit位设为1，然后用到xor的一个性质，即如果$a\ \texttt{xor}\ b = c$，那么$a=b\ \texttt{xor}\ c$。因此遍历hash set中的每个prefix，与$x$进行xor后，看结果能不能在hash set中找到，如果能找到，说明$x$是可以继续增大的，否则保留$x$为当前值。
+\end{itemize}
+
+\setcounter{lstlisting}{0}
+\begin{lstlisting}[style=customc, caption={Hash Set}]
+int findMaximumXOR( vector<int>& nums )
+{
+    int best = 0;
+    int mask = 0;
+    for( int b = 31; b >= 0; --b )
+    {
+        mask |= ( 1 << b );
+
+        unordered_set<int> s_prefix;
+
+        //get all bit prefix
+        for( int n : nums )
+        {
+            s_prefix.insert( mask & n );
+        }
+
+        //to maximize xor result
+        //best way is to set current bit
+        //of the result to 1
+        int x = best | ( 1 << b );
+
+        //we need to check if set current bit 1 to
+        //the resutl is viable
+        for( int p : s_prefix )
+        {
+            if( s_prefix.count( p ^ x ) )
+            {
+                //we can find another
+                //prefix y so that (p^y=x)
+                //therefor, set current bit 1 to
+                //the result, best, is viable
+                best = x;
+                break;
+            }
+        }
+    }
+
+    return best;
+}
+\end{lstlisting}

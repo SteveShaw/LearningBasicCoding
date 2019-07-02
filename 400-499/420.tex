@@ -46,17 +46,16 @@ According the analysis above, the process for calculating the minimum changes is
 \item Get the number of \textbf{replace} changes first. This will be the sum of length of each sequence with more than 2 letters divide by 3 as we need to replace one character every 3 letters. 
 \item At the same time, we get the number of deletion to change each sequence with $x$ repeating characters to $y$. 
 \begin{itemize}
-\item When $x\bmod 3=0$, each sequence need to delete one letter, therefore increments the number of deletions to delete one letter, denote as $d_1$. Before deletion, the sequence need $x/3$ replacements. After 1 letter is deleted, $\lfloor(x-1)/3\rfloor$ replacements is required which is $x/3-1$. So, the total replacement changes will decrease by 1.
-\item When $x\bmod 3=1$, each sequence need to delete 2 letters, therefore increase the number of deletions to delete two letters by 2, denote as $d_2$. Before deletion, the sequence need $\lfloor x/3\rfloor$ replacements. After 2 letter is deleted, $\lfloor(x-2)/3\rfloor$ replacements is required which is $\lfloor x/3\rfloor - 1$. So, the total replacement changes will decrease by 1.
-\item When $x\bmod 3=2$, each sequence need to delete 3 letters, therefore increase the number of deletions to delete three letters by 3, denote as $d_3$.  Before deletion, the sequence need $\lfloor x/3\rfloor$ replacements. After 3 letter is deleted, $\lfloor(x-3)/3\rfloor$ replacements is required which is $\lfloor x/3\rfloor - 1$. So, the total replacement changes will decrease by 1.
+\item When $x\bmod 3=0$, each sequence need to delete one letter, therefore increments the number of deletions to delete one letter, denote as $d_1$. 由于每个sequence删除1个letter后就少一个replacement, so the total replacement changes will decrease by 1 for every 1 deletion.
+\item When $x\bmod 3=1$, each sequence need to delete 2 letters, therefore increase the number of deletions to delete two letters by 2, denote as $d_2$. 由于每个sequence删除2个letter后就少一个replacement, so the total replacement changes will decrease by 1 for every 2 deletions.
+\item When $x\bmod 3=2$, 因为删除3个就少一个需要replace操作的sequence。So, the total replacement changes will be decremented for every 3 deletions.
 \end{itemize}
 \item Therefore, when finish iterating over $s$, total replace changes will be changed by the following rules:
 \begin{itemize}
 \item For deletion of 1 characters, the number of replace changes will be decreased by $d_1$
 \item For deletion of 2 characters, the number of replace changes will be decreased by $d_2 / 2$.
-\item For deletion of 3 characters, the number of replace changes will be decreased by $d_3 / 3$.
+\item After performing the above deletions, all remaining sequences have $3\times n+2$ letters. We can apply all remaining required deletions to all these sequences. Therefore, the number of replace changes will be decreased by the remaining required number of deletions divided by 3.
 \end{itemize}
-\item We have to compare $d_1+d_2+d_3$ with required $\ell-20$ deletions since we do not want to do unnecessary deletions. To try to maximize the effect of decreasing the replace operation, we will do deletion of 1 character first and then deletion of 2 character. After that,  if the remaining required deletions $d$ is less than or equal to $d_3$, we just do $d$ deletions to decrease replace operations by $d/3$. But if $d$ is larger than $d_3$, notice a fact: all the remaining sequences are $3\times n +2$, we can do as many as deletions to decrease replace operations, so the replace operation will be decreased by $d/3$. In either case, only $d$ will decide how many replace operations will be decreased. Hence, $d_3$ is no longer needed.
 \item In the end, compare the final number of replacement changes with the required changes to fix case 2. The maximum plus $\ell-20$ is the answer. 
 \end{enumerate}
 
@@ -75,7 +74,6 @@ int strongPasswordChecker( string s )
     int num_replaces = 0;
     int num_del1 = 0;
     int num_del2 = 0;
-    int num_del3 = 0;
 
     int L = static_cast<int>( s.size() );
 
@@ -122,11 +120,6 @@ int strongPasswordChecker( string s )
                 {
                     //delete two letters
                     num_del2 += 2;
-                }
-                else
-                {
-                    //delete three letters
-                    num_del3 += 3;
                 }
             }
 

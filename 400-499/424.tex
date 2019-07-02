@@ -1,0 +1,82 @@
+\section{424 --- Longest Repeating Character Replacement}
+Given a string $s$ that consists of only uppercase English letters, you can replace any letter in the string with another letter at most $ k $ times. Find the length of a longest substring containing all repeating letters you can get after performing the above operations.
+
+\paragraph{Note:}
+\begin{itemize}
+\item Both the string's length and k will not exceed $10^4$.
+\end{itemize}
+
+\paragraph{Example 1:}
+
+\begin{flushleft}
+\textbf{Input}: $s = \texttt{ABAB}$, $k = 2$
+
+\textbf{Output}: 4
+
+\textbf{Explanation}: 
+
+Replace the two \texttt{A}s with two \texttt{B}s or vice versa.
+\end{flushleft}
+
+\paragraph{Example 2:}
+
+\begin{flushleft}
+\textbf{Input}: $s = \texttt{AABABBA}$, $k = 1$
+
+\textbf{Output}: 4
+
+\textbf{Explanation}:
+
+Replace the one \texttt{A} in the middle with \texttt{B} and form \texttt{AABBBBA}.
+
+The substring \texttt{BBBB} has the longest repeating letters, which is 4.
+\end{flushleft}
+
+\subsection{Sliding Window}
+\begin{itemize}
+\item 与所有使用sliding window算法类似，同样需要左右两个index $l$和$r$。
+\item 统计窗口$A[l,r]$中出现次数最多的letter $c$的个数，记为$\delta$。
+\item 当窗口的length $\ell$与$\delta$的difference等于$k+1$时，表明可以将窗口中其他的 $k$个letter替换为$c$，这时候，这时候$A[l+1, r]$之间的所有其他字符都可以替换为同一个字符。注意这个时候这个字符可能不是$c$。
+\begin{enumerate}
+\item 如果$A[l]=c$，如果这时候$A[l+1,r]$之间的出现最多的letter不是$c$，而是另外一个letter，假设是$c_1$，那么$c_1$的出现次数必然为$\delta$。那么把$A[l+1,r]$中的其他字符替换为$c_1$即得到$r-(l+1)+1$长度的重复字符。
+\item 反之，如果$A[l]\neq c$，那么$A[l+1,c]$中$c$仍然是出现最多的letter，那么把$A[l+1,r]$中的其他字符替换为$c$也是得到$r-(l+1)+1$长度的重复字符。
+\end{enumerate}
+由此可见，两种情况下，所能得到的最长的重复字符长度都是$r-(l+1)+1$。
+\end{itemize}
+
+\setcounter{lstlisting}{0}
+\begin{lstlisting}[style=customc, caption={Sliding Window}]
+int characterReplacement( string s, int k )
+{
+    int L = static_cast<int>( s.size() );
+
+    int l = 0;
+    int r = 0;
+
+    int m[26] = {0};
+
+    int max_cnt = 0;
+
+    int best = 0;
+
+    while( r < L )
+    {
+        m[s[r] - 'A'] += 1;
+        max_cnt = ( max )( max_cnt, m[s[r] - 'A'] );
+
+        if( r - l + 1 - max_cnt == k + 1 )
+        {
+            //increments the left boundary
+            m[s[l] - 'A'] -= 1;
+            ++l;
+        }
+
+        //A[l,r] can have all same letters
+        best = ( max )( best, r - l + 1 );
+
+        ++r;
+    }
+
+    return best;
+}
+\end{lstlisting}

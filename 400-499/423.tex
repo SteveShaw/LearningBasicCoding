@@ -1,0 +1,107 @@
+\section{423 --- Reconstruct Original Digits from English}
+Given a non-empty string containing an out-of-order English representation of digits 0--9, output the digits in ascending order.
+
+\paragraph{Note:}
+\begin{itemize}
+\item Input contains only lowercase English letters.
+\item Input is guaranteed to be valid and can be transformed to its original digits. That means invalid inputs such as \texttt{abc} or \texttt{zerone} are not permitted.
+\item Input length is less than 50,000.
+\end{itemize}
+
+\paragraph{Example 1:}
+
+\begin{flushleft}
+\textbf{Input}: \texttt{owoztneoer}
+
+\textbf{Output}: 012
+\end{flushleft}
+
+\paragraph{Example 2:}
+\begin{flushleft}
+\textbf{Input}: \texttt{fviefuro}
+
+\textbf{Output}: 45
+\end{flushleft}
+
+\subsection{Find Unique Letters In Each Number}
+We can observe the following facts:
+\begin{itemize}
+\item Count unique letters in each even numbers.
+\begin{itemize}
+\item Letter \texttt{z} is present only in \texttt{zero}.
+\item Letter \texttt{w} is present only in \texttt{two}.
+\item Letter \texttt{u} is present only in \texttt{four}.
+\item Letter \texttt{x} is present only in \texttt{six}.
+\item Letter \texttt{g} is present only in \texttt{eight}.
+\end{itemize}
+\item Then we count the unique letters that have in both an even number and a odd number 
+
+\begin{itemize}
+\item Letter \texttt{h} is present only in \texttt{three} and \texttt{eight}.
+\item Letter \texttt{f} is present only in \texttt{five} and \texttt{four}.
+\item Letter \texttt{s} is present only in \texttt{seven} and \texttt{six}.
+\end{itemize}
+
+\item Finally, we count the unique letters in \texttt{nine} and \texttt{one}, and the logic is basically the same :
+\begin{itemize}
+\item Letter \texttt{i} is present in \texttt{nine}, \texttt{five}, \texttt{six}, and \texttt{eight}.
+\item Letter \texttt{n} is present in \texttt{one}, \texttt{seven}, and \texttt{nine}.
+\end{itemize}
+
+\end{itemize}
+
+\setcounter{lstlisting}{0}
+\begin{lstlisting}[style=customc, caption={Unique Letters Count}]
+string originalDigits( string s )
+{
+    //get the count of each letter
+    int m[26] = {0};
+
+    for( char c :  s )
+    {
+        m[c - 'a'] += 1;
+    }
+
+    int count[10] = {0};
+
+    // letter "z" is present only in "zero"
+    count[0] = m['z' - 'a'];
+    // letter "w" is present only in "two"
+    count[2] = m['w' - 'a'];
+    // letter "u" is present only in "four"
+    count[4] = m['u' - 'a'];
+    // letter "x" is present only in "six"
+    count[6] = m['x' - 'a'];
+    // letter "g" is present only in "eight"
+    count[8] = m['g' - 'a'];
+
+
+    // letter "h" is present only in "three" and "eight"
+    count[3] = m['h' - 'a'] - count[8];
+    // letter "f" is present only in "five" and "four"
+    count[5] = m['f' - 'a'] - count[4];
+    // letter "s" is present only in "seven" and "six"
+    count[7] = m['s' - 'a'] - count[6];
+
+    // letter "i" is present in "nine", "five", "six", and "eight"
+    count[9] = m['i' - 'a'] - count[5] - count[6] - count[8];
+    // letter "n" is present in "one", "nine", and "seven"
+    count[1] = m['n' - 'a'] - count[7] - 2 * count[9];
+
+    //generate output
+    string ans;
+	
+    for( int i = 0; i < 10; ++i )
+    {
+        if( count[i] == 0 )
+        {
+            continue;
+        }
+
+        ans.append( count[i], i + '0' );
+    }
+
+    return ans;
+
+}
+\end{lstlisting}

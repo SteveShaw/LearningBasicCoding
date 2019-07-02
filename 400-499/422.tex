@@ -82,7 +82,7 @@ Therefore, it is a valid word square.
   \texttt{lady}
 \end{tabular}
 \end{table}
-\textbf{Output}: \texttt{true}
+\textbf{Output}: \texttt{false}
 \\
 \textbf{Explanation}:
 \\
@@ -101,28 +101,25 @@ Therefore, it is NOT a valid word square.
 \begin{lstlisting}[style=customc, caption={Matrix Compare}]
 bool validWordSquare( vector<string>& words )
 {
-    if( words.empty() )
-    {
-        return true;
-    }
+    auto M = words.size();
 
-    if( words[0].size() != words.size() )
+    if( words[0].size() != M )
     {
-        //The first word need to have equal size
-        //as the input words size
         return false;
     }
 
-    for( size_t r = 0; r < words.size(); ++r )
+    for( size_t r = 0; r < words.size() ; ++r )
     {
-        for( size_t c = 0; c < words[i].size(); ++c )
+
+        for( size_t c = 0; c < words[r].size(); ++c )
         {
-            //words[r][c]=words[c][r]
-            if( ( r >= words[c].size() ) || ( c >= words.size() ) || ( words[r][c] != words[c][r] ) )
+            //we must check (c>=M) first
+            if( ( c >= M ) || ( r >= words[c].size() ) || ( words[r][c] != words[c][r] ) )
             {
                 return false;
             }
         }
+
     }
 
     return true;
