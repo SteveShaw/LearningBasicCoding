@@ -99,3 +99,98 @@ int firstMissingPositive( vector<int>& nums )
     return n + 1;
 }
 \end{lstlisting}
+
+\subsection{Index As Hash Key}
+\begin{itemize}
+\item  Get rid of negative numbers and zeros since there is no need of them. One could get rid of all numbers larger than $L$ as well, since the first missing positive is for sure smaller or equal to $L + 1$. The case when the first missing positive is equal to $L + 1$ will be treated separately. We can replace them by 1s to get rid.
+\item To ensure that the first missing positive is not 1, we have to verify the presence of 1 before proceeding to this operation.
+\item Now there we have an array which contains only positive numbers in a range from 1 to $L$, and the problem is to find a first missing positive in $\mathcal{O}(N)$ time and constant space. 
+\item The idea is to use index in $A$ as a hash key and \textbf{sign} of the element as the presence detector. For example, negative sign of $A[2]$ element means that number 3 is present in $A$. The positive sign of $A[3]$ element means that number 4 is not present (missing) in $A$.
+\item To achieve that, iterating the array after cleaning, check each element, $A[i]$, and change the sign of $A[A[i]-1]$ to \textbf{negative} to mark that number $A[i]$ is present in $A$. Be careful with duplicates and ensure that the sign was changed only once.
+\end{itemize}
+
+As such, the algorithm is clear
+\begin{algorithm}[H]
+\caption{Index As Hash key}
+\begin{algorithmic}[1]
+\Procedure{FirstMissingPositive}{$A, L$}
+\State $\star$ Check if $1$ is present in $A$. If not, return $1$.
+\If{$L=1$}
+\State \Return 2 \Comment No $1$
+\EndIf
+\algstore{41algo}
+\end{algorithmic}
+\end{algorithm}
+\begin{algorithm}[H]
+\begin{algorithmic}[1]
+\algrestore{41algo}
+\State $\ast$ Replace negative numbers, zeros, and numbers larger than $L$ by 1s.
+\State $\ast$ Iterating $A$, change the sign of $(x-1)$-th element if you meet the number $x$. 
+\State $\ast$ Iterating $A$, return the index of the first positive element plus 1.
+\State $\ast$ If no any positive element is found, the only answer is $L+1$
+\EndProcedure
+\end{algorithmic}
+\end{algorithm}
+
+\begin{lstlisting}[style=customc, caption={Index As Hash Key}]
+int firstMissingPositive( vector<int>& nums )
+{
+    int count = 0;
+
+    int L = static_cast<int>( nums.size() );
+
+    //count 1s
+    //replace any element that is less than 1
+    //or larger than L to 1
+    for( int i = 0; i < L; ++i )
+    {
+        if( nums[i] == 1 )
+        {
+            ++count;
+        }
+        else if( ( nums[i] <= 0 ) || ( nums[i] > L ) )
+        {
+            nums[i] = 1;
+        }
+    }
+
+    if( count == 0 )
+    {
+        //no 1 is present
+        //the first missing is 1
+        return 1;
+    }
+
+    if( nums.size() == 1 )
+    {
+        //this means nums = [1]
+        //so answer is 2
+        return 2;
+    }
+
+    for( int i = 0; i < L; ++i )
+    {
+        int x = abs( nums[i] );
+        if( nums[x - 1] > 0 )
+        {
+            //change the sign of nums[x-1]
+            nums[x - 1] = -nums[x - 1];
+        }
+    }
+
+    for( int i = 0; i < L; ++i )
+    {
+        if( nums[i] > 0 )
+        {
+            //the first missing positive
+            //is i+1
+            return i + 1;
+        }
+    }
+
+    //no any positive is found
+    //nums are filled with 1--L
+    //the first missing is L+1
+    return L + 1;
+}
+\end{lstlisting}
