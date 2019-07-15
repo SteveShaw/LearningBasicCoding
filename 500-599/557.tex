@@ -1,0 +1,44 @@
+\section{557 --- Reverse Words in a String III}
+Given a string, you need to reverse the order of characters in each word within a sentence while still preserving whitespace and initial word order.
+
+\paragraph{Example 1:}
+
+\begin{flushleft}
+\textbf{Input}: \texttt{Let's take LeetCode contest}
+
+\textbf{Output}: \texttt{s'teL ekat edoCteeL tsetnoc}
+\end{flushleft}
+
+\paragraph{Note:} 
+\begin{itemize}
+\item In the string, each word is separated by single space and there will not be any extra space in the string. 
+\end{itemize}
+
+\subsection{Simple Solution}
+\begin{itemize}
+\item Reverse each word from the each first encountered non-space character.
+\end{itemize}
+
+\setcounter{lstlisting}{0}
+\begin{lstlisting}[style=customc, caption={Simple Solution}]
+string reverseWords( string s )
+{
+    for( size_t i = 0; i < s.size(); ++i )
+    {
+        if( s[i] != ' ' )
+        {
+            auto j = i + 1;
+
+            while( ( j < s.size() ) && ( s[j] != ' ' ) )
+            {
+                ++j;
+            }
+
+            reverse( s.begin() + i, s.begin() + j );
+            i = j - 1;
+        }
+    }
+
+    return s;
+}
+\end{lstlisting}

@@ -1,0 +1,102 @@
+\section{561 --- Array Partition I}
+Given an array of $2n$ integers, $A$, your task is to group these integers into $n$ pairs of integer, say $(a_1, b_1)$, $(a_2, b_2)$, $\ldots$, $(a_n, b_n)$ which makes sum of $\min(a_i, b_i)$ for all $i$ from 1 to $n$ as large as possible.
+
+\paragraph{Example 1:}
+
+\begin{flushleft}
+\textbf{Input}: $ [1,4,3,2] $
+
+\textbf{Output}: 4
+
+\textbf{Explanation}: $n$ is 2, and the maximum sum of pairs is $4 = \min(1, 2) + \min(3, 4)$.
+
+\end{flushleft}
+
+\paragraph{Note:}
+\begin{itemize}
+\item $ n $ is a positive integer, which is in the range of $ [1, 10000] $.
+\item All the integers in the array will be in the range of $ [-10000, 10000] $.
+\end{itemize}
+
+\subsection{Sorting}
+\begin{itemize}
+\item The total sum will now be maximum if the overall loss incurred from such pairings is minimized. This minimization of loss in every pairing is possible only if the numbers chosen for the pairings lie closer to each other than to the other elements of the array.
+\item Taking this into consideration, we can sort the elements of the given array and form the pairings of the elements directly in the sorted order. This will lead to the pairings of elements with minimum difference between them leading to the maximization of the required sum.
+\end{itemize}
+
+\setcounter{lstlisting}{0}
+\begin{lstlisting}[style=customc, caption={Sorting}]
+int arrayPairSum( vector<int>& nums )
+{
+    sort( nums.begin(), nums.end() );
+
+    int ans = 0;
+
+    for( size_t i = 0; i < nums.size(); i += 2 )
+    {
+        ans += nums[i];
+    }
+
+    return ans;
+}
+\end{lstlisting}
+
+\subsection{Hash Map}
+\begin{itemize}
+\item 记录每个数字出现的次数，这里不能用普通的hash map，由于题目给定的数字范围是$ [-10000, 10000] $，可以用一个数组$H$来代替。
+\item 如果当前数字$x$出现偶数次，将这些同样的数字进行配对，那么每个pair的最小数字就是$x$。
+\item 如果这个数字出现奇数次，那么将$x$与$x+1$进行配对，保证数字之差仍然最小。同时$x+1$的个数会减少一次。
+\end{itemize}
+
+\begin{lstlisting}[style=customc, caption={Hash Map}]
+int arrayPairSum( vector<int>& nums )
+{
+    //since all elements are between [-10000, 10000]
+    //we can use an array as the hash map
+    vector<int> H( 20001, 0 );
+
+    for( int n : nums )
+    {
+        H[n + 10000] += 1;
+    }
+
+    int left = 0;
+    int ans = 0;
+
+    for( int x = -10000; x <= 10000; ++x )
+    {
+        int count = H[x + 10000];
+
+        if( left == 1 )
+        {
+            //we have to make a pair
+            //with x and x-1
+            //the minimum for this pair
+            //is x-1
+            ans += ( x - 1 );
+        }
+
+        //remove the one
+        //that make pair with last number
+        count -= left;
+
+        if( count & 1 )
+        {
+            //we will have one x left
+            //to be paired with x+1
+            left = 1;
+            --count;
+        }
+        else
+        {
+            left = 0;
+        }
+
+        //for count/2 pairs of (x,x)
+        //the minimum is x
+        ans += ( x ) * ( count / 2 );
+    }
+
+    return ans;
+}
+\end{lstlisting}

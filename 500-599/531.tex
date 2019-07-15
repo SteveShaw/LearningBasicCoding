@@ -1,0 +1,31 @@
+\section{531 --- Lonely Pixel I}
+Given a picture $G$ consisting of black and white pixels, find the number of black lonely pixels.
+
+The picture is represented by a 2D char array consisting of \texttt{B} and \texttt{W}, which means black and white pixels respectively.
+
+A black lonely pixel is character \texttt{B} that located at a specific position where the same row and same column don't have any other black pixels.
+
+\paragraph{Example:}
+
+\begin{flushleft}
+\textbf{Input}: 
+
+\begin{table}[H]
+\begin{tabular}{ccc}
+\texttt{W} & \texttt{W} & \texttt{B}\\
+ \texttt{W} & \texttt{B} & \texttt{W}\\
+ \texttt{B} & \texttt{W} & \texttt{W}
+\end{tabular}
+\end{table}
+
+
+\textbf{Output}: 3
+
+\textbf{Explanation}: All the three \texttt{B}s are black lonely pixels.
+\end{flushleft}
+
+\paragraph{Note:}
+
+\begin{itemize}
+\item  The range of width and height of the input 2D array is $ [1,500] $.
+\end{itemize}

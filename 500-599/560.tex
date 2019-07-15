@@ -1,0 +1,76 @@
+\section{560 --- Subarray Sum Equals K}
+Given an array of integers, $A$, and an integer $ k $, you need to find the total number of continuous subarrays whose sum equals to $ k $.
+
+\paragraph{Example 1:}
+\begin{flushleft}
+\textbf{Input}: $A = [1,1,1]$, $k = 2$
+
+\textbf{Output}: 2
+\end{flushleft}
+
+\paragraph{Note:}
+\begin{itemize}
+\item The length of the array is in range $[1, 20,000]$.
+
+\item The range of numbers in the array is $[-1000, 1000]$ and the range of the integer $k$ is $[-10^7, 10^7]$.
+\end{itemize}
+
+\subsection{Prefix Sum}
+\begin{itemize}
+\item 记录每个index处的prefix sum $x$，然后看之前的prefix sum是否出现过$x-k$，如果有，将$x-k$出现的次数加入到结果中。
+\item 如果$x=k$，将结果加1。
+\item 需要一个hash map记录prefix sum及其出现次数。
+\end{itemize}
+
+\setcounter{lstlisting}{0}
+\begin{lstlisting}[style=customc, caption={Prefix Sum}]
+int subarraySum( vector<int>& nums, int k )
+{
+    unordered_map<int, int> m;
+
+    vector<int> ps( nums.size() + 1, 0 );
+
+    //helper lambda
+    //to add to hash map
+    auto add_m = [&m]( int n )
+    {
+        auto it = m.find( n );
+        if( it == m.end() )
+        {
+            m.emplace( n, 1 );
+        }
+        else
+        {
+            ++it->second;
+        }
+    };
+
+    int ans = 0;
+
+    for( size_t i = 0; i < nums.size(); ++i )
+    {
+        ps[i + 1] = nums[i] + ps[i];
+
+
+        if( ps[i + 1] == k )
+        {
+            ++ans;
+        }
+
+        int x = ps[i + 1] - k;
+
+        auto it = m.find( x );
+        if( it != m.end() )
+        {
+            //add the count
+            ans += it->second;
+        }
+
+        //after finding,
+        //add the sum to the hash map
+        add_m( ps[i + 1] );
+    }
+
+    return ans;
+}
+\end{lstlisting}

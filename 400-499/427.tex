@@ -1,0 +1,154 @@
+\section{427 --- Construct Quad Tree}
+We want to use quad trees to store an $N \times N$ boolean grid. Each cell in the grid can only be \texttt{true} or \texttt{false}. The root node represents the whole grid. For each node, it will be subdivided into four children nodes \textbf{until the values in the region it represents are all the same}.
+
+Each node has another two boolean attributes : \texttt{isLeaf} and \texttt{val}. \texttt{isLeaf} is \texttt{true} if and only if the node is a leaf node. The \texttt{val} attribute for a leaf node contains the value of the region it represents.
+
+Your task is to use a quad tree to represent a given grid. The following example may help you understand the problem better:
+
+Given the 8 x 8 grid below, we want to construct the corresponding quad tree:
+
+
+\subsection{Depth First Search From Top To Bottom}
+\begin{itemize}
+\item In this method, each time, we check if the large grid has one uniform value or not. If it is, we create a leaf node to represent this grid.
+\item Otherwise, we split the grid into four parts and recursively apply the same process.
+\item To speed up the checking, we may use 2D prefix sum of the grid.
+\end{itemize}
+
+\setcounter{lstlisting}{0}
+\begin{lstlisting}[style=customc, caption={Build From Top To Bottom}]
+Node* construct( vector<vector<int>>& grid )
+{
+    int N = static_cast<int>( grid.size() );
+
+    vector<vector<int>> g_sum( N + 1, vector<int>( N + 1, 0 ) );
+
+    //build 2d prefix sum
+    //for input grid
+    for( int r = 0;  r < N; ++r )
+    {
+        for( int c = 0; c < N; ++c )
+        {
+            g_sum[r + 1][c + 1] = g_sum[r + 1][c] + g_sum[r][c + 1] - g_sum[r][c] + grid[r][c];
+        }
+    }
+
+    //run top to bottom build
+    return dfs( grid, 0, 0, N - 1, N - 1, g_sum );
+}
+
+Node* dfs( vector<vector<int>>&grid, int top, int left, int bottom, int right, vector<vector<int>>& g_sum )
+{
+    if( ( top > bottom ) || ( left > right ) )
+    {
+        //base case
+        return nullptr;
+    }
+
+    //get the sum of grid[top...bottom][left...right]
+    int sum = g_sum[bottom + 1][right + 1] -
+              g_sum[top][right + 1] -
+              g_sum[bottom + 1][left]
+              + g_sum[top][left];
+
+    //the whole sum if grid[top...bottom][left...right] all are 1s or 0s
+    int area = ( bottom - top + 1 ) * ( right - left + 1 ) * grid[top][left];
+
+    if( sum == area )
+    {
+        //grid[top...bottom][left...right]
+        //are all same values
+        //it forms a leaf node
+        Node* node = new Node;
+        //must set all 4 nodes
+        //to nullptr, otherwise will
+        //cause exception
+        node->topLeft = nullptr;
+        node->topRight = nullptr;
+        node->bottomLeft = nullptr;
+        node->bottomRight = nullptr;
+
+        node->val = grid[top][left] ? true : false;
+        node->isLeaf = true;
+
+        return node;
+    }
+
+    //divide grid[top...bottom][left...right] into 4 parts
+    //from the middle of row and column
+    int mid_r = ( top + bottom ) / 2;
+    int mid_c = ( left + right ) / 2;
+
+    Node* node = new Node;
+    node->topLeft = dfs( grid, top, left, mid_r, mid_c, g_sum );
+    node->topRight = dfs( grid, top, mid_c + 1, mid_r, right, g_sum );
+    node->bottomLeft = dfs( grid, mid_r + 1, left, bottom, mid_c, g_sum );
+    node->bottomRight = dfs( grid, mid_r + 1, mid_c + 1, bottom, right, g_sum );
+
+    node->isLeaf = false;
+    //must set node->val = false
+    //otherwise, it will cause exception
+    node->val = false;
+
+    return node;
+}
+\end{lstlisting}
+
+\subsection{Depth First Search From Bottom To Top}
+\begin{itemize}
+\item We can build from each element of the grid.
+\item Then, we combine 4 connected nodes.
+\item If the four nodes are all leaves and same values, we can combine them into one leaf node and delete these 4 nodes.
+\item Otherwise, create a node to contains these 4 nodes.
+\item Recursively apply the above process to the input grid.
+\end{itemize}
+
+\begin{lstlisting}[style=customc, caption={Build From Bottom To Top}]
+Node* construct( vector<vector<int>>& grid )
+{
+    int N = static_cast<int>( grid.size() );
+    return dfs( grid, 0, 0, N );
+}
+
+Node* dfs( vector<vector<int>>&grid, int x, int y, int size )
+{
+    if( size == 1 )
+    {
+        //this is each element in the grid
+        return new Node{grid[x][y] == 1, true, nullptr, nullptr, nullptr, nullptr};
+    }
+
+    auto tl = dfs( grid, x, y, size / 2 );
+    auto tr = dfs( grid, x, y + size / 2, size / 2 );
+    auto bl = dfs( grid, x + size / 2, y, size / 2 );
+    auto br = dfs( grid, x + size / 2, y + size / 2, size / 2 );
+
+    if( ( tl->isLeaf && tr->isLeaf && bl->isLeaf && br->isLeaf ) )
+    {
+        if( ( tl->val == tr->val ) && ( bl->val == br->val ) && ( tl->val == bl->val ) )
+        {
+            //we can merge these 4 nodes
+            //into one leaf node
+            auto node = new Node;
+            node->isLeaf = true;
+            node->val = tl->val;
+
+            node->topLeft = nullptr;
+            node->topRight = nullptr;
+            node->bottomLeft = nullptr;
+            node->bottomRight = nullptr;
+
+            //delete these nodes
+            delete tl;
+            delete tr;
+            delete bl;
+            delete br;
+
+            return node;
+        }
+    }
+
+    //create a new node to contain these 4 nodes
+    return new Node{false, false, tl, tr, bl, br};
+}
+\end{lstlisting}

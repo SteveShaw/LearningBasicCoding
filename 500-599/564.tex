@@ -1,0 +1,29 @@
+\section{564 --- Find the Closest Palindrome}
+Given an integer $n$, find the closest integer (not including itself), which is a palindrome.
+
+The \textbf{closest} is defined as absolute difference minimized between two integers.
+
+\paragraph{Example 1:}
+\begin{flushleft}
+\textbf{Input}: $ 123 $
+
+\textbf{Output}: $ 121 $
+\end{flushleft}
+
+\paragraph{Note:}
+\begin{itemize}
+\item The input $ n $ is a positive integer represented by string, whose length will not exceed 18.
+\item If there is a tie, return the smaller one as answer.
+\end{itemize}
+
+\subsection{Mathematical Approach}
+首先可以得到结论， 如果需要通过copy一半字符的方式从$n$得到 Palindrome number，那么一定是copy first half 到 second half.
+
+其次，有三种方式对$n$进行转换得到距离最近的Palindrome number
+\begin{enumerate}
+\item Copy first half to second half. For example：  Suppose $n=10987$. After this kind of transformation, we can get $10901$.
+\item Decrement the first half and then copy first half.
+\item Increment the first half and then copy first half.
+\item If the digit at the middle index is zero, decrement the first half and then copy first half: For example, when $n=20001$, decrements the first half $200$ we get $199$, then copy to second half we get $19991$. .
+\item If the digit at the middle index is $9$, increments the second half and then copy first half: For example, when $n=10987$, increments the first half $109$ we get $110$, then copy to second half we get $11011$. We do not decrement first half in this case because the generated number must have larger difference than just copying the first half to second half.
+\end{enumerate}

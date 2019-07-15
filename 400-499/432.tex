@@ -39,8 +39,12 @@ GetMinKey()
 
 \subsection{Hash Map With Double Linked List}
 \begin{itemize}
-\item Map key to its position in a double linked list.
+\item We use a struct \texttt{Bucket} to store the value and the associated keys.
+\item Store the buckets in a double linked list, $L$, and associate the key with the position of its bucket in the list through a hash map, $M$.
+\item We put the bucket with the least value at the end of the list, and the bucket with largest value in the front.
+\item When the value of the key is changed, we have to check their previous or successive bucket to see if the value inside is either 1 greater or 1 smaller than current value of the key. If not, we have to create a new bucket to store the new value and the key. Also, remove the key from it's current bucket and change the hash map when possible.
 \end{itemize}
+
 
 \setcounter{lstlisting}{0}
 \begin{lstlisting}[style=customc, caption={Double Linked List and Iterator For Value In Hash Map}]
@@ -51,160 +55,184 @@ public:
     AllOne()
     {
 
-        //we always have zero in the front
-        //Since the keys with one will delete
-        //so any existing key will have value greater than zero
-        blist.emplace_front( 0, "" );
     }
 
     /** Inserts a new key <Key> with value 1. Or increments an existing key by 1. */
     void inc( string key )
     {
-
-        auto it_key = m_sb.find( key );
-        if( it_key == m_sb.end() )
+        auto it = m_dict.find( key );
+        if( it == m_dict.end() )
         {
-            //add to front first
-            //try to unify the process of checking previous node
-            blist.front().keys.emplace( key ).first;
-            it_key = m_sb.emplace( key.c_str(), blist.begin() ).first;
-        }
+            //new key
+            //since value 1 is the smallest value
+            //we put this at the back of the list
+            if( m_bl.empty() || ( m_bl.back().val != 1 ) )
+            {
+                m_bl.push_back( {1, unordered_set<string>{key}} );
+            }
+            else
+            {
+                m_bl.back().keys.insert( key );
+            }
 
-        auto p = it_key->second;
-        auto next = p;
-        ++next;
+            //add the position of the bucket
+            //that containing the new key
+            //to the hash map
+            auto p_bl = m_bl.end();
+            --p_bl;
 
-        if( ( next == blist.end() ) || ( next->val != p->val + 1 ) )
-        {
-            //append a new item after p
-            //also update the position
-            it_key->second = blist.emplace( next, p->val + 1, key.c_str() );
+            m_dict.emplace( key, p_bl );
         }
         else
         {
-            //add the key to its next node's key pool
-            next->keys.emplace( key );
-            //update the key's associated position
-            it_key->second = next;
-        }
+            //we already have this key
+            //we must increments its existing value
+            //since the value is changed
+            //it must be placed into another or new bucket
 
-        //remove key from p's key pool
-        p->keys.erase( key );
-        if( p->keys.empty() )
-        {
-            //this node does not contain any key
-            //remove from the list
-            //notice the front node will never be deleted
-            //because it has a empty string in the pool
-            blist.erase( p );
-        }
+            auto p_bl = it->second;
 
+            //check the previous bucekt
+            auto prev = p_bl;
+            if( prev != m_bl.begin() )
+            {
+                --prev;
+            }
+
+            if( prev->val != p_bl->val + 1 )
+            {
+                //since the previous bucket
+                //contains a value larger than
+                //p_bl->val + 1,
+                //we must create a new bucket before p_bl to
+                //store the new value and its related string
+                auto new_p = m_bl.insert( p_bl, {p_bl->val + 1, unordered_set<string>{key}} );
+
+                //we also have to change the dictionary
+                it->second = new_p;
+            }
+            else
+            {
+                //this bucket will contain this new key
+                prev->keys.insert( key );
+
+                //we also have to change the dictionary
+                it->second = prev;
+            }
+
+            //in either case
+            //we have to remove this key from current bucket
+            p_bl->keys.erase( key );
+
+            if( p_bl->keys.empty() )
+            {
+                //no key inside this bucket
+                //remove it from the list
+                m_bl.erase( p_bl );
+            }
+        }//end else
     }
 
     /** Decrements an existing key by 1. If Key's value is 1, remove it from the data structure. */
     void dec( string key )
     {
-
-        auto it_key = m_sb.find( key );
-        if( it_key == m_sb.end() )
+        auto it = m_dict.find( key );
+        if( it == m_dict.end() )
         {
             return;
         }
 
-        auto p = it_key->second;
+        auto p_bl = it->second;
 
-        if( p->val == 1 )
+        if( p_bl->val == 1 )
         {
-            //remove from map and list
-            p->keys.erase( key );
-            if( p->keys.empty() )
+            //remove the key from the bucket
+            p_bl->keys.erase( key );
+
+            p_bl->keys.erase( key );
+            if( p_bl->keys.empty() )
             {
-                blist.erase( p );
+                //no key inside this bucket
+                //remove it from the list
+                m_bl.erase( p_bl );
             }
 
-            m_sb.erase( key );
+            //remove the key from the dictionary
+            m_dict.erase( key );
             return;
         }
 
-        auto prev = p;
-        --prev;
-
-        if( prev->val != p->val - 1 )
+        //the value of the key decrements
+        //we have to check if the next one of this bucket
+        //has the same value as the key
+        auto next_p = p_bl;
+        ++next_p;
+        if( ( next_p == m_bl.end() ) || ( next_p->val != p_bl->val - 1 ) )
         {
-            //add an item before p
-            //also update the position
-            it_key->second = blist.emplace( p, p->val - 1, key.c_str() );
+            //we have to create a new bucket before next_p to
+            //contain this new value
+            auto new_p = m_bl.insert( next_p, {p_bl->val - 1, unordered_set<string>{key}} );
+            //we also have to change the dictionary
+            it->second = new_p;
         }
         else
         {
-            //update the position
-            it_key->second = prev;
-            //insert key to previous node's key pool
-            prev->keys.emplace( key );
+            //we add the key to the bucket in next_p
+            next_p->keys.insert( key );
+
+            //we also have to change the dictionary
+            it->second = next_p;
         }
 
-        //remove key from p's key pool
-        p->keys.erase( key );
-        if( p->keys.empty() )
+        //in either case, we have to remove key from
+        //the bucket in p_bl
+        p_bl->keys.erase( key );
+        if( p_bl->keys.empty() )
         {
-            blist.erase( p );
+            //no key inside this bucket
+            //remove it from the list
+            m_bl.erase( p_bl );
         }
     }
 
     /** Returns one of the keys with maximal value. */
     string getMaxKey()
     {
-
-        auto it = blist.end();
-        --it;
-
-        if( it->val != 0 )
+        if( m_bl.empty() )
         {
-            return *( it->keys.begin() );
+            return "";
         }
 
-        return "";
-
+        //max value is the front of the list
+        auto b = m_bl.front().keys.begin();
+        return *b;
     }
 
     /** Returns one of the keys with Minimal value. */
     string getMinKey()
     {
-
-        auto it = blist.begin();
-        ++it;
-
-        if( it == blist.end() )
+        if( m_bl.empty() )
         {
             return "";
         }
 
-        return *( it->keys.begin() );
-
+        //min value is the back of the list
+        auto b = m_bl.back().keys.begin();
+        return *b;
     }
 
 private:
 
     struct Bucket
     {
-        //the value for each key
-        int val;
-        //the pool of keys with same value
+        int val = -1;
         unordered_set<string> keys;
 
-        Bucket( int v, const char* key )
-            : val( v )
-        {
-            keys.emplace( key );
-        }
+        Bucket() = default;
     };
 
-    //use a double linked list to store the bucket
-    //so that the insert/delete can be done in O(1)
-    list<Bucket> blist;
+    list<Bucket> m_bl;
 
-    //Create a map between the key and its position in
-    //the list
-    unordered_map<string, list<Bucket>::iterator> m_sb;
+    unordered_map<string, list<Bucket>::iterator> m_dict;
 };
 \end{lstlisting}

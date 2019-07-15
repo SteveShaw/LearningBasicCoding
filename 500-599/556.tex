@@ -1,0 +1,133 @@
+\section{556 --- Next Greater Element III}
+Given a positive 32-bit integer $n$, you need to find the smallest 32-bit integer which has exactly the same digits existing in the integer $n$ and is greater in value than $n$. If no such positive 32-bit integer exists, you need to return $-1$.
+
+\paragraph{Example 1:}
+
+\begin{flushleft}
+\textbf{Input}: $12$
+
+\textbf{Output}: $21$
+\end{flushleft}
+
+ 
+
+\paragraph{Example 2:}
+
+\begin{flushleft}
+\textbf{Input}: $21$
+
+\textbf{Output}: $-1$
+\end{flushleft}
+
+\subsection{Next Permutation}
+
+The following algorithm generates the next permutation lexicographically after a given permutation $A$. It changes the given permutation in-place.
+
+\begin{enumerate}
+\item Find the largest index $k$ such that $A[k] < A[k + 1]$. If no such index exists, the permutation is the last (largest) permutation.
+\item Find the largest index $x$ greater than k such that $A[k] < A[x]$.
+\item Swap the value of $A[k]$ with that of $A[l]$.
+\item Reverse the sequence from $A[k + 1]$ up to and including the final element $A[L-1]$.
+\end{enumerate}
+
+For example, given the sequence $A = [1, 2, 3, 4]$ (which is in increasing order), and given that the index is zero-based, the steps are as follows:
+
+\begin{itemize}
+\item Index $k = 2$, because 3 is placed at an index that satisfies condition of being the largest index that is still less than $A[k + 1]$ which is 4.
+\item Index $x = 3$, because 4 is the only value in the sequence that is greater than 3 in order to satisfy the condition $A[k] < A[x]$.
+\item The values of $A[2]$ and $A[3]$ are swapped to form the new sequence $[1,2,4,3]$.
+\item The sequence after $k$-index $A[2]$ to the final element is reversed. Because only one value lies after this index (the 3), the sequence remains unchanged in this instance. Thus the lexicographic successor of the initial state is permuted: $[1,2,4,3]$.
+\end{itemize}
+
+\setcounter{lstlisting}{0}
+\begin{lstlisting}[style=customc, caption={Next Permutation}]
+int nextGreaterElement( int n )
+{
+    vector<int> digits;
+
+    int t = n;
+    while( n )
+    {
+        int q = n / 10;
+        int r = n - q * 10;
+
+        digits.push_back( r );
+
+        n = q;
+    }
+
+    //make sure the digits of n
+    //are from high to low positions
+    reverse( begin( digits ), end( digits ) );
+
+    int L = static_cast<int>( digits.size() );
+
+    int i = L - 2;
+    bool flag = false;
+    //find first k so that A[k] < A[k+1]
+    for( i = L - 2; i >= 0; --i )
+    {
+        if( digits[i + 1] > digits[i] )
+        {
+            flag = true;
+            break;
+        }
+    }
+
+    if( !flag )
+    {
+        //n is already the largest one
+        return -1;
+    }
+
+    int j = L - 1;
+    //find largest x ( x > i)
+    //so that A[x] > A[k]
+    for( ; j > i; --j )
+    {
+        if( digits[j] > digits[i] )
+        {
+            break;
+        }
+    }
+
+    //swap A[x] and A[i]
+    swap( digits[j], digits[i] );
+
+    //reverse A[k+1] to A[L-1]
+    reverse( digits.begin() + i + 1, digits.end() );
+
+    int ans = 0;
+
+    int max_limit = INT_MAX / 10;
+
+    auto is_overflow = [max_limit]( int n, int d ) -> bool
+    {
+        if( n > max_limit )
+        {
+            return true;
+        }
+
+        if( ( n == max_limit ) && ( d > 7 ) )
+        {
+            return true;
+        }
+
+        return false;
+    };
+
+    for( int d : digits )
+    {
+        //we need to check integer type
+        //overflow
+        if( is_overflow( ans, d ) )
+        {
+            return -1;
+        }
+
+        ans = ans * 10 + d;
+    }
+
+    return ans;
+}
+\end{lstlisting}

@@ -1,0 +1,33 @@
+\section{537 --- Complex Number Multiplication}
+Given two strings representing two complex numbers.
+
+You need to return a string representing their multiplication. Note $i^2 = -1$ according to the definition.
+
+\paragraph{Example 1:}
+
+\begin{flushleft}
+\textbf{Input}: $1+1i$, $1+1i$
+
+\textbf{Output}: $0+2i$
+
+\textbf{Explanation}: $(1 + i) \times (1 + i) = 1 + i^2 + 2 \times i = 2i$, and you need convert it to the form of $0+2i$.
+
+\end{flushleft}
+
+\paragraph{Example 2:}
+
+\begin{flushleft}
+\textbf{Input}: $1+-1i$, $1+-1i$
+
+\textbf{Output}: $0+-2i$
+
+\textbf{Explanation}: $(1 - i) \times (1 - i) = 1 + i^2 - 2 \times i = -2i$, and you need convert it to the form of $0+-2i$.
+\end{flushleft}
+
+\paragraph{Note:}
+
+\begin{itemize}
+\item The input strings will not have extra blank.
+\item The input strings will be given in the form of $a+bi$, where the integer $a$ and $b$ will both belong to the range of $[-100, 100]$. And \textbf{the output should be also in this form}.
+
+\end{itemize}

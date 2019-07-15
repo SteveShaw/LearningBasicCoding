@@ -36,87 +36,89 @@ The substring with start index 1 is \texttt{ba}, which is an anagram of \texttt{
 The substring with start index 2 is \texttt{ab}, which is an anagram of \texttt{ab}.
 \end{flushleft}
 
+\subsection{Sliding Window}
+\begin{itemize}
+\item 用$l$和$r$分别代表sliding window的左右边界
+\item 用一个数组记录$p$中每个字符出现的次数，另外用$x$表示$p$的长度
+\item 对于每一个$r$，将对应的字符$s[r]$出现次数减1，如果这时候这个字符的次数大于等于零，说明这个字符是$p$中的，将$x$减1。
+\item 当$x$为零时，说明此时$s[l..r]$中包含了$p$中的所有字符，但是同样也可能包含了其他不属于$p$的字符
+\item 这时候需要一个循环，即只要$x$为零时，向右移动sliding window的左边界$l$，同时移动前将字符$s[l]$对应的次数加1，如果这个字符的对应的次数变为大于零，说明移动后，sliding window中将缺失掉一个属于$p$的字符。另外，移动左边界前，检查这时候sliding window的长度是否和$p$的长度相等，如果相等，说明这个sliding window中包含且只包含了$p$的所有字符，将此时sliding window的左边界加入结果中。
+\item 然后继续向右移动右边界$r$。
+\end{itemize}
 
 \setcounter{lstlisting}{0}
 \begin{lstlisting}[style=customc, caption={Sliding Window}]
 vector<int> findAnagrams( string s, string p )
 {
-    //create the character counter
-    unordered_map<int, int> m;
+    int dict[26] = {0};
+
     for( auto c : p )
     {
-        int ci = c - 'a';
-        auto it = m.find( ci );
-        if( it == m.end() )
-        {
-            m.emplace( ci, 1 );
-        }
-        else
-        {
-            ++it->second;
-        }
+        dict[c - 'a'] += 1;
     }
 
     //sliding window left and right boundary
     int l = 0;
     int r = 0;
 
-    int lp = static_cast<int>( p.size() );
-    int ls = static_cast<int>( s.size() );
+    int len_p = static_cast<int>( p.size() );
+    int len_s = static_cast<int>( s.size() );
 
-    //the number of unique characters
-    int count = static_cast<int>( m.size() );
+    //x serve as the indication if all p's characters
+    //inside the sliding window
+    int x = len_p;
 
     vector<int> ans;
 
-    while( r < ls )
+    while( r < len_s )
     {
-        int ci = s[r] - 'a';
-        auto it = m.find( ci );
-        if( it != m.end() )
-        {
+        int ci  = s[r] - 'a';
+        dict[ci] -= 1;
 
-            --it->second;
-            if( it->second == 0 )
-            {
-                //This means we already
-                //reach the count of character in p
-                --count;
-            }
+        if( dict[ci] >= 0 )
+        {
+            //s[r] is in p
+            //decrements x
+            --x;
         }
 
-        ++r;
-
-        while( count == 0 )
+        //we need a loop here
+        while( x == 0 )
         {
             //now, s[l...r] contains all same
-            //characters in p,
+            //letters in p,
             //but may contain other letters
-            int ci = s[l] - 'a';
-            auto it = m.find( ci );
 
-            if( it != m.end() )
+            ci = s[l] - 'a';
+            //increments the counts of s[l]
+            //since it will be removed from the
+            //sliding window
+            dict[ci] += 1;
+
+            if( dict[ci] > 0 )
             {
-                ++it->second;
-                if( it->second > 0 )
-                {
-                    //this letter is in p,
-                    //and will be removed
-                    //from current sliding window
-                    //as left boundary is moving rightwards
-                    ++count;
-                }
+                //s[l] is in p
+                //right shift l will
+                //remove this letter from
+                //the sliding window
+                ++x;
             }
 
-            //now s[l..r] is anagram of p
-            if( r - l == lp )
+            if( r - l + 1 == len_p )
             {
+                //s[l..r] contains all letters in p
+                //and has same length as p
+                //so, s[l..r] is the anagram of p
                 ans.push_back( l );
             }
 
+            //right shift left boundary
             ++l;
         }
+
+        ++r;
     }
+
     return ans;
 }
 \end{lstlisting}

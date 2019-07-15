@@ -48,6 +48,14 @@ The paths that sum to 8 are:
 \item $-3 \longrightarrow 11$
 \end{enumerate}
 
+\subsection{Prefix Sum}
+\begin{itemize}
+\item So the idea is similar as problem \textbf{Two Sum}: using a hash map to store the prefix sum and how many ways to get this prefix sum.
+\item Whenever reaches a node, check if the result of prefix sum minus target exists in the map  or not, if it does, we added up the ways of the result into the total counts.
+\item At start, we must set $M[0]=1$, otherwise, in some cases, we may lose some number of paths
+\item At the end of recursive function, we have to decrements the count of current total sum since we are leaving current node and it's value cannot be in the path.
+\end{itemize}
+
 \end{flushleft}
 
 \setcounter{lstlisting}{0}
@@ -101,5 +109,73 @@ void dfs( TreeNode* node, int sum, int total, unordered_map<int, int>& m, int& c
     //that can produce total, since we will
     //leave node
     --it->second;
+}
+\end{lstlisting}
+
+\subsection{Depth First Search}
+\begin{itemize}
+\item Suppose there is a function $F$ to return the number of path equal to the target sum from a given node, then the total number of path is the sum of the following
+\begin{enumerate}
+\item The number of path starting from current node
+\item The number of paths that sum to the target for the left child tree of current node
+\item The number of paths that sum to the target for the right child tree of current node
+\end{enumerate}
+\end{itemize}
+
+The algorithm of function $F$ is as below
+\setcounter{algorithm}{0}
+\begin{algorithm}[H]
+\caption{}
+\begin{algorithmic}[1]
+\Function{F}{$t, T$}
+\If{$t$ is a null node}
+\State \Return 0
+\EndIf
+\State $\delta:=0$
+\If{The value of $t$ is equal to the target $T$}
+\State $\delta=1$ \Comment $t$ itself is a path.
+\EndIf
+\State $\star$ Call $F$ for left child of $t$ and add the result to $\delta$
+\State $\star$ Call $F$ for right child of $t$ and add the result to $\delta$
+\State \Return $\delta$
+\EndFunction
+\end{algorithmic}
+\end{algorithm}
+
+\begin{lstlisting}[style=customc, caption={DFS}]
+int pathSum( TreeNode* root, int sum )
+{
+    if( !root )
+    {
+        return 0;
+    }
+
+    //number of paths starting from root
+    //plus number of paths in left child tree of root
+    // and number of paths in right child tree of root
+    return dfs( root, sum ) + pathSum( root->left, sum ) + pathSum( root->right, sum );
+}
+
+//get the number of paths equal to sum
+//that starting from node
+int dfs( TreeNode* node, int sum )
+{
+    if( !node )
+    {
+        return 0;
+    }
+
+    //if node->val= sum, node itself is a path
+    int count = ( node->val == sum ) ? 1 : 0;
+
+    //add the number of paths that starts from node->left
+    //with target sum - node->val
+    count += dfs( node->left, sum - node->val );
+
+    //add the number of paths that starts from node->right
+    //with target sum - node->val
+    count += dfs( node->right, sum - node->val );
+
+    return count;
 }
 \end{lstlisting}

@@ -34,15 +34,16 @@ as [1 [3[5 6] 2 4]]. You do not necessarily need to follow this format, so pleas
 \begin{itemize}
 \item Serialize: 
 \begin{enumerate}
-\item Fo a null node, add a special character like \#
+\item Fo a null node, just return.
 \item Otherwise, add the node's value first, then add a space, and then the number of its children, and then add a space again.
 \item If it has children, recursively traverse into each child node, do the above operation again.
+\item Finally, if the generated string is not empty, we remove the last space from the string.
 \end{enumerate}
 \item Deserialize: We may need \texttt{istringstream} to help read the string as a input stream.
 \begin{enumerate}
-\item Read the value from the stream. If the special character is the value, return the null node.
-\item Otherwise, read the number of children from the stream. 
-\item Create a new node with read value.
+\item Check if we read at the end of string. If it is, return null node.
+\item Read value and number of children from the stream
+\item Create a new node with the value.
 \item By the number of children, we add a recursively-built node into the children array of current node.
 \item Finally, return the current node
 \end{enumerate}
@@ -50,97 +51,101 @@ as [1 [3[5 6] 2 4]]. You do not necessarily need to follow this format, so pleas
 
 \setcounter{lstlisting}{0}
 \begin{lstlisting}[style=customc, caption={Recursion}]
-/*
-class Node
+class Codec
 {
 public:
-    int val;
-    vector<Node*> children;
-
-    Node()
-    {}
-}
-*/
-// Encodes a tree to a single string.
-string serialize( Node* root )
-{
-    string tree;
-    preorder( root, tree );
-    return tree;
-}
-
-void preorder( Node* node, string& stree )
-{
-    if( !node )
+    // Encodes a tree to a single string.
+    string serialize( Node* root )
     {
-        stree.push_back( '#' );
-    }
 
-    //val + space + number of children + space
-    stree += to_string( node->val );
-    stree.push_back( ' ' );
+        string ans;
 
-    if( node->children.empty() )
-    {
-        stree.push_back( '0' );
-        stree.push_back( ' ' );
-    }
-    else
-    {
-        stree += to_string( node->children.size() );
-        stree.push_back( ' ' );
+        preorder( root, ans );
 
-        for( auto child : node->children )
+        if( !ans.empty() )
         {
-            //recursively serialize the child
-            preorder( child, stree );
+            //remove the last space character
+            ans.pop_back();
+        }
+
+        return ans;
+    }
+
+    // Decodes your encoded data to tree.
+    Node* deserialize( string data )
+    {
+
+        if( data.empty() )
+        {
+            return nullptr;
+        }
+
+        istringstream iss( data );
+
+        return build( iss );
+    }
+
+    void preorder( Node* node, string& s )
+    {
+        if( !node )
+        {
+            return;
+        }
+
+        s += to_string( node->val );
+        s.push_back( ' ' ); //add space to separate
+
+        if( node->children.empty() )
+        {
+            s.push_back( '0' );
+            s.push_back( ' ' ); //add space to separate
+        }
+        else
+        {
+            s += to_string( node->children.size() );
+            s.push_back( ' ' ); //add space to separate
+
+            for( auto node : node->children )
+            {
+                preorder( node, s );
+            }
         }
     }
 
-    return;
-
-}
-
-// Decodes your encoded data to tree.
-Node* deserialize( string data )
-{
-    std::istringstream iss( data );
-    return build( iss );
-}
-
-Node* build( std::istringstream& iss )
-{
-    string sval;
-    string slen;
-
-    //read value first
-    iss >> sval;
-
-    if( sval[0] == '#' )
+    Node* build( istringstream& iss )
     {
-        return nullptr;
-    }
-
-    //read lenth then
-    iss >> slen;
-
-    int val = stoi( sval );
-
-    //create the new node
-    Node* node = new Node();
-    node->val = val;
-
-    int len = stoi( slen );
-
-    if( len > 0 )
-    {
-        for( int i = 0; i < len; ++i )
+        if( iss.eof() )
         {
-            //recursively build child
-            //add child into node->children
-            node->children.push_back( build( iss ) );
+            //read at the end of string
+            return nullptr;
         }
+
+        int val;
+        int len;
+
+        //get value and number of children
+        iss >> val >> len;
+
+        Node* node = new Node;
+        node->val = val;
+
+        if( len )
+        {
+            node->children.reserve( len );
+            for( int i = 0; i < len; ++i )
+            {
+                //recurisively build children
+                node->children.push_back( build( iss ) );
+            }
+        }
+
+        return node;
     }
-    return node;
-}
+
+
+};
+
+// Your Codec object will be instantiated and called as such:
+// Codec codec;
+// codec.deserialize(codec.serialize(root));
 \end{lstlisting}

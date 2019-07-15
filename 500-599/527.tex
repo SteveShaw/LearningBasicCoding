@@ -1,0 +1,25 @@
+\section{527 --- Word Abbreviation}
+Given an array of $n$ distinct non-empty strings, you need to generate minimal possible abbreviations for every word following rules below.
+
+\begin{itemize}
+\item Begin with the first character and then the number of characters abbreviated, which followed by the last character.
+\item If there are any conflict, that is more than one words share the same abbreviation, a longer prefix is used instead of only the first character until making the map from word to abbreviation become unique. In other words, a final abbreviation cannot map to more than one original words.
+\item If the abbreviation doesn't make the word shorter, then keep it as original.
+\end{itemize}
+
+\paragraph{Example:}
+
+\begin{flushleft}
+\textbf{Input}: [\texttt{like}, \texttt{god}, \texttt{internal}, \texttt{me}, \texttt{internet}, \texttt{interval}, \texttt{intension}, \texttt{face}, \texttt{intrusion}]
+
+\textbf{Output}: [\texttt{l2e}, \texttt{god}, \texttt{internal}, \texttt{me}, \texttt{i6t}, \texttt{interval}, \texttt{inte4n}, \texttt{f2e}, \texttt{intr4n}]
+\end{flushleft}
+
+\paragraph{Note:}
+
+\begin{itemize}
+\item Both $ n $ and the length of each word will not exceed 400.
+\item The length of each word is greater than 1.
+\item The words consist of lowercase English letters only.
+\item The return answers should be in the same order as the original array.
+\end{itemize}

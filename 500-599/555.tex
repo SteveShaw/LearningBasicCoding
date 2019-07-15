@@ -1,0 +1,135 @@
+\section{555 --- Split Concatenated Strings}
+Given a list of strings, $A$, you could concatenate these strings together into a loop, where for each string you could choose to reverse it or not. Among all the possible loops, you need to find the \textbf{lexicographically biggest} string after cutting the loop, which will make the looped string into a regular one.
+
+Specifically, to find the lexicographically biggest string, you need to experience two phases:
+
+\begin{itemize}
+\item Concatenate all the strings into a loop, where you can reverse some strings or not and connect them in the same order as given.
+\item Cut and make one breakpoint in any place of the loop, which will make the looped string into a regular one starting from the character at the cutpoint.
+\end{itemize}
+
+And your job is to find the lexicographically biggest one among all the possible regular strings.
+
+\paragraph{Example:}
+
+\begin{flushleft}
+\textbf{Input}: \texttt{abc}, \texttt{xyz}
+
+\textbf{Output}: \texttt{zyxcba}
+
+Explanation: 
+
+You can get the looped string -\texttt{abcxyz}-, -\texttt{abczyx}-, -\texttt{cbaxyz}-, -\texttt{cbazyx}-, 
+
+where dash represents the looped status. 
+
+The answer string came from the fourth looped one, 
+
+where you could cut from the middle character \texttt{a} and get \texttt{zyxcba}.
+\end{flushleft}
+
+\paragraph{Note:}
+
+\begin{itemize}
+\item The input strings will only contain lowercase letters.
+\item The total length of all the strings will not over 1,000.
+\end{itemize}
+
+\subsection{Analysis}
+\begin{itemize}
+\item Per the description of the problem, the relative ordering of the input strings doesn't change after applying the transformations(i.e. reversing and applying cuts).
+\item Consider a given list of strings: $[s_1,s_2,s_3,\ldots,s_j,\ldots, s_n]$. Assuming that we choose $s_j$​ to be the string on which the current cut is placed leading to the formation of two substrings from $s_j$, say $\alpha$ and $\beta$. Thus, the concatenated string formed by such a cut will be: $[\beta,s_{j+1},\ldots,s_n,\hat{s}_1,\hat{s}_2,\ldots,\hat{\alpha}]$. Here, $\hat{s}_i$​ means the reversed $s_i$.
+\item We can try each index as a cut in $s_j$, the lexicographically largest concatenated string will be given by: $[\beta,\max(s_{j+1},\hat{s}_{j+1}),\ldots,\max(s_{n},\hat{s}_{n}),\max(s_{1},\hat{s}_{1}),\ldots,\hat{\alpha}]$.
+\item Thus, if a particular string $s_j$ is finalized for the cut, the largest lexicographic concatenated string is dependent only on whether the string $s_j$​ is reversed or not, and also on the position of the cut. This happens because the reverse/not reverse operation for the rest of the strings is fixed for a chosen $s_j$​ as shown above and thus, doesn't impact the final result.
+\item Then, the algorithm is clear. 
+\begin{enumerate}
+\item For every given string, we replace the string with the lexicographically larger string from the original string and the reversed one. 
+\item Later, we test every string(chosen as the string on which the cuts will be applied), and apply a cut at all the positions of this one and form the full concatenate string keeping the other strings intact. We also test the reversed current string and follow the same process. While doing this, we keep track of the largest lexicographic string found so far.
+\end{enumerate}
+\end{itemize}
+
+\setcounter{lstlisting}{0}
+\begin{lstlisting}[style=customc, caption={Test Cuts}]
+string splitLoopedString( vector<string>& strs )
+{
+    //generate larger string comparing
+    //reversed one and original string.
+    for( auto& s : strs )
+    {
+        auto r = s;
+        reverse( begin( r ), end( r ) );
+        if( r > s )
+        {
+            s = r;
+        }
+    }
+
+    string suffix;
+    string prefix;
+
+    string ans;
+    for( size_t i = 0; i < strs.size(); ++i )
+    {
+        auto& s = strs[i];
+
+        auto r = s;
+
+        reverse( begin( r ), end( r ) );
+
+        suffix.clear();
+        prefix.clear();
+
+        //all the other strings are
+        //remained as they are
+
+        //suffix are append to current string's
+        //right part
+        for( size_t j = i + 1; j < strs.size(); ++j )
+        {
+            suffix += strs[j];
+        }
+
+        //prefix are append to current string's
+        //left part
+        for( size_t j = 0; j < i; ++j )
+        {
+            prefix += strs[j];
+        }
+
+        for( size_t si = 0; si < s.size(); ++si )
+        {
+            //test cut on each index si
+            //substr(si) get the right part
+            string t = s.substr( si );
+            string rt = r.substr( si );
+
+            t += suffix;
+            t += prefix;
+
+            rt += suffix;
+            rt += prefix;
+
+            if( si > 0 )
+            {
+                //substr(0, si) get the left part
+                t += s.substr( 0, si );
+                rt += r.substr( 0, si );
+            }
+
+            if( ans.empty() )
+            {
+                ans = t;
+            }
+            else
+            {
+                ans = ( max )( ans, t );
+            }
+
+            ans = ( max )( ans, rt );
+
+        }
+    }
+
+    return ans;
+}
+\end{lstlisting}

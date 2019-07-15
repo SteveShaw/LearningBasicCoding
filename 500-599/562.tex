@@ -1,0 +1,101 @@
+\section{562 --- Longest Line of Consecutive One in Matrix}
+Given a 01 matrix $M$, find the longest line of consecutive one in the matrix. The line could be horizontal, vertical, diagonal or anti-diagonal.
+\paragraph{Example:}
+
+\begin{flushleft}
+\textbf{Input}:
+[[0,1,1,0],
+ [0,1,1,0],
+ [0,0,0,1]]
+\textbf{Output}: 3
+
+\end{flushleft}
+
+\paragraph{Hint:} 
+\begin{itemize}
+\item The number of elements in the given matrix will not exceed 10,000.
+\end{itemize}
+
+\subsection{Dynamic Programming}
+\begin{itemize}
+\item 用$F(i,j,k)$代表the length of consecutive ones at $M[i][j]$，其中
+\begin{itemize}
+\item $k=0$ 表示horizontal
+\item $k=1$ 表示vertical
+\item $k=2$ 表示diagonal
+\item $k=3$ 表示anti-diagonal
+\end{itemize}
+\item 如果$M[i][j]=1$，分别 check $M[i-1][j]$, $M[i][j-1]$, $M[i-1][j-1]$ 和 $M[i-1][j+1]$是否为1。 如果是1，那么$F(i,j,k)\gets F(i,j,k)+1$，否则$F(i,j,k)=1$。
+\item 如果$M[i][j]=0$， 那么$F(i,j,k)=0$
+\item Maintain一个变量，记录遇到的最大长度。
+\end{itemize}
+
+\setcounter{lstlisting}{0}
+\begin{lstlisting}[style=customc, caption={Dynamic Programming}]
+int longestLine( vector<vector<int>>& M )
+{
+
+    if( M.empty() || M[0].empty() )
+    {
+        return 0;
+    }
+
+    using count_t = array<int, 4>;
+
+    vector<vector<count_t>> F( M.size(), vector<count_t>( M[0].size(), count_t{0, 0, 0, 0} ) );
+
+
+    int ans = 0;
+
+    for( size_t r = 0; r < M.size(); ++r )
+    {
+        for( size_t c = 0; c < M[0].size(); ++c )
+        {
+            if( M[r][c] == 1 )
+            {
+                //the length of each direction
+                //is at least 1
+                F[r][c][0] = 1;
+                F[r][c][1] = 1;
+                F[r][c][2] = 1;
+                F[r][c][3] = 1;
+
+                if( ( r > 0 ) || ( c > 0 ) )
+                {
+                    if( ( r > 0 ) && ( M[r - 1][c] == 1 ) )
+                    {
+                        //the horizon length increments
+                        F[r][c][0] = F[r - 1][c][0] + 1;
+                    }
+
+                    if( ( c > 0 ) && ( M[r][c - 1] == 1 ) )
+                    {
+                        //the vertical length increments
+                        F[r][c][1] = F[r][c - 1][1] + 1;
+                    }
+
+                    if( ( r > 0 ) && ( c > 0 ) && ( M[r - 1][c - 1] == 1 ) )
+                    {
+                        //the diag length increments
+                        F[r][c][2] = F[r - 1][c - 1][2] + 1;
+                    }
+
+                    if( ( r > 0 ) && ( c < M[0].size() - 1 ) && ( M[r - 1][c + 1] == 1 ) )
+                    {
+                        //the anti-diag length increments
+                        F[r][c][3] = F[r - 1][c + 1][3] + 1;
+                    }
+                }
+
+                //get the maximum length so far
+                ans = ( max )( ans, F[r][c][0] );
+                ans = ( max )( ans, F[r][c][1] );
+                ans = ( max )( ans, F[r][c][2] );
+                ans = ( max )( ans, F[r][c][3] );
+            }//outmost if
+        } //inner for
+    }//outer for
+
+    return ans;
+}
+\end{lstlisting}

@@ -1,0 +1,197 @@
+\section{548 --- Split Array with Equal Sum}
+Given an array with $n$ integers, $A$, you need to find if there are triplets $(i, j, k)$ which satisfies following conditions:
+
+\begin{itemize}
+\item$ 0 < i, i + 1 < j$, $j + 1 < k < n - 1$
+\item Sum of subarrays $(0, i - 1)$, $ (i + 1, j - 1) $, $(j + 1, k - 1)$ and $(k + 1, n - 1)$ should be equal.
+\end{itemize}
+
+where we define that subarray $ (L, R) $ represents a slice of the original array starting from the element indexed $L$ to the element indexed $R$.
+
+\paragraph{Example:}
+
+\begin{flushleft}
+\textbf{Input}: $[1,2,1,2,1,2,1]$
+
+\textbf{Output}: \texttt{True}
+
+\textbf{Explanation}:
+
+$i = 1, j = 3, k = 5$.
+
+$\sum A(0, i - 1) = \sum A(0, 0) = 1$
+
+$\sum A(i + 1, j - 1) = \sum A(2, 2) = 1$
+
+$\sum A(j + 1, k - 1) = \sum A(4, 4) = 1$
+
+$\sum A(k + 1, n - 1) = \sum A(6, 6) = 1$
+\end{flushleft}
+
+\paragraph{Note:}
+
+\begin{itemize}
+\item $1 \leq n \leq 2000$
+\item Elements in the given array will be in range $[-1,000,000, 1,000,000]$.
+\end{itemize}
+
+\subsection{Hash Map and Mathematical Induction}
+\begin{itemize}
+\item From the given condition, we can get $i\geq 1$, $j \geq 3$ and $k\geq 5$, and the length of the array must be no less than 7.
+\item Create a prefix summation array $P$ with same length as the input array.
+\item From the given condition, we can get the following equations
+\begin{align*}
+P[j-1] - P[i] &= P[i-1] \\
+P[k-1] - P[j] &= P[j-1] - P[i]\\
+P[n-1] - P[k] &= P[k-1] - P[j]\\
+\end{align*}
+By arrange these equations we can get
+\begin{align*}
+P[j-1] &=  P[i] + P[i-1] \\
+P[k-1] + P[i] &= P[j] + P[j-1]\\
+P[n-1] + P[j] &= P[k] + P[k-1]\\
+\end{align*}
+As we can see, $P[x]+P[x-1]$ is the important characteristic.
+\item Therefore, create a hash map with the key equal to $P[x] + P[x-1]$ and the value is the array of associated indexes.
+\item From $j=3$ until $n-4$, we try each $j$
+ \begin{enumerate}
+ \item Find in the hash map if any key equal to $P[j-1]$. If there is a key equal to $P[j-1]$, there exists some $i$ that $P[i] + P[i-1] = P[j-1]$ (the first equation). We must make sure that $i+1 < j$ by the given condition. Since the array of associated indexes are sorted, we can use a binary search to find the candidates of $i$ in the array
+ \item Then we find if any key equal to $P[n-1]+P[j]$. If there is a key equal to $P[n-1]+P[j]$, there exists some $k$ that $P[n-1] + P[j] = P[k] + P[k-1]$ (the third equation). We must make sure that $j+1<k$ by the given condition. Similarly, we use a binary search to find the candidates $k$ in the array.
+ \item Finally, we need to traverse each $i$ and $k$ to make sure that $P[k-1] + P[i] = P[j] + P[j-1]$ (the second equation)
+ \end{enumerate}
+\end{itemize}
+
+\setcounter{lstlisting}{0}
+\begin{lstlisting}[style=customc, caption={Hash Map}]
+bool splitArray( vector<int>& nums )
+{
+
+    //i>=1, j>=3, k>=5, n>=7
+    if( nums.empty() || ( nums.size() < 7 ) )
+    {
+        return false;
+    }
+
+    vector<int> ps( nums.size(), 0 );
+    ps[0] = nums[0];
+
+    unordered_map<int, vector<int>> m;
+
+    int L = static_cast<int>( nums.size() );
+
+    //get prefix sum
+    //create the hash map with key equal to
+    //ps[i]+ps[i-1] and associated indexes
+    for( int i = 1; i < L; ++i )
+    {
+        ps[i] = ps[i - 1] + nums[i];
+
+        auto it = m.find( ps[i] + ps[i - 1] );
+        if( it == m.end() )
+        {
+            m.emplace( ps[i] + ps[i - 1], vector<int> {i} );
+        }
+        else
+        {
+            it->second.push_back( i );
+        }
+    }
+
+
+    //test each j to find
+    //if there exists i and k
+    for( int j = 3 ; j < L - 3; ++j )
+    {
+        //i and j must satisfy
+        //ps[j-1] = ps[i] + ps[i-1]
+        auto it = m.find( ps[j - 1] );
+        if( it == m.end() )
+        {
+            continue;
+        }
+
+        //find first index that is
+        //no less than j-1;
+        //then it->second[0,x] is the candidiates of i
+        int x = leftmost( it->second, j - 1 );
+
+        //j and k must satisfy
+        //ps[j] + ps[n-1] = ps[k] + ps[k-1]
+        auto it_k = m.find( ps[j] + ps.back() );
+        if( it_k == m.end() )
+        {
+            continue;
+        }
+
+
+        //find the first index that is
+        //larger than j+1 (k)
+        //then it_k->second[y,len-1] is the candidates of k
+        int y = rightmost( it_k->second, j + 1 );
+        int len = static_cast<int>( it_k->second.size() );
+
+        //i,j and k must satisfy
+        //ps[i] + ps[k-1] = ps[j] + ps[j-1]
+        int z = ps[j] + ps[j - 1];
+
+        for( int u = 0; u < x; ++u )
+        {
+            int i = it->second[u];
+
+            for( int v = y; v < len; ++v )
+            {
+                int k = it_k->second[v];
+
+                if( ps[k - 1] + ps[i] == z )
+                {
+                    return true;
+                }
+            }
+        }
+    }
+
+    return false;
+}
+
+int leftmost( vector<int>& A, int target )
+{
+    int l = 0;
+    int r = static_cast<int>( A.size() );
+
+    while( l < r )
+    {
+        int mid = ( l + r ) / 2;
+        if( A[mid] < target )
+        {
+            l = mid + 1;
+        }
+        else
+        {
+            r = mid;
+        }
+    }
+
+    return l;
+}
+
+int rightmost( vector<int>& A, int target )
+{
+    int l = 0;
+    int r = static_cast<int>( A.size() );
+
+    while( l < r )
+    {
+        int mid = ( l + r ) / 2;
+        if( A[mid] <= target )
+        {
+            l = mid + 1;
+        }
+        else
+        {
+            r = mid;
+        }
+    }
+
+    return l;
+}
+\end{lstlisting}

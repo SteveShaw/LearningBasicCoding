@@ -42,3 +42,80 @@ Note that the above is just an example which might or might not work. You do not
 \item $ N $ is in the range of [1, 1000]
 \item Do not use class member/global/static variables to store states. Your encode and decode algorithms should be stateless.
 \end{itemize}
+
+\subsection{One Possible Approach}
+\begin{itemize}
+\item In encoding, put the first child as the left child, and each sibling becomes its previous one's right child.
+\item In decoding, get the left child as the first child, and add its right decedents as its siblings. 
+\end{itemize}
+
+\setcounter{lstlisting}{0}
+\begin{lstlisting}[style=customc, caption={Left Child And Right Decendents}]
+class Codec
+{
+public:
+    // Encodes an n-ary tree to a binary tree.
+    TreeNode* encode( Node* root )
+    {
+        if( !root )
+        {
+            return nullptr;
+        }
+
+        TreeNode* t_node = new TreeNode( root->val );
+        if( !root->children.empty() )
+        {
+            //set the first child as the left child
+            //since the first child may contain other node
+            //we recursively build the child tree
+            //with root as root->children[0]
+            t_node->left = encode( root->children[0] );
+            auto t = t_node->left;
+
+            //set the siblings as the right decendents
+            //of left child
+            for( size_t i = 1; i < root->children.size(); ++i )
+            {
+                //recursively build the child tree
+                //with root as root->children[i]
+                t->right = encode( root->children[i] );
+                t = t->right;
+            }
+        }
+
+        return t_node;
+    }
+
+    // Decodes your binary tree to an n-ary tree.
+    Node* decode( TreeNode* root )
+    {
+        if( !root )
+        {
+            return nullptr;
+        }
+
+        Node* node = new Node;
+        node->val = root->val;
+
+        if( root->left )
+        {
+            //first child
+            //recursively process current root->left
+            node->children.push_back( decode( root->left ) );
+
+            auto t_node = root->left->right;
+
+            //add right decendents
+            //as the siblings
+            while( t_node )
+            {
+                //recursively process current node
+                node->children.push_back( decode( t_node ) );
+                t_node = t_node->right;
+            }
+        }
+
+        return node;
+    }
+};
+ \end{lstlisting}

@@ -1,5 +1,5 @@
 \section{430 --- Flatten a Multilevel Doubly Linked List}
-You are given a doubly linked list which in addition to the next and previous pointers, it could have a child pointer, which may or may not point to a separate doubly linked list. These child lists may have one or more children of their own, a nd so on, to produce a multilevel data structure, as shown in the example below.
+You are given a doubly linked list which in addition to the next and previous pointers, it could have a child pointer, which may or may not point to a separate doubly linked list. These child lists may have one or more children of their own, and so on, to produce a multilevel data structure, as shown in the example below.
 
 \begin{figure}[H]
 \begin{tikzpicture}
@@ -126,7 +126,7 @@ node distance=5mm, >=stealth,->]
 \item Connect the pointer of current node and it child.
 \item Set current node's child as null.
 \item Go to the next node of current node.
-\item In this way, we flatten one child list at a time. Even though the child list may contain another grandchild list, we iterate from current node's next which will iterate over the child list again.
+\item In this way, we flatten one whole child list at a time. Even though the child list may contain another grandchild list, we iterate from current node's next which will iterate over the child list again.
 \end{itemize}
 
 \setcounter{lstlisting}{0}

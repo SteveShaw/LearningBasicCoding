@@ -1,0 +1,108 @@
+\section{552 --- Student Attendance Record II}
+Given a positive integer $n$, return the number of all possible attendance records with length $n$, which will be regarded as rewardable. The answer may be very large, return it after mod $10^9 + 7$.
+
+A student attendance record is a string that only contains the following three characters:
+
+\begin{itemize}
+\item \texttt{A} : Absent.
+\item \texttt{L} : Late.
+\item \texttt{P} : Present.
+\end{itemize}
+
+A record is regarded as rewardable if it doesn't contain more than one \texttt{A} (absent) or more than two continuous \texttt{L} (late).
+
+\paragraph{Example 1:}
+
+\begin{flushleft}
+\textbf{Input}: $n = 2$
+
+\textbf{Output}: 8 
+
+\textbf{Explanation}:
+
+There are 8 records with length 2 will be regarded as rewardable:
+
+\texttt{PP}, \texttt{AP}, \texttt{PA}, \texttt{LP}, \texttt{PL}, \texttt{AL}, \texttt{LA}, \texttt{LL}
+
+Only \texttt{AA} won't be regarded as rewardable owing to more than one absent times. 
+\end{flushleft}
+
+\paragraph{Note:} 
+\begin{itemize}
+\item The value of $n$ won't exceed 100,000.
+\end{itemize}
+
+\subsection{Dynamic Programming}
+\begin{itemize}
+\item We can divide the current available rewardable strings with length $\ell$ into following categories
+\begin{enumerate}
+\item End with one \texttt{A}. No any other \texttt{A} in the string. Denote number of this kind of string as $x$.
+\item End with \texttt{L} without \texttt{A}. Denote number of this kind of string as $y_0$
+\item End with \texttt{L} with only one \texttt{A}. Denote number of this kind of string as $y_1$
+\item End with \texttt{P} without \texttt{A}. Denote number of this kind of string as $z_0$
+\item End with \texttt{P} with only one \texttt{A}. Denote number of this kind of string as $z_1$
+\item End with \texttt{LL} without \texttt{A}. Denote number of this kind of string as $t_0$
+\item End with \texttt{LL} with only one \texttt{A}. Denote number of this kind of string as $t_1$
+\end{enumerate}
+\item Then for the rewardable strings with length $\ell+1$, we can get the following relationship
+\begin{enumerate}
+\item To get type 1, we can't add anymore \texttt{A}. We can only add \texttt{A} to type 2, 4 and 6. As such, the number of type 1 string with length $\ell+1$, $\hat{x}$, depends on $y_0$, $z_0$ and $t_0$, i.e., $\hat{x}:=y_0+z_0+t_0$.
+\item To get type 2, this type of string cannot have any \texttt{A}. Since this type of string is ending with only one \texttt{L}, We can only add \texttt{L} to type 4. Hence, the number of type 2 string with length $\ell+1$, $\hat{y}_0$, only depends on $z_0$, i.e., $\hat{y}_0:=z_0$
+\item To get type 3, this type of string has only one \texttt{A}. We can only add \texttt{L} to type 1 and 5. Similarly, we have $\hat{y}_1:=x+z_1$.
+\item To get type 4, we can add \texttt{L} or \texttt{P} to type 2, 4 and 6, except \texttt{A}. $\hat{z}_0:= y_0+z_0+t_0$.
+\item To get type 5, we can add \texttt{P} to type 1, 3, 5 and 7. $\hat{z}_1:=x + y_1 + z_1 + t_1$
+\item To get type 6, we can add \texttt{L} to type 2. $\hat{t}_0:=y_0$.
+\item To get type 7, we can add \texttt{L} to type 3. $\hat{t}_1:=y_1$.
+\end{enumerate}
+\end{itemize}
+
+\setcounter{lstlisting}{0}
+\begin{lstlisting}[style=customc, caption={Dynamic Programming}]
+int checkRecord( int n )
+{
+    int x = 1; //end with A
+
+    int y0 = 1; //end with L without A
+    int y1 = 0; //end with L with 1 A
+
+    int z0 = 1; //end with P without A
+    int z1 = 0; //end with P with 1 A
+
+    int t0 = 0; //end with LL without A
+    int t1 = 0; //end with LL with 1 A
+
+    auto bmod = []( int n )
+    {
+        return n % ( 1000000007 );
+    };
+
+    for( int i = 2; i <= n; ++i )
+    {
+        int last_x = x;
+
+        int last_y0 = y0;
+        int last_y1 = y1;
+
+        int last_z0 = z0;
+        int last_z1 = z1;
+
+        int last_t0 = t0;
+        int last_t1 = t1;
+
+        x = bmod( bmod( last_y0 + last_z0 ) + last_t0 ); //type 1
+
+        y0 = last_z0; //type 2
+        y1 = bmod( last_x + last_z1 ); //type 3
+
+        z0 = bmod( bmod( last_y0 + last_z0 ) + last_t0 ); //type 4
+        z1 = bmod( bmod( last_x + last_y1 ) + bmod( last_z1 + last_t1 ) ); //type 5
+
+        t0 = last_y0; //type 6
+        t1 = last_y1; //type 7
+    }
+
+    //the total of seven types is the answer
+    return bmod( bmod( bmod( x + y0 ) + bmod( z0 + t0 ) ) + bmod( bmod( y1 + z1 ) + t1 ) );
+
+}
+\end{lstlisting}

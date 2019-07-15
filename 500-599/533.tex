@@ -1,0 +1,53 @@
+\section{533 --- Lonely Pixel II}
+Given a picture $G$ consisting of black and white pixels, and a positive integer $N$, find the number of black pixels located at some specific row \textbf{R} and column \textbf{C} that align with all the following rules:
+
+\begin{itemize}
+\item Row R and column C both contain exactly $ N $ black pixels.
+\item For all rows that have a black pixel at column \textbf{C}, they should be exactly the same as row \textbf{R}
+\end{itemize}
+
+The picture is represented by a 2D char array consisting of \textbf{B} and \textbf{W}, which means black and white pixels respectively.
+
+\paragraph{Example:}
+
+\begin{flushleft}
+\textbf{Input}: 
+                                           
+\begin{table}[H]
+\begin{tabular}{cccccc}
+W & B & W & B & B & W \\   
+W & B & W & B & B & W \\
+W & B & W & B & B & W \\
+W & W & B & W & B & W
+\end{tabular}
+\end{table}
+
+$ N = 3 $
+
+\textbf{Output}: 6
+
+\textbf{Explanation}: All the red \textbf{B} are the black pixels we need (all \textbf{B}s at column 1 and 3).
+
+\begin{table}[H]
+\begin{tabular}{l|cccccc}
+ & 0 &   1&    2 &   3 &   4 &   5 \\
+\hline
+0 &   W & \textcolor{red}{B} & W & \textcolor{red}{B} & B & W \\    
+1  &   W & \textcolor{red}{B} & W & \textcolor{red}{B} & B & W \\    
+2  &   W & \textcolor{red}{B} & W & \textcolor{red}{B} & B & W \\    
+3  &   W & W & B & W & B & W 
+\end{tabular}
+\end{table}  
+
+Take \textbf{B} at row $ R = 0 $ and column $ C = 1 $ as an example:
+
+\textbf{Rule 1}: row $ R = 0 $ and column $ C = 1 $ both have exactly $ N = 3 $ black pixels. 
+
+\textbf{Rule 2}, the rows have black pixel at column $ C = 1 $ are row 0, row 1 and row 2. They are exactly the same as row $ R = 0 $.
+\end{flushleft}
+
+\paragraph{Note:}
+
+\begin{itemize}
+\item  The range of width and height of the input 2D array is $[1,200]$
+\end{itemize}.
