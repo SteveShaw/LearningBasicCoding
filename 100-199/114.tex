@@ -1,0 +1,180 @@
+\section{114 --- Flatten Binary Tree to Linked List}
+Given a binary tree $T$, flatten it to a linked list in-place.
+\par
+For example, given the following tree:
+\begin{figure}[H]
+\begin{tikzpicture}
+[mynode/.style={draw,circle,minimum size=5mm, fill=gray!20!}]
+\node(){};
+\node[mynode](1) {1};
+\node[mynode](2) [below = 8mm of 1, xshift=-10mm] {2};
+\node[mynode](5) [below = 8mm of 1, xshift=10mm] {5};
+\node[mynode](3) [below = 8mm of 2, xshift=-8mm] {3};
+\node[mynode](4) [below = 8mm of 2, xshift=8mm] {4};
+\node[mynode](6) [below = 8mm of 5, xshift=8mm] {6};
+\draw[>=stealth,->] (1) -- (2);
+\draw[>=stealth,->] (1) -- (5);
+\draw[>=stealth,->] (2) -- (3);
+\draw[>=stealth,->] (2) -- (4);
+\draw[>=stealth,->] (5) -- (6);
+\end{tikzpicture}
+\end{figure}
+The flattened tree should look like:
+\begin{figure}[H]
+\begin{tikzpicture}
+[mynode/.style={draw,circle,minimum size=5mm, fill=gray!20!}]
+\node(){};
+\node[mynode](1) {1};
+\node[mynode](2) [below = 8mm of 1, xshift=5mm] {2};
+\node[mynode](3) [below = 8mm of 2, xshift=5mm] {3};
+\node[mynode](4) [below = 8mm of 3, xshift=5mm] {4};
+\node[mynode](5) [below = 8mm of 4, xshift=5mm] {5};
+\node[mynode](6) [below = 8mm of 5, xshift=5mm] {6};
+\draw[>=stealth,->] (1) -- (2);
+\draw[>=stealth,->] (2) -- (3);
+\draw[>=stealth,->] (3) -- (4);
+\draw[>=stealth,->] (4) -- (5);
+\draw[>=stealth,->] (5) -- (6);
+\end{tikzpicture}
+\end{figure}
+\subsection{Depth First Search}
+\begin{CJK*}{UTF8}{gbsn}
+根据展开后形成的链表的顺序分析出是使用preorder traverse，如果用recursive depth first search，那么首先对左右子树分别进行flatten，接着保存当前节点的右子树，然后将当前节点的右子树替换成左子树，然后把当前节点的左子树设为\texttt{nullptr}，接着，沿着新的右子树(其实就是之前的左子树)的right一直走到叶子节点，然后将这个叶子节点的右子树设为之前保存的原来的右子树。
+\par
+而对于iterative方法，则从root开始出发，先检测root的left node是否存在，如存在则将root和其right node断开，将left node及其子树一起连到原right node的位置，然后再把原right node连到原来的left node最右面的right node之后
+\end{CJK*}
+\subsubsection{Algorithm}
+\setcounter{algorithm}{0}
+\begin{algorithm}[H]
+\caption{Depth First Search --- Recursion}
+\begin{algorithmic}[1]
+\Procedure{Flattern}{$T$}
+\If{$T=\texttt{nullptr}$}
+\State \Return
+\EndIf
+\State $\texttt{Flattern}(\texttt{Left}(T))$ \Comment Recursive on left subtree
+\State $\texttt{Flattern}(\texttt{Right}(T))$ \Comment Recursive on right subtree
+\State $x:=\texttt{Right}(T)$ \Comment Save right subtree of $T$
+\State $\texttt{Right}(T)\gets \texttt{Left}(T)$ \Comment Replace right subtree by left subtree
+\State $\texttt{Left}(T)\gets \texttt{nullptr}$ \Comment Set left subtree of $T$ as empty
+\State $y:=T$
+\While{$\texttt{Right}(y)$}
+\State $y\gets \texttt{Right}(y)$ \Comment Move right until right child is null
+\EndWhile
+\State $\texttt{Right}(y)\gets x$ \Comment Link previous right child
+\EndProcedure
+\end{algorithmic}
+\end{algorithm}
+The process of transformation of the given example is shown as below:
+\begin{figure}[H]
+\begin{tikzpicture}
+[mynode/.style={draw,circle,minimum size=5mm, fill=gray!20!}]
+\node(){};
+\node[mynode](1) {1};
+\node[mynode](2) [below = 8mm of 1, xshift=-10mm] {2};
+\node[mynode](5) [below = 8mm of 1, xshift=10mm] {5};
+\node[mynode](3) [below = 8mm of 2, xshift=-8mm] {3};
+\node[mynode](4) [below = 8mm of 2, xshift=8mm] {4};
+\node[mynode](6) [below = 8mm of 5, xshift=8mm] {6};
+\draw[>=stealth,->] (1) -- (2);
+\draw[>=stealth,->] (1) -- (5);
+\draw[>=stealth,->] (2) -- (3);
+\draw[>=stealth,->] (2) -- (4);
+\draw[>=stealth,->] (5) -- (6);
+\end{tikzpicture}
+\caption{Original Tree}
+\end{figure}
+\begin{figure}[H]
+\begin{tikzpicture}
+[mynode/.style={draw,circle,minimum size=5mm, fill=gray!20!}]
+\node(){};
+\node[mynode](1) {1};
+\node[mynode](2) [below = 8mm of 1, xshift=-10mm] {2};
+\node[mynode](5) [below = 8mm of 1, xshift=10mm] {5};
+\node[mynode](3) [below = 8mm of 2, xshift=8mm] {3};
+\node[mynode](4) [below = 8mm of 3, xshift=8mm] {4};
+\node[mynode](6) [below = 8mm of 5, xshift=8mm] {6};
+\draw[>=stealth,->] (1) -- (2);
+\draw[>=stealth,->] (1) -- (5);
+\draw[>=stealth,->] (2) -- (3);
+\draw[>=stealth,->] (3) -- (4);
+\draw[>=stealth,->] (5) -- (6);
+\end{tikzpicture}
+\caption{Recursive On Left And Right Subtree}
+\end{figure}
+\begin{figure}[H]
+\begin{tikzpicture}
+[mynode/.style={draw,circle,minimum size=5mm, fill=gray!20!}]
+\node(){};
+\node[mynode](1) {1};
+\node[mynode](2) [below = 8mm of 1, xshift=5mm] {2};
+\node[mynode](3) [below = 8mm of 2, xshift=5mm] {3};
+\node[mynode](4) [below = 8mm of 3, xshift=5mm] {4};
+\node[mynode](5) [below = 8mm of 4, xshift=5mm] {5};
+\node[mynode](6) [below = 8mm of 5, xshift=5mm] {6};
+\draw[>=stealth,->] (1) -- (2);
+\draw[>=stealth,->] (2) -- (3);
+\draw[>=stealth,->] (3) -- (4);
+\draw[>=stealth,->] (4) -- (5);
+\draw[>=stealth,->] (5) -- (6);
+\end{tikzpicture}
+\caption{Replace Right By Left Subtree}
+\end{figure}
+The following is the implementation of iterative way
+\begin{algorithm}[H]
+\caption{Iterative Way}
+\begin{algorithmic}[1]
+\Procedure{Flattern}{$T$}
+\State $x:=T$
+\While{$x\neq \texttt{null}$}
+\If{$\texttt{Left}(x)\neq null$}
+\State $y:=\texttt{Left}(x)$
+\While{$\texttt{Right}(y)\neq \texttt{null}$} \Comment Move to the rightmost node of left subtree
+\State $y\gets \texttt{Right}(y)$
+\EndWhile
+\State $\texttt{Right}(y)\gets \texttt{Right}(x)$ \Comment Set right subtree of $x$ as $y$'s right child
+\State $\texttt{Right}(x) \gets \texttt{Left}(x)$ \Comment Update right subtree of $x$ as its left subtree
+\State $\texttt{Left}(x) \gets \texttt{null}$ \Comment Update left subtree of $x$ as empty
+\EndIf
+\EndWhile
+\State $x\gets \texttt{Right}(x)$ \Comment Move to right subtree of $x$
+\EndProcedure
+\end{algorithmic}
+\end{algorithm}
+The process of transformation for the given example tree is shown as below
+\begin{figure}[H]
+\begin{tikzpicture}
+[mynode/.style={draw,circle,minimum size=5mm, fill=gray!20!}]
+\node(){};
+\node[mynode](1) {1};
+\node[mynode](2) [below = 8mm of 1, xshift=8mm] {\textcolor{red}{2}};
+\node[mynode](3) [below = 8mm of 2, xshift=-8mm] {\textcolor{red}{3}};
+\node[mynode](4) [below = 8mm of 2, xshift=8mm] {\textcolor{red}{4}};
+\node[mynode](5) [below = 8mm of 4, xshift=8mm] {5};
+\node[mynode](6) [below = 8mm of 5, xshift=8mm] {6};
+\draw[>=stealth,->] (1) -- (2);
+\draw[>=stealth,->] (2) -- (3);
+\draw[>=stealth,->] (2) -- (4);
+\draw[>=stealth,->] (4) -- (5);
+\draw[>=stealth,->] (5) -- (6);
+\end{tikzpicture}
+\caption{Change Left And Right Subtree}
+\end{figure}
+\begin{figure}[H]
+\begin{tikzpicture}
+[mynode/.style={draw,circle,minimum size=5mm, fill=gray!20!}]
+\node(){};
+\node[mynode](1) {1};
+\node[mynode](2) [below = 8mm of 1, xshift=5mm] {2};
+\node[mynode](3) [below = 8mm of 2, xshift=5mm] {\textcolor{red}{3}};
+\node[mynode](4) [below = 8mm of 3, xshift=5mm] {4};
+\node[mynode](5) [below = 8mm of 4, xshift=5mm] {5};
+\node[mynode](6) [below = 8mm of 5, xshift=5mm] {6};
+\draw[>=stealth,->] (1) -- (2);
+\draw[>=stealth,->] (2) -- (3);
+\draw[>=stealth,->] (3) -- (4);
+\draw[>=stealth,->] (4) -- (5);
+\draw[>=stealth,->] (5) -- (6);
+\end{tikzpicture}
+\caption{The Final Result}
+\end{figure}

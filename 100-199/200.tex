@@ -1,0 +1,92 @@
+\section{200 --- Number of Islands}
+Given a 2d grid map of 1s (land) and 0s (water), count the number of islands. An island is surrounded by water and is formed by connecting adjacent lands horizontally or vertically. You may assume all four edges of the grid are all surrounded by water.
+\paragraph{Example 1:}
+\begin{flushleft}
+\textbf{Input:}
+\begin{table}[H]
+\begin{tabular}{lllll}
+1 & 1 & 1 & 1 & 0 \\
+1 & 1 & 0 & 1 & 0 \\
+1 & 1 & 0 & 0 & 0 \\
+0 & 0 & 0 & 0 & 0
+\end{tabular}
+\end{table}
+\textbf{Output}: 1
+\end{flushleft}
+\paragraph{Example 2:}
+\begin{flushleft}
+\textbf{Input}:
+\begin{table}[H]
+\begin{tabular}{lllll}
+1 & 1 & 0 & 0 & 0 \\
+1 & 1 & 0 & 0 & 0 \\
+0 & 0 & 1 & 0 & 0 \\
+0 & 0 & 0 & 1 & 1
+\end{tabular}
+\end{table}
+\textbf{Output}: 3
+\end{flushleft}
+\subsection{Depth First Search}
+\begin{CJK*}{UTF8}{gbsn}
+典型的DFS搜索题，遍历这个grid，当遇到1时，进行DFS，把遇到的1标注为2。便利过程中，记录每次进行DFS的次数，这个次数就是所求的结果。
+\end{CJK*}
+\setcounter{lstlisting}{0}
+\begin{lstlisting}[style=customc, caption={DFS}]
+class Solution
+{
+public:
+    int numIslands( vector<vector<char>>& grid )
+    {
+
+        if( grid.empty() || grid[0].empty() )
+        {
+            return 0;
+        }
+
+        int R = static_cast<int>( grid.size() );
+        int C = static_cast<int>( grid[0].size() );
+
+        int count = 0;
+
+        for( int r = 0; r < R; ++r )
+        {
+            for( int c = 0; c < C; ++c )
+            {
+                if( grid[r][c] == '1' )
+                {
+                    dfs( grid, r, c );
+                    ++count;
+                }
+            }
+        }
+
+        return count;
+    }
+
+    void dfs( vector<vector<char>>& G, int r, int c )
+    {
+        G[r][c] = '2';
+
+        int R = static_cast<int>( G.size() );
+        int C = static_cast<int>( G[0].size() );
+
+        for( const auto& d :  dirs )
+        {
+            int nr = r + d.first;
+            int nc = c + d.second;
+
+            if( ( nr >= 0 ) && ( nr < R ) && ( nc >= 0 ) && ( nc < C ) )
+            {
+                if( G[nr][nc] == '1' )
+                {
+                    dfs( G, nr, nc );
+                }
+            }
+        }
+    }
+
+private:
+
+    vector<pair<int, int>> dirs = {{0, 1}, {0, -1}, {1, 0}, {-1, 0}};
+};
+\end{lstlisting}

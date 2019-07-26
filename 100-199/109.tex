@@ -1,0 +1,65 @@
+\section{109 --- Convert Sorted List to Binary Search Tree}
+Given a singly linked list $L$ where elements are sorted in ascending order, convert it to a height balanced BST.
+\par
+For this problem, a height-balanced binary tree is defined as a binary tree in which the depth of the two subtrees of every node never differ by more than 1.
+\paragraph{Example:}
+\begin{flushleft}
+\textbf{Input}: $L = [-10,-3,0,5,9]$,
+\\
+One possible answer is:
+\begin{figure}[H]
+\begin{tikzpicture}
+[mynode/.style={draw,circle,minimum size=10mm, fill=gray!20!}]
+\node(){};
+\node[mynode](0) {0};
+\node[mynode](3) [below = 8mm of 0, xshift=-8mm] {-3};
+\node[mynode](9) [below = 8mm of 0, xshift=8mm] {9};
+\node[mynode](10) [below = 8mm of 3, xshift=-8mm] {-10};
+\node[mynode](5) [below = 8mm of 9, xshift=-8mm] {5};
+\draw[>=stealth,->] (0) -- (3);
+\draw[>=stealth,->] (0) -- (9);
+\draw[>=stealth,->] (3) -- (10);
+\draw[>=stealth,->] (9) -- (5);
+\end{tikzpicture}
+\end{figure}
+ \end{flushleft}
+ \subsection{Recursion}
+ \begin{CJK*}{UTF8}{gbsn}
+ 链表的查找中间点可以通过快慢指针来操。找到中点后，要以中点的值建立一个根节点，然后需要把原链表断开，分为前后两个链表，都不能包含原中点，然后再分别对这两个链表递归调用原函数，分别连上左右子节点即可。因此，仍然需要一个辅助函数来进行递归操作，这个辅助函数有两个输入参数，即起始节点和尾部节点后的第一个节点。
+\end{CJK*}
+\subsubsection{Algorithm}
+\setcounter{algorithm}{0}
+\begin{algorithm}[H]
+\caption{Recursion}
+\begin{algorithmic}[1]
+\Procedure{SortedListToBST}{$L$}
+\If{$L=\texttt{null}$}
+\State \Return \texttt{null}
+\EndIf
+\State $T:=\texttt{CreateTree}(L, \texttt{null})$
+\EndProcedure
+\end{algorithmic}
+\end{algorithm}
+ \begin{CJK*}{UTF8}{gbsn}
+ \texttt{CreateTree}根据输入的起始节点$\alpha$和尾部节点后的第一个节点$\beta$构建二叉搜索树
+\end{CJK*}
+\begin{algorithm}[H]
+\caption{Recursively Build Binary Search Tree}
+\begin{algorithmic}[1]
+\Function{CreateTree}{$\alpha, \beta$}
+\If{$\alpha=\beta$} \Comment Cannot compare larger/smaller for linked list nodes
+\State \Return \texttt{null}
+\EndIf
+\State $F:=\alpha$ \Comment Fast pointer
+\State $S:=\alpha$ \Comment Slow pointer
+\While{$\texttt{Next}(F)\neq \beta$ \textbf{and} $\texttt{Next}(\texttt{Next}(F))\neq \beta$ }
+\State $F\gets \texttt{Next}(\texttt{Next}(F))$ \Comment Forward fast pointer by 2 nodes
+\State $S\gets \texttt{Next}(S)$ \Comment Forward slow pointer by 1 node
+\EndWhile
+\State Create a tree node $T$ with value equal to $\texttt{Value}(S)$ 
+\State $\texttt{LEFT}(T)\gets \texttt{CreateTree}(\alpha, S)$ \Comment Create left subtree
+\State $\texttt{RIGHT}(T)\gets \texttt{CreateTree}(\texttt{Next}(S), \beta)$ \Comment Create right subtree
+\State \Return $T$
+\EndFunction
+\end{algorithmic}
+\end{algorithm} 

@@ -1,0 +1,115 @@
+\section{117 --- Populating Next Right Pointers in Each Node II}
+Given a binary tree $T$
+\begin{lstlisting}
+struct TreeLinkNode {
+  TreeLinkNode *left;
+  TreeLinkNode *right;
+  TreeLinkNode *next;
+}
+\end{lstlisting}
+\par
+Populate each next pointer to point to its next right node. If there is no next right node, the next pointer should be set to \texttt{null}.
+\par
+Initially, all next pointers are set to \texttt{null}.
+\paragraph{Note:}
+\begin{itemize}
+    \item You may only use constant extra space.
+    \item Recursive approach is fine, implicit stack space does not count as extra space for this problem.
+\end{itemize}
+\paragraph{Example:}
+\begin{flushleft}
+\textbf{Input}
+\begin{figure}[H]
+\begin{tikzpicture}
+[mynode/.style={draw,circle,minimum size=5mm, fill=gray!20!}]
+\node(){};
+\node[mynode](1) {1};
+\node[mynode](2) [below = 8mm of 1, xshift=-12mm] {2};
+\node[mynode](3) [below = 8mm of 1, xshift=12mm] {3};
+\node[mynode](4) [below = 8mm of 2, xshift=-7mm] {4};
+\node[mynode](5) [below = 8mm of 2, xshift=7mm] {5};
+\node[mynode](7) [below = 8mm of 3, xshift=7mm] {7};
+\draw[>=stealth,->] (1) -- (2);
+\draw[>=stealth,->] (1) -- (3);
+\draw[>=stealth,->] (2) -- (4);
+\draw[>=stealth,->] (2) -- (5);
+\draw[>=stealth,->] (3) -- (7);
+\end{tikzpicture}
+\end{figure}
+\textbf{Output}:
+\begin{figure}[H]
+\begin{tikzpicture}
+[mynode/.style={draw,circle,minimum size=5mm, fill=gray!20!}]
+\node(){};
+\node[mynode](1) {1};
+\node[mynode](r1) [right = 12mm of 1] {\texttt{null}};
+\node[mynode](2) [below = 8mm of 1, xshift=-12mm] {2};
+\node[mynode](3) [below = 8mm of 1, xshift=12mm] {3};
+\node[mynode](r2) [right = 12mm of 3] {\texttt{null}};
+\node[mynode](4) [below = 8mm of 2, xshift=-7mm] {4};
+\node[mynode](5) [below = 8mm of 2, xshift=7mm] {5};
+\node[mynode](7) [below = 8mm of 3, xshift=7mm] {7};
+\node[mynode](r3) [right = 12mm of 7] {\texttt{null}};
+\draw[>=stealth,->] (1) -- (2);
+\draw[>=stealth,->] (1) -- (3);
+\draw[>=stealth,->] (2) -- (4);
+\draw[>=stealth,->] (2) -- (5);
+\draw[>=stealth,->] (3) -- (7);
+\draw[>=stealth,->] (1) -- (r1);
+\draw[>=stealth,->] (3) -- (r2);
+\draw[>=stealth,->] (7) -- (r3);
+\draw[>=stealth,->] (2) -- (3);
+\draw[>=stealth,->] (4) -- (5);
+\draw[>=stealth,->] (5) -- (7);
+\end{tikzpicture}
+\end{figure}
+\end{flushleft}
+\subsection{Level Traversing}
+\begin{CJK*}{UTF8}{gbsn}
+虽然题目要求中可能不是完全二叉树，但是基本思路仍然是用指针分别指向当前节点以及下层节点的首节点以及下层节点的当前节点。保留下层节点的首节点是当遍历完当前level的时候，能够move到下一层。
+\end{CJK*}
+\setcounter{algorithm}{0}
+\begin{algorithm}[H]
+\caption{Iterative Approach}
+\begin{algorithmic}[1]
+\Procedure{Connect}{$T$}
+\If{$T=\texttt{null}$}
+\State \Return
+\EndIf
+\State $x:=T$ \Comment Current node of current level
+\State $y:=\texttt{null}$ \Comment Current node of next level
+\State $z:=\texttt{null}$ \Comment The first node of next level
+\While{$x\neq \texttt{null}$}
+\State $t:=x$
+\While{$t\neq \texttt{null}$} \label{117while1} 
+\If{$\texttt{Left}(t) \neq \texttt{null}$}
+\If{$y\neq \texttt{null}$}
+\State $\texttt{Next}(y)\gets \texttt{Left}(t)$ \Comment Link sibling's left node
+\Else \Comment $t$'s left node is the first node
+\State $z\gets \texttt{Left}(t)$
+\EndIf
+\State $y\gets \texttt{Left}(t)$ \Comment Move $y$ to the next node in next level
+\EndIf
+\If{$\texttt{Right}(t) \neq \texttt{null}$}
+\If{$y\neq \texttt{null}$}
+\State $\texttt{Next}(y)\gets \texttt{Right}(t)$ \Comment Link sibling's left node
+\Else \Comment $t$'s right node is the first node
+\State $z\gets \texttt{Right}(t)$
+\EndIf
+\State $y\gets \texttt{Right}(t)$ \Comment Move $y$ to the next node in next level
+\EndIf
+\State $t\gets \texttt{Next}(t)$ \Comment Update $t$ to next sibling node
+\algstore{117algo}
+\end{algorithmic}
+\end{algorithm}
+\begin{algorithm}[H]
+\begin{algorithmic}[1]
+\algrestore{117algo}
+\EndWhile \Comment End [\ref{117while1}]
+\State $x\gets z$ \Comment Move $x$ to next level
+\State $z\gets \texttt{null}$ \Comment Reset $z$ as empty
+\State $y\gets \texttt{null}$ \Comment Reset $y$ as empty
+\EndWhile
+\EndProcedure
+\end{algorithmic}
+\end{algorithm}

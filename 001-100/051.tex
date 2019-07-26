@@ -1,0 +1,99 @@
+\section{51 --- N-Queens}
+The $n$-queens puzzle is the problem of placing $n$ queens on an $n\times n$ chessboard such that no two queens attack each other.
+
+
+Given an integer $n$, return all distinct solutions to the $n$-queens puzzle.
+
+Each solution contains a distinct board configuration of the n-queens' placement, where \texttt{Q} and dot both indicate a queen and an empty space respectively.
+
+\subsection{Backtrack}
+\begin{itemize}
+\item There could be the only one queen in a row and the only one queen in a column. This means that there is no need to consider all squares on the board. One could just iterate over the columns.
+\item For all diagonals the sum of row and column of each square is constant
+\item For all anti-diagonals the difference between row and column of each square is constant.
+\end{itemize}
+
+The backtrack algorithm is listed as below
+
+\setcounter{algorithm}{0}
+\begin{algorithm}[H]
+\caption{$N$-Queen Backtarck}
+\begin{algorithmic}[1]
+\Procedure{Backtrack}{$n$}
+\State $\star$ Start from the first $r = 0$.
+\State $\star$ Iterate over the columns and try to put a queen in each column.
+\If{Square $(r,c)$ is not under attack}
+\State $\star$ Place the queen in $(r, c)$ square.
+\State Exclude one row, one column and two diagonals from further consideration.
+\If{$r = n$} \Comment All rows are filed up
+\State $\star$ One solution is found
+\Else
+\State \Call{Backtrack}{$n+1$} \Comment Proceed to place further queens 
+\EndIf
+\State $\star$ Now backtrack, remove the queen from $(r,c)$.
+\EndIf
+\EndProcedure
+\end{algorithmic}
+\end{algorithm}
+
+\setcounter{lstlisting}{0}
+\begin{lstlisting}[style=customc, caption={Backtrack}]
+vector<vector<string>> solveNQueens( int n )
+{
+    vector<int> queens( n );
+
+    vector<unsigned char> rows( n, 0 );
+    vector<unsigned char> hills( 2 * n - 1, 0 );
+    vector<unsigned char> dales( 2 * n - 1, 0 );
+
+    vector<vector<string>> ans;
+
+    dfs( 0, n, rows, hills, dales, queens, ans );
+
+    return ans;
+}
+
+void dfs( int r, int n,
+          vector<unsigned char>& rows,
+          vector<unsigned char>& hills,
+          vector<unsigned char>& dales,
+          vector<int>& queens,
+          vector<vector<string>>& ans )
+{
+    for( int c = 0; c < n; ++c )
+    {
+        if( hills[r + c] + dales[r - c + n - 1] + rows[c] == 0 )
+        {
+            //place queen at (r,c)
+            queens[r] = c;
+            hills[r + c] = 1;
+            dales[r - c + n - 1] = 1;
+            rows[c] = 1;
+
+            if( r + 1 == n )
+            {
+                //we have filled all rows
+                vector<string> chess( n, string( n, '.' ) );
+
+                for( int i = 0; i < n; ++i )
+                {
+                    chess[i][queens[i]] = 'Q';
+                }
+
+                ans.push_back( move( chess ) );
+            }
+            else
+            {
+                //depth first search
+                dfs( r + 1, n, rows, hills, dales, queens, ans );
+            }
+
+            //backtrack
+            queens[r] = 0;
+            hills[r + c] = 0;
+            dales[r - c + n - 1] = 0;
+            rows[c] = 0;
+        }
+    }
+}
+\end{lstlisting}

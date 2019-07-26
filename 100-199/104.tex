@@ -1,0 +1,41 @@
+\section{104 --- Maximum Depth of Binary Tree}
+Given a binary tree $T$, find its maximum depth.
+\par
+The maximum depth is the number of nodes along the longest path from the root node down to the farthest leaf node.
+\par
+Note: A leaf is a node with no children.
+\paragraph{Example:}
+Given binary tree
+\begin{figure}[H]
+\begin{tikzpicture}
+[mynode/.style={draw,circle,minimum size=10mm, fill=gray!20!}]
+\node(){};
+\node[mynode](3) {3};
+\node[mynode](9) [below = 8mm of 3, xshift=-10mm] {9};
+\node[mynode](20) [below = 8mm of 1, xshift=10mm] {20};
+\node[mynode](15) [below = 8mm of 20, xshift=-6mm] {15};
+\node[mynode](7) [below = 8mm of 20, xshift=6mm] {7};
+\draw[>=stealth,->] (3) -- (9);
+\draw[>=stealth,->] (3) -- (20);
+\draw[>=stealth,->] (20) -- (15);
+\draw[>=stealth,->] (20) -- (7);
+\end{tikzpicture}
+\end{figure}
+return its depth $D = 3$.
+\subsection{Recursion}
+A very easy problem. Just return the maximum depth of left substree and right subtree plus 1 (since we need to count the root).
+\subsubsection{Algorithm}
+\setcounter{algorithm}{0}
+\begin{algorithm}[H]
+\caption{Recursion}
+\begin{algorithmic}[1]
+\Procedure{MaxDepth}{$T$}
+\If{$T=\texttt{null}$}
+\State \Return 0 \Comment Empty tree has height 1
+\EndIf
+\State $\alpha:=\texttt{MaxDepth}(\texttt{LEFT}(T))$ \Comment The maximum depth of left subtree
+\State $\beta:=\texttt{MaxDepth}(\texttt{RIGHT}(T))$ \Comment The maximum depth of right subtree
+\State \Return $1+\max(\alpha, \beta)$
+\EndProcedure
+\end{algorithmic}
+\end{algorithm}

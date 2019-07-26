@@ -1,0 +1,96 @@
+\section{132 --- Palindrome Partitioning II}
+Given a string $s$, partition $s$ such that every substring of the partition is a palindrome.
+\par
+Return the minimum cuts needed for a palindrome partitioning of $s$.
+\paragraph{Example:}
+\begin{flushleft}
+\textbf{Input}: \texttt{aab}
+\\
+\textbf{Output}: 1
+\\
+\textbf{Explanation}: The palindrome partitioning (aa, b) could be produced using 1 cut.
+\end{flushleft}
+\subsection{Dynamic Programming}
+采用DP的方法需要构建两个array $F[i][j]$ and $C[i]$，$F[i][j]$ indicate $S[i,j]$是否是回文字符串，而$C[i]$则从$F[0][i]$中 find minimum cuts for $S[0,i-1]$。
+\setcounter{algorithm}{0}
+\begin{algorithm}[H]
+\caption{Dynamic Programming}
+\begin{algorithmic}[1]
+\Procedure{MinCuts}{$S, L_S$}
+\State Initialize array $F_{L_S\times L_S}$
+\For{$i:=0\to L_S-1$}
+\State $F[i][i] \gets 1$ \Comment Single character is definitely a palindrome
+\EndFor
+\For{$i:=0\to L_S-2$}
+\If{$S[i]=S[i+1]$}
+\State $F[i][i+1]\gets 1$
+\EndIf
+\EndFor
+\For{$l:=3\to L_S$}
+\For{$i:=0\to L_S-l+1$}
+\State $j:=i+l-1$
+\If{$S[i]=S[j]$}
+\State $F[i][j]\gets 1$
+\EndIf
+\EndFor
+\EndFor
+\State Initialize array $C_{L_S}$
+\algstore{132algo}
+\end{algorithmic}
+\end{algorithm}
+\begin{algorithm}[H]
+\begin{algorithmic}[1]
+\algrestore{132algo}
+\For{$i:=1\to L_S-1$}
+\If{$F[0][i]=1$}
+\State $C[i]=0$ \Comment $S[0,i]$ is a palindrome, no need to cut
+\Else
+\While{$j:=0\to i-1$}
+\If{$F[j+1][i]=1$} \Comment $S[j+1, i]$ is a palindrome
+\State $C[i]\gets \min(C[i], C[j]+1)$ \Comment Only need one more cut between $S[j]$ and $S[j+1]$
+\EndIf
+\EndWhile
+\EndIf
+\EndFor
+\State \Return $C[L_S-1]$ \Comment $C[L_S-1]$ is the minimum cuts for $S[0,L_S-1]$
+\EndProcedure
+\end{algorithmic}
+\end{algorithm}
+\subsection{Manancher--Like Alogrithtm}
+这种方法从左到右扫描$S$，在每一个位置$i$，只检查以$S[i]$为中心的substring。一旦找到一个substring不是palindrome，就会结束搜索，然后移动到下一个位置$i+1$。与DP方法类似，也需要一个array $C[i]$用来保存minimum cuts for $S[0, i]$。
+\par
+实现时，在每一个位置$i$，做两次循环，一次检查$S[i-j, i+j]$是否为palindrome，另外一个则检查$S[i-j-1,i+j]$是否为palindrome。循环的变量$j$从0开始，这样我们就能找到以$i$为中心的所有palindrome string，同时更新$C[i]$。一旦找到non-palindrome string，终止内部的这个循环，因为不会再出现以$i$为中心的palindrome string了。这可以避免很多在DP方法中不必要的palindrome检查。
+\par
+由于需要检查$i-j$和$i-j-1$是否大于零，这时候如果找到palindrome，我们需要直到$C[i-j-1]$和$C[[i-j-2]]$的值，这时候，$i-j-1$或者$i-j-2$都有可能小于零，因此为了方便起见，$C[i]$定义为minimum cuts for $S[0, i-1]$。因此$C[L]$就是所求之结果。如果$i=0$，那么$C[0]=-1$，这样$C$的长度就是$L_S+1$了。
+\begin{algorithm}[H]
+\caption{Manancher Algorithm}
+\begin{algorithmic}[1]
+\Procedure{MinCuts}{$S, L_S$}
+\State Initialize array $C_{L_S+1}$
+\For{$i:=0\to L_S$}
+\State $C[i]\gets i-1$ \Comment The maximum cuts for palindrome partition is $l-1$
+\EndFor
+\For{$i:=1\to L$}
+\State $j:=0$
+\While{$i-j\geq 0$ \textbf{and} $i+j<L_S$} \Comment Odd length substring centered at $S[i]$
+\If{$S[i-j]=S[i+j]$}
+\State $C[i+j+1]\gets \min(C[i+j+1], 1 + C[i-j])$ \Comment One cut in $i-j$ and $i-j-1$
+\Else
+\State \texttt{break} \Comment Stop while loop
+\EndIf
+\State $j\gets j+1$
+\EndWhile
+\State $j\gets 0$ \Comment Reset $j$
+\While{$i-j-1\geq 0$ \textbf{and} $i+j<L_S$} \Comment Even length substring centered at $S[i]$
+\If{$S[i-j-1]=S[i+j]$}
+\State $C[i+j+1]\gets \min(C[i+j+1], 1 + C[i-j-1])$ \Comment One cut in $i-j-1$ and $i-j-2$
+\Else
+\State \texttt{break} \Comment Stop while loop
+\EndIf
+\State $j\gets j+1$
+\EndWhile
+\EndFor
+\State \Return $C[L_S]$ \Comment The minimum cuts for $S[0, L_S-1]$
+\EndProcedure
+\end{algorithmic}
+\end{algorithm}

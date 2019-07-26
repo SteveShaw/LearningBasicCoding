@@ -1,0 +1,234 @@
+\section{591 --- Tag Validator}
+Given a string, $S$, representing a code snippet, you need to implement a tag validator to parse the code and return whether it is valid. A code snippet is valid if all the following rules hold:
+
+\begin{enumerate}
+\item The code must be wrapped in a \textbf{valid closed tag}. Otherwise, the code is invalid.
+\item A \textbf{closed tag} (not necessarily valid) has exactly the following format:
+
+ \texttt{<TAG\_NAME>TAG\_CONTENT</TAG\_NAME>}.
+ 
+Among them, \texttt{<TAG\_NAME>} is the start tag, and \texttt{</TAG\_NAME>} is the end tag. The \texttt{TAG\_NAME} in start and end tags should be the same. A closed tag is \textbf{valid} if and only if the \texttt{TAG\_NAME} and \texttt{TAG\_CONTENT} are valid.
+\item A \textbf{valid} \texttt{TAG\_NAME} only contain upper-case letters, and has length in range $[1,9]$. Otherwise, the \texttt{TAG\_NAME} is invalid.
+\item A \textbf{valid} \texttt{TAG\_CONTENT} may contain other \textbf{valid closed tags}, \textbf{cdata} and any characters EXCEPT unmatched \texttt{<}, unmatched start and end tag, and unmatched or closed tags with invalid \texttt{TAG\_NAME}. Otherwise, the \texttt{TAG\_CONTENT} is invalid.
+\item A start tag is unmatched if no end tag exists with the same \texttt{TAG\_NAME}, and vice versa. However, you also need to consider the issue of unbalanced when tags are nested.
+\item A \texttt{<} is unmatched if you cannot find a subsequent \texttt{>}. And when you find a \texttt{<} or \texttt{</}, all the subsequent characters until the next \texttt{>} should be parsed as \texttt{TAG\_NAME} (not necessarily valid).
+\item The \textbf{cdata} has the following format : \texttt{<![CDATA[CDATA\_CONTENT]]>}. The range of \texttt{CDATA\_CONTENT} is defined as the characters between \texttt{<![CDATA[} and the first subsequent \texttt{]]>}.
+\item \texttt{CDATA\_CONTENT} may contain any characters. The function of cdata is to forbid the validator to parse \texttt{CDATA\_CONTENT}, so even it has some characters that can be parsed as tag (no matter valid or invalid), you should treat it as regular characters.
+\end{enumerate}
+
+\paragraph{Valid Code Examples:}
+
+\begin{flushleft}
+\textbf{Input}: \texttt{<DIV>This is the first line <![CDATA[<div>]]></DIV>}
+
+\textbf{Output}: \texttt{True}
+
+\textbf{Explanation}: 
+
+The code is wrapped in a closed tag : \texttt{<DIV>} and \texttt{</DIV>}. 
+
+The \texttt{TAG\_NAME} is valid, the \texttt{TAG\_CONTENT} consists of some characters and cdata. 
+
+Although \texttt{CDATA\_CONTENT} has unmatched start tag with invalid \texttt{TAG\_NAME}, it should be considered as plain text, not parsed as tag.
+
+So \texttt{TAG\_CONTENT} is valid, and then the code is valid. Thus return \textbf{true}.
+
+
+\textbf{Input}: \texttt{<DIV>>>  ![cdata[]] <![CDATA[<div>]>]]>]]>>]</DIV>}
+
+\textbf{Output}: \texttt{True}
+
+\textbf{Explanation}:
+
+We first separate the code into : \texttt{start\_tag|tag\_content|end\_tag}.
+
+\texttt{start\_tag}: \texttt{<DIV>}
+
+\texttt{end\_tag}: \texttt{</DIV>}
+
+\texttt{tag\_content} could also be separated into : \texttt{text1|cdata|text2}.
+
+\texttt{text1}: \texttt{>>  ![cdata[]]}
+
+\texttt{cdata}: \texttt{<![CDATA[<div>]>]]>}, where the \texttt{CDATA\_CONTENT} is \texttt{<div>]>}
+
+\texttt{text2}: \texttt{]]>>]}
+
+The reason why \texttt{start\_tag} is NOT \texttt{<DIV>>>} is because of the rule 6.
+
+The reason why \texttt{cdata} is NOT \texttt{<![CDATA[<div>]>]]>]]>} is because of the rule 7.
+\end{flushleft}
+
+%Invalid Code Examples:
+%Input: "<A>  <B> </A>   </B>"
+%Output: False
+%Explanation: Unbalanced. If "<A>" is closed, then "<B>" must be unmatched, and vice versa.
+%
+%Input: "<DIV>  div tag is not closed  <DIV>"
+%Output: False
+%
+%Input: "<DIV>  unmatched <  </DIV>"
+%Output: False
+%
+%Input: "<DIV> closed tags with invalid tag name  <b>123</b> </DIV>"
+%Output: False
+%
+%Input: "<DIV> unmatched tags with invalid tag name  </1234567890> and <CDATA[[]]>  </DIV>"
+%Output: False
+%
+%Input: "<DIV>  unmatched start tag <B>  and unmatched end tag </C>  </DIV>"
+%Output: False
+%Note:
+%For simplicity, you could assume the input code (including the any characters mentioned above) only contain letters, digits, '<','>','/','!','[',']' and ' '.
+
+\subsection{Stack}
+
+Summarizing the given problem, we need to determine whether a tag is valid or not, by checking the following properties.
+
+\begin{itemize}
+\item The code should be wrapped in valid closed tag.
+
+\item The \color{red}{\texttt{TAG\_NAME}} should be valid.
+
+\item The \texttt{TAG\_CONTENT} should be valid.
+
+\item The \texttt{cdata} should be valid.
+\end{itemize}
+
+All the tags should be closed. i.e. each start-tag should have a corresponding end-tag and vice-versa and the order of the tags should be correct as well.
+
+In order to check the validity of all these, firstly, we need to identify which parts of $S$ act as which part from the above mentioned categories.
+
+\begin{itemize}
+\item Iterate over $S$. Whenever a \texttt{<} is encountered( unless we are currently inside \textbf{cdata} section ), it indicates the beginning of either a \texttt{TAG\_NAME}(start tag or end tag) or the beginning of cdata as per the conditions given in the problem statement.
+
+\item If the character immediately following this \texttt{<} is an \texttt{!}, the characters following this \texttt{\textless} can't be a part of a valid \texttt{TAG\_NAME}, since only upper-case letters(in case of a start tag) or \texttt{\textbackslash} followed by upper-case letters(in the case of an end tag). Thus, the choice now narrows down to only \textbf{cdata}. Thus, we need to check if the current bunch of characters following \texttt{\textless!}(including it) constitute a valid cdata. For doing this, firstly we find out the first matching \texttt{]]\textgreater} following the current \texttt{\textless\textexclamdown} to mark the ending of cdata. If no such matching \texttt{]]\textgreater} exists, $S$ is considered as invalid. Apart from this, the \texttt{\textless!} should also be immediately followed by \texttt{CDATA[} for the cdata to be valid. The characters lying inside the \texttt{\textless!CDATA[} and \texttt{]]\textgreater} do not have any constraints on them.
+
+\item If the character immediately following the \texttt{<} encountered isn't an \texttt{!}, this \texttt{<} can only mark the beginnning of \texttt{TAG\_NAME}. Now, since a valid start tag can't contain anything except upper-case letters, if a \texttt{\textbackslash} is found after \texttt{<}, the \texttt{</} pair indicates the beginning of an end tag. Now, when a \texttt{<} refers to the beginning of a \texttt{TAG\_NAME}(either start-tag or end-tag), we find out the first closing \texttt{>} following the \texttt{<} to find out the substring(say $t$), that constitutes the \texttt{TAG\_NAME}. $t$ should satisfy all the criterion to constitute a valid \texttt{TAG\_NAME}. Thus, for every such $t$, we check if it contains all upper-case letters and also check its length(It should be between 1 to 9). If any of the criteria isn't fulfilled, $t$ is not a valid \texttt{TAG\_NAME}. Hence, $S$ is invalid as well.
+\
+\item Apart from checking the validity of the \texttt{TAG\_NAME}, we also need to ensure that the tags always exist in pairs. i.e. for every start-tag, a corresponding end-tag should always exist. Further, we can note that in case of multiple \texttt{TAG\_NAME}s, the \texttt{TAG\_NAME} whose start-tag comes later than the other ones, should have its end-tag appearing before the end-tags of those other \texttt{TAG\_NAME}s. i.e. the tag which starts later should end first.
+
+\item From this, we get the intuition that we can make use of a stack, $Z$,to check the existence of matching start and end-tags. Thus, whenever we find out a valid start-tag, as mentioned above, we push its \texttt{TAG\_NAME} onto $Z$. Now, whenever an end-tag is found, we compare its \texttt{TAG\_NAME} with the \texttt{TAG\_NAME} at the top of $Z$ and remove this element from $Z$. If the two don't equal, $S$ is invalid.
+
+\item After completing scanning of $S$, the stack $Z$ should be empty if all the start-tags have matched their corresponding end-tags. If $Z$ isn't empty, this implies that some start-tags doesn't have the corresponding end-tags.
+
+\item Further, we also need to ensure that $S$ is completely enclosed within closed tags. Thus, we need to ensure that the first \textbf{cdata} found is also inside the closed tags. Thus, when we find a possibility of the presence of \texttt{cdata}, we proceed further only if we've already found a start tag, indicated by a non-empty stack, $Z$. Further, to ensure that no data lies after the last end-tag, we need to ensure that $Z$ doesn't become empty before we reach the end of $S$, since an empty stack indicates that the last end-tag has been encountered.
+\end{itemize}
+
+\setcounter{lstlisting}{0}
+\begin{lstlisting}[style=customc, caption={Stack}]
+bool isValid( string code )
+{
+    stack<string> stk;
+
+    bool flag_start_tag = false;
+
+    if( ( code[0] != '<' ) || ( code.back() != '>' ) )
+    {
+        return false;
+    }
+
+    auto is_cdata = []( const string & s, size_t start, size_t end )
+    {
+        auto pos = s.find( "[CDATA[", start );
+        return pos != string::npos;
+        //return s.compare( start, end - start, "[CDATA[" ) == 0;
+    };
+
+
+    auto is_valid_tagname = [&stk, &flag_start_tag]( const string & s, size_t start, size_t end, bool end_flag )
+    {
+        if( ( end == start ) || ( end - start > 9 ) )
+        {
+            //the tag name must not empty
+            //and cannot be larger than 9 letters
+            return false;
+        }
+
+        for( size_t i = start; i < end; ++i )
+        {
+            //only uppercase for tagname
+            if( ( s[i] >= 'A' ) && ( s[i] <= 'Z' ) )
+            {
+                continue;
+            }
+
+            return false;
+        }
+
+        if( end_flag )
+        {
+            if( !stk.empty() )
+            {
+                const auto& tagname = stk.top();
+
+                if( s.compare( start, end - start, tagname ) == 0 )
+                {
+                    stk.pop();
+                    return true;
+                }
+            }
+
+            return false;
+        }
+        else
+        {
+            //this is starting tag
+            flag_start_tag = true;
+            stk.emplace( s, start, end - start );
+        }
+
+        return true;
+    };
+
+    for( size_t i = 0; i < code.size(); ++i )
+    {
+        bool flag_end_tag = false;
+
+        size_t close_pos{};
+
+        if( stk.empty() && flag_start_tag )
+        {
+            //stk must not be empty before complete
+            //scanning
+            return false;
+        }
+
+        if( code[i] == '<' )
+        {
+            //start tag name
+            if( !stk.empty() && ( code[i + 1] == '!' ) )
+            {
+                //CDATA section
+                close_pos = code.find( "]]>", i + 1 );
+
+                //check if it is valid cdata section
+                if( ( close_pos == string::npos ) || !is_cdata( code, i + 2, close_pos ) )
+                {
+                    return false;
+                }
+            }
+            else
+            {
+                if( code[i + 1] == '/' )
+                {
+                    //this is a end_tag;
+                    ++i;
+                    flag_end_tag = true;
+                }
+
+                close_pos = code.find( '>', i + 1 );
+                if( ( close_pos == string::npos ) || !is_valid_tagname( code, i + 1, close_pos, flag_end_tag ) )
+                {
+                    return false;
+                }
+            }
+
+            i = close_pos;
+        }
+
+    }
+
+    return stk.empty() && flag_start_tag;
+}
+\end{lstlisting}

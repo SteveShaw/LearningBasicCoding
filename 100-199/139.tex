@@ -1,0 +1,64 @@
+\section{139 --- Word Break}
+Given a non-empty string $S$ and a dictionary $A$ containing a list of non-empty words, determine if $S$ can be segmented into a space-separated sequence of one or more dictionary words.
+\par
+\paragraph{Note:}
+\begin{itemize}
+\item The same word in the dictionary may be reused multiple times in the segmentation.
+\item You may assume the dictionary does not contain duplicate words.
+\end{itemize}
+\paragraph{Example 1:}
+\begin{flushleft}
+\textbf{Input}: $S$ = leetcode, $A = [\text{leet}, \text{code}]$
+\\
+\textbf{Output}: true
+\\
+\textbf{Explanation}: Return \textbf{true} because \textit{leetcode} can be segmented as ``leet code''.
+\end{flushleft}
+\paragraph{Example 2:}
+\begin{flushleft}
+\textbf{Input}: $S$ = applepenapple, $A = [\text{apple}, \text{pen}]$
+\\
+\textbf{Output}: true
+\\
+\textbf{Explanation}: Return \textbf{true} because ``applepenapple'' can be segmented as ``apple pen apple''. Note that you are allowed to reuse a dictionary word.
+\end{flushleft}
+\paragraph{Example 3:}
+\begin{flushleft}
+\textbf{Input}: $S$ = catsandog, $A = [\text{cats}, \text{dog}, \text{sand}, \text{and}, \text{cat}]$
+\\
+\textbf{Output}: false
+\end{flushleft}
+\subsection{Dynamic Programming}
+本题重要的是如何构建DP函数。假设$F[i]$表示$S[0,i-1]$可以拆分成给定字典中的单词。由于需要考虑空字符串的情况，因此$F$的长度是$S$的长度加1。
+\par
+算法包含如下几个步骤
+\begin{enumerate}
+    \item 首先Initialize $F[0]$为 \texttt{true}
+    \item 遍历$S$。这里需要两个for循环来遍历，在当前位置$i$，假设在$j$处把$S[0,i-1]$分为$S[0, j-1]$ 和 $S[j, i-1]$两个部分，很显然$S[0,j-1]$对应的就是$F[j]$，这个结果已经有了，现在就是要看$S[j,i-1]$就是是不是在字典中。
+    \begin{itemize}
+        \item 如果$F[j]$为\texttt{true}，并且$S[j,i-1]$也在字典中，那么很显然$S[0,i-1]$也是可以拆分成字典中的单词的，因此$F[i]$也为\texttt{true}，这时候就可以终止$j$的循环了。
+        \item 如果其中一个都不满足上述条件，继续$j$的循环。
+    \end{itemize}
+    \item 最后$F$的最后一个值就是需要返回的结果了。
+\end{enumerate}
+\setcounter{algorithm}{0}
+\begin{algorithm}[H]
+\caption{Dynamic Programming}
+\begin{algorithmic}[1]
+\Procedure{WordBreak}{$S, L, W$}
+\State Initialize array $F$ as $F[0]=\texttt{true}, F[1]=\ldots=F[L]=\texttt{false}$
+\For{$i:=1\to L$}
+\For{$j:=0\to i-1$} \label{139loop1}
+\If{$F[j]=\texttt{true}$} 
+\State $\omega:=S[j, i-1]$ \Comment The substring $S[j,i-1]$
+\If{$\omega \in W$} \Comment $\omega$ is found in the dictionary $W$
+\State $F[i]\gets \texttt{true}$
+\State \texttt{break} \Comment Exit the inner loop [\ref{139loop1}]
+\EndIf
+\EndIf
+\EndFor
+\EndFor
+\State \Return $F[L]$
+\EndProcedure
+\end{algorithmic}
+\end{algorithm}

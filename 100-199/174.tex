@@ -1,0 +1,97 @@
+\section{174 --- Dungeon Game}
+The demons had captured the princess ($P$) and imprisoned her in the bottom-right corner of a dungeon. The dungeon consists of $M \times N$ rooms laid out in a 2D grid $D$. Our valiant knight ($K$) was initially positioned in the top-left room and must fight his way through the dungeon to rescue the princess.
+\par
+The knight has an initial health point represented by a positive integer. If at any point his health point drops to 0 or below, he dies immediately.
+\par
+Some of the rooms are guarded by demons, so the knight loses health (negative integers) upon entering these rooms; other rooms are either empty (0's) or contain magic orbs that increase the knight's health (positive integers).
+\par
+In order to reach the princess as quickly as possible, the knight decides to move only rightward or downward in each step.
+\par
+\textbf{Write a function to determine the knight's minimum initial health so that he is able to rescue the princess}.
+\par
+For example, given the dungeon below, the initial health of the knight must be at least 7 if he follows the optimal path \textbf{RIGHT} \textrightarrow \textbf{RIGHT} \textrightarrow \textbf{DOWN} \textrightarrow \textbf{DOWN}.
+
+
+\begin{figure}[H]
+\begin{tikzpicture}[square/.style={draw=#1, minimum size=1.5cm,anchor=south west}]
+\matrix(m)[matrix of nodes, nodes={square=gray!20!}, column sep=0pt, row sep=0pt]
+{
+ $-2(K)$  & $-3$  & 3 \\
+ $-5$  & $-10$  & 1 \\
+ $10$  & $30$  & $-5(P)$ \\
+};
+\draw[line width=1pt] (m-1-1.north west) rectangle (m-3-3.south east);
+\end{tikzpicture}
+\end{figure}
+\paragraph{Note:}
+\begin{itemize}
+\item The knight's health has no upper bound.
+\item Any room can contain threats or power-ups, even the first room the knight enters and the bottom-right room where the princess is imprisoned.
+\end{itemize}
+\subsection{Backward Dynamic Programming}
+\begin{CJK*}{UTF8}{gbsn}
+\begin{itemize}
+\item knight在每个格子的生命值至少为1
+\item 从$P$的位置回溯进行DP。
+\end{itemize}
+\end{CJK*}
+\setcounter{algorithm}{0}
+\begin{algorithm}[H]
+\caption{}
+\begin{algorithmic}[1]
+\Procedure{CalculateMinimumHP}{$D, R, C$}
+\State $\star$ Create a 2D array $F$ same dimensions as $D$
+\State $F[R-1][C-1] \gets \max(1, 1 - D[R-1][C-1])$ \Comment At least the knight must have 1 health point
+\State $\star$ Fill last column of $F$
+\For{$r:=R-2 \to 0$}
+\State $F[r][C-1]\gets\max(1, F[r+1][C-1] - D[r][C-1])$
+\EndFor
+\State $\star$ Fill last row of $F$
+\For{$c:=C-2 \to 0$}
+\State $F[R-1][c]\gets\max(1, F[R-1][c+1] - D[R-1][c])$
+\EndFor
+\State $\star$ Filling all remaining cells back to $F[0][0]$
+\For{$r:=R-2 \to 0$}
+\For{$c:=C-2 \to 0$}
+\State $x:=\min(F[r+1][c], F[r][c+1])$ \Comment Get minimum required health points
+\State $\star$ $x-D[r][c]$ is the health points required to move to \textbf{RIGHT} or \textbf{DOWN}
+\State $\star$ But knight must have at least 1 health point
+\State $F[r][c]\gets\max(1, x - D[r][c])$ 
+\EndFor
+\EndFor
+\State \Return $F[0][0]$
+\EndProcedure
+\end{algorithmic}
+\end{algorithm}
+\setcounter{lstlisting}{0}
+\begin{lstlisting}[style=customc, caption={Source Code}]
+int calculateMinimumHP( vector<vector<int>>& dungeon )
+{
+    int rows = static_cast<int>( dungeon.size() );
+    int cols = static_cast<int>( dungeon[0].size() );
+    vector<vector<int>> F( rows, vector<int>( cols, 0 ) );
+
+    F[rows - 1][cols - 1] = ( max )( 1, 1 - D[rows - 1][cols - 1] );
+
+    for( int r = rows - 2; r >= 0; --r )
+    {
+        F[r][cols - 1] = ( max )( 1, F[r + 1][cols - 1] - dungeon[r][cols - 1] );
+    }
+
+    for( int c = cols - 2; c >= 0; --c )
+    {
+        F[rows - 1][c] = ( max )( 1, F[rows - 1][c + 1] - dungeon[rows - 1][c] );
+    }
+
+    for( int r = rows - 2; r >= 0; --r )
+    {
+        for( int c = cols - 2; c >= 0; --c )
+        {
+            int next = ( min )( F[r + 1][c], F[r][c + 1] );
+            F[r][c] = ( max )( 1, next - dungeon[r][c] );
+        }
+    }
+
+    return F[0][0];
+}
+\end{lstlisting}

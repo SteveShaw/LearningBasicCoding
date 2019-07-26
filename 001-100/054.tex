@@ -42,36 +42,61 @@ Suppose the matrix $M$ have $R$ rows and $C$ columns. $\nu[r][c]$ is a $0/1$ aux
 As we move through the matrix, our candidate next position is $(r_1, c_1)$. If the candidate is in the bounds of the matrix and not seen before, i.e. not in $\nu$, then it becomes our next position; otherwise, our next position is the one after performing a clockwise turn.
 
 The input parameter includes the matrix $A$, number of rows $R$ and number of columns $C$. The return value is array $\phi$, the elements that visited through spiral order.
-\setcounter{algorithm}{0}
-\begin{algorithm}[H]
-\caption{Simulation Based Solution}
-\begin{algorithmic}[1]
-\Procedure{SpiralOrder}{$A,R,C$}
-\If{$R=0$ \textbf{or} $C=0$}
-\State \Return $\emptyset$ \Comment Boundary case.
-\EndIf
-\State $\phi := \emptyset$
-\State $\nu$ as $\nu[0][0] = \ldots  = \nu[R-1][C-1] := 0$
-\State $\delta_R$ as $\delta_R[4] = (0, 1, 0, -1)$ \Comment The direction order will be right, down, left and up
-\State $\delta_C$ as $\delta_C[4] = (1, 0, -1, 0)$
-\State $r :=0$
-\State $c :=0$
-\State $\theta := 0$
-\For{$i := 0$ \textbf{to} $R\times C -1$}
-\State $\phi \gets \phi \cup A[r][c]$
-\State $\nu[r][c] \gets 1$ \Comment Mark this element as visited
-\State $r_n := r + \delta_R[\theta]$ \Comment Get next element row in the direction $\theta$
-\State $c_n := c + \delta_C[\theta]$ \Comment Get next element column in the direction $\theta$ 
-\If{$0 \leq r_n < R$ \textbf{and} $0 \leq c_n < C$ \textbf{and} $\nu[r_n][c_n] = 0$ }
-\State $r\gets r_n$
-\State $c\gets c_n$
-\Else
-\State $\theta \gets (\theta + 1) \bmod 4$ \Comment Get next direction
-\State $r\gets r + \delta_R[\theta]$
-\State $c\gets c + \delta_R[\theta]$
-\EndIf
-\State \Return $\phi$
-\EndFor
-\EndProcedure
-\end{algorithmic}
-\end{algorithm}
+
+
+\setcounter{lstlisting}{0}
+\begin{lstlisting}[style=customc, caption={Simulation}]
+vector<int> spiralOrder( vector<vector<int>>& matrix )
+{
+    if( matrix.empty() || matrix[0].empty() )
+    {
+        return {};
+    }
+
+    vector<vector<unsigned char>> seen( matrix.size(), vector<unsigned char>( matrix[0].size(), 0 ) );
+
+    //the sequence cannot be
+    //changed.
+    int dr[] = {0, 1, 0, -1};
+    int dc[] = {1, 0, -1, 0};
+
+    vector<int> ans;
+
+    int r = 0;
+    int c = 0;
+    //direction
+    int d = 0;
+
+    int rows = static_cast<int>( matrix.size() );
+    int cols = static_cast<int>( matrix[0].size() );
+    int total = static_cast<int>( rows * cols );
+
+    ans.reserve( total );
+
+    for( int i = 0; i < total; ++i )
+    {
+        ans.push_back( matrix[r][c] );
+        seen[r][c] = 1;
+
+        int nr = r + dr[d];
+        int nc = c + dc[d];
+
+        if( ( nr >= 0 ) && ( nr < rows ) && ( nc >= 0 ) && ( nc < cols ) && ( !seen[nr][nc] ) )
+        {
+            //(nr,nc) is inside range
+            //and (nr,nc) has not seen
+            r = nr;
+            c = nc;
+        }
+        else
+        {
+            //change the direction
+            d = ( ( d + 1 ) % 4 );
+            r += dr[d];
+            c += dc[d];
+        }
+    }
+
+    return ans;
+}
+\end{lstlisting}

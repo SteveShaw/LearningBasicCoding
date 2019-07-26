@@ -1,0 +1,54 @@
+\section{152 --- Maximum Product Subarray}
+Given an integer array $A$, find the contiguous subarray within an array (containing at least one number) which has the largest product.
+\paragraph{Example 1:}
+\begin{flushleft}
+\textbf{Input}: $[2,3,-2,4]$
+\\
+\textbf{Output}: 6
+\\
+\textbf{Explanation}: $[2,3]$ has the largest product 6.
+\end{flushleft}
+\paragraph{Example 2:}
+\begin{flushleft}
+\textbf{Input}: $[-2,0,-1]$
+\\
+\textbf{Output}: 0
+\\
+\textbf{Explanation}: The result cannot be 2, because $[-2,-1]$ is not a subarray.
+\end{flushleft}
+\subsection{Kadane's Algorithm}
+\begin{CJK*}{UTF8}{gbsn}
+给予Kadane's algorithm，由于product受到正负数的影响，因此maintain两个变量:$\alpha$和$\beta$，其中$\alpha$是maximum subarray product ending at $i$，而$\beta$则是minimum subarray product ending at $i$。，同时用变量$P$代表目前为止所获得的最大product。遍历每一个数字时，首先确定当前数字$A[i]$，$\alpha\times A[i]$和$\beta\times A[i]$三者中的最大值，由于这时候$\alpha$会更新到这三者中的最大值，因此每次更新前将$\alpha$保存到一个临时变量$\gamma$中。然后确定数字$A[i]$, $\gamma\times A[i]$和$\beta\times A[i]$三者中的最小值，将$\beta$更新为这个最小值。最后更新$P$为$P$和更新后的$\alpha$两者中的最大值。遍历结束后，$P$即为所求最大product。
+\end{CJK*}
+\setcounter{lstlisting}{0}
+\begin{lstlisting}[style=customc, caption={Modified Kadane's Algorithm}]
+int maxProduct( vector<int>& A )
+{
+	//alpha: max_ending_here
+	int max_ending_here = A[0];
+	//beta: min_endign_here
+	int min_ending_here = A[0];
+	//P: max_so_far
+	int max_so_far = A[0];
+
+	for ( size_t i = 1; i < A.size(); ++i )
+	{
+		//save current alpha to a temp variable
+		//gamma: cur_max
+		int cur_max = max_ending_here;
+
+		//update alpha
+		max_ending_here = ( max )( A[i], min_ending_here * A[i] );
+		max_ending_here = ( max )( max_ending_here, cur_max * A[i] );
+
+		//update beta
+		min_ending_here = ( min )( A[i], min_ending_here * A[i] );
+		min_ending_here = ( min )( min_ending_here, cur_max * A[i] );
+
+		//update P
+		max_so_far = ( max )( max_so_far, max_ending_here );
+	}
+
+	return max_so_far;
+}
+\end{lstlisting}

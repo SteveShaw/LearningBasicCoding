@@ -1,0 +1,95 @@
+\section{155 --- Min Stack}
+Design a stack that supports \texttt{push}, \texttt{pop}, \texttt{top}, and retrieving the minimum element in constant time.
+\begin{itemize}
+    \item \texttt{push}($x$) -- Push element $x$ onto stack.
+    \item \texttt{pop}() -- Removes the element on top of the stack.
+    \item \texttt{top}() -- Get the top element.
+    \item \texttt{getMin}() -- Retrieve the minimum element in the stack.
+\end{itemize}
+\paragraph{Example:}
+\begin{lstlisting}[style=customc]
+MinStack minStack = new MinStack();
+minStack.push(-2);
+minStack.push(0);
+minStack.push(-3);
+minStack.getMin();   // Returns -3.
+minStack.pop();
+minStack.top();      // Returns 0.
+minStack.getMin();   // Returns -2.
+\end{lstlisting}
+\begin{CJK*}{UTF8}{gbsn}
+这里涉及到如何利用stack的特性的技巧，为了得到stack中的最小值，同时又能保证弹出操作能够正确的更新最小值，可以将当前最小值和要压入的值一起放入stack中，一种做法是先放入当前值，在放入当前最小值，这样栈顶就是最小值。这样，当弹出时，需要弹出两个。然后如果栈不为空，就用栈顶元素更新最小值。
+\par
+而对于\texttt{top} function，由于栈顶元素是最小值，因此需要先把当前栈顶元素弹出，然后获得剩下的栈的栈顶元素，再把弹出的最小值重新压入栈中。
+\end{CJK*}
+\setcounter{lstlisting}{0}
+\begin{lstlisting}[style=customc, caption={Push Two Values At Same Time}]
+class MinStack
+{
+public:
+	/** initialize your data structure here. */
+	MinStack ()
+	{
+		m_min = -1;
+	}
+
+	void push ( int x )
+	{
+		if( m_stk.empty () )
+		{
+			//This is the first time
+			//to push into stack
+			m_min = x;
+		}
+		else
+		{
+			//Update current minimum value
+			m_min = ( min ) ( x, m_min );
+		}
+
+		//Push x first
+		m_stk.push ( x );
+		//Push current minimum value
+		m_stk.push ( m_min );
+	}
+
+	void pop ()
+	{
+		if( !m_stk.empty () )
+		{
+			//Pop minimum value
+			m_stk.pop ();
+			//Pop actual value
+			m_stk.pop ();
+
+			if( !m_stk.empty () )
+			{
+				//Update current minimum value
+				m_min = m_stk.top ();
+			}
+		}
+	}
+
+	int top ()
+	{
+		//we have to pop current top first
+		//because it is m_min
+		m_stk.pop ();
+		//This is the actual top
+		int x = m_stk.top ();
+		//Push m_min to stack again
+		m_stk.push ( m_min );
+		return x;
+	}
+
+	int getMin ()
+	{
+		return m_min;
+	}
+
+	// The minimum value in the stack
+	int m_min;
+	// The stack
+	stack<int> m_stk;
+};
+\end{lstlisting}

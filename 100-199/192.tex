@@ -1,0 +1,45 @@
+\section{192 --- Word Frequency}
+Write a bash script to calculate the frequency of each word in a text file words.txt.
+\par
+For simplicity sake, you may assume:
+\begin{itemize}
+\item words.txt contains only lowercase characters and space characters (\textvisiblespace).
+\item Each word must consist of lowercase characters only.
+Words are separated by one or more whitespace characters.
+\end{itemize}
+\paragraph{Example:}
+\begin{flushleft}
+\begin{mdframed}[style=mymdf]
+the day is sunny the the
+\\
+the sunny is is
+\end{mdframed}
+Your script should output the following, sorted by descending frequency:
+\begin{mdframed}[style=mymdf]
+the 4
+\\
+is 3
+\\
+sunny 2
+\\
+day 1
+\end{mdframed}
+\end{flushleft}
+\paragraph{Note:}
+\begin{itemize}
+\item Don't worry about handling ties, it is guaranteed that each word's frequency count is unique.
+\item Could you write it in one-line using Unix pipes?
+\end{itemize}
+\subsection{Solution}
+\begin{mdframed}[style=mymdf]
+\begin{lstlisting}[style=customc]
+cat words.txt | tr -s ' ' '\n' | sort | uniq -c | sort -r | awk '{ print $2, $1 }'
+\end{lstlisting}
+\end{mdframed}
+\begin{itemize}
+\item \textbf{tr -s}: truncate the string with target string, but only remaining one instance (e.g. multiple whitespaces)
+\item \textbf{sort}: To make the same string successive so that \texttt{uniq} could count the same string fully and correctly.
+\item \textbf{uniq -c}: \texttt{uniq} is used to filter out the repeated lines which are successive, \texttt{-c} means counting
+\item \textbf{sort -r}: \texttt{-r} means sorting in descending order
+\item \texttt{awk} is used to format output
+\end{itemize}

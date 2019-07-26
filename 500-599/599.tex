@@ -1,0 +1,41 @@
+\section{599 --- Minimum Index Sum of Two Lists}
+Suppose Andy and Doris want to choose a restaurant for dinner, and they both have a list of favorite restaurants represented by strings.
+
+You need to help them find out their common interest with the least list index sum. If there is a choice tie between answers, output all of them with no order requirement. You could assume there always exists an answer.
+
+\paragraph{Example 1:}
+\begin{flushleft}
+\textbf{Input}:
+
+[ Shogun, Tapioca Express, Burger King, KFC ]
+
+[ Piatti, The Grill at Torrey Pines, Hungry Hunter Steakhouse, Shogun ]
+
+\textbf{Output}: [ Shogun ]
+
+\textbf{Explanation}: The only restaurant they both like is Shogun.
+\end{flushleft}
+
+\paragraph{Example 2:}
+
+\begin{flushleft}
+\textbf{Input}:
+
+[Shogun, Tapioca Express, Burger King, KFC]
+
+[KFC, Shogun, Burger King]
+
+\textbf{Output}: [Shogun]
+
+\textbf{Explanation}: 
+
+The restaurant they both like and have the least index sum is Shogun with index sum 1 ($0+1$).
+\end{flushleft}
+
+\paragraph{Note:}
+\begin{itemize}
+\item The length of both lists will be in the range of $[1, 1000]$.
+\item The length of strings in both lists will be in the range of $[1, 30]$.
+\item The index is starting from 0 to the list length minus 1.
+\item No duplicates in both lists.
+\end{itemize}

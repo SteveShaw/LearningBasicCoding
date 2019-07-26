@@ -1,0 +1,68 @@
+\section{447 --- Number of Boomerangs}
+Given $n$ points in the plane that are all pairwise distinct, a \textbf{boomerang} is a tuple of points $(i, j, k)$ such that the distance between $i$ and $j$ equals the distance between $i$ and $k$ (the order of the tuple matters).
+
+Find the number of \textbf{boomerang}s. You may assume that $n$ will be at most 500 and coordinates of points are all in the range $[-10000, 10000]$ (inclusive).
+
+\paragraph{Example:}
+
+\begin{flushleft}
+\textbf{Input}: $[\, [0,0],[1,0],[2,0]\,]$
+
+\textbf{Output}: 2
+
+\textbf{Explanation}: The two boomerangs are $[\,[1,0],[0,0],[2,0]\,]$ and $[\,[1,0],[2,0],[0,0]\,]$
+
+\end{flushleft}
+
+\subsection{Hash Map}
+\begin{itemize}
+\item 对每一个点，计算其他所有点到这个点的距离，然后maintain一个hash map用来记录到这个点具有相同的距离的点的个数。
+\item 在计算出所有的点后， 统计hash map中每个距离对应的点的个数，suppose it is $n$，那么这些点可以形成$n\times (n-1)/2$个pair，再和当前点构成bommerang。
+因此结果要加上$n\times (n-1)/2$。
+\end{itemize}
+
+\setcounter{lstlisting}{0}
+\begin{lstlisting}[style=customc, caption={Hash Map}]
+int numberOfBoomerangs( vector<vector<int>>& points )
+{
+    int ans = 0;
+
+    for( size_t i = 0; i < points.size(); ++i )
+    {
+        unordered_map<int, int> m;
+
+        for( size_t j = 0; j < points.size(); ++j )
+        {
+            if( i == j )
+            {
+                continue;
+            }
+            auto& pi = points[i];
+            auto& pj = points[j];
+
+            int sq_dist = ( pi[0] - pj[0] ) * ( pi[0] - pj[0] ) + ( pi[1] - pj[1] ) * ( pi[1] - pj[1] );
+
+            //add to the hash map
+            //per the disance
+            auto it = m.find( sq_dist );
+
+            if( it == m.end() )
+            {
+                m.emplace( sq_dist, 1 );
+            }
+            else
+            {
+                it->second += 1;
+            }
+        }
+
+        for( const auto& p : m )
+        {
+            int x = p.second;
+            ans += x * ( x - 1 );
+        }
+    }
+
+    return ans;
+}
+\end{lstlisting}

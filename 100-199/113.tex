@@ -1,0 +1,81 @@
+\section{113 --- Path Sum II}
+Given a binary tree $T$ and a sum $S$, find all root-to-leaf paths where each path's sum equals the given sum.
+\par
+Note: A leaf is a node with no children.
+\par
+\paragraph{Example:}
+\begin{flushleft}
+\textbf{Input}: $S=22$, $T$ is given as below
+\begin{figure}[H]
+\begin{tikzpicture}
+[mynode/.style={draw,circle,minimum size=5mm, fill=gray!20!}]
+\node(){};
+\node[mynode](5) {5};
+\node[mynode](4) [below = 8mm of 5, xshift=-15mm] {4};
+\node[mynode](8) [below = 8mm of 5, xshift=15mm] {8};
+\node[mynode](11) [below = 8mm of 4, xshift=-12mm] {11};
+\node[mynode](13) [below = 8mm of 8, xshift=-12mm] {13};
+\node[mynode](41) [below = 8mm of 8, xshift=12mm] {4};
+\node[mynode](7) [below = 8mm of 11, xshift=-8mm] {7};
+\node[mynode](2) [below = 8mm of 11, xshift=8mm] {2};
+\node[mynode](1) [below = 8mm of 41, xshift=8mm] {1};
+\node[mynode](51) [below = 8mm of 41, xshift=-8mm] {5};
+\draw[>=stealth,->] (5) -- (4);
+\draw[>=stealth,->] (5) -- (8);
+\draw[>=stealth,->] (4) -- (11);
+\draw[>=stealth,->] (8) -- (13);
+\draw[>=stealth,->] (8) -- (41);
+\draw[>=stealth,->] (11) -- (7);
+\draw[>=stealth,->] (11) -- (2);
+\draw[>=stealth,->] (41) -- (1);
+\draw[>=stealth,->] (41) -- (51);
+\end{tikzpicture}
+\end{figure}
+\textbf{Output}:
+\\
+$(5,4,11,2)$
+\\
+$(5,8,4,5)$
+\end{flushleft}
+\subsection{Recursion}
+\begin{CJK*}{UTF8}{gbsn}
+由于需要保存路径，因此每次进入到递归函数时，将当前node的值插入到当前path的末尾，然后在递归结束时，将末尾的node从path中移除。
+\end{CJK*}
+\subsubsection{Algorithm}
+\setcounter{algorithm}{0}
+\begin{algorithm}[H]
+\caption{Depth First Search}
+\begin{algorithmic}[1]
+\Procedure{PathSum}{$T, S$}
+\State $\texttt{ans}:=\emptyset$ \Comment The path collections
+\State $P:=\emptyset$ \Comment The path array
+\State $\texttt{DFS}(T, S, P, \texttt{ans})$
+\State \Return \texttt{ans}
+\EndProcedure
+\end{algorithmic}
+\end{algorithm}
+\begin{CJK*}{UTF8}{gbsn}
+\texttt{DFS}从给定的二叉树$T$中找到所有的路径和等于$S$的path。
+\end{CJK*}
+\begin{algorithm}[H]
+\caption{Help Function To Do Depth First Search}
+\begin{algorithmic}[1]
+\Function{DFS}{$T, S, P, A$}
+\If{$T=\texttt{null}$}
+\State \Return
+\EndIf
+\If{$\texttt{Left}(T)=\texttt{null}$ \textbf{and} $\texttt{Right}(T)=\texttt{null}$}
+\If{$S=\texttt{Value}(T)$}
+\State $P\gets P + \texttt{Value}(T)$ \Comment Add to current path
+\State $A\gets A +  P$ \Comment Add this path to the path collection
+\State $P\gets P\setminus P[-1]$ \Comment Remove end element from $P$
+\EndIf
+\State \Return  \Comment Exit current recursion
+\EndIf
+\State $P\gets P + \texttt{Value}(T)$ \Comment Add to current path
+\State $\texttt{DFS}(\texttt{Left}(T), S - \texttt{Value}(T), P, A)$ \Comment Recursive on left subtree
+\State $\texttt{DFS}(\texttt{Right}(T), S - \texttt{Value}(T), P, A)$ \Comment Recursive on right subtree
+\State $P\gets P\setminus P[-1]$ \Comment Remove end element from $P$
+\EndFunction
+\end{algorithmic}
+\end{algorithm}

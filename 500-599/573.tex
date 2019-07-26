@@ -1,0 +1,45 @@
+\section{573 --- Squirrel Simulation}
+There's a tree, a squirrel, and several nuts. Positions are represented by the cells in a 2D grid. Your goal is to find the \textbf{minimal} distance for the squirrel to collect all the nuts and put them under the tree one by one. The squirrel can only take at most \textbf{one nut} at one time and can move in four directions -- up, down, left and right, to the adjacent cell. The distance is represented by the number of moves.
+
+\paragraph{Example 1:}
+
+\begin{flushleft}
+\textbf{Input}: 
+
+$H:=5$, $W:=7$, 
+
+Tree position : $[2,2]$
+
+Squirrel : $[4,4]$
+
+Nuts : $[[3,0], [2,5]]$
+
+\textbf{Output}: 12
+
+\textbf{Explanation}:
+\begin{figure}[H]
+\begin{tikzpicture}
+\draw[help lines] (0,0) grid (7, 5);
+\node[bob] at (4.5, 0.5) {};
+\node at (5.5,2.5) {\Coffeecup[2]};
+\node at (0.5,1.5) {\Coffeecup[2]};
+\node at (2.5, 2.5) {\Springtree[2]};
+\draw[>=stealth, ->] (5,0.5) -| (5.5, 1.8) node[pos=0.80, right] {1};
+\draw[>=stealth, ->] (5,2.5) -> (3.2, 2.5) node[midway, above] {2};
+\draw[>=stealth, ->] (2,2.5) -| (0.5, 2.1) node[pos=0.25, above] {3};
+\draw[>=stealth, ->] (1,1.5) -| (2.5, 1.9) node[pos=0.25, below] {4};
+\end{tikzpicture}
+\end{figure}
+
+\end{flushleft}
+
+\paragraph{Note:}
+
+\begin{itemize}
+\item All given positions won't overlap.
+\item The squirrel can take at most one nut at one time.
+\item The given positions of nuts have no order.
+\item Height, $H$, and Width, $W$, are positive integers. $3 \leq H\times W \leq 10,000$.
+\item The given positions contain at least one nut, only one tree and one squirrel.
+\end{itemize}
+

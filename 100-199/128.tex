@@ -1,0 +1,101 @@
+\section{128 --- Longest Consecutive Sequence}
+Given an unsorted array of integers $A$, find the length of the longest consecutive elements sequence.
+\par
+Your algorithm should run in $O(n)$ complexity.
+\paragraph{Example:}
+\begin{flushleft}
+\textbf{Input}: $[100, 4, 200, 1, 3, 2]$
+\\
+\textbf{Output}: 4
+\\
+\textbf{Explanation}: The longest consecutive elements sequence is $[1, 2, 3, 4]$. Therefore its length is 4.
+\end{flushleft}
+
+\subsection{Hash Map}
+由于$A$可能是乱序的，所以需要用一个hash map来记录每个数字当前所找到包含其在内的连续数的序列长度。遍历数组中的每个数字$x$时，然后在hash map中寻找$x-1$对应的序列长度$\ell_1$，以及$x+1$对应的序列长度$\ell_2$，这时候由于$x$的加入，之前分开的$x-1$和$x+1$可以连接在一起了，因此这时候就要把这个三个数字对应的长度统一更新为$\ell_1+\ell_2+1$。除此以外，还需要将$x - \ell_1$和$x+\ell_2$这两个数字对应的长度更新为$\ell_1+\ell_2+1$，因为这是当前连续数序列的起始和终止值。如果不更新这两个值，以后碰到比如$x-\ell_1+1$时，这个时候长度计算就错误了。当然，如果hash map中找不到对应的数字，那么返回的长度相应为0。
+
+
+\setcounter{lstlisting}{0}
+\begin{lstlisting}[style=customc, caption={Hash Map}]
+int longestConsecutive( vector<int>& nums )
+{
+    if( nums.empty() )
+    {
+        return 0;
+    }
+
+    unordered_map<int, int> m;
+
+    int ans = 1;
+
+    for( int n : nums )
+    {
+        if( m.find( n ) != m.end() )
+        {
+            //n already has processed
+            //in previous number
+            continue;
+        }
+
+        auto it_l = m.find( n - 1 );
+        int left_len = 0;
+
+
+        if( it_l != m.end() )
+        {
+            //[n-left_len, n-1] is consecutive
+            left_len = it_l->second;
+        }
+
+        int right_len = 0;
+
+        auto it_r = m.find( n + 1 );
+
+        if( it_r != m.end() )
+        {
+            //[n+1, n+right_len] is consecutive
+            right_len = it_r->second;
+        }
+
+        //found new consecutive sequence
+        int len = left_len + 1 + right_len;
+
+        ans = ( max )( ans, len );
+
+        m.emplace( n, len );
+
+        if( it_l != m.end() )
+        {
+            //update number n-1
+            //related length
+            it_l->second = len;
+        }
+
+        if( it_r != m.end() )
+        {
+            //update number n+1
+            //related length
+            it_r->second = len;
+        }
+
+        //we have to update
+        //y = n-left_len related length
+        it_l = m.find( n - left_len );
+        if( left_len && ( it_l != m.end() ) )
+        {
+            m[n - left_len] = len;
+        }
+
+
+        //we also have to update
+        //z=n+right_len related length
+        it_r = m.find( n + right_len );
+        if( right_len && ( it_r != m.end() ) )
+        {
+            m[n + right_len] = len;
+        }
+    }
+
+    return ans;
+}
+\end{lstlisting}

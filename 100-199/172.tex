@@ -1,0 +1,55 @@
+\section{172 --- Factorial Trailing Zeroes}
+Given an integer $n$, return the number of trailing zeroes in $n!$.
+\paragraph{Example 1:}
+\begin{flushleft}
+\textbf{Input}: 3
+\\
+\textbf{Output}: 0
+\\
+\textbf{Explanation}: $3! = 6$, no trailing zero.
+\end{flushleft}
+\paragraph{Example 2:}
+\begin{flushleft}
+\textbf{Input}: 5
+\\
+\textbf{Output}: 1
+\\
+\textbf{Explanation}: $5! = 120$, one trailing zero.
+\end{flushleft}
+\paragraph{Note:}
+\begin{itemize}
+\item Your solution should be in logarithmic time complexity.
+\end{itemize}
+\subsection{Find Number Of Fives}
+\begin{CJK*}{UTF8}{gbsn}
+这其实就是要找乘数中10的个数，而10可分解为2和5，而2的数量又远大于5的数量，那么也就是找出5的个数。需注意的一点就是，像25,125，这样不只含有一个5的数字需要考虑进去。
+\end{CJK*}
+\setcounter{algorithm}{0}
+\begin{algorithm}[H]
+\caption{Find Number Of Fives}
+\begin{algorithmic}[1]
+\Procedure{TrailingZeroes}{$n$}
+\State $\delta:=0$ \Comment The result
+\While{$n \neq 0$}
+\State $\delta\gets \delta + \dfrac{n}{5}$
+\State $n\gets n/5$
+\EndWhile
+\State \Return $\delta$
+\EndProcedure
+\end{algorithmic}
+\end{algorithm}
+\setcounter{lstlisting}{0}
+\begin{lstlisting}[style=customc, caption={Source Code}]
+int trailingZeroes( int n )
+{
+    int ans = 0;
+
+    while( n != 0 )
+    {
+        ans += ( n / 5 );
+        n /= 5;
+    }
+
+    return ans;
+}
+\end{lstlisting}

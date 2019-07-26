@@ -1,0 +1,85 @@
+\section{133 --- Clone Graph}
+Given the head of a graph $G$, return a deep copy (clone) of the graph. Each node in the graph contains a label $n$ and a list of its neighbors $A$. There is an edge $E$ between the given node and each of the nodes in its neighbors.
+\subsection{DFS}
+由于节点值是为唯一的，可以使用哈希表来对应节点值和新生成的节点。
+\setcounter{algorithm}{0}
+\begin{algorithm}[H]
+\caption{DFS}
+\begin{algorithmic}[1]
+\Procedure{CloneGraph}{$G$}
+\State $M:=\emptyset$ \Comment The hash map to map label to the new constructed node
+\State $\texttt{ans}:=\texttt{DFS}(M, G)$
+\State \Return \texttt{ans}
+\EndProcedure
+\end{algorithmic}
+\end{algorithm}
+\texttt{DFS}递归的copy以$G$为开始的graph。
+\begin{algorithm}[H]
+\caption{DFS Helper Function}
+\begin{algorithmic}[1]
+\Function{DFS}{$G, M$}
+\If{$G=\texttt{null}$}
+\State \Return $G$
+\EndIf
+\State $g:=\texttt{Label}(G)$ \Comment The label of node $G$
+\If{$g\in M$}
+\State \Return $M[g]$
+\EndIf
+\State Create a new node $\hat{G}$
+\State $\texttt{Label}(\hat{G})\gets g$
+\State $M[g]\gets \hat{G}$
+\State $v:=\texttt{Neighbors}(G)$ \Comment The neighbors of $G$
+\State $\hat{v}:=\texttt{Neighbors}(\hat{G})$ \Comment The neighbors of $\hat{G}$
+\For{$i:=0\to |v|-1$}
+\State $t:=\texttt{DFS}(v[i], M)$ \Comment Recursively copy $v[i]$
+\State $\hat{v}\gets \hat{v} + t$ \Comment Add copy of $v[i]$ as one of neighbor of $\hat{G}$
+\algstore{133algo}
+\end{algorithmic}
+\end{algorithm}
+\begin{algorithm}[H]
+\begin{algorithmic}[1]
+\algrestore{133algo}
+\EndFor
+\EndFunction
+\end{algorithmic}
+\end{algorithm}
+\subsection{BFS}
+采用BFS时，可以用queue也可以用hash set然后swap 现在的level和下一个level。这里采用后者。同样需要一个hash map来记录label值和对应的新的clone node。有个tricky点是如果在map中找到了label对应的clone node，这个node就不用放到下一层去，否则会产生无限循环。
+\begin{algorithm}[H]
+\caption{BFS}
+\begin{algorithmic}[1]
+\Procedure{CloneGraph}{$G$}
+\State $M:=\emptyset$ \Comment The hash map to map label to the new constructed node
+\State $x:=\emptyset$ \Comment The current level of BFS tree
+\State $x\gets x + G$ \Comment The first level contains only $G$
+\State Create a clone node $G_c$
+\State $\texttt{Label}(G_c)\gets \texttt{Label}(G)$
+\While{$x\neq \emptyset$} \Comment BFS loop
+\State $y:=\emptyset$ \Comment The hash set of next level
+\For{$t \in x$}
+\State $t_c:=M[\texttt{Label}(t)]$ \Comment Get the clone node in $M$
+\State $v:=\texttt{Neighbors}(t_c)$
+\For{$n \in \texttt{Neighbors}(t)$} \Comment Iterate over neighbor nodes of $t$
+\If{$\texttt{Label}(n)\notin M$}
+\State Create a new node $n_c$
+\State $\texttt{Label}(n_c)\gets \texttt{Label}(n)$
+\State $M[\texttt{Label}(n_c)]:=n_c$
+\State $v\gets v+ n_c$ \Comment Add $n_c$ as one of neighbors of $t_c$
+\State $y\gets y+n$ \Comment Add $n$ to next level
+\Else \Comment $M$ contains the clone node of $\texttt{Label}(n)$
+\State $v\gets v+M[\texttt{Label}(n)]$ \Comment Add the node as one of neighbors of $t_c$
+\EndIf
+\EndFor
+\EndFor
+\State $x\gets y$ \Comment Update $x$ as the next level
+\algstore{133algo}
+\end{algorithmic}
+\end{algorithm}
+\begin{algorithm}[H]
+\begin{algorithmic}[1]
+\algrestore{133algo}
+\EndWhile
+\State \Return $G_c$
+\EndProcedure
+\end{algorithmic}
+\end{algorithm}

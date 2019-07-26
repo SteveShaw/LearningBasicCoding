@@ -1,0 +1,128 @@
+\section{449 --- Serialize and Deserialize BST}
+Serialization is the process of converting a data structure or object into a sequence of bits so that it can be stored in a file or memory buffer, or transmitted across a network connection link to be reconstructed later in the same or another computer environment.
+
+Design an algorithm to serialize and deserialize a \textbf{binary search tree}. There is no restriction on how your serialization/deserialization algorithm should work. You just need to ensure that a binary search tree can be serialized to a string and this string can be deserialized to the original tree structure.
+
+\textbf{The encoded string should be as compact as possible.}
+
+\paragraph{Note:} 
+\begin{itemize}
+\item Do not use class member/global/static variables to store states. Your serialize and deserialize algorithms should be stateless.
+\end{itemize}
+
+\subsection{Postorder traversal to optimise space for the tree structure}
+BST could be constructed from preorder or postorder traversal only. In brief, it's a consequence of two facts:
+
+\begin{itemize}
+\item Binary tree could be constructed from preorder/postorder and inorder traversal.
+\item Inorder traversal of BST is an array sorted in the ascending order: inorder is sorted preorder sequence.
+\end{itemize}
+That means that BST structure is already encoded in the preorder or postorder traversal and hence they are both suitable for the compact serialization.
+
+Serialization could be easily implemented with both strategies, in this case, preorder can be implemented more efficiently.
+
+\setcounter{lstlisting}{0}
+\begin{lstlisting}[style=customc, caption={preorder}]
+class Codec
+{
+public:
+
+    // Encodes a tree to a single string.
+    string serialize( TreeNode* root )
+    {
+
+        string s;
+
+        //serialize by preorder travese
+        preorder( root, s );
+
+        if( !s.empty() )
+        {
+            //remove last blanck
+            s.pop_back();
+        }
+
+
+        return s;
+    }
+
+    void preorder( TreeNode* node, string& s )
+    {
+        if( !node )
+        {
+            return;
+        }
+
+        s += to_string( node->val );
+        s.push_back( ' ' );
+
+
+        preorder( node->left, s );
+        preorder( node->right, s );
+
+    }
+
+
+
+
+    // Decodes your encoded data to tree.
+    TreeNode* deserialize( string data )
+    {
+        size_t start = 0;
+        return build( data, start, INT_MIN, INT_MAX );
+    }
+
+    //from characters to integer
+    int get_val( const char*s, size_t start, size_t end )
+    {
+        int x = 0;
+        for( size_t i = start; i < end; ++i )
+        {
+            x = x * 10 + ( s[i] - '0' );
+        }
+
+        return x;
+    }
+
+    //we need start as a reference type
+    //because we need this parameter to be changed
+    //during the recursion, so that the index in s can
+    //move forward
+    TreeNode* build( string& s, size_t& start, int low, int up )
+    {
+        if( start >= s.size() )
+        {
+            return nullptr;
+        }
+
+        //find index of next space
+        auto pos = s.find( ' ', start );
+
+        if( pos == string::npos )
+        {
+            pos = s.size();
+        }
+
+        int val = get_val( s.c_str(), start, pos );
+
+
+        if( ( val < low ) || ( val > up ) )
+        {
+            return nullptr;
+        }
+
+        //update next search start index
+        start = pos + 1;
+
+        TreeNode* node = new TreeNode( val );
+        //after left is done
+        //start will be updated
+        node->left = build( s, start, low, val );
+
+        node->right = build( s, start, val, up );
+
+        return node;
+    }
+};
+\end{lstlisting}
+

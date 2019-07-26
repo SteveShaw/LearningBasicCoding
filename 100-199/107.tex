@@ -1,0 +1,26 @@
+\section{107 --- Binary Tree Level Order Traversal II}
+Given a binary tree $T$, return the bottom-up level order traversal of its nodes' values. (i.e., from left to right, level by level from leaf to root).
+\par
+For example: Given binary tree
+\begin{figure}[H]
+\begin{tikzpicture}
+[mynode/.style={draw,circle,minimum size=10mm, fill=gray!20!}]
+\node(){};
+\node[mynode](3) {3};
+\node[mynode](9) [below = 8mm of 3, xshift=-10mm] {9};
+\node[mynode](20) [below = 8mm of 1, xshift=10mm] {20};
+\node[mynode](15) [below = 8mm of 20, xshift=-6mm] {15};
+\node[mynode](7) [below = 8mm of 20, xshift=6mm] {7};
+\draw[>=stealth,->] (3) -- (9);
+\draw[>=stealth,->] (3) -- (20);
+\draw[>=stealth,->] (20) -- (15);
+\draw[>=stealth,->] (20) -- (7);
+\end{tikzpicture}
+\end{figure}
+return its bottom-up level order traversal as:
+\par
+$\left((15,7),\ (9,20),\ (3)\right)$
+\subsection{BFS}
+\begin{CJK*}{UTF8}{gbsn}
+非常容易的题目，用一个queue进行BFS, 然后reverse得到的level遍历数组即可。
+\end{CJK*}

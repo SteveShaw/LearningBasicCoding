@@ -1,0 +1,18 @@
+\section{158 --- Read N Characters Given Read4 II - Call multiple times }
+The API: \texttt{int read4(char *buf)} reads 4 characters at a time from a file.
+\par
+The return value is the actual number of characters read.
+\par
+For example, it returns 3 if there is only 3 characters left in the file.
+\par
+By using the read4 API, implement the function \texttt{int read(char *p, int n)} that reads $n$ characters from the file.
+\paragraph{Note:}
+\begin{itemize}
+\item The \texttt{read} function may be called \texttt{multiple} times..
+\end{itemize}
+\subsection{Analysis}
+\begin{CJK*}{UTF8}{gbsn}
+这道题是之前157 --- \textbf{Read N Characters Given Read4}的拓展，不同点在于这里\texttt{read}函数可以调用多次，那么难度就增加了，例如：要读取的文件buffer为\texttt{ab}，然后执行read(1)，read(2)，那么第一次调用\texttt{read(1)}后，从buffer中读出一个字符，那么就是第一个字符\texttt{a}，然后又调用了一个\texttt{read(2)}，但是buffer中只剩一个\texttt{b}了，所以就把取出的结果就是\texttt{b}。
+\par
+另外一个例子更能说明不同： 文件的buffer为\texttt{a}, 分别执行\texttt{read(0)}，\texttt{read(1)}，\texttt{read(2)}。第一次调用read(0)，不会读取任何字符。第二次调用\texttt{read(1)}，取一个字符，而buffer中只有一个字符\texttt{a}，因此返回\texttt{a}。然后调用read(2)，但是这时候buffer中没有字符了，所以同样不会读取任何字符。
+\end{CJK*}

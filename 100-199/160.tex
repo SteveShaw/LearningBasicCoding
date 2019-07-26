@@ -1,0 +1,195 @@
+\section{160 --- Intersection of Two Linked Lists}
+Write a program to find the node at which the intersection of two singly linked lists begins.
+\par
+For example, the following two linked lists:
+\begin{figure}[H]
+\begin{tikzpicture}
+[mynode/.style={draw,circle,minimum size=1cm, fill=gray!20!}]
+\node(){};
+\node[minimum size=1cm](A) {A:};
+\node[minimum size=1cm](E)[right=8mm of A] {};
+\node[mynode](a1)[right=8mm of E] {$a_1$};
+\node[mynode](a2)[right=8mm of a1] {$a_2$};
+\node[minimum size=1cm](B) [below=1.6cm of A]{B:};
+\node[mynode](b1)[right=8mm of B] {$b_1$};
+\node[mynode](b2)[right=8mm of b1] {$b_2$};
+\node[mynode](b3)[right=8mm of b2] {$b_3$};
+\node[mynode](c1)[right=8mm of b3, yshift=1.2cm] {$c_1$};
+\node[mynode](c2)[right=8mm of c1] {$c_2$};
+\node[mynode](c3)[right=8mm of c2] {$c_3$};
+\draw[>=stealth,->] (a1) -- (a2);
+\draw[>=stealth,->] (a2) to[bend left=15] (c1);
+\draw[>=stealth,->] (b1) -- (b2);
+\draw[>=stealth,->] (b2) -- (b3);
+\draw[>=stealth,->] (b3) to[bend right=15] (c1);
+\draw[>=stealth,->] (a2) to[bend left=15] (c1);
+\draw[>=stealth,->] (c1) -- (c2);
+\draw[>=stealth,->] (c2) -- (c3);
+\end{tikzpicture}
+\end{figure}
+\par
+begin to intersect at node $c_1$.
+\paragraph{Example 1:}
+\begin{flushleft}
+\textbf{Input}:
+\\
+\begin{figure}[H]
+\begin{tikzpicture}
+[mynode/.style={draw,circle,minimum size=1cm, fill=gray!20!}]
+\node(){};
+\node[minimum size=1cm](A) {A:};
+\node[minimum size=1cm](E)[right=8mm of A] {};
+\node[mynode](a1)[right=8mm of E] {4};
+\node[mynode](a2)[right=8mm of a1] {1};
+\node[minimum size=1cm](B) [below=1.6cm of A]{B:};
+\node[mynode](b1)[right=8mm of B] {5};
+\node[mynode](b2)[right=8mm of b1] {0};
+\node[mynode](b3)[right=8mm of b2] {1};
+\node[mynode](c1)[right=8mm of b3, yshift=1.2cm] {8};
+\node[mynode](c2)[right=8mm of c1] {4};
+\node[mynode](c3)[right=8mm of c2] {5};
+\draw[>=stealth,->] (a1) -- (a2);
+\draw[>=stealth,->] (a2) to[bend left=15] (c1);
+\draw[>=stealth,->] (b1) -- (b2);
+\draw[>=stealth,->] (b2) -- (b3);
+\draw[>=stealth,->] (b3) to[bend right=15] (c1);
+\draw[>=stealth,->] (a2) to[bend left=15] (c1);
+\draw[>=stealth,->] (c1) -- (c2);
+\draw[>=stealth,->] (c2) -- (c3);
+\end{tikzpicture}
+\end{figure}
+\textbf{Output}: Reference of the node with value $= 8$
+\\
+\textbf{Input Explanation}: The intersected node's value is 8 (note that this must not be 0 if the two lists intersect). From the head of $A$, it reads as $[4,1,8,4,5]$. From the head of $B$, it reads as $[5,0,1,8,4,5]$. There are 2 nodes before the intersected node in $A$; There are 3 nodes before the intersected node in $B$.
+\end{flushleft}
+
+\paragraph{Example 2:}
+\begin{flushleft}
+\textbf{Input}:
+\begin{figure}[H]
+\begin{tikzpicture}
+[mynode/.style={draw,circle,minimum size=1cm, fill=gray!20!}]
+\node(){};
+\node[minimum size=1cm](A) {A:};
+\node[mynode](a1)[right=8mm of A] {0};
+\node[mynode](a2)[right=8mm of a1] {9};
+\node[mynode](a3)[right=8mm of a2] {1};
+\node[minimum size=1cm](B) [below=1.6cm of A]{B:};
+\node[minimum size=1cm](E1)[right=8mm of B] {};
+\node[minimum size=1cm](E2)[right=8mm of E1] {};
+\node[mynode](b1)[right=8mm of E2] {3};
+\node[mynode](c1)[right=8mm of b3, yshift=1.2cm] {2};
+\node[mynode](c2)[right=8mm of c1] {4};
+\draw[>=stealth,->] (a1) -- (a2);
+\draw[>=stealth,->] (a2) -- (a3);
+\draw[>=stealth,->] (a3) to[bend left=15] (c1);
+\draw[>=stealth,->] (b1) to[bend right=15] (c1);
+\draw[>=stealth,->] (c1) -- (c2);
+\end{tikzpicture}
+\end{figure}
+\textbf{Output}: Reference of the node with value $= 2$
+\\
+\textbf{Input Explanation}: The intersected node's value is 2 (note that this must not be 0 if the two lists intersect). From the head of $A$, it reads as $[0,9,1,2,4]$. From the head of $B$, it reads as $[3,2,4]$. There are 3 nodes before the intersected node in $A$; There are 1 node before the intersected node in $B$.
+\end{flushleft}
+
+\paragraph{Example 3:}
+\begin{flushleft}
+\textbf{Input}:
+\\
+\begin{figure}[H]
+\begin{tikzpicture}
+[mynode/.style={draw,circle,minimum size=1cm, fill=gray!20!}]
+\node(){};
+\node[minimum size=1cm](A) {A:};
+\node[mynode](a1)[right=8mm of A] {2};
+\node[mynode](a2)[right=8mm of a1] {6};
+\node[mynode](a3)[right=8mm of a2] {4};
+\node[minimum size=1cm](B) [below=1.6cm of A]{B:};
+\node[minimum size=1cm](E)[right=8mm of B] {};
+\node[mynode](b1)[right=8mm of E] {1};
+\node[mynode](b2)[right=8mm of b1] {5};
+\draw[>=stealth,->] (a1) -- (a2);
+\draw[>=stealth,->] (a2) -- (a3);
+\draw[>=stealth,->] (b1) -- (b2);
+\end{tikzpicture}
+\end{figure}
+\textbf{Output}: Reference of the node with value $= 8$
+\\
+\textbf{Input Explanation}: From the head of $A$, it reads as $[2,6,4]$. From the head of $B$, it reads as $[1,5]$. Since the two lists do not intersect, intersectVal must be 0
+\\.
+\textbf{Explanation}: The two lists do not intersect, so return \texttt{null}.
+\end{flushleft}
+\paragraph{Notes:}
+\begin{itemize}
+\item If the two linked lists have no intersection at all, return \texttt{null}.
+\item The linked lists must retain their original structure after the function returns.
+\item You may assume there are no cycles anywhere in the entire linked structure.
+\item Your code should preferably run in $O(n)$ time and use only $O(1)$ memory.
+\end{itemize}
+\subsection{Two Pointers}
+\begin{itemize}
+\item Maintain two pointers $x$ and $y$ initialized at the head of $A$ and $B$, respectively. Then let them both traverse through the lists, one node at a time.
+\item When $x$ reaches the end of a list, then redirect it to the head of $B$; similarly when $y$ reaches the end of a list, redirect it the head of $A$.
+\item If at any point $x$ meets $y$, then $x/y$ is the intersection node.
+\item If two lists have intersection, then their last nodes must be the same one. So when $x$ or $y$ reaches the end of a list, record the last element of $A$ and $B$ respectively. If the two last elements are not the same one, then the two lists have no intersections.
+\end{itemize}
+\setcounter{lstlisting}{0}
+\begin{lstlisting}[style=customc, caption={Reference Code}]
+ListNode *getIntersectionNode( ListNode *headA, ListNode *headB ) {
+
+    auto x = headA;
+    auto y = headB;
+
+    if( !x || !y )
+    {
+        return nullptr;
+    }
+
+    ListNode* lastA = nullptr;
+
+    while( x->next )
+    {
+        x = x->next;
+    }
+
+    while( y->next )
+    {
+        y = y->next;
+    }
+
+	// A and B have no intersection
+    if( x != y )
+    {
+        return nullptr;
+    }
+
+    x = headA;
+    y = headB;
+
+    int x0 = 0;
+    int y0 = 1;
+
+    ListNode* A[2]  = {headA, headB};
+
+    while( x != y )
+    {
+        x = x->next;
+
+        if( !x )
+        {
+            x0 = 1 - x0;
+            x = A[x0];
+        }
+
+        y = y->next;
+
+        if( !y )
+        {
+            y0 = 1 - y0;
+            y = A[y0];
+        }
+    }
+
+    return x;
+}
+\end{lstlisting}

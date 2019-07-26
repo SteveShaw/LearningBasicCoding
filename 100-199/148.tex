@@ -1,0 +1,140 @@
+\section{148 --- Sort List}
+Sort a linked list $H$ in $O(n\log_2 n)$ time using constant space complexity.
+\paragraph{Example 1:}
+\begin{flushleft}
+\textbf{Input}:
+\begin{figure}[H]
+\begin{tikzpicture}
+[mynode/.style={draw,circle,minimum size=8mm, fill=gray!20!}]
+\node(){};
+\node[mynode](1) {4};
+\node[mynode](2)[right=12mm of 1] {2};
+\node[mynode](3)[right=12mm of 2] {1};
+\node[mynode](4)[right=12mm of 3] {3};
+\draw[>=stealth,->] (1) -- (2);
+\draw[>=stealth,->] (2) -- (3);
+\draw[>=stealth,->] (3) -- (4);
+\end{tikzpicture}
+\end{figure}
+\textbf{Output}: 
+\begin{figure}[H]
+\begin{tikzpicture}
+[mynode/.style={draw,circle,minimum size=8mm, fill=gray!20!}]
+\node(){};
+\node[mynode](1) {1};
+\node[mynode](2)[right=12mm of 1] {2};
+\node[mynode](3)[right=12mm of 2] {3};
+\node[mynode](4)[right=12mm of 3] {4};
+\draw[>=stealth,->] (1) -- (2);
+\draw[>=stealth,->] (2) -- (3);
+\draw[>=stealth,->] (3) -- (4);
+\end{tikzpicture}
+\end{figure}
+\end{flushleft}
+\paragraph{Example 2:}
+\begin{flushleft}
+\textbf{Input}:
+\begin{figure}[H]
+\begin{tikzpicture}
+[mynode/.style={draw,circle,minimum size=8mm, fill=gray!20!}]
+\node(){};
+\node[mynode](1) {$-1$};
+\node[mynode](2)[right=12mm of 1] {5};
+\node[mynode](3)[right=12mm of 2] {3};
+\node[mynode](4)[right=12mm of 3] {4};
+\node[mynode](5)[right=12mm of 4] {0};
+\draw[>=stealth,->] (1) -- (2);
+\draw[>=stealth,->] (2) -- (3);
+\draw[>=stealth,->] (3) -- (4);
+\draw[>=stealth,->] (4) -- (5);
+\end{tikzpicture}
+\end{figure}
+\textbf{Output}: 
+\begin{figure}[H]
+\begin{tikzpicture}
+[mynode/.style={draw,circle,minimum size=8mm, fill=gray!20!}]
+\node(){};
+\node[mynode](1) {$-1$};
+\node[mynode](2)[right=12mm of 1] {0};
+\node[mynode](3)[right=12mm of 2] {3};
+\node[mynode](4)[right=12mm of 3] {4};
+\node[mynode](5)[right=12mm of 4] {5};
+\draw[>=stealth,->] (1) -- (2);
+\draw[>=stealth,->] (2) -- (3);
+\draw[>=stealth,->] (3) -- (4);
+\draw[>=stealth,->] (4) -- (5);
+\end{tikzpicture}
+\end{figure}
+\end{flushleft}
+\subsection{Merge Sort}
+由于链表的特性，Merge Sort是最适合的排序方法。首先把原链表分成左右两部分，分别对这两部分调用排序函数，然后将这两部分排序号的链表进行merge。
+\par
+另外有一点需要注意，用快慢指针寻找链表的中间位置应该是
+\begin{lstlisting}[style=customc]
+fast = head;
+slow = head;
+while(fast->next && fast->next->next)
+{
+    fast = fast->next->next;
+    slow = slow->next;
+}
+//now slow is the middle node of the list, i.e.,  
+//if we count 0 from head, the number of the slow is
+//floor(L/2). L is the number of nodes in the list
+\end{lstlisting}
+\setcounter{algorithm}{0}
+\begin{algorithm}[H]
+\caption{Merge Sort}
+\begin{algorithmic}[1]
+\Procedure{SortList}{$H$}
+\If{$H=\texttt{null}$ \textbf{or} $H.\texttt{next}=\texttt{null}$}
+\State \Return $H$
+\EndIf
+\State $F:=H$, $S:=H$ \Comment Fast and Slow pointers
+\While{$F.\texttt{next}\neq\texttt{null}$ \textbf{and} $F.\texttt{next}.\texttt{next}\neq\texttt{null}$ }
+\State $F\gets F.\texttt{next}$
+\State $F\gets F.\texttt{next}$
+\State $S\gets S.\texttt{next}$
+\EndWhile
+\State $H_1:=S.\texttt{next}$ \Comment The header of right list
+\State $S.\texttt{next}\gets\texttt{null}$ \Comment Break the original list
+\State $t_0:=\texttt{SortList}(H)$ \Comment Sort left half
+\State $t_1:=\texttt{SortList}(H_1)$ \Comment Sort right half
+\State $\hat{H}:=\texttt{Merge}(H, H_1)$ \Comment Merge the sorted two lists
+\State \Return $\hat{H}$
+\EndProcedure
+\end{algorithmic}
+\end{algorithm}
+Function \texttt{Merge} merge two linked lists $L_1$ and $L_2$ by ascending order and return the header of the merged list
+\begin{algorithm}[H]
+\caption{Merge Helper Function}
+\begin{algorithmic}[1]
+\Function{Merge}{$L_1, L_2$}
+\State Create a dummy header $D$
+\State $\ell:=D$
+\algstore{148algo}
+\end{algorithmic}
+\end{algorithm}
+\begin{algorithm}[H]
+\begin{algorithmic}[1]
+\algrestore{148algo}
+\While{$L_1\neq\texttt{null}$ \textbf{and} $L_2\neq\texttt{null}$}
+\If{$L_1.\texttt{value}<L_2.\texttt{value}$}
+\State $\ell.\texttt{next}\gets L_1$
+\State $L_1\gets L_1.\texttt{next}$
+\Else
+\State $\ell.\texttt{next}\gets L_2$
+\State $L_2\gets L_2.\texttt{next}$
+\EndIf
+\State $\ell\gets\ell.\texttt{next}$ \Comment Move the merged list pointer to next node
+\EndWhile
+\If{$L_1\neq\texttt{null}$} \Comment $L_1$ still has elements 
+\State $\ell.\texttt{next}\gets L_1$ \Comment Link the merged list to the remainings of $L_1$
+\EndIf
+\If{$L_2\neq\texttt{null}$} \Comment $L_2$ still has elements 
+\State $\ell.\texttt{next}\gets L_2$ \Comment Link the merged list to the remainings of $L_2$
+\EndIf
+\State \Return $D.\texttt{next}$ \Comment The dummy header's next node is the header of merged list
+\EndFunction
+\end{algorithmic}
+\end{algorithm}

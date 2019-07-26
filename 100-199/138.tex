@@ -1,0 +1,276 @@
+\section{138 --- Copy List with Random Pointer}
+\definecolor{gray1}{RGB}{229,229,229}
+\definecolor{blue1}{RGB}{178,214,239}
+\definecolor{red1}{RGB}{255,187,177}
+\definecolor{red2}{RGB}{201,45,57}
+\definecolor{blue2}{RGB}{12,124,186}
+A linked list $L$ is given such that each node contains an additional random pointer which could point to any node in the list or \texttt{null}.
+\par
+Return a deep copy of the list.
+\subsection{Analysis}
+Lets first look at how the linked list looks like
+\begin{figure}[H]
+\begin{tikzpicture}
+[graynode/.style={draw,rectangle,minimum width=10mm, minimum height=8mm, fill=gray1},
+rednode/.style={draw,rectangle,minimum width=10mm, minimum height=8mm, fill=red1},
+bluenode/.style={draw,rectangle,minimum width=10mm, minimum height=8mm, fill=blue1},
+]
+\node(){};
+\node[graynode](1) {4};
+\node[rednode](2) [anchor=west] at (1.east) {};
+\node[bluenode](3) [anchor=west] at (2.east) {};
+\node[graynode](1a) [right=12mm of 3] {7};
+\node[rednode](2a) [anchor=west] at (1a.east) {};
+\node[bluenode](3a) [anchor=west] at (2a.east) {};
+\node[graynode](1b) [right=12mm of 3a] {$-2$};
+\node[rednode](2b) [anchor=west] at (1b.east) {};
+\node[bluenode](3b) [anchor=west] at (2b.east) {};
+\draw[fill=red2](2.center) circle [radius=1.5mm];
+\draw[>=stealth,->,red2, line width=0.5mm] (2.center) to [out=60] (1b.north);
+\draw[fill=red2](2a.center) circle [radius=1.5mm];
+\draw[>=stealth,->,red2, line width=0.5mm] (2a.center) to [out=-80, in=-60] (1.south);
+\draw[fill=blue2](3.center) circle [radius=1.5mm];
+\draw[>=stealth,->,blue2, line width=0.5mm] (3.center) to (1a.west);
+\draw[fill=blue2](3a.center) circle [radius=1.5mm];
+\draw[>=stealth,->,blue2, line width=0.5mm] (3a.center) to (1b.west);
+\draw[fill=red2] (2b.center) circle [radius=1.5mm];
+\draw[fill=blue2] (3b.center) circle [radius=1.5mm];
+\node (n1) [below=4mm of 2b] {\small None};
+\draw[>=stealth,->,red2,line width=0.5mm] (2b.center) to (n1);
+\node (n2) [below=4mm of 3b] {\small None};
+\draw[>=stealth,->,blue2,line width=0.5mm] (3b.center) to (n2);
+\node[draw, rectangle, minimum size=6mm, fill=red1] (random) [below=22mm of 3, xshift=3mm] {};
+\node[minimum size=6mm] (exp1) [right=1mm of random] {\footnotesize Random Pointer};
+\node[draw, rectangle, minimum size=6mm, fill=blue1] (np) [below=22mm of 3a, xshift=3mm] {};
+\node[minimum size=6mm] (exp2) [right=1mm of np] {\footnotesize Next Pointer};
+\end{tikzpicture}
+\end{figure}
+In the above diagram, for a given node the \textcolor{blue}{next} pointer points to the next node in the linked list. The next pointer is something standard for a linked list and this is what \textbf{links} the nodes together. What is interesting about the diagram and this problem is the \textcolor{blue}{random} pointer which, as the name suggests can point to any node in the linked list or can be a null.
+\subsection{Recursive}
+The basic idea behind the recursive solution is to consider the linked list like a \textbf{graph}. Every node of the Linked List has 2 pointers (edges in a graph). Since, random pointers add the randomness to the structure we might visit the same node again leading to cycles.
+\begin{figure}[H]
+\begin{tikzpicture}
+[graynode/.style={draw,rectangle,minimum width=10mm, minimum height=8mm, fill=gray1},
+rednode/.style={draw,rectangle,minimum width=10mm, minimum height=8mm, fill=red1},
+bluenode/.style={draw,rectangle,minimum width=10mm, minimum height=8mm, fill=blue1},
+]
+\node(){};
+\node[graynode](1) {\textbf{4}};
+\node[rednode](2) [anchor=west] at (1.east) {};
+\node[bluenode](3) [anchor=west] at (2.east) {};
+\node[graynode](1a) [right=12mm of 3] {7};
+\node[rednode](2a) [anchor=west] at (1a.east) {};
+\node[bluenode](3a) [anchor=west] at (2a.east) {};
+\draw[fill=red2](2a.center) circle [radius=1.5mm];
+\draw[>=stealth,->,red2, line width=0.5mm] (2a.center) to [out=-80, in=-60] (1.south);
+\draw[fill=blue2](3.center) circle [radius=1.5mm];
+\draw[>=stealth,->,blue2, line width=0.5mm] (3.center) to (1a.west);
+\node[draw, rectangle, minimum size=6mm, fill=red1] (random) [below=22mm of 1, xshift=3mm] {};
+\node[minimum size=6mm] (exp1) [right=1mm of random] {\footnotesize Random Pointer};
+\node[draw, rectangle, minimum size=6mm, fill=blue1] (np) [below=22mm of 1a, xshift=3mm] {};
+\node[minimum size=6mm] (exp2) [right=1mm of np] {\footnotesize Next Pointer};
+\end{tikzpicture}
+\end{figure}
+In the diagram above we can see the random pointer points back to the previously seen node hence leading to a cycle. We need to take care of these cycles in the implementation.
+\par
+All we do in this approach is to just traverse the graph and clone it. Cloning essentially means creating a new node for every unseen node you encounter. The traversal part will happen recursively in a depth first manner. Note that we have to keep track of nodes already processed because, as pointed out earlier, we can have cycles because of the random pointers.
+\par
+The steps of the algorithm implementation include
+\begin{enumerate}
+    \item Start traversing the graph from \textcolor{red}{head} node. Since we view the list as a graph, below is the graph representation of the above linked list example.
+\begin{figure}[H]
+\begin{tikzpicture}
+[graynode/.style={draw,rectangle,minimum width=10mm, minimum height=8mm, fill=gray1},
+rednode/.style={draw,rectangle,minimum width=10mm, minimum height=8mm, fill=red1},
+bluenode/.style={draw,rectangle,minimum width=10mm, minimum height=8mm, fill=blue1},
+]
+\node[draw, ellipse, minimum height = 3cm, minimum width = 4.2cm, fill=gray1] (node1) {};
+\node[rednode](2) [anchor=center] at (node1.center) {};
+\node[graynode](1) [anchor=east] at (2.west) {\textbf{4}};
+\node[bluenode](3) [anchor=west] at (2.east) {};
+\draw[fill=red2] (2.center) circle [radius=1.5mm];
+\draw[fill=blue2] (3.center) circle [radius=1.5mm];
+\node (A) [above=1mm of 2] {\small \textbf{A}};
+\node (S) [above=7mm of node1] {\small \textbf{Head}};
+\draw[>=stealth,->,line width=0.5mm] (S.south) to (node1.north);
+%node 2 south west
+\node[draw, ellipse, minimum height = 3cm, minimum width = 4.2cm, fill=gray1] (node2) [below=2.8cm of node1, xshift=-4.0cm] {};
+\node[rednode](2a) [anchor=center] at (node2.center) {};
+\node[graynode](1a) [anchor=east] at (2a.west) {\textbf{7}};
+\node[bluenode](3a) [anchor=west] at (2a.east) {};
+\draw[fill=red2] (2a.center) circle [radius=1.5mm];
+\draw[fill=blue2] (3a.center) circle [radius=1.5mm];
+\node (A) [above=1mm of 2a] {\small \textbf{B}};
+%node 3 south east
+\node[draw, ellipse, minimum height = 3cm, minimum width = 4.2cm, fill=gray1] (node3) [below=2.8cm of node1, xshift=4.0cm] {};
+\node[rednode](2b) [anchor=center] at (node3.center) {};
+\node[graynode](1b) [anchor=east] at (2b.west) {$\mathbf{-2}$};
+\node[bluenode](3b) [anchor=west] at (2b.east) {};
+\draw[fill=red2] (2b.center) circle [radius=1.5mm];
+\draw[fill=blue2] (3b.center) circle [radius=1.5mm];
+\node (A) [above=1mm of 2b] {\small \textbf{C}};
+%draw arrows node1 between node2
+\path[name path=e1] (node1.center) ellipse (2.1cm and 1.5cm);
+\path[name path=e2] (node2.center) ellipse (2.1cm and 1.5cm);
+\path[name path=l1] (2.center) -- (2a.center);
+\path[name path=l2] (1.center) -- (1a.center);
+\path[name intersections={of=e1 and l1, by=I1}];
+\path[name intersections={of=e2 and l1, by=I2}];
+\path[name intersections={of=e1 and l2, by=I3}];
+\path[name intersections={of=e2 and l2, by=I4}];
+\coordinate (t1) at (I1);
+\coordinate (t2) at (I2);
+\coordinate (t3) at (I3);
+\coordinate (t4) at (I4);
+\draw[>=stealth,->,line width=0.5mm,red2] (t2) -- (t1);
+\draw[>=stealth,->,line width=0.5mm,blue2] (t3) -- (t4);
+%draw arrows node2 to node3
+\draw[>=stealth,->,line width=0.5mm,blue2] (node2) -- (node3);
+%draw arrows node1 to node3
+\draw[>=stealth,->,line width=0.5mm,red2] (node1) -- (node3);
+%draw explain random pointer
+\node[draw, rectangle, minimum size=6mm, fill=red1] (random) [below=15mm of node2, xshift=-6mm] {};
+\node[minimum size=6mm] (exp1) [right=1mm of random] {\footnotesize Random Pointer};
+%draw explain next pointer
+\node[draw, rectangle, minimum size=6mm, fill=blue1] (np) [below=15mm of node3, xshift=-9mm] {};
+\node[minimum size=6mm] (exp2) [right=1mm of np] {\footnotesize Next Pointer};
+\end{tikzpicture}
+\end{figure}
+    In the above example, \textcolor{red}{head} is where we begin our graph traversal.
+    \item If we already have a cloned copy of the current node in the visited dictionary, we use the cloned node reference.
+    \item If we don't have a cloned copy in the visited dictionary, we create a new node and add it to the visited dictionary.
+    \item We then make \textbf{two recursive calls}, one using the random pointer and the other using next pointer. The diagram from step 1, shows random and next pointers in red and blue color respectively. Essentially we are making recursive calls for the children of the current node. In this implementation, the children are the nodes pointed by the random and the next pointers.
+\end{enumerate}
+\setcounter{algorithm}{0}
+\begin{algorithm}[H]
+\caption{Recursion}
+\begin{algorithmic}[1]
+\Procedure{CopyRandomList}{$L$}
+\State $M:=\emptyset$ \Comment The hash map
+\State $\hat{L}:=\texttt{DFS}(L, M)$
+\State \Return $\hat{L}$
+\EndProcedure
+\end{algorithmic}
+\end{algorithm}
+Function \texttt{DFS} recursively create a clone list from a input list node $L$. $M$ is a hash map whose key is the original node and value is the clone node
+\begin{algorithm}[H]
+\caption{DFS Helper Function}
+\begin{algorithmic}[1]
+\Function{DFS}{$L, M$}
+\If{$L=\emptyset$}
+\State \Return $L$
+\EndIf
+\If{$L\in M$}
+\State \Return $M[L]$
+\EndIf
+\State Create a new node $T$ which has same node value as $L$
+\State $M[L]:=T$
+\State $T.\texttt{next}\gets \texttt{DFS}(L.\texttt{next}, M)$
+\State $T.\texttt{random}\gets \texttt{DFS}(L.\texttt{random}, M)$
+\State \Return $T$
+\EndFunction
+\end{algorithmic}
+\end{algorithm}
+\subsection{Iterative With O(n) Space}
+This approach does not model the linked list as a graph, instead simply treat it as it is. When we are iterating over the list, we can create new nodes via the random pointer or the next pointer whichever points to a node that doesn't exist in our visited dictionary.
+\par
+The overall algorithm takes following steps
+\begin{enumerate}
+    \item Traverse the linked list starting at \textcolor{red}{head} of the linked list.
+        \begin{figure}[H]
+        \centering
+        \includegraphics[width=12cm]{138-4.png}
+        \end{figure}
+    In the above diagram we create a new \textbf{cloned} \textcolor{red}{head} node. The cloned node is shown using dashed lines. In the implementation we would even store the reference of this newly created node in a visited dictionary.
+    \item Random Pointer
+    \begin{itemize}
+        \item If the \textcolor{red}{random} pointer of the current node $i$ points to the a node $j$ and a clone of $j$ already exists in the visited dictionary, we will simply use the cloned node reference from the visited dictionary.
+        \item If the \textcolor{red}{random} pointer of the current node $i$ points to the a node $j$ which has not been created yet, we create a new node corresponding to $j$ and add it to the visited dictionary.
+    \end{itemize}
+        \begin{figure}[H]
+        \centering
+        \includegraphics[width=12cm]{138-5.png}
+        \end{figure}    
+    In the above diagram the \textcolor{red}{random} pointer of node $A$ points to a node $C$. Node $C$ which was not visited yet as we can see from the previous diagram. Hence we create a new cloned $C^{'}$ node corresponding to node $C$ and add it to visited dictionary.
+    \item Next Pointer
+    \begin{itemize}
+        \item If the \textcolor{red}{next} pointer of the current node $i$ points to the a node $j$ and a clone of $j$ already exists in the visited dictionary, we will simply use the cloned node reference from the visited dictionary.
+        \item If the \textcolor{red}{next} pointer of the current node $i$ points to the a node $j$ which has not been created yet, we create a new node corresponding to $j$ and add it to the visited dictionary.
+    \end{itemize}
+        \begin{figure}[H]
+        \centering
+        \includegraphics[width=12cm]{138-6.png}
+        \end{figure}     
+    In the above diagram the \textcolor{red}{next} pointer of node $A$ points to a node $B$. Node $B$ which was not visited yet as we can see from the previous diagram. Hence we create a new cloned $B^{'}$ node corresponding to node $B$ and add it to visited dictionary.
+    \item We repeat steps 2 and 3 until we reach the end of the linked list.
+    In the above diagram, the \textcolor{red}{random} pointer of node $B$ points to an already visited node $A$. Hence in step 2, we don't create a new copy for the clone. Instead we point \textcolor{red}{random} pointer of cloned node $B^{'}$  to already existing cloned node  $A^{'}$.
+    \par
+    Also, the \textcolor{red}{next} pointer of node $B$ points to an already visited node $C$. Hence in step 3, we don't create a new copy for the clone. Instead we point \textcolor{red}{next} pointer of cloned node $B^{'}$ to already existing cloned node $C^{'}$.
+\end{enumerate}
+\begin{algorithm}[H]
+\caption{Iterative With O(n) Memory}
+\begin{algorithmic}[1]
+\Procedure{CopyRandomList}{$L$}
+\If{$L=\texttt{null}$}
+\State \Return \texttt{null}
+\EndIf
+\State $M:=\emptyset$ \Comment The hash map
+\State $n:=L$
+\State Create a new node $\hat{n}$ with value of $n$
+\algstore{138algo}
+\end{algorithmic}
+\end{algorithm}
+\begin{algorithm}[H]
+\begin{algorithmic}[1]
+\algrestore{138algo}
+\State $M[n]:=\hat{n}$
+\While{$n\neq\texttt{null}$}
+\State $r:=n.\texttt{random}$ \Comment The random pointer of $n$
+\If{$r\in M$}
+\State $\hat{n}.\texttt{random}\gets M[r]$
+\Else
+\State Create a new node $\hat{r}$ with value of $r$
+\State $M[r]:=\hat{r}$
+\State $n.\texttt{random}\gets \hat{r}$
+\EndIf
+\State $t:=n.\texttt{next}$ \Comment The next pointer of $n$
+\If{$t\in M$}
+\State $\hat{n}.\texttt{next}\gets M[t]$
+\Else
+\State Create a new node $\hat{t}$ with value of $t$
+\State $M[t]:=\hat{t}$
+\State $n.\texttt{next}\gets \hat{t}$
+\EndIf
+\State $n\gets n.\texttt{next}$ \Comment Move old node to next
+\State $\hat{n}\gets \hat{n}.\texttt{next}$ \Comment Move new node to next
+\EndWhile
+\State \Return $M[L]$ \Comment The value of the head of old list in the dictionary is the head of new list
+\EndProcedure
+\end{algorithmic}
+\end{algorithm}
+\subsection{Iterative with O(1) Space}
+In this approach, we do not need the hash map as in the previous approaches. Instead, we change the structure of the original linked list and \textbf{keep every cloned node next to its original node}. This interleaving of old and new nodes allows us to solve this problem without any extra space. 
+\par
+The algorithm has following steps
+\begin{enumerate}
+    \item Traverse the original list and clone the nodes as going and place the cloned copy next to its original node. This new linked list is essentially a \textbf{interweaving} of original and cloned nodes.
+        \begin{figure}[H]
+        \centering
+        \includegraphics[width=15cm]{138-7.png}
+        \end{figure}  
+    The cloned copy is created by using the value of original node. The \textcolor{red}{next} pointer is used to create the weaving. Note that this operation ends up modifying the original linked list. Suppose the original node is $n$ and the cloned node is $\hat{n}$, then we have
+    \begin{align*}
+        \hat{n}.\texttt{next} & \gets n.\texttt{next}\\
+        n.\texttt{next} &\gets \hat{n}
+    \end{align*}
+    \item Iterate the list having both the new and old nodes intertwined with each other and use the original nodes' random pointers to assign references to random pointers for cloned nodes. For example, If $B$ has a random pointer to $A$, this means $B^{'}$ has a random pointer to $A^{'}$.
+        \begin{figure}[H]
+        \centering
+        \includegraphics[width=18cm]{138-8.png}
+        \end{figure}
+    \item Now that the \textcolor{red}{random} pointers are assigned to the correct node, the \textcolor{red}{next} pointers need to be correctly assigned to unwoven the current linked list and get back the original list and the cloned list.
+        \begin{figure}[H]
+        \centering
+        \includegraphics[width=18cm]{138-9.png}
+        \end{figure}    
+\end{enumerate}

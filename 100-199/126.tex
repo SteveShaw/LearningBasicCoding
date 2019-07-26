@@ -1,0 +1,178 @@
+\section{126 --- Word Ladder II}
+Given two words (begin word $\alpha$ and end word $\beta$), and a dictionary's word list $A$, find all shortest transformation sequence(s) from $\alpha$ to $\beta$, such that:
+\begin{itemize}
+\item Only one letter can be changed at a time
+\item Each transformed word must exist in the word list. Note that begin word $\alpha$ is not a transformed word.
+\end{itemize}
+\paragraph{Note:}
+\begin{itemize}
+\item Return an empty list if there is no such transformation sequence.
+\item All words have the same length.
+\item All words contain only lowercase alphabetic characters.
+\item You may assume no duplicates in the word list.
+\item You may assume begin word $\alpha$ and end word $\beta$ are non-empty and are not the same.
+\end{itemize}
+\paragraph{Example 1:}
+\begin{flushleft}
+\textbf{Input}: $\alpha = \text{hit}$, $\beta = \text{cog}$, $A = [\text{hot},\;\text{dot},\;\text{dog},\;\text{lot},\;\text{log},\;\text{cog}]$
+\\
+\textbf{Output}:
+\\
+$[[\text{hit},\;\text{hot},\;\text{dot},\;\text{dog},\;\text{cog}], [\text{hit},\;\text{hot},\;\text{lot},\;\text{log},\;\text{cog}]]$
+\end{flushleft}
+\paragraph{Example 2:}
+\begin{flushleft}
+\textbf{Input}: $\alpha = \text{hit}$, $\beta = \text{cog}$, $A = [\text{hot}, \text{dot}, \text{dog}, \text{lot}, \text{log}]$
+\\
+\textbf{Output}: $\emptyset$
+\\
+\textbf{Explanation}: The end word \textit{cog} is not in word list, therefore no possible transformation.
+\end{flushleft}
+\subsection{Bidirectional BFS}
+\begin{CJK*}{UTF8}{gbsn}
+假设同时从$\alpha$和$\beta$出发进行宽度优先扩展，如果可以在两个树的某一层找到相同的word，这时候就能确定最短距离了，即最早产生相同word的层数。以给出的例子说明，从begin word \textbf{hot}出发，其扩展出的BFS tree前三层如下所示
+\end{CJK*}
+\begin{figure}[H]
+\begin{tikzpicture}
+[mynode/.style={draw,circle,minimum size=10mm, fill=gray!20!}]
+\node(){};
+\node[mynode](1) {\scriptsize hit};
+\node[mynode](2)[below=8mm of 1] {\scriptsize hot};
+\node[mynode](3)[below=8mm of 2, xshift=-8mm] {\scriptsize dot};
+\node[mynode](4)[below=8mm of 2, xshift=8mm] {\scriptsize lot};
+\draw[>=stealth,->] (1) -- (2);
+\draw[>=stealth,->] (2) -- (3);
+\draw[>=stealth,->] (2) -- (4);
+\end{tikzpicture}
+\end{figure}
+\begin{CJK*}{UTF8}{gbsn}
+而从end word \textbf{cog}出发，其扩展出的BFS tree 前三层如下所示。
+\end{CJK*}
+\begin{figure}[H]
+\begin{tikzpicture}
+[mynode/.style={draw,circle,minimum size=10mm, fill=gray!20!}]
+\node(){};
+\node[mynode](1) {\scriptsize cog};
+\node[mynode](2)[below=8mm of 1, xshift=-8mm] {\scriptsize dog};
+\node[mynode](3)[below=8mm of 1, xshift=8mm] {\scriptsize log};
+\node[mynode](4)[below=8mm of 2] {\scriptsize dot};
+\node[mynode](5)[below=8mm of 3] {\scriptsize lot};
+\draw[>=stealth,->] (1) -- (2);
+\draw[>=stealth,->] (1) -- (3);
+\draw[>=stealth,->] (2) -- (4);
+\draw[>=stealth,->] (3) -- (5);
+\end{tikzpicture}
+\end{figure}
+\begin{CJK*}{UTF8}{gbsn}
+注意在上图中虽然\textbf{dog}也能transform到\textbf{log}，但是由于\textbf{log}也同样能从\textit{cog}中得到，而我们是为了得到最短的路径，所以\textbf{log}选择从\textit{cog}变换得到。同理，\textbf{dog}也由\textit{cog}转换得到，而不是从\textbf{log}。这样在具体实现时，我们需要将已经transform得到的word从保存的可transform的word list $A$中删除。这时候可以看到两个word扩展出的树的第三层有相同的word，因此这一层就是最短的路径。
+\par
+在实现时，用一个hash map记录每个word所transform出的单词，可能是一个也可能是多个，因此这个hash map的value就是一个array。由于我们是从两个方向同时进行DFS，因此每次选择DFS的开始层时，总是选择node最少的层开始，另外就是注意由于是两个方向，而hash map所记录的转换关系是单向的，即是从$\alpha$到$\beta$，所以如果当前处理的方向是从$\beta$到$\alpha$，那么在更新hash map时，要把tranform出的word作为key，而作为transform源头的word放入key对应的array中。
+\par
+有了最短路径后，我们就得到了每个word及其transform出的word，接下来就可以用递归即DFS的方式构建出path了。
+\end{CJK*}
+\setcounter{algorithm}{0}
+\begin{algorithm}[H]
+\caption{Bidirectional BFS Search + DFS Path Building}
+\begin{algorithmic}[1]
+\Procedure{FindLadders}{$\alpha,\;\beta,\;A$}
+\If{$\beta\notin A$} \Comment The end word is not in the word list
+\State \Return $\emptyset$ \Comment Cannot reach end word through $A$
+\EndIf
+\State $A\gets A\setminus \beta$ \Comment Remove end word from $A$
+\algstore{126algo}
+\end{algorithmic}
+\end{algorithm}
+\begin{algorithm}[H]
+\begin{algorithmic}[1]
+\algrestore{126algo}
+\State $x:=\emptyset,\ y:=\emptyset$ \Comment Two hash sets to simulate BFS tree
+\State $x\gets x + \alpha$ \Comment The forward BFS tree root
+\State $y\gets y + \alpha$ \Comment The backward BFS tree root
+\State $C:=\emptyset$ \Comment The hash map contains the words and transformed words from each word
+\State $b:=\texttt{false}$ \Comment Indicate if the two trees have same words in their respective current level
+\State $d:=0$ \Comment Indicate the type of current tree (0 is forward tree and 1 is backward tree)
+\While{$x\neq \emptyset$ \textbf{and} $y\neq\emptyset$ and $b:=\texttt{false}$}
+\For{$w \in x$}
+\State $A\gets A\setminus w$ \Comment Remove transformed words in $x$ from $A$ to avoid repeating search
+\EndFor
+\For{$w \in y$}
+\State $A\gets A\setminus w$ \Comment Remove transformed words in $y$ from $A$ to avoid repeating search
+\EndFor
+\If{$|x| \leq |y|$} \Comment $x$ has fewer or equal nodes than $y$
+\State $\texttt{Process}(x, y, C, A, b, \texttt{forward})$ \Comment Forward direction
+\Else 
+\State $\texttt{Process}(y, x, C, A, b, \texttt{backward})$ \Comment Backward direction
+\EndIf
+\EndWhile
+\State $P:=\emptyset$ \Comment The building path during recursive
+\State $\pi:=\emptyset$ \Comment The final results
+\State $\texttt{BuildPath}(\alpha, \beta, C, P, \pi)$ \Comment Build paths from $\alpha$ to $\beta$ from parent/children map $C$
+\State \Return $pi$
+\EndProcedure
+\end{algorithmic}
+\end{algorithm}
+\begin{CJK*}{UTF8}{gbsn}
+\texttt{Process}将BFS的tree当前level $L_0$ transform到$A$中允许的words，同时比较另外一个tree的当前Level $L_1$，看是否有相同的word，如果有相同的word，就表示已经找到最短路径的transform path了。如果没有，但是是$A$中的word，就把transform出的word加入到下一层level $L_n$中，最后swap $L_n$和$L$，使得$L$变为下一个level。
+\par
+两种情况下，都要根据是forward还是barward将word和transform出的word加入到parent--children map $C$中。
+\par
+最后，如果在$L_0$和$L_1$中找到相同的word，\text{Process}会修改$b$为\texttt{true}。
+\end{CJK*}
+\begin{algorithm}[H]
+\caption{Helper Function To Process BFS Tree}
+\begin{algorithmic}[1]
+\Function{Process}{$L_0, L_1, C, A, b, \texttt{Direction}$}
+\State $L_n:=\emptyset$ \Comment The hash set of next level from $L_0$
+\For{$w\in L_0$}
+\State $s:=w$ 
+\For{$i:=0 \to |s|$} \label{126for02}
+\State $e:=s[i]$ \Comment Current character
+\For{$g:=\texttt{char}(a)\to \texttt{char}(z)$ \textbf{and} $g\neq e$} \Comment try every letter from `a' to `z' \label{126for01}
+\State $s[i]\gets g$
+\If{$s\in L_1$} \Comment Found in current level of another tree \label{126if02}
+\State $b\gets \texttt{true}$
+\If{\texttt{Direction}=\texttt{Forward}} \Comment $L_0$ is current level of forward tree \label{126if01}
+\State $C[w]\gets C[w] + s$ \Comment Add $s$ as $w$'s children list
+\Else \Comment $L_0$ is current level of backward tree
+\State $C[s]\gets C[s] + w$ \Comment Add $w$ as $s$'s children list
+\EndIf \Comment End [\ref{126if01}]
+\Else \Comment $s$ is not current level of another tree
+\If{$b=\texttt{false}$} \Comment No matched word in current level of two trees \label{126if03}
+\State $L_n\gets L_n+s$ \Comment Add $s$ to next level
+\If{\texttt{Direction}=\texttt{Forward}} 
+\State $C[w]\gets C[w] + s$ 
+\Else 
+\State $C[s]\gets C[s] + w$ 
+\EndIf 
+\EndIf \Comment End [\ref{126if03}]
+\EndIf \Comment End [\ref{126if02}]
+\EndFor \Comment End [\ref{126for01}]
+\State $s[i]\gets e$ \Comment Restore $s$ to original word 
+\EndFor \Comment End [\ref{126for02}]
+\EndFor
+\State $\texttt{swap}(L_0, L_n)$ \Comment Update $L_0$ as its next level
+\EndFunction
+\end{algorithmic}
+\end{algorithm}
+\begin{CJK*}{UTF8}{gbsn}
+\texttt{BuildPath}则根据parent--children map $C$ 以及给定的begin word $w$和end word $\beta$，构建出所有可能的path，并将生成的path加入到最终结果$\pi$中。初始时，$w=\alpha$
+\end{CJK*}
+\begin{algorithm}[H]
+\caption{DFS Build Path}
+\begin{algorithmic}[1]
+\Function{BuildPath}{$w, \beta, P, C, \pi$}
+\If{$w:=\beta$} \Comment Reach the end
+\State $\pi\gets \pi + P$ \Comment Add current path
+\State \Return
+\EndIf
+\If{$w\notin C$} \Comment The begin word is not in $C$
+\State \Return \Comment Do nothing
+\EndIf
+\For{$s\in C[w]$} \Comment Test each transformed word from $w$
+\State $P\gets P + s$ \Comment Add $s$ to current path
+\State $\texttt{BuildPath}(s, \beta, P, C, \pi)$ \Comment Proceed to next word $s$
+\State $P\gets P - s$ \Comment Remove $s$ from current path
+\EndFor
+\EndFunction
+\end{algorithmic}
+\end{algorithm}

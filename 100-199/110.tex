@@ -1,0 +1,97 @@
+\section{110 --- Balanced Binary Tree}
+Given a binary tree $T$, determine if it is height-balanced.
+\par
+For this problem, a height-balanced binary tree is defined as: a binary tree in which the depth of the two subtrees of every node never differ by more than 1.
+\paragraph{Example 1:}
+\begin{flushleft}
+\textbf{Input}
+\begin{figure}[H]
+\begin{tikzpicture}
+[mynode/.style={draw,circle,minimum size=10mm, fill=gray!20!}]
+\node(){};
+\node[mynode](3) {3};
+\node[mynode](9) [below = 8mm of 3, xshift=-10mm] {9};
+\node[mynode](20) [below = 8mm of 1, xshift=10mm] {20};
+\node[mynode](15) [below = 8mm of 20, xshift=-6mm] {15};
+\node[mynode](7) [below = 8mm of 20, xshift=6mm] {7};
+\draw[>=stealth,->] (3) -- (9);
+\draw[>=stealth,->] (3) -- (20);
+\draw[>=stealth,->] (20) -- (15);
+\draw[>=stealth,->] (20) -- (7);
+\end{tikzpicture}
+\end{figure}
+\textbf{Output}: \texttt{true}
+\end{flushleft}
+\paragraph{Example 2:}
+\begin{flushleft}
+\textbf{Input}:
+\begin{figure}[H]
+\begin{tikzpicture}
+[mynode/.style={draw,circle,minimum size=5mm, fill=gray!20!}]
+\node(){};
+\node[mynode](1) {1};
+\node[mynode](2l) [below = 8mm of 1, xshift=-6mm] {2};
+\node[mynode](2r) [below = 8mm of 1, xshift=6mm] {2};
+\node[mynode](3l) [below = 8mm of 2l, xshift=-6mm] {3};
+\node[mynode](3r) [below = 8mm of 2l, xshift=6mm] {3};
+\node[mynode](4l) [below = 8mm of 3l, xshift=-6mm] {4};
+\node[mynode](4r) [below = 8mm of 3l, xshift=6mm] {4};
+\draw[>=stealth,->] (1) -- (2l);
+\draw[>=stealth,->] (1) -- (2r);
+\draw[>=stealth,->] (2l) -- (3l);
+\draw[>=stealth,->] (2l) -- (3r);
+\draw[>=stealth,->] (3l) -- (4l);
+\draw[>=stealth,->] (3l) -- (4r);
+\end{tikzpicture}
+\end{figure}
+\textbf{Output}: \texttt{false}
+ \end{flushleft}
+ \subsection{Recursion}
+ \begin{CJK*}{UTF8}{gbsn}
+根据题目中的定义，高度平衡二叉树是每一个结点的两个子树的深度差不能超过1，那么肯定需要一个求各个点深度的函数，然后对每个节点的两个子树来比较深度差，但是这种方法效率差，因为每一个点都会被上面的点计算深度时访问一次，优化后的方法是如果我们发现子树不平衡，则不计算具体的深度，而是直接返回-1。那么优化后的方法为：对于每一个节点，递归获得左右子树的深度，如果子树是平衡的，则返回真实的深度，若不平衡，直接返回$-1$
+\end{CJK*}
+\subsubsection{Algorithm}
+\setcounter{algorithm}{0}
+\begin{algorithm}[H]
+\caption{Recursion}
+\begin{algorithmic}[1]
+\Procedure{IsBalanced}{$T$}
+\If{$\texttt{MaxDepth} < 0$}
+\State \Return \texttt{false}
+\EndIf
+\State \Return \texttt{true}
+\EndProcedure
+\end{algorithmic}
+\end{algorithm}
+\begin{CJK*}{UTF8}{gbsn}
+\texttt{MaxDepth} 在计算每个节点的最大深度时，同时进行左右子树深度的比较，如果深度大于1，返回$-1$，否则返回实际的最大深度。
+\end{CJK*}
+\begin{algorithm}[H]
+\caption{Include Balance Check In Computing Maximum Depth}
+\begin{algorithmic}[1]
+\Function{MaxDepth}{$T$}
+\If{$T=\texttt{null}$}
+\State \Return 0
+\EndIf
+\State $\alpha:=\texttt{MaxDepth}(\texttt{LEFT}(T))$ \Comment The maximum depth of left subtree
+\If{$\alpha < 0$} \Comment Left subtree is unbalanced
+\State \Return $-1$
+\EndIf
+\State $\beta:=\texttt{MaxDepth}(\texttt{RIGHT}(T))$ \Comment The maximum depth of right subtree
+\If{$\beta < 0$} \Comment Left subtree is unbalanced
+\State \Return $-1$
+\EndIf
+\State $d:=|\alpha-\beta|$ \Comment The absolute difference
+\If{$d > 1$}
+\State \Return $-1$ \Comment $T$ is unbalanced
+\EndIf
+\State \Return $1+\max(l, r)$ \Comment $T$ is balanced so return the actual maximum depth
+\algstore{110algo}
+\end{algorithmic}
+\end{algorithm}
+\begin{algorithm}[H]
+\begin{algorithmic}[1]
+\algrestore{110algo}
+\EndFunction
+\end{algorithmic}
+\end{algorithm}

@@ -1,0 +1,121 @@
+\section{62 --- Unique Paths}
+A robot is located at the top-left corner of a $m \times n$ grid.
+\par
+The robot can only move either down or right at any point in time. The robot is trying to reach the bottom-right corner of the grid.
+\begin{figure}[H]
+\begin{tikzpicture}
+\draw[step=1.5cm, help lines, thick] (0,0) grid ++(10.5,4.5);
+\node[bob, minimum size=1cm] at (0.75, 3.75) {};
+\node[star, fill=green!40, star points = 5, draw, star point height=0.2cm, minimum size=1cm] at(9.75, 0.75) {};
+\end{tikzpicture}
+\end{figure}
+How many possible unique paths are there?
+\\
+\paragraph{Note:}
+\begin{itemize}
+\item $m$ and $n$ will be at most 100.
+\end{itemize}
+\paragraph{Example 1:}
+\begin{flushleft}
+\textbf{Input}: $m = 3, n = 2$
+\\
+\textbf{Output}: 3
+\\
+\textbf{Explanation}:
+\\
+From the top-left corner, there are a total of 3 ways to reach the bottom-right corner:
+\begin{enumerate}
+\item Right $\to$ Right $\to$ Down
+\item Right $\to$ Down $\to$ Right
+\item Down $\to$ Right $\to$ Right
+\end{enumerate}
+\end{flushleft}
+
+\paragraph{Example 2:}
+\begin{flushleft}
+\textbf{Input}: $m = 7, n = 3$
+\\
+\textbf{Output}: 28
+\end{flushleft}
+
+\subsection{Dynamic Programming}
+Suppose $F[i][j]$ is the number of unique paths from $(0,0)$ to $(i,j)$. 
+
+由于robot只能向右或者向下走，所以，move 到 $(i,j)$ 必须首先 move 到 $(i-1, j)$ 或者 $(i, j-1)$，因此 recursive function $F[i][j] = F[i-1][j] + F[i][j-1]$。对于第一行或者第一列的每个位置，很显然到这些位置的unique path 只有一个。
+
+\setcounter{lstlisting}{0}
+\begin{lstlisting}[style=customc, caption={Two Dimensional DP}]
+int uniquePaths( int m, int n )
+{
+    vector<vector<int>> F( m, vector<int>( n, 0 ) );
+
+    F[0][0] = 1;
+
+    //since the only move direction is down or right
+    //the first row and column will be 1
+    for( int i = 1; i < m; ++i )
+    {
+        F[i][0] = 1;
+    }
+
+    for( int j = 1; j < n; ++j )
+    {
+        F[0][j] = 1;
+    }
+
+    for( int i = 1; i < m; ++i )
+    {
+        for( int j = 1; j < n; ++j )
+        {
+            F[i][j] = F[i - 1][j] + F[i][j - 1];
+        }
+    }
+
+    return F[m - 1][n - 1];
+
+}
+\end{lstlisting}
+
+Notice that each time when we update $F[i][j]$, we only need $F[i - 1][j]$ (at the previous row) and $F[i][j - 1]$ (at the current row). So we can reduce the memory usage to just two rows.
+
+\begin{lstlisting}[style=customc, caption={Two One Dimension DP Array}]
+int uniquePaths( int m, int n )
+{
+    vector<int> pre_row( n, 1 );
+    vector<int> cur_row( n, 1 );
+
+    for( int i = 1; i < m; ++i )
+    {
+        for( int j = 1; j < n; ++j )
+        {
+            cur_row[j] = pre_row[j] + cur_row[j - 1];
+        }
+
+        swap( cur_row, pre_row );
+    }
+
+    //last time, cur_row is swapped to pre_row
+    //therefore, the answer is in pre_row
+    return pre_row[n - 1];
+}
+\end{lstlisting}
+
+We can see only one dimension array is required 
+
+\begin{lstlisting}[style=customc, caption={One Dimension DP Array}]
+int uniquePaths( int m, int n )
+{
+    vector<int> cur_row( n, 1 );
+
+    for( int i = 1; i < m; ++i )
+    {
+        for( int j = 1; j < n; ++j )
+        {
+            //update current row directly
+            cur_row[j] += cur_row[j - 1];
+        }
+    }
+
+    return cur_row[n - 1];
+}
+\end{lstlisting}

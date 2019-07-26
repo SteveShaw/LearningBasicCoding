@@ -1,0 +1,125 @@
+\definecolor{mygreen}{rgb}{0,0.6,0}
+\definecolor{mygray}{rgb}{0.5,0.5,0.5}
+\definecolor{mymauve}{rgb}{0.58,0,0.82}
+
+\lstset{ 
+  backgroundcolor=\color{gray!20!white},   % choose the background color; you must add \usepackage{color} or \usepackage{xcolor}; should come as last argument
+  basicstyle=\footnotesize,        % the size of the fonts that are used for the code
+  breaklines=true,                 % sets automatic line breaking
+  commentstyle=\color{mygreen},    % comment style
+  deletekeywords={...},            % if you want to delete keywords from the given language
+  escapeinside={\%*}{*)},          % if you want to add LaTeX within your code
+  extendedchars=true,              % lets you use non-ASCII characters; for 8-bits encodings only, does not work with UTF-8
+  keepspaces=true,                 % keeps spaces in text, useful for keeping indentation of code (possibly needs columns=flexible)
+  keywordstyle=\color{blue},       % keyword style
+  language=C++,                 % the language of the code
+  numbers=left,                    % where to put the line-numbers; possible values are (none, left, right)
+  numbersep=5pt,                   % how far the line-numbers are from the code
+  numberstyle=\tiny\color{mygray}, % the style that is used for the line-numbers
+  showspaces=false,                % show spaces everywhere adding particular underscores; it overrides 'showstringspaces'
+  showstringspaces=false,          % underline spaces within strings only
+  showtabs=false,                  % show tabs within strings adding particular underscores
+  stepnumber=2,                    % the step between two line-numbers. If it's 1, each line will be numbered
+  stringstyle=\color{mymauve},     % string literal style
+  tabsize=2,	                   % sets default tabsize to 2 spaces
+  title=\lstname                   % show the filename of files included with \lstinputlisting; also try caption instead of title
+}
+
+\section{116 --- Populating Next Right Pointers in Each Node}
+Given a binary tree $T$
+\begin{lstlisting}
+struct TreeLinkNode {
+  TreeLinkNode *left;
+  TreeLinkNode *right;
+  TreeLinkNode *next;
+}
+\end{lstlisting}
+Populate each next pointer to point to its next right node. If there is no next right node, the next pointer should be set to \texttt{null}.
+\par
+Initially, all next pointers are set to \texttt{null}.
+\paragraph{Note:}
+\begin{itemize}
+    \item You may only use constant extra space.
+    \item Recursive approach is fine, implicit stack space does not count as extra space for this problem.
+    \item You may assume that it is a perfect binary tree (i.e., all leaves are at the same level, and every parent has two children).
+\end{itemize}
+\paragraph{Example:}
+\begin{flushleft}
+\textbf{Input}
+\begin{figure}[H]
+\begin{tikzpicture}
+[mynode/.style={draw,circle,minimum size=5mm, fill=gray!20!}]
+\node(){};
+\node[mynode](1) {1};
+\node[mynode](2) [below = 8mm of 1, xshift=-12mm] {2};
+\node[mynode](3) [below = 8mm of 1, xshift=12mm] {3};
+\node[mynode](4) [below = 8mm of 2, xshift=-7mm] {4};
+\node[mynode](5) [below = 8mm of 2, xshift=7mm] {5};
+\node[mynode](6) [below = 8mm of 3, xshift=-7mm] {6};
+\node[mynode](7) [below = 8mm of 3, xshift=7mm] {7};
+\draw[>=stealth,->] (1) -- (2);
+\draw[>=stealth,->] (1) -- (3);
+\draw[>=stealth,->] (2) -- (4);
+\draw[>=stealth,->] (2) -- (5);
+\draw[>=stealth,->] (3) -- (6);
+\draw[>=stealth,->] (3) -- (7);
+\end{tikzpicture}
+\end{figure}
+\textbf{Output}:
+\begin{figure}[H]
+\begin{tikzpicture}
+[mynode/.style={draw,circle,minimum size=5mm, fill=gray!20!}]
+\node(){};
+\node[mynode](1) {1};
+\node[mynode](r1) [right = 12mm of 1] {\texttt{null}};
+\node[mynode](2) [below = 8mm of 1, xshift=-12mm] {2};
+\node[mynode](3) [below = 8mm of 1, xshift=12mm] {3};
+\node[mynode](r2) [right = 12mm of 3] {\texttt{null}};
+\node[mynode](4) [below = 8mm of 2, xshift=-7mm] {4};
+\node[mynode](5) [below = 8mm of 2, xshift=7mm] {5};
+\node[mynode](6) [below = 8mm of 3, xshift=-7mm] {6};
+\node[mynode](7) [below = 8mm of 3, xshift=7mm] {7};
+\node[mynode](r3) [right = 12mm of 7] {\texttt{null}};
+\draw[>=stealth,->] (1) -- (2);
+\draw[>=stealth,->] (1) -- (3);
+\draw[>=stealth,->] (2) -- (4);
+\draw[>=stealth,->] (2) -- (5);
+\draw[>=stealth,->] (3) -- (6);
+\draw[>=stealth,->] (3) -- (7);
+\draw[>=stealth,->] (1) -- (r1);
+\draw[>=stealth,->] (3) -- (r2);
+\draw[>=stealth,->] (7) -- (r3);
+\draw[>=stealth,->] (2) -- (3);
+\draw[>=stealth,->] (4) -- (5);
+\draw[>=stealth,->] (5) -- (6);
+\draw[>=stealth,->] (6) -- (7);
+\end{tikzpicture}
+\end{figure}
+\end{flushleft}
+\subsection{Analysis}
+\begin{CJK*}{UTF8}{gbsn}
+由于要求只能用$O(1)$的存储空间，因此需要有效利用$\texttt{next}$指针来联系左右节点。由于是否存在左右节点只能由父节点来判断，因此需要根据parent node的next来判断是否旁边还有node。由于已经明确了是完全二叉树，因此每个节点除了根节点之外都会有兄弟节点。而循环只需要走到叶子节点上层即可。
+\end{CJK*}
+\setcounter{algorithm}{0}
+\begin{algorithm}[H]
+\caption{Tricky Approach}
+\begin{algorithmic}[1]
+\Procedure{Connect}{$T$}
+\If{$T=\texttt{null}$}
+\State \Return
+\EndIf
+\State $x:=T$
+\While{$\texttt{Left}(x)\neq \texttt{null}$} \Comment If the child is not leaf
+\State $y:=x$ 
+\While{$y\neq \texttt{null}$} \Comment Connect siblings in current level
+\State $\texttt{Next}(\texttt{Left}(y))\gets \texttt{Right}(y)$
+\If{$\texttt{Next}(y)\neq \texttt{null}$}
+\State $\texttt{Next}(\texttt{Right}(y))\gets\texttt{Left}(\texttt{Next}(y))$ \Comment Connect right to right sibling's left
+\EndIf
+\State $y\gets \texttt{Next}(y)$ \Comment Move to right sibling
+\EndWhile
+\State $x\gets \texttt{Left}(x)$ \Comment Move to the leftmost child node 
+\EndWhile
+\EndProcedure
+\end{algorithmic}
+\end{algorithm}

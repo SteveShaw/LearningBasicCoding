@@ -1,0 +1,293 @@
+\section{61 --- Rotate List}
+Given a linked list $\eta_0$, rotate the list to the right by $k$ places, where $k$ is non-negative.
+\paragraph{Example 1:}
+\begin{flushleft}
+\textbf{Input:}
+\\
+\begin{figure}[H]
+\begin{tikzpicture}
+\node{};
+\node(1) at (2,0)[draw, circle] {1};
+\node(2) [draw, circle, right = 0.7cm of 1] {2};
+\node(3) [draw, circle, right = 0.7cm of 2] {3};
+\node(4) [draw, circle, right = 0.7cm of 3] {4};
+\node(5) [draw, circle, right = 0.7cm of 4] {5};
+\node(6) [draw, circle, right = 0.7cm of 5] {$\emptyset$};
+\draw[-{Stealth}] (1) -- (2);
+\draw[-{Stealth}] (2) -- (3);
+\draw[-{Stealth}] (3) -- (4);
+\draw[-{Stealth}] (4) -- (5);
+\draw[-{Stealth}] (5) -- (6);
+\end{tikzpicture}
+\end{figure}
+$k=2$
+\\
+\textbf{Output:}
+\\
+\begin{figure}[H]
+\begin{tikzpicture}
+\node{};
+\node(1) at (2,0)[draw, circle] {4};
+\node(2) [draw, circle, right = 0.7cm of 1] {5};
+\node(3) [draw, circle, right = 0.7cm of 2] {1};
+\node(4) [draw, circle, right = 0.7cm of 3] {2};
+\node(5) [draw, circle, right = 0.7cm of 4] {3};
+\node(6) [draw, circle, right = 0.7cm of 5] {$\emptyset$};
+\draw[-{Stealth}] (1) -- (2);
+\draw[-{Stealth}] (2) -- (3);
+\draw[-{Stealth}] (3) -- (4);
+\draw[-{Stealth}] (4) -- (5);
+\draw[-{Stealth}] (5) -- (6);
+\end{tikzpicture}
+\end{figure}
+\textbf{Explanation}:
+\par
+rotate 1 steps to the right:
+\\
+\begin{figure}[H]
+\begin{tikzpicture}
+\node{};
+\node(1) at (2,0)[draw, circle] {5};
+\node(2) [draw, circle, right = 0.7cm of 1] {1};
+\node(3) [draw, circle, right = 0.7cm of 2] {2};
+\node(4) [draw, circle, right = 0.7cm of 3] {3};
+\node(5) [draw, circle, right = 0.7cm of 4] {4};
+\node(6) [draw, circle, right = 0.7cm of 5] {$\emptyset$};
+\draw[-{Stealth}] (1) -- (2);
+\draw[-{Stealth}] (2) -- (3);
+\draw[-{Stealth}] (3) -- (4);
+\draw[-{Stealth}] (4) -- (5);
+\draw[-{Stealth}] (5) -- (6);
+\end{tikzpicture}
+\end{figure}
+rotate 2 steps to the right:
+\\
+\begin{figure}[H]
+\begin{tikzpicture}
+\node{};
+\node(1) at (2,0)[draw, circle] {4};
+\node(2) [draw, circle, right = 0.7cm of 1] {5};
+\node(3) [draw, circle, right = 0.7cm of 2] {1};
+\node(4) [draw, circle, right = 0.7cm of 3] {2};
+\node(5) [draw, circle, right = 0.7cm of 4] {3};
+\node(6) [draw, circle, right = 0.7cm of 5] {$\emptyset$};
+\draw[-{Stealth}] (1) -- (2);
+\draw[-{Stealth}] (2) -- (3);
+\draw[-{Stealth}] (3) -- (4);
+\draw[-{Stealth}] (4) -- (5);
+\draw[-{Stealth}] (5) -- (6);
+\end{tikzpicture}
+\end{figure}
+\end{flushleft}
+\paragraph{Example 2:}
+\begin{flushleft}
+\textbf{Input}:
+\\
+\begin{figure}[H]
+\begin{tikzpicture}
+\node{};
+\node(1) at (2,0)[draw, circle] {0};
+\node(2) [draw, circle, right = 0.7cm of 1] {1};
+\node(3) [draw, circle, right = 0.7cm of 2] {2};
+\node(4) [draw, circle, right = 0.7cm of 3] {$\emptyset$};
+\draw[-{Stealth}] (1) -- (2);
+\draw[-{Stealth}] (2) -- (3);
+\draw[-{Stealth}] (3) -- (4);
+\end{tikzpicture}
+\end{figure}
+$k = 4$
+\\
+\textbf{Output:}
+\\
+\begin{figure}[H]
+\begin{tikzpicture}
+\node{};
+\node(1) at (2,0)[draw, circle] {2};
+\node(2) [draw, circle, right = 0.7cm of 1] {0};
+\node(3) [draw, circle, right = 0.7cm of 2] {1};
+\node(4) [draw, circle, right = 0.7cm of 3] {$\emptyset$};
+\draw[-{Stealth}] (1) -- (2);
+\draw[-{Stealth}] (2) -- (3);
+\draw[-{Stealth}] (3) -- (4);
+\end{tikzpicture}
+\end{figure}
+\textbf{Explanation}:
+\\
+rotate 1 steps to the right:
+\\
+\begin{figure}[H]
+\begin{tikzpicture}
+\node{};
+\node(1) at (2,0)[draw, circle] {2};
+\node(2) [draw, circle, right = 0.7cm of 1] {0};
+\node(3) [draw, circle, right = 0.7cm of 2] {1};
+\node(4) [draw, circle, right = 0.7cm of 3] {$\emptyset$};
+\draw[-{Stealth}] (1) -- (2);
+\draw[-{Stealth}] (2) -- (3);
+\draw[-{Stealth}] (3) -- (4);
+\end{tikzpicture}
+\end{figure}
+rotate 2 steps to the right: 
+\\
+\begin{figure}[H]
+\begin{tikzpicture}
+\node{};
+\node(1) at (2,0)[draw, circle] {1};
+\node(2) [draw, circle, right = 0.7cm of 1] {2};
+\node(3) [draw, circle, right = 0.7cm of 2] {0};
+\node(4) [draw, circle, right = 0.7cm of 3] {$\emptyset$};
+\draw[-{Stealth}] (1) -- (2);
+\draw[-{Stealth}] (2) -- (3);
+\draw[-{Stealth}] (3) -- (4);
+\end{tikzpicture}
+\end{figure}
+rotate 3 steps to the right:
+\\
+\begin{figure}[H]
+\begin{tikzpicture}
+\node{};
+\node(1) at (2,0)[draw, circle] {0};
+\node(2) [draw, circle, right = 0.7cm of 1] {1};
+\node(3) [draw, circle, right = 0.7cm of 2] {2};
+\node(4) [draw, circle, right = 0.7cm of 3] {$\emptyset$};
+\draw[-{Stealth}] (1) -- (2);
+\draw[-{Stealth}] (2) -- (3);
+\draw[-{Stealth}] (3) -- (4);
+\end{tikzpicture}
+\end{figure}
+rotate 4 steps to the right:
+\\
+\begin{figure}[H]
+\begin{tikzpicture}
+\node{};
+\node(1) at (2,0)[draw, circle] {2};
+\node(2) [draw, circle, right = 0.7cm of 1] {0};
+\node(3) [draw, circle, right = 0.7cm of 2] {1};
+\node(4) [draw, circle, right = 0.7cm of 3] {$\emptyset$};
+\draw[-{Stealth}] (1) -- (2);
+\draw[-{Stealth}] (2) -- (3);
+\draw[-{Stealth}] (3) -- (4);
+\end{tikzpicture}
+\end{figure}
+\end{flushleft}
+
+\subsection{Analysis}
+The nodes in the list are already linked, and hence the rotation basically means
+
+\begin{itemize}
+\item To close the linked list into the ring.
+\item To break the ring after the new tail and just in front of the new head
+\end{itemize}
+
+Suppose $k=2$ and the list is shown as below:
+
+\begin{figure}[H]
+\begin{tikzpicture}
+[start chain, 
+every node/.style={draw, circle,
+ minimum size=6mm, fill=gray!20!, on chain},
+  node distance=8mm, 
+  every join/.style={>=stealth,->},
+  every on chain/.style={join=by ->},
+ thick
+]
+\node{1};
+\node{2};
+\node{3};
+\node{4};
+\node{5};
+\node{};
+\end{tikzpicture}
+\end{figure}
+
+The steps to rotate the list by $k=2$ places are shown as below:
+
+\begin{enumerate}
+\item Link the head and the tail
+\begin{figure}[H]
+\begin{tikzpicture}
+[start chain, 
+every node/.style={draw, circle,
+ minimum size=6mm, fill=gray!20!, on chain},
+  node distance=8mm, 
+  every join/.style={>=stealth,->},
+  every on chain/.style={join=by ->},
+ thick
+]
+\node(1){1};
+\node(2){2};
+\node(3){3};
+\node(4){4};
+\node(5){5};
+\draw[very thick, red, >=stealth, ->] (5.south) -- ++(0, -10mm) -| (1.south);
+\end{tikzpicture}
+\end{figure}
+\item Break 3 and 4, and set node 3 as the final non-empty node.
+\begin{figure}[H]
+\begin{tikzpicture}
+[every node/.style={draw, circle,
+ minimum size=6mm, fill=gray!20!, on chain},
+  node distance=8mm, 
+  every join/.style={>=stealth,->},
+ thick
+]
+\node(1){1};
+\node(2)[join]{2};
+\node(3)[join]{3};
+\node[join]{};
+\node(4){4};
+\node(5)[join]{5};
+\draw[very thick, red, >=stealth, ->] (5.south) -- ++(0, -10mm) -| (1.south);
+\end{tikzpicture}
+\end{figure}
+\item The new head is in the position $n-k$, where $n$ is a number of nodes in the list. The new tail is just before the new head, which is in the position $n - k - 1$.
+\item When $k\geq n$, just use $k\bmod n$ to change $k$ to less than $n$.
+\end{enumerate}
+
+Thus, the algorithm is quite straightforward :
+
+\begin{itemize}
+\item Find the old tail and connect it with the head to form a close ring. Compute the length of the list n at the same time.
+
+\item Find the new tail, which is $(n - (k\bmod n) - 1)$th node from the head, and the new head, which is $(n - (k\bmod n))$th node.
+
+\item Break the ring by set the new tail's next node as empty node, and the new head.
+\end{itemize}
+
+\setcounter{lstlisting}{0}
+\begin{lstlisting}[style=customc, caption={Direct Way}]
+ListNode* rotateRight( ListNode* head, int k )
+{
+    if( !head )
+    {
+        return head;
+    }
+
+    auto node = head;
+
+    int n = 1;
+
+    while( node->next )
+    {
+        ++n;
+        node = node->next;
+    }
+
+    //close the ring
+    node->next = head;
+
+    //the new tail's position
+    auto new_tail = head;
+
+    int pos = n - ( k % n ) - 1;
+    for( int i = 0; i < pos; ++i )
+    {
+        new_tail = new_tail->next;
+    }
+
+    auto new_head = new_tail->next;
+    new_tail->next = nullptr;
+
+    return new_head;
+}
+\end{lstlisting}

@@ -1,0 +1,70 @@
+\section{179 --- Largest Number}
+Given a list of non negative integers $A$, arrange them such that they form the largest number.
+\paragraph{Example 1:}
+\begin{flushleft}
+\textbf{Input}: $[10,2]$
+\\
+\textbf{Output}: \textcolor{red}{210}
+\end{flushleft}
+\paragraph{Example 2:}
+\begin{flushleft}
+\textbf{Input}: $[3,30,34,5,9]$
+\\
+\textbf{Output}: \textcolor{red}{9534330}
+\end{flushleft}
+\paragraph{Note:} 
+\begin{itemize}
+\item The result may be very large, so you need to return a string instead of an integer.
+\end{itemize}
+\subsection{Sort}
+\begin{CJK*}{UTF8}{gbsn}
+\begin{itemize}
+\item 需要自定义排序规则
+\item 对于两个数字对应的字符串a和b，如果ab > ba，则a排在前面，比如9和34，由于934>349，所以9排在前面，再比如说30和3，由于303<330，所以3排在30的前面。
+\item 如果拼接后的字符串以0开头，需要去除。如果去除后成了空字符串，那么说明整个数组都是0。否则就返回从第一个不是0的字符开始的字符串。 
+\end{itemize}
+\end{CJK*}
+\setcounter{lstlisting}{0}
+\begin{lstlisting}[style=customc, caption={Sort Based On Custom Rule[]}]
+string largestNumber( vector<int>& nums )
+{
+	//sort based on custom rule
+    sort( nums.begin(), nums.end(), []( int a, int b )
+    {
+        auto sa = to_string( a );
+        auto sb = to_string( b );
+
+        auto s1 = sa;
+        s1 += sb;
+
+        auto s2 = sb;
+        s2 += sa;
+
+        return s1 >  s2;
+    });
+
+    string ans;
+
+    for( auto n : nums )
+    {
+        ans += to_string( n );
+    }
+
+	//Check if ans is starting with 0
+    size_t i = 0;
+    for( ; i < ans.size(); ++i )
+    {
+        if( ans[i] != '0' )
+        {
+            break;
+        }
+    }
+
+    if( i == ans.size() )
+    {
+        return "0";
+    }
+
+    return ans.substr( i );
+}
+\end{lstlisting}

@@ -1,0 +1,33 @@
+\section{157 --- Read N Characters Given Read4}
+The API: \texttt{int read4(char *buf)} reads 4 characters at a time from a file.
+\par
+The return value is the actual number of characters read.
+\par
+For example, it returns 3 if there is only 3 characters left in the file.
+\par
+By using the read4 API, implement the function \texttt{int read(char *p, int n)} that reads $n$ characters from the file.
+\paragraph{Note:}
+\begin{itemize}
+\item The \texttt{read} function will only be called \textbf{once} for each test case.
+\end{itemize}
+\subsection{Analysis}
+\begin{CJK*}{UTF8}{gbsn} 
+比较简单的题目，每次调用\texttt{read4}，直到返回值变为零，表示已经全部读完。另外每次调用\texttt{read4}的时候，将\texttt{p}指针根据返回值调整到下一个开始读取的位置。
+\end{CJK*}
+\setcounter{algorithm}{0}
+\begin{algorithm}[H]
+\caption{Implementation read By read4}
+\begin{algorithmic}[1]
+\Procedure{Read}{$p, n$}
+\State $x:=0$ \Comment The read result of each calling \texttt{read4}
+\While{$\texttt{true}$}
+\State $y:= \texttt{read4(p+x)}$ \Comment $y$ is the count of characters read from the file
+\If{$y = 0$}
+\State \texttt{break} \Comment Finished reading from the file
+\EndIf
+\State $x\gets x+y$ \Comment Update current total counts of characters 
+\EndWhile
+\State \Return $\min(x, n)$ \Comment The file may contain less than $n$ characters
+\EndProcedure
+\end{algorithmic}
+\end{algorithm}

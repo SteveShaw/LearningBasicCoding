@@ -1,0 +1,161 @@
+\section{55 --- Jump Game}
+Given an array of non-negative integers, $A$, you are initially positioned at the first index of the array.
+
+Each element in the array represents your maximum jump length at that position.
+
+Determine if you are able to reach the last index.
+
+\paragraph{Example 1:}
+
+\begin{flushleft}
+\textbf{Input}: $[2,3,1,1,4]$
+
+\textbf{Output}: \texttt{true}
+
+\textbf{Explanation}: Jump 1 step from index 0 to 1, then 3 steps to the last index.
+
+\end{flushleft}
+
+\paragraph{Example 2:}
+
+\begin{flushleft}
+\textbf{Input}: $[3,2,1,0,4]$
+
+\textbf{Output}: \texttt{false}
+
+\textbf{Explanation}: 
+
+You will always arrive at index 3 no matter what. Its maximum jump length is 0, which makes it impossible to reach the last index.
+\end{flushleft}
+
+
+\subsection{Graphic Level Equivalent}
+和45题Jump Game II解法基本一致，同样将其看作是多个level的图， $\alpha_0$表示当前level的ending position，$\alpha_1$为下个level的ending position。遍历当前level中的each position，更新下个level的ending position。一旦当前位置到达$\alpha_0$，即表示进入下一个level了，那么$\alpha_0$更新为$\alpha_1$
+
+\setcounter{lstlisting}{0}
+\begin{lstlisting}[style=customc, caption={Graphic Approach}]
+bool canJump( vector<int>& nums )
+{
+    //current level end position
+    int cur_end = 0;
+    //next level end position
+    int next_end = 0;
+
+    int p = 0;
+
+    int L = static_cast<int>( nums.size() );
+
+    while( p <= cur_end )
+    {
+        //update next level end position
+        next_end = ( max )( next_end, p + nums[p] );
+
+        if( next_end >= L - 1 )
+        {
+            return true;
+        }
+
+        if( p == cur_end )
+        {
+            cur_end = next_end;
+        }
+
+        ++p;
+    }
+
+    return false;
+}
+\end{lstlisting}
+
+\subsection{Dynamic Programming Top-down}
+Top-down Dynamic Programming can be thought of as optimized backtracking. It relies on the observation that once we determine that a certain index is good / bad, this result will never change. This means that we can store the result and not need to recompute it every time.
+
+Therefore, for each position in the array, we store whether the index is good or bad into an array, say $M$ and let its values be either one of: \texttt{GOOD}, \texttt{BAD} or \texttt{UNKNOWN}.
+
+Then, the steps of the algorithm are 
+\begin{enumerate}
+\item Initially, all elements of the memo table are \texttt{UNKNOWN}, except for the last one, which is \texttt{GOOD} (it can reach itself)
+\item First checks if a index $i$ is known (\texttt{GOOD} / \texttt{BAD})
+\begin{itemize}
+\item If it is known then return the stored result.
+\item Otherwise perform the DFS and backtracking steps.
+\end{itemize}
+\item Once we determine the value of the current index, we store it in the $M$
+\end{enumerate}
+
+However, this approach will cause \textbf{TLE}.
+
+\begin{lstlisting}[style=customc, caption={Top Down Dynamic Programming}]
+//This will cause TLE
+//only for reference
+bool canJump( vector<int>& nums )
+{
+
+    if( nums.empty() || ( nums.size() == 1 ) )
+    {
+        return true;
+    }
+
+    vector<unsigned char> memo( nums.size(), 0 );
+
+    memo.back() = 2; //Good
+
+    return dfs( nums, 0, memo );
+}
+//recursive helper function
+bool dfs( vector<int>& A, size_t start, vector<unsigned char>& memo )
+{
+    if( memo[start] > 0 )
+    {
+        return memo[start] == 2;
+    }
+
+    //next_jump is the maximum index from start can reach.
+    auto next_jump = ( min )( A.size() - 1, start + A[start] );
+    for( size_t i = start + 1; i <= next_jump; ++i )
+    {
+        if( dfs( A, i, memo ) )
+        {
+            memo[start] = 2;
+            return true;
+        }
+    }
+
+    memo[start] = 1;
+    return false;
+}
+\end{lstlisting}
+
+\subsection{Bottom Up Dynamic Programming}
+We know that we only ever jump to the right. This means that if we start from the \textbf{right} of the array, every time we will query a position to our right, that position has already be determined as being \texttt{GOOD} or \texttt{BAD}. This means we don't need to recurse anymore, as we will always hit the memo table.
+
+\setcounter{lstlisting}{0}
+\begin{lstlisting}[style=customc, caption={Bottom Up Dynamic Programming}]
+bool canJump( vector<int>& nums )
+{
+    vector<unsigned char> memo( nums.size(), 0 );
+
+    memo.back() = 2; //Good
+
+    int L = static_cast<int>( nums.size() );
+
+    //process from right
+    for( int i = L - 2; i >= 0; --i )
+    {
+        //the maximum index that from index i can reach
+        int end_pos = ( min )( L - 1, i + nums[i] );
+
+        for( int j = i + 1; j <= end_pos; ++j )
+        {
+            if( memo[j] == 2 )
+            {
+                //can jump
+                memo[i] = 2;
+                break;
+            }
+        }
+    }
+
+    return memo[0] == 2;
+}
+\end{lstlisting}

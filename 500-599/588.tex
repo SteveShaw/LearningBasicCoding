@@ -1,0 +1,194 @@
+\section{588 --- Design In-Memory File System}
+Design an in-memory file system to simulate the following functions:
+
+\begin{itemize}
+\item \texttt{ls}: Given a path in string format. If it is a file path, return a list that only contains this file's name. If it is a directory path, return the list of file and directory names in \textbf{this directory}. Your output (file and directory names together) should in \textbf{lexicographic order}.
+
+\item \texttt{mkdir}: Given a \textbf{directory path} that does not exist, you should make a new directory according to the path. If the middle directories in the path don't exist either, you should create them as well. This function has void return type.
+
+\texttt{addContentToFile}: Given a \textbf{file path} and \textbf{file content} in string format. If the file doesn't exist, you need to create that file containing given content. If the file already exists, you need to \textbf{append} given content to original content. This function has void return type.
+
+\texttt{readContentFromFile}: Given a \textbf{file path}, return its \textbf{content} in string format.
+\end{itemize}
+
+ 
+\paragraph{Note:}
+
+\begin{itemize}
+\item You can assume all file or directory paths are absolute paths which begin with slash and do not end with slash except that the path is just only slash.
+\item You can assume that all operations will be passed valid parameters and users will not attempt to retrieve file content or list a directory or file that does not exist.
+\item You can assume that all directory names and file names only contain lower-case letters, and same names won't exist in the same directory.
+\end{itemize}
+
+\subsection{Trie}
+\begin{itemize}
+\item Design this filesystem data structure as a Trie where each node represent a struct, say, \texttt{File}.
+\end{itemize}
+
+\setcounter{lstlisting}{0}
+\begin{lstlisting}[style=customc, caption={Trie}]
+class FileSystem
+{
+public:
+    FileSystem()
+    {
+
+        root = make_unique<File>();
+    }
+
+    vector<string> ls( string path )
+    {
+
+        istringstream iss( path );
+
+        string token;
+
+        auto node = root.get();
+
+        while( getline( iss, token, '/' ) )
+        {
+            if( token.empty() )
+            {
+                continue;
+            }
+            auto it = node->files.find( token );
+
+            if( it == node->files.end() )
+            {
+                return {};
+            }
+
+            node = it->second.get();
+        }
+
+        if( node->flag == 1 )
+        {
+            //this is file
+            //only output the file name
+
+            auto pos = path.find_last_of( '/' );
+            return {path.substr( pos + 1 )};
+        }
+
+        vector<string> ans;
+
+        for( const auto& file : node->files )
+        {
+            //add files into the list
+            ans.push_back( file.first );
+        }
+
+        sort( begin( ans ), end( ans ) );
+
+        return ans;
+    }
+
+    void mkdir( string path )
+    {
+
+        istringstream iss( path );
+
+        string token;
+
+        auto node = root.get();
+
+        while( getline( iss, token, '/' ) )
+        {
+
+            if( token.empty() )
+            {
+                continue;
+            }
+
+            auto it = node->files.find( token );
+
+
+            if( it == node->files.end() )
+            {
+                //this directory doesn't exist
+                //create a new one
+                it = node->files.emplace( token, make_unique<File>() ).first;
+            }
+
+            node = it->second.get();
+        }
+    }
+
+    void addContentToFile( string filePath, string content )
+    {
+
+        istringstream iss( filePath );
+
+        string token;
+
+        auto node = root.get();
+
+        while( getline( iss, token, '/' ) )
+        {
+            if( token.empty() )
+            {
+                continue;
+            }
+
+            auto it = node->files.find( token );
+
+            if( it == node->files.end() )
+            {
+                it = node->files.emplace( token, make_unique<File>() ).first;
+            }
+
+            node = it->second.get();
+        }
+
+        node->flag = 1; //this is file
+        node->content.append( move( content ) );
+    }
+
+    string readContentFromFile( string filePath )
+    {
+
+        istringstream iss( filePath );
+
+        string token;
+
+        auto node = root.get();
+
+        while( getline( iss, token, '/' ) )
+        {
+            if( token.empty() )
+            {
+                continue;
+            }
+            auto it = node->files.find( token );
+            if( it == node->files.end() )
+            {
+                //The path doesn't exist
+                return "";
+            }
+
+            node = it->second.get();
+        }
+
+        if( node->flag )
+        {
+            return node->content;
+        }
+
+        //this path is not a file
+        return "";
+    }
+
+private:
+
+    struct File
+    {
+        unsigned char flag = 0;
+
+        unordered_map<string, unique_ptr<File>> files;
+
+        string content;
+    };
+
+    unique_ptr<File> root;
+};
+\end{lstlisting}

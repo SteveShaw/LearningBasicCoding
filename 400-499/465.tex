@@ -1,0 +1,141 @@
+\section{465 --- Optimal Account Balancing}
+A group of friends went on holiday and sometimes lent each other money. For example, Alice paid for Bill's lunch for \$10. Then later Chris gave Alice \$5 for a taxi ride. We can model each transaction as a tuple $(x, y, z)$ which means person $x$ gave person $y$ \$z. Assuming Alice, Bill, and Chris are person 0, 1, and 2 respectively (0, 1, 2 are the person's ID), the transactions can be represented as $ [[0, 1, 10], [2, 0, 5]] $.
+
+Given a list of transactions between a group of people, $T$, return the minimum number of transactions required to settle the debt.
+
+\paragraph{Note:}
+
+\begin{itemize}
+\item A transaction will be given as a tuple $ (x, y, z) $. Note that $x \neq y$ and $z > 0$.
+
+\item Person's IDs may not be linear, e.g. we could have the persons 0, 1, 2 or we could also have the persons 0, 2, 6.
+\end{itemize}
+
+\paragraph{Example 1:}
+
+\begin{flushleft}
+\textbf{Input}:
+
+$[[0,1,10], [2,0,5]]$
+
+\textbf{Output}: 2
+
+\textbf{Explanation}:
+
+Person \#0 gave person \#1 \$10.
+
+Person \#2 gave person \#0 \$5.
+
+
+Two transactions are needed. One way to settle the debt is person \#1 pays person \#0 and \#2 \$5 each.
+\end{flushleft}
+
+
+\paragraph{Example 2:}
+
+\begin{flushleft}
+\textbf{Input}:
+
+$ [[0,1,10], [1,0,1], [1,2,5], [2,0,5]] $
+
+\textbf{Output}: 1
+
+\textbf{Explanation}:
+Person \#0 gave person \#1 \$10.
+Person \#1 gave person \#0 \$1.
+Person \#1 gave person \#2 \$5.
+Person \#2 gave person \#0 \$5.
+
+Therefore, person \#1 only need to give person \#0 \$4, and all debt is settled.
+\end{flushleft}
+
+\subsection{Depth First Search}
+\begin{itemize}
+\item Calculate each person's overall balance $B[i]$. $B[i]>0$ means person $i$ needs to pay $B[i]$ to other persons, while $B[i]<0$ person $i$ needs to get money from other people. 
+\item We start from the first person with $B[0]$, skip all persons with $B[i]=0$ and try to find the first person that has opposite sign to $B[0]$, say, $B[j]$. We use $B[j]\gets B[j]+B[0]$ to clear $B[0]$.
+\item From now on, $B[0]$ is cleared, and we recursively set other $B[k]$ to zero one by one until all $B[j]$ are zeros. At this time, update the global minimum transactions.
+\end{itemize}
+
+\setcounter{lstlisting}{0}
+\begin{lstlisting}[style=customc, caption={DFS}]
+int minTransfers( vector<vector<int>>& transactions )
+{
+    //get each person's overall balance
+    unordered_map<int, int> m_bal;
+
+    auto add_map = [&m_bal]( int id, int money )
+    {
+        auto it  = m_bal.find( id );
+        if( it == m_bal.end() )
+        {
+            m_bal.emplace( id, money );
+        }
+        else
+        {
+            it->second += money;
+        }
+    };
+
+    for( const auto& trans : transactions )
+    {
+        add_map( trans[0], -trans[2] );
+        add_map( trans[1], +trans[2] );
+    }
+
+    //change to vector
+    vector<int> v_bal;
+    v_bal.reserve( m_bal.size() );
+
+    for( const auto& p : m_bal )
+    {
+        if( p.second != 0 )
+        {
+            v_bal.push_back( p.second );
+        }
+    }
+
+    int ans = INT_MAX;
+    dfs( v_bal, 0, 0, ans );
+
+    return ans;
+}
+
+void dfs( vector<int>& A, size_t start, int steps, int& ans )
+{
+    //skip person with zero balance
+    while( ( start < A.size() ) && ( A[start] == 0 ) )
+    {
+        ++start;
+    }
+
+    if( start == A.size() )
+    {
+        //all persons are cleared
+        //update minimum transactions
+        ans = ( min )( ans, steps );
+        return;
+    }
+
+    //try other persons
+    auto next = start + 1;
+
+    while( next < A.size() )
+    {
+        if( A[next] * A[start] < 0 )
+        {
+            //person next can help
+            //clear person start
+            int x = A[start];
+            A[next] += x;
+
+            //we seach from person (start+1)
+            //increments the transactions
+            dfs( A, start + 1, steps + 1, ans );
+
+            //backtrack
+            A[next] -= x;
+        }
+        ++next;
+    }
+}
+\end{lstlisting}

@@ -1,0 +1,80 @@
+\section{594 --- Longest Harmonious Subsequence}
+We define a harmounious array as an array where the difference between its maximum value and its minimum value is exactly 1.
+
+Now, given an integer array, $A$, you need to find the length of its longest harmonious subsequence among all its possible subsequences.
+
+\paragraph{Example 1:}
+\begin{flushleft}
+
+\textbf{Input}: $[1,3,2,2,5,2,3,7]$
+
+\textbf{Output}: 5
+
+\textbf{Explanation}: The longest harmonious subsequence is $[3,2,2,2,3]$.
+ 
+
+\end{flushleft}
+
+\paragraph{Note:} 
+
+\begin{itemize}
+\item The length of the input array will not exceed 20,000.
+\end{itemize}
+
+\subsection{Hash Map}
+\begin{itemize}
+\item We make use of a hash map $M$ which stores the number of times an element occurs in the array. Traverse $A$ and fill $M$ once.
+\item After this, we traverse over the keys of $M$. For every key considered, say $k$, we find out if the map contains the $k + 1$. We need not care about $k-1$, because if $k$ is present in the harmonic subsequence, at one time either $k+1$ or $k - 1$ only could be included in the harmonic subsequence. The case of $k$being in the harmonic subsequence will automatically be considered, when $k- 1$ is encountered as the current key.
+\item Whenver we find that $k+ 1$ exists in $M$, we determine the count of the current harmonic subsequence as count of $k$ plus count of $k+1$
+\end{itemize}
+
+注意，这种方法可以不用考虑$k-1$是因为首先遍历完了$A$。如果要边做遍历，边进行$M$的更新，那么需要同时考虑$k+1$和$k-1$。
+\setcounter{lstlisting}{0}
+\begin{lstlisting}[style=customc, caption={Hash Map With One Pass}]
+int findLHS( vector<int>& nums )
+{
+    unordered_map<int, int>m;
+	
+    int res = 0;
+	
+    for( auto i : nums )
+    {
+        m[i]++;
+        if( m.count( i + 1 ) )
+        {
+            res = max( res, m[i] + m[i + 1] );
+        }
+        if( m.count( i - 1 ) )
+        {
+            res = max( res, m[i] + m[i - 1] );
+        }
+    }
+	
+    return res;
+}
+\end{lstlisting}
+
+\begin{lstlisting}[style=customc, caption={Hash Map With TWo Pass}]
+int findLHS( vector<int>& nums )
+{
+    unordered_map<int, int> m;
+
+    for( int n : nums )
+    {
+        m[n] += 1;
+    }
+
+    int ans = 0;
+
+    for( const auto& p : m )
+    {
+        //only consider k+1
+        if( m.count( p.first + 1 ) )
+        {
+            ans = ( max )( p.second + m[p.first + 1], ans );
+        }
+    }
+
+    return ans;
+}
+\end{lstlisting}

@@ -1,0 +1,90 @@
+\section{156 --- Binary Tree Upside Down}
+Given a binary tree with root $R$, where all the right nodes are either leaf nodes with a sibling (a left node that shares the same parent node) or empty, flip it upside down and turn it into a tree where the original right nodes turned into left leaf nodes. Return the new root.
+\paragraph{For example:}
+\begin{flushleft}
+Given a binary tree
+\begin{figure}[H]
+\begin{tikzpicture}
+[mynode/.style={draw,circle,minimum size=5mm, fill=gray!20!}]
+\node(){};
+\node[mynode](1) {1};
+\node[mynode](2)[below=8mm of 1, xshift=-8mm] {2};
+\node[mynode](3)[below=8mm of 1, xshift=8mm] {3};
+\node[mynode](4)[below=8mm of 2, xshift=-8mm] {4};
+\node[mynode](5)[below=8mm of 2, xshift=8mm] {5};
+\draw[>=stealth,->] (1) -- (2);
+\draw[>=stealth,->] (1) -- (3);
+\draw[>=stealth,->] (2) -- (4);
+\draw[>=stealth,->] (2) -- (5);
+\end{tikzpicture}
+\end{figure}
+return the root of the binary tree
+\begin{figure}[H]
+\begin{tikzpicture}
+[mynode/.style={draw,circle,minimum size=5mm, fill=gray!20!}]
+\node(){};
+\node[mynode](1) {4};
+\node[mynode](2)[below=8mm of 1, xshift=-8mm] {5};
+\node[mynode](3)[below=8mm of 1, xshift=8mm] {2};
+\node[mynode](4)[below=8mm of 3, xshift=-8mm] {3};
+\node[mynode](5)[below=8mm of 3, xshift=8mm] {1};
+\draw[>=stealth,->] (1) -- (2);
+\draw[>=stealth,->] (1) -- (3);
+\draw[>=stealth,->] (3) -- (4);
+\draw[>=stealth,->] (3) -- (5);
+\end{tikzpicture}
+\end{figure}
+\end{flushleft}
+\subsection{Recursive Approach}
+\begin{CJK*}{UTF8}{gbsn}
+对于一个根节点来说，目标是将其左子节点变为根节点，右子节点变为左子节点，原来的根节点变为右子节点，那么我们判断这个root是否存在，且其有没有left child node，如果不满足这两个条件的话，直接返回即可，否则对left child node调用递归函数，直到到达most left开始翻转，翻转好most left child node后，开始回到上一个left child node继续翻转即可，直至翻转完The whole tree。
+\par
+另外注意到题目中给出的特性，所有的右节点要么没有，要么就是叶子节点并且一定有个兄弟节点。
+\end{CJK*}
+\setcounter{algorithm}{0}
+\begin{algorithm}[H]
+\caption{Recursive Approach}
+\begin{algorithmic}[1]
+\Procedure{UpsideDownBinaryTree}{$R$}
+\If{$R=\texttt{null}$ \textbf{or} $R.\texttt{left}=\texttt{null}$}
+\State \Return $R$ \Comment root or left child is empty
+\EndIf
+\State $l:=R.\texttt{left}$ \Comment The left child node of current root $R$
+\State $r:=R.\texttt{right}$ \Comment The right child node of current root $R$
+\State $\hat{R}:=\texttt{UpsideDownBinaryTree}(l)$ \Comment Recursively operating on left tree
+\State $l.\texttt{left}\gets r$ \Comment Change left child node of $l$ to $r$
+\State $l.\texttt{right}\gets R$ \Comment Change right child node $l$ to $R$
+\State $R.\texttt{left}\gets\texttt{null}$ \Comment Set left and right child nodes of current root $R$ to empty
+\State $R.\texttt{right}\gets\texttt{null}$
+\State \Return $\hat{R}$
+\EndProcedure
+\end{algorithmic}
+\end{algorithm}
+\setcounter{lstlisting}{0}
+\begin{lstlisting}[style=customc, caption={Recursive Approach}]
+TreeNode *upsideDownBinaryTree ( TreeNode *root )
+{
+	if( !root || !root->left )
+	{
+		return root;
+	}
+
+	//save left child node
+	auto l = root->left;
+	//save right child node
+	auto r = root->right;
+	//Recursive call the function to get the 
+	//root of upside-down left child tree
+	auto l_root = upsideDownBinaryTree ( l );
+	//set left child node of l to r
+	l->left = r;
+	//set right child node of l to current root
+	l->right = root;
+	//since root becomes leaf, 
+	//set its left and child node to null
+	root->left = nullptr;
+	root->right = nullptr;
+	//This is the new root of the changed tree
+	return l_root;
+}
+\end{lstlisting}

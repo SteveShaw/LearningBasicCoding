@@ -1,0 +1,64 @@
+\section{112 --- Path Sum}
+Given a binary tree $T$ and a sum $S$, determine if the tree has a root-to-leaf path such that adding up all the values along the path equals the given sum.
+\par
+Note: A leaf is a node with no children.
+\paragraph{Example:}
+\begin{flushleft}
+\textbf{Input}: $S=22$, $T$ is given below
+\begin{figure}[H]
+\begin{tikzpicture}
+[mynode/.style={draw,circle,minimum size=5mm, fill=gray!20!}]
+\node(){};
+\node[mynode](5) {5};
+\node[mynode](4) [below = 8mm of 5, xshift=-15mm] {4};
+\node[mynode](8) [below = 8mm of 5, xshift=15mm] {8};
+\node[mynode](11) [below = 8mm of 4, xshift=-12mm] {11};
+\node[mynode](13) [below = 8mm of 8, xshift=-12mm] {13};
+\node[mynode](41) [below = 8mm of 8, xshift=12mm] {4};
+\node[mynode](7) [below = 8mm of 11, xshift=-8mm] {7};
+\node[mynode](2) [below = 8mm of 11, xshift=8mm] {2};
+\node[mynode](1) [below = 8mm of 41, xshift=8mm] {1};
+\draw[>=stealth,->] (5) -- (4);
+\draw[>=stealth,->] (5) -- (8);
+\draw[>=stealth,->] (4) -- (11);
+\draw[>=stealth,->] (8) -- (13);
+\draw[>=stealth,->] (8) -- (41);
+\draw[>=stealth,->] (11) -- (7);
+\draw[>=stealth,->] (11) -- (2);
+\draw[>=stealth,->] (41) -- (1);
+\end{tikzpicture}
+\end{figure}
+\textbf{Output}: \texttt{true}, as there exist a root-to-leaf path $5\to4\to11\to2$ which sum is 22.
+\end{flushleft}
+\subsection{Recursive}
+\begin{CJK*}{UTF8}{gbsn}
+递归方法是最直接想到的方法：如果当前节点是空节点，显然是\texttt{false}。
+\begin{itemize}
+    \item 如果当前node是leaf，看其值是否与$S$相等，相等返回\texttt{true}，否则\texttt{false}。
+    \item 如果不是leaf，首先递归处理left subtree，如果结果找到，返回\texttt{true}，否则递归处理right subtree，返回处理结果。
+\end{itemize}
+\end{CJK*}
+\subsubsection{Algorithm}
+\setcounter{algorithm}{0}
+\begin{algorithm}[H]
+\caption{Recursion}
+\begin{algorithmic}[1]
+\Procedure{HasPathSum}{$T, S$}
+\If{$T=\texttt{null}$}
+\State \Return \texttt{false}
+\EndIf
+\If{$\texttt{Left}(T)=\texttt{null}$ \textbf{and} $\texttt{Right}(T)=\texttt{null}$}
+\If{$\texttt{Value}(T)=S$}
+\State \Return \texttt{true}
+\Else
+\State \Return \texttt{false}
+\EndIf
+\EndIf
+\State $b:=\texttt{HasPathSum}(\texttt{Left}(T), S - \texttt{Value}(T))$ \Comment Recursive on left subtree
+\If{$b=\texttt{false}$}
+\State $b:=\texttt{HasPathSum}(\texttt{Right}(T), S - \texttt{Value}(T))$ \Comment Recursive on right subtree
+\EndIf
+\State \Return $b$
+\EndProcedure
+\end{algorithmic}
+\end{algorithm}

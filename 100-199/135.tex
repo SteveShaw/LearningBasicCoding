@@ -1,0 +1,143 @@
+\section{135 --- Candy}
+There are $N$ children standing in a line. Each child is assigned a rating value.
+\par
+You are giving candies to these children subjected to the following requirements:
+\begin{enumerate}
+\item Each child must have at least one candy.
+\item Children with a higher rating get more candies than their neighbors.
+\item What is the minimum candies you must give?
+\end{enumerate}
+\paragraph{Example 1:}
+\begin{flushleft}
+\textbf{Input}: $[1,0,2]$
+\\
+\textbf{Output}: 5
+\\
+\textbf{Explanation}: You can allocate to the first, second and third child with 2, 1, 2 candies respectively.
+\end{flushleft}
+\paragraph{Example 2:}
+\begin{flushleft}
+\textbf{Input}: [1,2,2]
+\\
+\textbf{Output}: 4
+\\
+\textbf{Explanation}: You can allocate to the first, second and third child with 1, 2, 1 candies respectively. The third child gets 1 candy because it satisfies the above two conditions.
+\end{flushleft}
+\subsection{Brute Force}
+这是最直接的方法，首先创建一个1维数组$C$用来跟踪分配的candies。
+\begin{itemize}
+\item 首先，给每个student一个candy。然后从左至右扫描$C$。对于每个位置，如果其rating $R[i]$ 比左边的大，即$R[i]>R[i-1]$，并且$C[i]\leq C[i-1]$，那么就要update $C[i]$为$C[i-1]+1$。
+\item 同样的，我们也需要检查其rating是否比右边的大，即$R[i]>R[i+1]$，如果是，并且$C[i] \leq C[i+1]$，那么$C[i]$还要被再次update为$C[i+1]+1$。
+\item 继续上述步骤直到没有发生任何update $C[i]$的操作。
+\item 最后将数组$C$中的元素加起来就是最终的结果。
+\end{itemize}
+\subsection{Using One Array}
+上述Brute Force的方法虽然直接，但是效率不高。为了提高效率，首先用两个1维数组$L$ and $R$。$L$用来保存从左至右所需要的candies的数量，即如果当前student的rating比其左边的高，他应该得到比左边更多的candies。类似的，$R$就是保存从右至左所需要的candies的数量，即如果当前student的rating比其右边的高，他应该得到比右边更多的candies。
+\par
+开始时，$L$ and $R$中都是1， 即每个student都是1个candy。首先从左到右遍历ratings数组$A$，在当前位置$i$，如果$A[i]>A[i-1]$，那么$L[i]\gets L[i-1]+1$。因为$L[i]$在update前总是小于或者等于$L[i-1]$的。
+\par
+接着从右到左遍历$R$，类似的在当前位置$i$，如果$A[i]>A[i+1]$，那么$R[i]\gets R[i+1]+1$。
+\par
+这时候，在位置$i$处，需要得到$\max(L[i],R[i])$以满足左右两侧rating的大小关系。因此最后的minimum number of candies就是
+\[
+\sum_{0}^{|A|-1}\max(L[i], R[i])
+\]
+不过在从右到左时，可以不用$R$数组，直接更新$L[i]$为$\max(L[i], L[i+1]+1)$即可。这样就只需要一个数组了。
+\setcounter{algorithm}{0}
+\begin{algorithm}[H]
+\caption{One Array}
+\begin{algorithmic}[1]
+\Procedure{Candy}{$A, L$}
+\State Create $C_{L}$ as a 1d array
+\State $C[0]=C[1]=\ldots=C[L-1]:=1$
+\State $x:=0$ \Comment The minimum number of required candies
+\For{$i:=1\to L$}
+\If{$A[i]>A[i-1]$}
+\State $C[i]\gets C[i-1]+1$
+\EndIf
+\EndFor
+\For{$i:=L-2\to 0$}
+\If{$A[i]>A[i+1]$}
+\State $C[i]\gets \max(C[i], C[i+1]+1)$
+\EndIf
+\State $x\gets x+C[i]$
+\EndFor
+\State $x\gets x+C[L-1]$ \Comment $C[L-1]$ is not added to $x$ in the loop
+\State \Return $x$
+\algstore{135algo}
+\end{algorithmic}
+\end{algorithm}
+\begin{algorithm}[H]
+\begin{algorithmic}[1]
+\algrestore{135algo}
+\EndProcedure
+\end{algorithmic}
+\end{algorithm}
+\subsection{One Pass With Constant Space}
+上述方法仍然需要线性空间。如果不需要线性空间，那么首先需要观察到如下信息：
+\begin{itemize}
+\item 分配candies都是按1递增进行的。因为目标是最少的candies。
+\item 分配candies，local minimum处的student得到的candy必须是1。
+\end{itemize}
+因此分配candy要么是以$1,2,3,\ldots,n$的形式，或者是$n, n-1, \ldots, 2, 1$的形式，这两种形式的和都是$n\times(n+1)/2$。
+\par
+因此我们可以将ratings array看作是由一些上坡和下坡部分构成的。当在上坡的时候，candy的分配就是$1,2,3,\ldots,n$的形式。类似的，下坡的分配形式就是$k, k-1, \ldots, 2,1$。现在的问题就是local maximum或者说local peak到底应该包含在上坡或者下坡的哪一个中？很明显，为了同时大于左右两侧的candy数量，local peak所赋予的candy数必须由其所在上坡和下坡中的长度最长的那个来决定。而对于local valley即波谷，我们把它包含在下一个上坡段中，其所assign的candy数量必当为1( which can be subtracted from the next slope's count calculation )
+\par
+在实现时， maintain两个变量$\alpha$和$\beta$分别代表当前段和上一段的类型即是上坡还是下坡。另外用$u$和$d$两个变量keep track上坡和下坡的长度，即所包含的element的个数。当遇到如下情形时，
+\begin{enumerate}
+\item 一段上坡，然后紧接着是相等的rating
+\item 一段下坡，然后紧接着是一段上坡
+\item 一段下坡，然后紧接着是相等的rating
+\end{enumerate}
+这时候，就需要更新当前当前所分配的candy的总的数量。而assign给波峰的candy的数量则变为$\max(u,d)+1$。然后，reset $u$和$d$这两个变量为零。
+\par
+以下面的数组作为例子来说明算法的执行过程，
+\par
+假设$R=[1\;2\; 3\; 4\; 5\; 3\; 2\; 1\; 2\; 6\; 5\; 4\; 3\; 3\; 2\; 1\; 1\; 3\; 3\; 3\; 4\; 2]$，下图是对应的示意图
+\begin{figure}[H]
+\includegraphics[width=15cm]{135.PNG}
+\end{figure}
+从图中可以看到，candy在局部区域的分布总是以以$1,2,3,\ldots,n$的形式，或者是$n, n-1, \ldots, 2, 1$的形式。
+\begin{itemize}
+\item 对于$a$ and $b$这两段，$a$是上坡，$b$是下坡，波峰点5需要包含在$a$中因为$b$的点数小于$a$的点数。
+\item 波谷点8则是上述说的需要进行更新的三种情形中的第二种case。所以8可以包含在$b$中，也可以包含在下一个上坡段即$d$中。
+\item point 13则是上述需要进行更新的三种情形中的第三种case，因为13和14两个位置处的ratings是相等的。
+\item 由于下坡段$e$比上坡段$d$所包含的位置多，因此波峰点10需要包含在下坡段$e$中以满足大于右侧的candy的数量。
+\item point 16则是第三种case， 18则是第二种case。
+\end{itemize}
+\begin{algorithm}[H]
+\caption{Up And Down Slope}
+\begin{algorithmic}[1]
+\Procedure{Candy}{$A, L$}
+\State $\alpha:=0$, $\beta:=0$ \Comment The number of local peak and local valley
+\State $u:=0, d:=0$ \Comment The length of up slope and down slope
+\For{$i:=1\to L$}
+\If{$A[i]>A[i-1]$}
+\State $\alpha\gets1$ \Comment Local peak
+\ElsIf{$A[i]=A[i-1]$}
+\State $\alpha\gets 0$ \Comment Local plateau
+\Else
+\State $\alpha\gets -1$ \Comment Local valley
+\EndIf
+\State $x:=0$ \Comment The total number of candies
+\If{($\beta>0$ \textbf{and} $\alpha=0$) \textbf{or} ($\beta < 0$ \textbf{and} $\alpha \geq 0$)}
+\State $x\gets x + u\times(u+1)/2 + d\times(d+1)/2 + \max(u,d)$ \Comment Update total candies \label{explain13501}
+\State $u\gets 0$ \Comment Reset length of up slope
+\State $d\gets 0$ \Comment Reset length of down slope
+\EndIf
+\If{$\alpha > 0$} \Comment It is a up slope
+\State $u\gets u+1$ \Comment Increments the length of up slope
+\EndIf
+\If{$\alpha < 0$} \Comment It is a down slope
+\State $d\gets d+1$ \Comment Increments the length of down slope
+\EndIf
+\If{$\alpha = 0$} \Comment It is a plateau
+\State $x\gets x+1$ \Comment Increments the total candies
+\EndIf
+\State $\beta\gets \alpha$ \Comment Save to $\beta$ for future comparison
+\EndFor
+\State $x\gets x + u\times(u+1)/2 + d\times(d+1)/2 + \max(u,d) + 1$ \Comment Update total candies \label{explain13502}
+\EndProcedure
+\end{algorithmic}
+\end{algorithm}
+注意line [\ref{explain13501}]和[\ref{explain13502}]的不同，[\ref{explain13501}]处没有加1，而[\ref{explain13502}]处则加上了1。这是因为[\ref{explain13501}]处，循环并没有结束，因此那个多余的1需要清除掉，因为这是波谷，我们把它作为下一个上坡段的起点，因此不把它包含在当前段的计算中。而在[\ref{explain13502}]处，因为这是处理最后剩余的段，因此需要把波谷包含进来。

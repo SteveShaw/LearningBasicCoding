@@ -1,0 +1,55 @@
+\section{122 --- Best Time to Buy and Sell Stock II}
+Say you have an array $P$ for which the $i$th element is the price of a given stock on day $i$.
+\par
+Design an algorithm to find the maximum profit. You may complete as many transactions as you like (i.e., buy one and sell one share of the stock multiple times).
+\par
+Note: You may not engage in multiple transactions at the same time (i.e., you must sell the stock before you buy again).
+\paragraph{Example 1:}
+\begin{flushleft}
+\textbf{Input}: $[7,\;1,\;5,\;3,\;6,\;4]$
+\\
+\textbf{Output}: 7
+\\
+\textbf{Explanation}
+\\
+Buy on day 2 (price = 1) and sell on day 3 (price = 5), profit $= 5-1 = 4$. Then buy on day 4 (price = 3) and sell on day 5 (price = 6), profit $= 6-3 = 3$.
+\end{flushleft}
+\paragraph{Example 2:}
+\begin{flushleft}
+\textbf{Input}: $[1,\;2,\;3,\;4,\;5]$
+\\
+\textbf{Output}: 4
+\\
+\textbf{Explanation}
+\\
+Buy on day 1 (price = 1) and sell on day 5 (price = 5), profit $= 5-1 = 4$. Note that you cannot buy on day 1, buy on day 2 and sell them later, as you are engaging multiple transactions at the same time. You must sell before buying again.
+\end{flushleft}
+\paragraph{Example 3:}
+\begin{flushleft}
+\textbf{Input}: $[7,\;6,\;4,\;3,\;1]$
+\\
+\textbf{Output}: 0
+\\
+\textbf{Explanation}
+\\
+In this case, no transaction is done, i.e. max profit $= 0$.
+\end{flushleft}
+\subsection{Simple One Pass}
+\begin{CJK*}{UTF8}{gbsn}
+这里条件放宽了，可以无限次买入和卖出。因此只需要从第二天开始，如果当前价格比之前价格高，则把差值加入利润中，因为我们可以昨天买入，今日卖出，若明日价更高的话，还可以今日买入，明日再抛出。以此类推，遍历完整个数组后即可求得最大利润
+\end{CJK*}
+\setcounter{algorithm}{0}
+\begin{algorithm}[H]
+\caption{One Pass}
+\begin{algorithmic}[1]
+\Procedure{MaxProfit}{$P\;L_P$}
+\State $\texttt{ans}:=0$ \Comment The maximum profit
+\For{$i:=1\to L_P-1$}
+\If{$P[i] > P[i-1]$}
+\State $\texttt{ans}\gets \texttt{ans} + P[i]-P[i-1]$
+\EndIf
+\EndFor
+\State \Return \texttt{ans}
+\EndProcedure
+\end{algorithmic}
+\end{algorithm}

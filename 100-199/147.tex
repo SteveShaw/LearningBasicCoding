@@ -1,0 +1,98 @@
+\section{147 --- Insertion Sort List}
+Sort a linked list using insertion sort.  The partial sorted list initially contains only the first element in the list. With each iteration, one element is removed from the input data and inserted in-place into the sorted list
+\par
+Algorithm of Insertion Sort:
+\begin{itemize}
+    \item Insertion sort iterates, consuming one input element each repetition, and growing a sorted output list.
+    \item At each iteration, insertion sort removes one element from the input data, finds the location it belongs within the sorted list, and inserts it there.
+    \item It repeats until no input elements remain.
+\end{itemize}
+\paragraph{Example 1:}
+\begin{flushleft}
+\textbf{Input}:
+\begin{figure}[H]
+\begin{tikzpicture}
+[mynode/.style={draw,circle,minimum size=8mm, fill=gray!20!}]
+\node(){};
+\node[mynode](1) {4};
+\node[mynode](2)[right=12mm of 1] {2};
+\node[mynode](3)[right=12mm of 2] {1};
+\node[mynode](4)[right=12mm of 3] {3};
+\draw[>=stealth,->] (1) -- (2);
+\draw[>=stealth,->] (2) -- (3);
+\draw[>=stealth,->] (3) -- (4);
+\end{tikzpicture}
+\end{figure}
+\textbf{Output}: 
+\begin{figure}[H]
+\begin{tikzpicture}
+[mynode/.style={draw,circle,minimum size=8mm, fill=gray!20!}]
+\node(){};
+\node[mynode](1) {1};
+\node[mynode](2)[right=12mm of 1] {2};
+\node[mynode](3)[right=12mm of 2] {3};
+\node[mynode](4)[right=12mm of 3] {4};
+\draw[>=stealth,->] (1) -- (2);
+\draw[>=stealth,->] (2) -- (3);
+\draw[>=stealth,->] (3) -- (4);
+\end{tikzpicture}
+\end{figure}
+\end{flushleft}
+\paragraph{Example 2:}
+\begin{flushleft}
+\textbf{Input}:
+\begin{figure}[H]
+\begin{tikzpicture}
+[mynode/.style={draw,circle,minimum size=8mm, fill=gray!20!}]
+\node(){};
+\node[mynode](1) {$-1$};
+\node[mynode](2)[right=12mm of 1] {5};
+\node[mynode](3)[right=12mm of 2] {3};
+\node[mynode](4)[right=12mm of 3] {4};
+\node[mynode](5)[right=12mm of 4] {0};
+\draw[>=stealth,->] (1) -- (2);
+\draw[>=stealth,->] (2) -- (3);
+\draw[>=stealth,->] (3) -- (4);
+\draw[>=stealth,->] (4) -- (5);
+\end{tikzpicture}
+\end{figure}
+\textbf{Output}: 
+\begin{figure}[H]
+\begin{tikzpicture}
+[mynode/.style={draw,circle,minimum size=8mm, fill=gray!20!}]
+\node(){};
+\node[mynode](1) {$-1$};
+\node[mynode](2)[right=12mm of 1] {0};
+\node[mynode](3)[right=12mm of 2] {3};
+\node[mynode](4)[right=12mm of 3] {4};
+\node[mynode](5)[right=12mm of 4] {5};
+\draw[>=stealth,->] (1) -- (2);
+\draw[>=stealth,->] (2) -- (3);
+\draw[>=stealth,->] (3) -- (4);
+\draw[>=stealth,->] (4) -- (5);
+\end{tikzpicture}
+\end{figure}
+\end{flushleft}
+\subsection{Insertion Sort}
+首先建立一个Dummy Header，这个dummy header将是排序后的链表的第一个节点。然后从当前链表的第一个节点开始，在每一次循环中，都在以dummy header开头的链表中寻找插入的位置。直至遍历完当前链表。最后返回dummy header的下一个节点作为排序后链表的头节点。
+\setcounter{algorithm}{0}
+\begin{algorithm}[H]
+\caption{}
+\begin{algorithmic}[1]
+\Procedure{InsertionSortList}{$H$}
+\State Initialize a dummy header $D$
+\State $t:=H$
+\While{$t\neq\texttt{null}$}
+\State $d:=D$
+\State $\hat{t}:=t.\texttt{next}$ \Comment Save next node of $t$
+\While{$d.\texttt{next}\neq\texttt{null}$ \textbf{and} $d.\texttt{next}.\texttt{value}\leq t.\texttt{value}$} \Comment Find the place to insert $t$
+\State $d\gets d.\texttt{next}$
+\EndWhile
+\State $t.\texttt{next}\gets d.\texttt{next}$ \Comment Link $t$'s next to $d$'s next node
+\State $d.\texttt{next}\gets t$ \Comment Link $d$'s next to $t$, so $t$ is inserted into the list $D$
+\State $t\gets \hat{t}$ \Comment Move $t$ to next node in list $H$
+\EndWhile
+\State \Return $D.\texttt{next}$
+\EndProcedure
+\end{algorithmic}
+\end{algorithm}

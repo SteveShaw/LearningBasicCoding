@@ -1,0 +1,24 @@
+\section{103 --- Binary Tree Zigzag Level Order Traversal}
+Given a binary tree $T$, return the zigzag level order traversal of its nodes' values. (ie, from left to right, then right to left for the next level and alternate between). For example: Given binary tree
+\begin{figure}[H]
+\begin{tikzpicture}
+[mynode/.style={draw,circle,minimum size=10mm, fill=gray!20!}]
+\node(){};
+\node[mynode](3) {3};
+\node[mynode](9) [below = 8mm of 3, xshift=-10mm] {9};
+\node[mynode](20) [below = 8mm of 1, xshift=10mm] {20};
+\node[mynode](15) [below = 8mm of 20, xshift=-6mm] {15};
+\node[mynode](7) [below = 8mm of 20, xshift=6mm] {7};
+\draw[>=stealth,->] (3) -- (9);
+\draw[>=stealth,->] (3) -- (20);
+\draw[>=stealth,->] (20) -- (15);
+\draw[>=stealth,->] (20) -- (7);
+\end{tikzpicture}
+\end{figure}
+return its zigzag level order traversal as:
+\\
+$\left((3),\ (20,9),\ (15,7)\right)$
+\subsection{BFS}
+\begin{CJK*}{UTF8}{gbsn}
+同样用BFS搜索，记录每层的节点个数即当前queue的size，然后分奇数偶数层确定访问节点的方向，具体说就是对于奇数层，从右往左，对于偶数层则从左往右，层数从0开始。
+\end{CJK*}

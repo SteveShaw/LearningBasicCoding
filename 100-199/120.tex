@@ -1,0 +1,61 @@
+\section{120 --- Triangle}
+Given a triangle $T$, find the minimum path sum from top to bottom. Each step you may move to adjacent numbers on the row below.
+\paragraph{Example}
+\begin{flushleft}
+\textbf{Input}:
+\begin{table}[H]
+\begin{tabular}{llll}
+2 &   &   &   \\
+3 & 4 &   &   \\
+6 & 5 & 7 &   \\
+4 & 1 & 8 & 3
+\end{tabular}
+\end{table}
+\textbf{Output}: 11
+\\
+\textbf{Explanation}:
+The minimum path sum from top to bottom is 11 (i.e., $2 + 3 + 5 + 1 = 11$).
+\end{flushleft}
+\paragraph{Note:}
+\begin{itemize}
+\item Bonus point if you are able to do this using only $O(n)$ extra space, where $n$ is the total number of rows in the triangle.
+\end{itemize}
+\subsection{Dynamic Programming}
+\begin{CJK*}{UTF8}{gbsn}
+表面上看，这个三角形看起来像一个树状结构，这很自然让我们想到用树的遍历算法比如DFS。但是，如果仔细观察就会发现，其实相邻的nodes构成了一个选择分支。也就是说，存在\textbf{overlapping subproblems}。而且，如果$x, y$是$k$的adjacent nodes，一旦找到了minimum path starting from $x$ and $y$，那么minimum path starting from $k$也就找到了，这就构成了一个\textbf{optimal substructure}。因此，Dynamic Programming是最佳的solution。
+\end{CJK*}
+\par
+\begin{CJK*}{UTF8}{gbsn}
+如果采用\textbf{Top--Down}的方式，从最顶层的node出发，递归寻找每个node的minium path sum。每次计算出一个path sum，就存放在一个数组中。下一次需要计算同一个node的minimum path sum时，只需要直接从存放的数组中获得。但是这个数组的大小至少要与输入的三角形数组的大小相等，而这需要$O(N^2)$存储空间。虽然也能通过某些trick优化这个存储空间，但是这在recursive方法中很难直接想到。
+\end{CJK*}
+\par
+\begin{CJK*}{UTF8}{gbsn}
+反之，如果采用\textbf{Bottom--Up}的方式，优化存储空间就很直接了。首先从最底层的node出发，最开始每个node的minimum path sum就是node本身的值。接着，在$k$th row的$i$th node的minimum path sum就是这个节点的两个children的minimum path sum中的最小值加上这个节点的值。即：
+\end{CJK*}
+\[
+F(k,i)=\min(F(k+1, i), F(k+1, i+1)) + T[k][i]
+\]
+\begin{CJK*}{UTF8}{gbsn}
+接下来就是如何优化存储空间，我们需要将$F$修改成1D array，然后iteratively逐步更新$F$，即对于$k$th level
+\end{CJK*}
+\[
+F[i] = \min(F[i], F[i+1]) + T[k][i];
+\]
+\begin{CJK*}{UTF8}{gbsn}
+最后$F[0]$就是最终的结果。
+\end{CJK*}
+\setcounter{algorithm}{0}
+\begin{algorithm}[H]
+\caption{Dynamic Programming}
+\begin{algorithmic}[1]
+\Procedure{MinimumTotal}{$T,\;L_T$}
+\State $F:=T[L_T-1]$ \Comment $F$ is initialized as the final element in $T$
+\For{$l:=L_T-2 \to 0$}
+\For{$i:=0 \to l$}
+\State $F[i]\gets \min(F[i], F[i+1]) + T[l][i]$
+\EndFor
+\EndFor
+\State \Return $F[0]$
+\EndProcedure
+\end{algorithmic}
+\end{algorithm}

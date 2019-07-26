@@ -1,0 +1,26 @@
+\section{145 --- Binary Tree Postorder Traversal}
+Given a binary tree $R$, return the \textit{postorder} traversal of its nodes' values.
+\paragraph{Example:}
+\begin{flushleft}
+\textbf{Input}:
+\begin{figure}[H]
+\begin{tikzpicture}
+[mynode/.style={draw,circle,minimum size=5mm, fill=gray!20!}]
+\node(){};
+\node[mynode](1) {1};
+\node[mynode](2)[below=8mm of 1, xshift=8mm] {2};
+\node[mynode](3)[below=8mm of 2, xshift=-8mm] {3};
+\draw[>=stealth,->] (1) -- (2);
+\draw[>=stealth,->] (2) -- (3);
+\end{tikzpicture}
+\end{figure}
+\textbf{Output}: $[3,2,1]$
+\end{flushleft}
+\paragraph{Follow up:}
+\begin{itemize}
+\item Recursive solution is trivial, could you do it iteratively?
+\end{itemize}
+\subsection{Stack}
+和preorder一样，也有两种iterative的方法: stack和morris traversal。stack 的 output 过程和 preorder 类似，唯一不同的是需要先把left child放入stack中，另外最后要把得到的数组进行reverse。因为插入的过程中，当前节点的值都放在最前面了。
+\subsection{Morris Traversal}
+和Preorder方法类似，但是需要做改动，即，这时候需要看其right child是否存在，如果存在，则一直向左，然后建立link。如果不存在，则进入left child，并输出当前节点。

@@ -1,0 +1,83 @@
+\section{140 --- Word Break II}
+Given a non-empty string $S$ and a dictionary $A$ containing a list of non-empty words, add spaces in $S$ to construct a sentence where each word is a valid dictionary word. Return all such possible sentences.
+\paragraph{Note:}
+\begin{itemize}
+\item The same word in the dictionary may be reused multiple times in the segmentation.
+\item You may assume the dictionary does not contain duplicate words.
+\end{itemize}
+\paragraph{Example 1:}
+\begin{flushleft}
+\textbf{Input}: $S$ = catsanddog, $A = [\text{cat}, \text{cats}, \text{and}, \text{sand}, \text{dog}]$
+\\
+\textbf{Output}:(cats and dog, cat sand dog)
+\end{flushleft}
+\paragraph{Example 2:}
+\begin{flushleft}
+\textbf{Input}: $S$ = pineapplepenapple, $A= [\text{apple, pen, applepen, pine, pineapple}]$
+\\
+\textbf{Output}:(pine apple pen apple, pineapple pen apple, pine applepen apple)
+\\
+\textbf{Explanation}: Note that you are allowed to reuse a dictionary word.
+\end{flushleft}
+\paragraph{Example 3:}
+\begin{flushleft}
+\textbf{Input}: $S = \text{catsandog}$, $A = [\text{cats, dog, sand, and, cat}]$
+\\
+\textbf{Output}: $\emptyset$
+\end{flushleft}
+\subsection{Dynamic Programming With Memeorization}
+因为是要得到输出所有的组合，而不仅仅是判定是否能拆分，因此最佳的选择是采用递归式Dynamic Programming加上Memorization。由于返回的是字符串数组，因此用于Memorziation的数据结构最佳选择就是hash map，其中key是字符串，value则是该字符串所能拆分出的字符串拼成的句子字符串array。
+\par
+递归中具体的算法步骤如下
+\begin{enumerate}
+    \item 首先看当前字符串在Memo中是否存在，如果存在直接返回保存的结果。
+    \item 如果当前字符串是空字符串，很明显直接返回包含空字符串的数组。
+    \item 然后测试字典中的每个word，如果发现某个word和当前字符串从其起始位置开始的相同长的子字符串相等，那么就从这个word长度的下一个位置开始继续递归。然后根据递归返回的字符串数组，将其中的每个字符串加上这个word作为前缀，然后将得到的字符串数组作为以当前字符串为key的value保存到$Memo$中。
+\end{enumerate}
+\setcounter{algorithm}{0}
+\begin{algorithm}[H]
+\caption{DFS + Memorization}
+\begin{algorithmic}[1]
+\Procedure{WordBreak}{$S, L, W$}
+\State Initialize $M:=\emptyset$ as the memorization hash map
+\State $\texttt{ans}:=\texttt{DFS}(S, W, M)$
+\EndProcedure
+\end{algorithmic}
+\end{algorithm}
+\texttt{DFS}递归搜索可以将$S$进行分割形成的句子字符串，分割产生的word必须在给定的字典$W$中。$M$用于在递归过程中记录字符串及其对应的句子字符串数组。
+\begin{algorithm}[H]
+\caption{DFS Helper Function}
+\begin{algorithmic}[1]
+\Function{DFS}{$S, L, W, M$}
+\If{$S=\emptyset$} \Comment $S$ is empty
+\State \Return $[\emptyset]$ \Comment Return an array contains only one empty string
+\EndIf
+\If{$S\in M$} \Comment $S$ is a key in $M$
+\State \Return $M[S]$ \Comment Directly return the saved result
+\EndIf
+\State $A:=\emptyset$ \Comment The sentense string array for current string $S$
+\For{$\omega \in W$} \Comment Iterate each word $\omega$ in $W$
+\State $\ell:=|\omega|$ \Comment The length of current word
+\State $S_0:=S[0,\ell-1]$ \Comment The substring starting from 0
+\If{$S_0=\omega$} \label{140if2}
+\State $S_1:=S[\ell, L-1]$ \Comment The substring after the matched word
+\State $Z:=\texttt{DFS}(S_1, L-\ell, W, M)$ \Comment Recursively get result for $S_1$ 
+\For{$z\in Z$} \Comment Iterate each sentense $z$ in $Z$ \label{140for1}
+\If{$z=\emptyset$} \Comment $z$ is empty \label{140if1}
+\State $A\gets A + \omega$ \Comment $\omega$ is the only word in the sentence
+\algstore{140algo}
+\end{algorithmic}
+\end{algorithm}
+\begin{algorithm}[H]
+\begin{algorithmic}[1]
+\algrestore{140algo}
+\Else
+\State $t:=\omega+\text{\textvisiblespace}+z$ \Comment Add $\omega$ as the first word in $z$
+\State $A\gets A + t$
+\EndIf \Comment End[\ref{140if1}]
+\EndFor \Comment End[\ref{140for1}]
+\EndIf \Comment End[\ref{140if2}]
+\EndFor
+\EndFunction
+\end{algorithmic}
+\end{algorithm}

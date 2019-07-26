@@ -1,0 +1,53 @@
+\section{153 --- Find Minimum in Rotated Sorted Array}
+Suppose an array $A$ sorted in ascending order is rotated at some pivot unknown to you beforehand. (i.e., $[0,1,2,4,5,6,7]$ might become  $[4,5,6,7,0,1,2]$).
+\par
+Find the minimum element.
+\par
+You may assume no duplicate exists in the array.
+\paragraph{Example 1:}
+\begin{flushleft}
+\textbf{Input}: $[3,4,5,1,2]$
+\\
+\textbf{Output}: 1
+\end{flushleft}
+\paragraph{Example 2:}
+\begin{flushleft}
+\textbf{Input}: $[4,5,6,7,0,1,2]$
+\\
+\textbf{Output}: 0
+\end{flushleft}
+\subsection{Binary Search}
+\begin{CJK*}{UTF8}{gbsn}
+基于二分搜索，假设$l$, $r$是当前搜索的边界，那么位于中间位置$m=(l+r)/2$的数$A[m]$。如果这个数比$A[r]$大，那么表明最小值出现在$A[m+1\ldots r]$j区间内，如果比$A[r]$小，则最小值出现在$A[l\ldots m]$中。而题目中给出了没有重复的数字条件，因此不需要考虑$A[m]$和$A[r]$相等的情况。
+\end{CJK*}
+\setcounter{lstlisting}{0}
+\begin{lstlisting}[style=customc, caption={Binary Search}]
+int findMin( vector<int>& A )
+{
+	//right boundary of searching
+	int r = static_cast< int >( A.size() - 1 ); 
+	//left boundary of searching
+	int l = 0;
+
+	//We need l to be a valid index 
+	//so the condition is (l < r)
+	//not (l<=r)
+	while ( l < r )
+	{
+		int mid = ( l + r ) / 2;
+
+		if ( A[mid] > A[r] )
+		{
+			//The minimum is in [mid+1,r]
+			l = mid + 1;
+		}
+		else
+		{
+			//The minimum is in [l, mid]
+			r = mid;
+		}
+	}
+
+	return A[l];
+}
+\end{lstlisting}

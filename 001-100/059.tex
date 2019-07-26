@@ -1,0 +1,20 @@
+\section{59 --- Spiral Matrix II}
+Given a positive integer $n$, generate a square matrix filled with elements from 1 to $n^2$ in spiral order.
+\paragraph{Example:}
+\begin{flushleft}
+\textbf{Input}: 3
+\par
+\textbf{Output}:
+\begin{figure}[H]
+    \begin{tikzpicture}
+    \matrix (m) [matrix of nodes]
+    {
+        1 & 2 & 3 \\
+        8 & 9 & 4 \\
+        7 & 6 & 5 \\
+    };
+    \end{tikzpicture}
+\end{figure}
+\end{flushleft}
+\subsection{Simulation}
+和54题一模一样的方法，同样通过利用访问数组，不过因为这道题本身就是填充数组，所以我们可以用当前$M[r][c]$是否被填充了数来确定该元素是否已经访问过。避免了使用额外的访问数组。同时方向的安排需要按照spiral的顺序来定义，即$(0,1)\to(1,0)\to(0,-1)\to(-1,0)$

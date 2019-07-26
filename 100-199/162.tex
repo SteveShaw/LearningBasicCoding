@@ -1,0 +1,94 @@
+\section{162 --- Find Peak Element}
+A peak element is an element that is greater than its neighbors.
+\par
+Given an input array $A$, where $A[i] \neq A[i+1]$, find a peak element and return its index.
+\par
+The array may contain multiple peaks, in that case return the index to any one of the peaks is fine.
+\par
+You may imagine that $A[-1] = A[n] = -\infty$.
+\paragraph{Example 1:}
+\begin{flushleft}
+\textbf{Input}: $A = [1,2,3,1]$
+\\
+\textbf{Output}: 2
+\\
+\textbf{Explanation}: 3 is a peak element and your function should return the index number 2.
+\end{flushleft}
+\paragraph{Example 2:}
+\begin{flushleft}
+\textbf{Input}: $A = [1,2,1,3,5,6,4]$
+\\
+\textbf{Output}: 1 or 5 
+\\
+\textbf{Explanation}: Your function can return either index number 1 where the peak element is 2, or index number 5 where the peak element is 6.
+\end{flushleft}
+\paragraph{Note:}
+\begin{itemize}
+\item Your solution should be in logarithmic complexity.
+\end{itemize}
+\subsection{Recursive Binary Search}
+We can view any given sequence in $A$ as alternating ascending and descending sequences. By making use of this, and the fact that we can return any peak as the result, we can make use of \textbf{Binary Search} to find the required peak element.
+\par
+In case of simple Binary Search, we work on a sorted sequence of numbers and try to find out the required number by reducing the search space at every step. In this case, we use a modification of this simple Binary Search to our advantage. We start off by finding the middle element $M$ from the given array $A$. If this element happens to be lying in a descending sequence of numbers. or a local falling slope(found by comparing $A[i]$ to its right neighbor), it means that the peak will always lie towards the left of this element. Thus, we reduce the search space to the left of $M$(including itself) and perform the same process on left subarray.
+\par
+If the middle element $M$ lies in an ascending sequence of numbers, or a rising slope(found by comparing $A[i]$ to its right neighbor), it obviously implies that the peak lies towards the right of this element. Thus, we reduce the search space to the right of $M$ (\textbf{not} including $M$) and perform the same process on the right subarray.
+\par
+In this way, we keep on reducing the search space till we eventually reach a state where only one element is remaining in the search space. This single element is the \textbf{peak element}.
+\par
+To see how it works, consider the three cases discussed above again.
+\begin{enumerate}
+\item $A=[5,4,3,2,1]$: In this case, we firstly find 3 as the middle element. Since it lies on a falling slope ($3>2$), we reduce the search space to $[5, 4, 3]$. For this subarray, 4 happens to be the middle element, which again lies on a falling slope ($4 > 3$), reducing the search space to $[5, 4]$. Now, 5 acts as the middle element and it lies on a falling slope ($5>4$), reducing the search space to $[5]$ only. Thus, 5 is returned as the peak correctly.
+\item $A=[1,2,3,4,5]$:  In this case, we firstly find $3$ as the middle element. Since it lies on a rising slope ($3 < 4$), we reduce the search space to $[4, 5]$. Now, $4$ acts as the middle element for this subarray and it lies on a rising slope ($4< 5$), reducing the search space to $[5]$ only. Thus, 5 is returned as the peak correctly.
+\item $A=[2,3,4,5,1]$: In this case, the peak lies somewhere in the middle. The first middle element is $4$. It lies on a rising slope ($4<5$), indicating that the peak lies towards its right. Thus, the search space is reduced to $[5, 1]$. Now, 5 happens to be the on a falling slope ($5 > 1$), reducing the search space to $[5]$ only. Thus, 5 is identified as the peak element correctly.
+\end{enumerate}
+\setcounter{algorithm}{0}
+\setcounter{algorithm}{0}
+\begin{algorithm}[H]
+\caption{Binary Search}
+\begin{algorithmic}[1]
+\Procedure{FindPeakElement}{$A, L$}
+\State $l:=0$
+\State $r:=L-1$
+\While{$l < r$}
+\State $m:=(l+r)/2$
+\If{$A[m] < A[m+1]$} \Comment In a rising slope
+\State $l\gets m+1$
+\Else \Comment In a falling slope
+\State $r\gets m$ 
+\EndIf
+\algstore{162algo}
+\end{algorithmic}
+\end{algorithm}
+\begin{algorithm}[H]
+\begin{algorithmic}[1]
+\algrestore{162algo}
+\EndWhile
+\State \Return $l$
+\EndProcedure
+\end{algorithmic}
+\end{algorithm}
+\setcounter{lstlisting}{0}
+\begin{lstlisting}[style=customc, caption={Reference Code}]
+int findPeakElement ( vector<int>& nums )
+{
+
+	int l = 0;
+	int r = static_cast< int >( nums.size () ) - 1;
+
+	while( l < r )
+	{
+		int mid = ( l + r ) / 2;
+
+		if( nums[mid] < nums[mid + 1] )
+		{
+			l = mid + 1;
+		}
+		else
+		{
+			r = mid;
+		}
+	}
+
+	return l;
+}
+\end{lstlisting}

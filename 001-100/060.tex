@@ -1,0 +1,166 @@
+\section{60 --- Permutation Sequence}
+The set $[1,2,3,...,n]$ contains a total of $n!$ unique permutations.
+\par
+By listing and labeling all of the permutations in order, we get the following sequence for $n = 3$:
+\[
+123, 132, 213, 231, 312, 321
+\]
+\par
+Given $n$ and $k$, return the $k$th permutation sequence.
+\par
+\textbf{Note}:
+\par
+Given $n$ will be between 1 and 9 inclusive.
+\par
+Given $k$ will be between 1 and n! inclusive.
+\paragraph{Example 1:}
+\begin{flushleft}
+\textbf{Input}: $n = 3, k = 3$
+\par
+\textbf{Output}: $213$
+\end{flushleft}
+\paragraph{Example 2:}
+\begin{flushleft}
+\textbf{Input}: $n = 4, k = 9$
+\par
+\textbf{Output}: $2314$
+\end{flushleft}
+\subsection{Find the N-th permutation (Using factorial number system)} 
+In this section, we are talking about the background of how to find $n$th permutation of a string. 
+\subsection{Factorial Number System}
+Instead of finding all permutations and looking up the $n$th, we can directly calculate the $n$th permutation. We need to first understand the \textbf{Factorial Number System.} A factorial number system uses \textbf{factorial} values instead of powers of numbers (binary system uses powers of 2, decimal uses powers of 10) to denote place-values (or base). The place values (base) are:
+\[
+0!=1, 1!=1, 2!=2, 3!=6, 4!=24, 5!=120, \ldots
+\]
+The digit in the zeroth place is always 0. The digit in the 1st place (with base = 1!) can be 0 or 1. The digit in the 2nd place (with base 2!) can be 0, 1 or 2 and so on. Generally speaking, the digit at $n$th place can take any value between $0\to n$.
+\par
+First few numbers represented as factoradics
+\begin{align*}
+    0 & \implies 0 = 0\times 0! \\
+    1 & \implies 10 = 1*1! + 0*0! \\
+    2 & \implies 100 = 1*2! + 0*1! + 0*0! \\
+    3 & \implies 110 = 1\times 2! + 1\times 1! + 0\times 0! \\
+    4 & \implies 200 = 2\times 2! + 0\times 1! + 0\times 0! \\
+    5 & \implies 210 = 2\times 2! + 1\times 1! + 0\times 0! \\
+    6 & \implies 1000 = 1\times 3! + 0\times 2! + 0\times 1! + 0\times 0! \\
+    7 & \implies 1010 = 1\times 3! + 0\times 2! + 1\times 1! + 0\times 0! \\
+    8 & \implies 1100 = 1\times 3! + 1\times 2! + 0\times 1! + 0\times 0! \\
+    9 & \implies 1110 \\
+    10& \implies 1200
+\end{align*}
+\par
+There is a direct relationship between $n$th lexicographical permutation of a string and its factoradic representation.
+\par
+For example, here are the permutations of the string \textit{abcd}.
+\begin{figure} [H]
+    \centering
+    \begin{tikzpicture}
+    \matrix (p) [matrix of nodes]
+    {
+    0  abcd & 6  bacd &  12  cabd & 18  dabc \\
+    1  abdc & 7  badc &  13  cadb & 19  dacb \\
+    2  acbd & 8  bcad &  14  cbad & 20  dbac \\
+    3  acdb & 9  bcda &  15  cbda & 21  dbca \\
+    4  adbc & 10  bdac & 16  cdab & 22  dcab \\
+    5  adcb & 11  bdca & 17  cdba & 23  dcba \\
+    };    
+    \end{tikzpicture}
+\end{figure}
+\par
+We can see a pattern here, if observed carefully. The first letter changes after every 6th ($3!$) permutation. The second letter changes after 2($2!$) permutation. The third letter changed after every ($1!$) permutation and the fourth letter changes after every ($0!$) permutation. We can use this relation to directly find the nth permutation.
+\subsection{Algorithm}
+Once we represent $n$ in factoradic representation, we consider each digit in it and add a character from the given string to the output. If we need to find the 14th permutation of \textbf{ABCD}. 14 in \textbf{factoradics} is 2100.
+\begin{itemize}
+    \item Start with the first digit \textbf{2}. Take the element at position 2 from \textbf{ABCD} which is \textbf{C}, and add it to the Output. Therefore, the output now is \textbf{C} and The previous string becomes \textbf{ABD}
+    \item The next digit is \textbf{1}.String is now \textbf{ABCD}. Again, get the character at position 1 which is \textbf{B} and add it to the Output. Now, the output is \textbf{CB} and the previous string is \textbf{AD}
+    \item Next digit is \textbf{0}. String is \textbf{AD}. Add the character at position 0 to the Output, we get output \textbf{CBA}. The previous string reduces to \textbf{D}
+    \item Next digit is \textbf{0}. String is \textbf{D}. Add the character at position 0 to the Output, we get output \textbf{CBAD} and we consumed all characters from previous string.
+\end{itemize}
+In summary, we get the following process
+\begin{figure}[H]
+\centering
+\begin{tikzpicture}
+\node(0) {};
+\node(2) at (2,0) [text=red, draw, minimum width=1cm, minimum height=1cm] {2};
+\node(a) at (3.5,0) [text=violet, draw, minimum width=2cm, minimum height=1cm] {\textbf{ABCD}};
+\node(c) at (6.5,0) [text=purple, draw, minimum width=2cm, minimum height=1cm] {\textbf{C}};
+\node(d) at (8.5,0) [text=purple, draw, minimum width=2cm, minimum height=1cm] {\textbf{ABD}};
+\draw[-{Stealth[length=2mm]}] (a) -- (c);
+\node(1) at (2,-1) [text=red, draw, minimum width=1cm, minimum height=1cm] {1};
+\node(a1) at (3.5,-1) [text=violet, draw, minimum width=2cm, minimum height=1cm] {\textbf{ABD}};
+\node(c1) at (6.5,-1) [text=purple, draw, minimum width=2cm, minimum height=1cm] {\textbf{CB}};
+\node(d1) at (8.5,-1) [text=purple, draw, minimum width=2cm, minimum height=1cm] {\textbf{AD}};
+\draw[-{Stealth[length=2mm]}] (a1) -- (c1);
+\node(0) at (2,-2) [text=red, draw, minimum width=1cm, minimum height=1cm] {0};
+\node(a2) at (3.5,-2) [text=violet, draw, minimum width=2cm, minimum height=1cm] {\textbf{AD}};
+\node(c2) at (6.5,-2) [text=purple, draw, minimum width=2cm, minimum height=1cm] {\textbf{CBA}};
+\node(d2) at (8.5,-2) [text=purple, draw, minimum width=2cm, minimum height=1cm] {\textbf{D}};
+\draw[-{Stealth[length=2mm]}] (a2) -- (c2);
+\node at (2,-3) [text=red, draw, minimum width=1cm, minimum height=1cm] {0};
+\node(a3) at (3.5,-3) [text=violet, draw, minimum width=2cm, minimum height=1cm] {\textbf{D}};
+\node(c3) at (6.5,-3) [text=purple, draw, minimum width=2cm, minimum height=1cm] {\textbf{CBAD}};
+\node at (8.5,-3) [text=purple, draw, minimum width=2cm, minimum height=1cm] {$\emptyset$};
+\draw[-{Stealth[length=2mm]}] (a3) -- (c3);
+\end{tikzpicture}
+\end{figure}
+\subsection{Convert To Factorial Number}
+To convert a given number to Factorial Number System,successively divide the number by $1,2,3,4,5,6$ and so on until the quotient becomes zero. The reminders at each step forms the factoradic representation.
+\par
+For example, to convert $349$ to factoradic, we have the following process
+\begin{itemize}
+    \item $\dfrac{349}{1} = 349$, we have remainders $r = 0$ and quotient $q = 349$, the generated factoradic number $\digamma = 0$
+    \item $\dfrac{349}{2} = 174$, $r = 1, q = 174,\; \digamma = 10$
+    \item $\dfrac{174}{3} = 58$, $r = 0, q = 58,\; \digamma = 010$
+    \item $\dfrac{58}{4} = 14$, $r = 2, q = 14,\; \digamma = 2010$
+    \item $\dfrac{14}{5} = 2$, $r = 4, q = 2,\; \digamma = 42010$
+    \item $\dfrac{2}{6} = 0$, $r = 2, q = 0,\; \digamma = 242010$
+\end{itemize}
+Hence, Factoradic representation of 349 is \textbf{242010}. \textbf{Note}: The length of factoradic representation should be equal to the length of the character array. Prepend zeros to ensure the length is same.
+
+\setcounter{lstlisting}{0}
+\begin{lstlisting}[style=customc, caption={Factorial Number System}]
+string getPermutation( int n, int k )
+{
+    vector<int> factors( n, 0 );
+
+    int factor = 1;
+
+    //k is in [0, n!-1]
+    --k;
+
+    //fill the coefficients of factorial number
+    while( k )
+    {
+        int q = k / factor;
+        int r = k - q * factor;
+
+        factors[factor - 1] = r;
+
+        k = q;
+        ++factor;
+    }
+
+    string s;
+    for( int i = 1; i <= n; ++i )
+    {
+        s.push_back( i + '0' );
+    }
+
+    string ans;
+
+    //generate the k-th permutation
+    //based on factors array
+    for( size_t i = 0; i < factors.size(); ++i )
+    {
+
+        auto j = factors.size() - i - 1;
+
+        int sel = factors[j];
+        ans.push_back( s[sel] );
+
+        s = s.substr( 0, sel ) + s.substr( sel + 1 );
+    }
+
+    return ans;
+}
+\end{lstlisting}

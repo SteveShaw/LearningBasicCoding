@@ -1,0 +1,150 @@
+\section{189 --- Rotate Array}
+Given an array $A$, rotate the array to the right by $k$ steps, where $k$ is non-negative.
+\paragraph{Example 1:}
+\begin{flushleft}
+\textbf{Input}: $[1,2,3,4,5,6,7]$ and $k = 3$
+\\
+\textbf{Output}: $[5,6,7,1,2,3,4]$
+\\
+\textbf{Explanation}:
+\\
+rotate 1 steps to the right: $[7,1,2,3,4,5,6]$
+\\
+rotate 2 steps to the right: $[6,7,1,2,3,4,5]$
+\\
+rotate 3 steps to the right: $[5,6,7,1,2,3,4]$
+\end{flushleft}
+\paragraph{Example 2:}
+\begin{flushleft}
+\textbf{Input}: $[-1,-100,3,99]$ and $k = 2$
+\\
+\textbf{Output}: $[3,99,-1,-100]$
+\\
+\textbf{Explanation}:
+\\
+rotate 1 steps to the right: $[99,-1,-100,3]$
+\\
+rotate 2 steps to the right: $[3,99,-1,-100]$
+\end{flushleft}
+\paragraph{Note:}
+\begin{itemize}
+\item Try to come up as many solutions as you can, there are at least 3 different ways to solve this problem.
+\item Could you do it in-place with $O(1)$ extra space?
+\end{itemize}
+\subsection{Cyclic Replacement}
+Start from one element and keep rotating until we have rotated n different elements.
+\setcounter{algorithm}{0}
+\begin{algorithm}[H]
+\caption{Cyclic Replacement}
+\begin{algorithmic}[1]
+\Procedure{Rotate}{$A, L, k$}
+\State $\delta:=0$ \Comment The number of elements have been shifted
+\State $x:=0$ \Comment The start index of elements to be shifted
+\State $y:=x$ \Comment The current index of element that is shifted
+\algstore{189algo}
+\end{algorithmic}
+\end{algorithm}
+\begin{algorithm}[H]
+\begin{algorithmic}[1]
+\algrestore{189algo}
+\State $z:=0$ \Comment The variable used as saving number to be shifted
+\While{$\delta < n$}
+\State $n:=A[x]$ \Comment The first number that will be shifted in the following loop
+\Repeat
+\State $y:=(y+k)\bmod L$ \Comment The next index that place $n$
+\State $z:=A[y]$ \Comment Save the value to $z$
+\State $A[y]\gets n$ \Comment Replace $A[y]$ by $n$
+\State $n\gets z$ \Comment The value will replace next element
+\State $\delta\gets\delta+1$ \Comment Increments the number of elements shifted
+\Until{$y\neq x$}
+\EndWhile
+\State $x\gets x+1$ \Comment Move to next element to be shifted
+\State $y\gets x$
+\EndProcedure
+\end{algorithmic}
+\end{algorithm}
+\setcounter{lstlisting}{0}
+\begin{lstlisting}[style=customc, caption={Cyclic Replacement Code}]
+void rotate( vector<int>& nums, int k )
+{
+    if( nums.empty() )
+    {
+        return;
+    }
+
+    if( k == 0 )
+    {
+        return;
+    }
+
+    int L = static_cast<int>( nums.size() );
+
+    int x = 0;
+    int y = x;
+
+    int delta = 0;
+
+    int z = -1;
+
+    while( delta < L )
+    {
+        int n = nums[x];
+        do
+        {
+            y = ( y + k ) % L;
+            z = nums[y];
+            nums[y] = n;
+
+            n = z;
+            ++delta;
+        }
+        while( y != x );
+
+        ++x;
+        y = x;
+    }
+}
+\end{lstlisting}
+\subsection{Reverse}
+Reverse the first $n-k$ elements, then reverse last $k$ elements, finally reverse whole array.
+\subsection{Swap}
+Swap the last $k$ elements with the first $k$ elements.
+\begin{algorithm}[H]
+\caption{Swap}
+\begin{algorithmic}[1]
+\Procedure{Rotate}{$A,L,k$}
+\State $\theta:=0$ \Comment The start index
+\State $\ell:=L$
+\State $\kappa:=k$
+\While{$\ell\neq0$ \textbf{and} $\kappa\neq 0$}
+\State $\kappa\gets \kappa\bmod L$
+\For{$i:=0\to \kappa-1$}
+\State \Call{swap}{$A[\theta + i]$, $A[\theta + \ell - \kappa + i]$}
+\State $\theta\gets \theta + \kappa$ \Comment Change the start index
+\State $\ell\gets \ell - \kappa$ \Comment Change the length of numbers to be shifted
+\EndFor
+\EndWhile
+\EndProcedure
+\end{algorithmic}
+\end{algorithm}
+\begin{lstlisting}[style=customc, caption={Swap}]
+void rotate( vector<int>& nums, int k )
+{
+    int theta = 0;
+    int ell = static_cast<int>( nums.size() );
+    int kappa = k;
+
+    while( ( ell != 0 ) && ( kappa != 0 ) )
+    {
+        kappa = kappa % ell;
+
+        for( int i = 0; i < kappa; ++i )
+        {
+            swap( nums[theta + i], nums[theta + ell - kappa + i] );
+        }
+
+        theta += kappa;
+        ell -= kappa;
+    }
+}
+\end{lstlisting}

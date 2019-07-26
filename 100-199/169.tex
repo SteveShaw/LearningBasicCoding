@@ -1,0 +1,108 @@
+\section{169 --- Majority Element}
+Given an array $A$ of size $n$, find the majority element. The majority element is the element that appears more than $\lfloor \dfrac{n}{2}\rfloor$ times.
+\par
+You may assume that the array is non-empty and the majority element always exist in the array.
+\paragraph{Example 1:}
+\begin{flushleft}
+\textbf{Input}: $[3,2,3]$
+\\
+\textbf{Output}: 3
+\end{flushleft}
+\paragraph{Example 2:}
+\begin{flushleft}
+\textbf{Input}: $[2,2,1,1,1,2,2]$
+\\
+\textbf{Output}: 2
+\end{flushleft}
+\subsection{Boyer-Moore Voting Algorithm}
+The algorithm maintains a sequence element $x$ and a counter $\delta$, with $\delta$ initially zero.
+\par
+It then processes the elements of the sequence, one at a time. When processing an element $e$, 
+\begin{itemize}
+\item if $\delta$ is zero, the algorithm stores $e$ as its remembered sequence element $x$ and sets $\delta$ to one. 
+\item Otherwise, it compares $e$ to the stored element $x$ and either increments the counter (if they are equal) or decrements the counter (otherwise).
+\end{itemize}
+At the end of this process, if the sequence has a majority, it will be $e$ stored by the algorithm.
+\paragraph{Note:}
+Even when the input sequence has no majority, the algorithm will report one of the sequence elements as its result. However, it is possible to perform a \textbf{second pass} over the same input sequence in order to count the number of times the reported element occurs and determine whether it is actually a majority.
+\par
+This second pass is needed, as it is not possible for a sublinear--space algorithm to determine whether there exists a majority element in a single pass through the input.
+\setcounter{algorithm}{0}
+\begin{algorithm}[H]
+\caption{Boyer-Moore Voting Algorithm}
+\begin{algorithmic}[1]
+\Procedure{MajorityElement}{$A, n$}
+\State $x:=A[0]$ \Comment The stored element
+\State $\delta:=0$ \Comment The counter
+\For{$i:=1\to n-1$}
+\If{$A[i]=x$}
+\State $\delta\gets\delta+1$ \Comment Increment the counter
+\Else
+\State $\delta\gets\delta-1$ \Comment Decrement the counter
+\EndIf
+\State Check if the counter is zero
+\If{$\delta=0$}
+\State $\delta\gets 1$ \Comment Reset the counter to 1
+\State $x\gets A[i]$ \Comment Replace the stored element as current number
+\EndIf
+\EndFor
+\State Second pass to make sure $x$ is majority element indeed
+\State $\delta\gets 0$ \Comment Reset counter to 0
+\For{$i:=1\to n-1$}
+\If{$x=A[i]$}
+\State $\delta\gets \delta +1$
+\EndIf
+\EndFor
+\State Determine if the counter is actually larger than half of length
+\If{$\delta > \lfloor n/2 \rfloor$}
+\State \Return $x$
+\Else
+\State \Return $\varnothing$ \Comment No majority element exists
+\EndIf
+\EndProcedure
+\end{algorithmic}
+\end{algorithm}
+\setcounter{lstlisting}{0}
+\begin{lstlisting}[style=customc]
+int majorityElement( vector<int>& nums )
+{
+    int x = nums[0];
+    int count = 1;
+
+    for( auto n : nums )
+    {
+        if( n == x )
+        {
+            ++count;
+        }
+        else
+        {
+            --count;
+        }
+
+        if( count == 0 )
+        {
+            x = n;
+            count = 1;
+        }
+    }
+
+    count = 0;
+    for( auto n : nums )
+    {
+        if( x == n )
+        {
+            ++count;
+        }
+    }
+
+    int L = static_cast<int>( nums.size() );
+    L >>= 1; // L = L/2
+    if( count > L )
+    {
+        return x;
+    }
+
+    return nums[0];
+}
+\end{lstlisting}

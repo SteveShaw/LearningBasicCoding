@@ -1,0 +1,66 @@
+\section{52 --- N-Queens II}
+The $n$-queens puzzle is the problem of placing $n$ queens on an $n\times n$ chessboard such that no two queens attack each other.
+
+Given an integer $n$, return the number of distinct solutions to the $n$-queens puzzle.
+
+\subsection{Backtrack}
+
+\begin{itemize}
+\item Almost same as Problem 51. The only difference in this problem, we just count the total possible placements.
+\end{itemize}
+
+\setcounter{lstlisting}{0}
+\begin{lstlisting}[style=customc, caption={Backtrack}]
+int totalNQueens( int n )
+{
+    vector<int> queens( n );
+
+    vector<unsigned char> rows( n, 0 );
+    vector<unsigned char> hills( 2 * n - 1, 0 );
+    vector<unsigned char> dales( 2 * n - 1, 0 );
+
+    int ans = 0;
+
+    dfs( 0, n, rows, hills, dales, queens, ans );
+
+    return ans;
+}
+
+void dfs( int r, int n,
+          vector<unsigned char>& rows,
+          vector<unsigned char>& hills,
+          vector<unsigned char>& dales,
+          vector<int>& queens,
+          int& ans )
+{
+    for( int c = 0; c < n; ++c )
+    {
+        if( hills[r + c] + dales[r - c + n - 1] + rows[c] == 0 )
+        {
+            //place queen at (r,c)
+            queens[r] = c;
+            hills[r + c] = 1;
+            dales[r - c + n - 1] = 1;
+            rows[c] = 1;
+
+            if( r + 1 == n )
+            {
+                //all queens are placed
+                //increments the result
+                ++ans;
+            }
+            else
+            {
+                //try next row
+                dfs( r + 1, n, rows, hills, dales, queens, ans );
+            }
+
+            //backtrack
+            queens[r] = 0;
+            hills[r + c] = 0;
+            dales[r - c + n - 1] = 0;
+            rows[c] = 0;
+        }
+    }
+}
+\end{lstlisting}

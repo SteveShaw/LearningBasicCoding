@@ -1,0 +1,52 @@
+\section{187 --- Repeated DNA Sequences}
+All DNA is composed of a series of nucleotides abbreviated as $A$, $C$, $G$, and $T$, for example: \texttt{ACGAATTCCG}. When studying DNA, it is sometimes useful to identify repeated sequences within the DNA.
+\par
+Write a function to find all the 10-letter-long sequences (substrings) that occur more than once in a DNA molecule.
+\paragraph{Example:}
+\begin{flushleft}
+\textbf{Input}: $s = \texttt{AAAAACCCCCAAAAACCCCCCAAAAAGGGTTT}$
+\\
+\textbf{Output}: $[\texttt{AAAAACCCCC}, \texttt{CCCCCAAAAA}]$
+\end{flushleft}
+\subsection{Hash Set}
+\begin{CJK*}{UTF8}{gbsn}
+\begin{itemize}
+\item 需要用两个hash set，一个用来记录出现过的string，另外一个用来存放出现过至少两次的string。之所以用hash set来存放至少两次的string，是因为结果中也不能出现重复的string。
+\item 直接用hash set记录出现的10个字母的string
+\item 如果碰到的string在hash set中出现过，加入到存放结果的hash set中。
+\end{itemize}
+\end{CJK*}
+\setcounter{lstlisting}{0}
+\begin{lstlisting}[style=customc, caption={Hash Sets}]
+vector<string> findRepeatedDnaSequences( string s )
+{
+    if( s.size() <= 10 )
+    {
+        return {};
+    }
+
+    unordered_set<string> ss;
+
+    auto key = s.substr( 0, 10 );
+
+    ss.emplace( key );
+
+    unordered_set<string> ss_ans;
+
+    for( size_t i = 1; i <= s.size() - 10; ++i )
+    {
+        key = s.substr( i, 10 );
+
+        if( ss.find( key ) != ss.end() )
+        {
+            ss_ans.insert( key );
+        }
+        else
+        {
+            ss.insert( key );
+        }
+    }
+
+    return {ss_ans.begin(), ss_ans.end()};
+}
+\end{lstlisting}

@@ -1,0 +1,137 @@
+\section{143 --- Reorder List}
+Given a singly linked list $L$: 
+\begin{figure}[H]
+\begin{tikzpicture}
+[mynode/.style={draw,circle,minimum size=10mm, fill=gray!20!}]
+\node(){};
+\node[mynode](0) {\scalebox{0.6}{$L_0$}};
+\node[mynode](1)[right=15mm of 0] {\scalebox{0.6}{$L_1$}};
+\node[mynode](2)[right=15mm of 1] {$\ldots$};
+\node[mynode](n1)[right=15mm of 2] {\scalebox{0.6}{$L_{n-1}$}};
+\node[mynode](n2)[right=15mm of n1] {\scalebox{0.6}{$L_n$}};
+\draw[>=stealth,->] (0) -- (1);
+\draw[>=stealth,->] (1) -- (2);
+\draw[>=stealth,->] (2) -- (n1);
+\draw[>=stealth,->] (n1) -- (n2);
+\end{tikzpicture}
+\end{figure}
+reorder it to:
+\begin{figure}[H]
+\begin{tikzpicture}
+[mynode/.style={draw,circle,minimum size=10mm, fill=gray!20!}]
+\node(){};
+\node[mynode](0) {\scalebox{0.6}{$L_0$}};
+\node[mynode](n2)[right=15mm of 0] {\scalebox{0.6}{$L_n$}};
+\node[mynode](1)[right=15mm of n2] {\scalebox{0.6}{$L_1$}};
+\node[mynode](n1)[right=15mm of 1] {\scalebox{0.6}{$L_{n-1}$}};
+\node[mynode](2)[right=15mm of n1] {$\ldots$};
+\draw[>=stealth,->] (0) -- (n2);
+\draw[>=stealth,->] (n2) -- (1);
+\draw[>=stealth,->] (1) -- (n1);
+\draw[>=stealth,->] (n1) -- (2);
+\end{tikzpicture}
+\end{figure}
+You may \textbf{not} modify the values in the list's nodes, only nodes itself may be changed.
+\paragraph{Example 1:}
+\begin{flushleft}
+Given:
+\begin{figure}[H]
+\begin{tikzpicture}
+[mynode/.style={draw,circle,minimum size=5mm, fill=gray!20!}]
+\node(){};
+\node[mynode](1) {1};
+\node[mynode](2)[right=8mm of 1] {2};
+\node[mynode](3)[right=8mm of 2] {3};
+\node[mynode](4)[right=8mm of 3] {4};
+\draw[>=stealth,->] (1) -- (2);
+\draw[>=stealth,->] (2) -- (3);
+\draw[>=stealth,->] (3) -- (4);
+\end{tikzpicture}
+\end{figure}
+Reorder to:
+\begin{figure}[H]
+\begin{tikzpicture}
+[mynode/.style={draw,circle,minimum size=5mm, fill=gray!20!}]
+\node(){};
+\node[mynode](1) {1};
+\node[mynode](4)[right=8mm of 1] {4};
+\node[mynode](2)[right=8mm of 4] {2};
+\node[mynode](3)[right=8mm of 2] {3};
+\draw[>=stealth,->] (1) -- (4);
+\draw[>=stealth,->] (4) -- (2);
+\draw[>=stealth,->] (2) -- (3);
+\end{tikzpicture}
+\end{figure}
+\end{flushleft}
+\paragraph{Example 2:}
+\begin{flushleft}
+Given:
+\begin{figure}[H]
+\begin{tikzpicture}
+[mynode/.style={draw,circle,minimum size=5mm, fill=gray!20!}]
+\node(){};
+\node[mynode](1) {1};
+\node[mynode](2)[right=8mm of 1] {2};
+\node[mynode](3)[right=8mm of 2] {3};
+\node[mynode](4)[right=8mm of 3] {4};
+\node[mynode](5)[right=8mm of 4] {5};
+\draw[>=stealth,->] (1) -- (2);
+\draw[>=stealth,->] (2) -- (3);
+\draw[>=stealth,->] (3) -- (4);
+\draw[>=stealth,->] (4) -- (5);
+\end{tikzpicture}
+\end{figure}
+Reorder to:
+\begin{figure}[H]
+\begin{tikzpicture}
+[mynode/.style={draw,circle,minimum size=5mm, fill=gray!20!}]
+\node(){};
+\node[mynode](1) {1};
+\node[mynode](5)[right=8mm of 1] {5};
+\node[mynode](2)[right=8mm of 5] {2};
+\node[mynode](4)[right=8mm of 2] {4};
+\node[mynode](3)[right=8mm of 4] {3};
+\draw[>=stealth,->] (1) -- (5);
+\draw[>=stealth,->] (5) -- (2);
+\draw[>=stealth,->] (2) -- (4);
+\draw[>=stealth,->] (4) -- (3);
+\end{tikzpicture}
+\end{figure}
+\end{flushleft}
+\subsection{Two Pointers + Reverse}
+首先用快慢指针找到链表的中间位置的node，然后从这个位置，将这个链表断开。然后对后半部分的链表进行reverse操作，最后合并两个链表。
+\setcounter{algorithm}{0}
+\begin{algorithm}[H]
+\caption{Two Pointers And Reverse}
+\begin{algorithmic}[1]
+\Procedure{ReorderList}{$H$}
+\If{$H=\texttt{null}$ \textbf{or} $H.\texttt{next}=\texttt{null}$}
+\State \Return
+\EndIf
+\State $F:=H$ and $S:=H$ \Comment Fast and Slow pointers
+\While{$F.\texttt{next}\neq\texttt{null}$ \textbf{and} $F.\texttt{next}.\texttt{next}\neq\texttt{null}$}
+\State $F\gets F.\texttt{next}$
+\State $F\gets F.\texttt{next}$
+\State $S\gets S.\texttt{next}$
+\EndWhile
+\State $\alpha:=S.\texttt{next}$
+\State $S.\texttt{next}\gets\texttt{null}$ \Comment Break the original list
+\State $\beta:=\texttt{null}$
+\While{$\alpha\neq\texttt{null}$} \Comment Reverse the right hand list
+\State $z:=\alpha.\texttt{next}$ \Comment Save the next node of $\alpha$
+\State $\alpha.\texttt{next}\gets \beta$
+\State $\beta\gets\alpha$ 
+\State $\alpha\gets z$ \Comment Move $\alpha$ to next node
+\EndWhile
+\State $n_1:=H$ and $n_2:=\beta$ \Comment The start node of two lists
+\While{$n_1\neq\texttt{null}$ \textbf{and} $n_2\neq\texttt{null}$}
+\State $z_1:=n_1.\texttt{next}$
+\State $n_1.\texttt{next}\gets n_2$ \Comment Set next pointer of $n_1$ to point to $n_2$
+\State $z_2:=n_2.\texttt{next}$
+\State $n_2.\texttt{next}\gets z_1$ \Comment Set next pointer of $n_1$ to point to next node of $n_1$
+\State $n_1\gets z_1$ \Comment Move $n_1$ to its next node in original list
+\State $n_2\gets z_2$ \Comment Move $n_2$ to its next node in the reversed list
+\EndWhile
+\EndProcedure
+\end{algorithmic}
+\end{algorithm}

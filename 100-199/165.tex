@@ -1,0 +1,53 @@
+\section{165 --- Compare Version Numbers}
+Compare two version numbers version1  and version2.
+\par
+If version1 $>$ version2 return 1; if version1 $<$ version2 return $-1$;otherwise return 0.
+\par
+You may assume that the version strings are non-empty and contain only digits and the dot character.
+\par
+The dot character does not represent a decimal point and is used to separate number sequences.
+\par
+For instance, 2.5 is not \textit{two and a half} or \textit{half way to version three}, it is the fifth second-level revision of the second first-level revision.
+\par
+You may assume the default revision number for each level of a version number to be 0. For example, version number 3.4 has a revision number of 3 and 4 for its first and second level revision number. Its third and fourth level revision number are both 0.
+\paragraph{Example 1:}
+\begin{flushleft}
+\textbf{Input}: version1 = \textcolor{red}{0.1}, version2 = \textcolor{red}{1.1}
+\\
+\textbf{Output}: $-1$
+\end{flushleft}
+\paragraph{Example 2:}
+\begin{flushleft}
+\textbf{Input}: version1 = \textcolor{red}{1.0.1}, version2 = \textcolor{red}{1}
+\\
+\textbf{Output}: 1
+\end{flushleft}
+\paragraph{Example 3:}
+\begin{flushleft}
+\textbf{Input}: version1 = \textcolor{red}{7.5.2.4}, version2 = \textcolor{red}{7.5.3}
+\\
+\textbf{Output}: $-1$
+\end{flushleft}
+\paragraph{Example 4:}
+\begin{flushleft}
+\textbf{Input}: version1 = \textcolor{red}{1.01}, version2 = \textcolor{red}{1.001}
+\\
+\textbf{Output}: 0
+\\
+\textbf{Explanation}: Ignoring leading zeroes, both \textbf{01} and \textbf{001} represent the same number \textcolor{blue}{1}
+\end{flushleft}
+\paragraph{Example 5:}
+\begin{flushleft}
+\textbf{Input}: version1 = \textcolor{red}{1.0}, version2 = \textcolor{red}{1.0.0}
+\\
+\textbf{Output}: 0
+\\
+\textbf{Explanation}: The first version number does not have a third level revision number, which means its third level revision number is default to \textcolor{blue}{0}
+\end{flushleft}
+\paragraph{Note:}
+\begin{itemize}
+    \item Version strings are composed of numeric strings separated by dots \textcolor{red}{.} and this numeric strings may have leading zeroes.
+    \item Version strings do not start or end with dots, and they will not be two consecutive dots.
+\end{itemize}
+\subsection{Compare Each Segment}
+Even if the two strings have different lengths, the comparision can still be performed on the longer one by assuming the shorter one has zero when compared.

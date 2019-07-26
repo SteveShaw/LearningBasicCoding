@@ -1,0 +1,350 @@
+\section{144 --- Binary Tree Preorder Traversal}
+Given a binary tree with root node $R$, return the pre--order traversal of its nodes' values.
+\paragraph{Example:}
+\begin{flushleft}
+\textbf{Input}:
+\begin{figure}[H]
+\begin{tikzpicture}
+[mynode/.style={draw,circle,minimum size=5mm, fill=gray!20!}]
+\node(){};
+\node[mynode](1) {1};
+\node[mynode](2)[below=8mm of 1, xshift=8mm] {2};
+\node[mynode](3)[below=8mm of 2, xshift=-8mm] {3};
+\draw[>=stealth,->] (1) -- (2);
+\draw[>=stealth,->] (2) -- (3);
+\end{tikzpicture}
+\end{figure}
+\textbf{Output}: $[1,2,3]$
+\end{flushleft}
+\paragraph{Follow up:}
+\begin{itemize}
+\item Recursive solution is trivial, could you do it iteratively?
+\end{itemize}
+\subsection{Iterative With Stack}
+How to traverse the tree
+There are two general strategies to traverse a tree:
+\begin{itemize}
+    \item Breadth First Search (BFS): We scan through the tree level by level, following the order of height, from top to bottom. The nodes on higher level would be visited before the ones with lower levels.
+    \item Depth First Search (DFS): In this strategy, we adopt the depth as the priority, so that one would start from a root and reach all the way down to certain leaf, and then back to root to reach another branch.
+    \par
+    The DFS strategy can further be distinguished as \textbf{preorder}, \textbf{inorder}, and \textbf{postorder} depending on the relative order among the root node, left node and right node.
+\end{itemize}
+In iterative approach, we simulate the recursive process, i.e., start from the root and then at each iteration pop the current node out of the stack and push its child nodes. In the implemented strategy we push nodes into output list following the order $\texttt{top}\to\texttt{bottom}$ and $\texttt{left}\to\texttt{right}$, that naturally reproduces preorder traversal.
+\setcounter{algorithm}{0}
+\begin{algorithm}[H]
+\caption{Iterative With Stack}
+\begin{algorithmic}[1]
+\Procedure{Preorder}{$R$}
+\If{$R=\texttt{null}$}
+\State \Return $\emptyset$
+\EndIf
+\State Initialize $S$ as the stack
+\State $S\gets S + R$ \Comment Add root node to the stack
+\State $A:=\emptyset$ \Comment The result array contains the preorder traverse result
+\While{$S\neq \emptyset$}
+\State $t:=S.\texttt{top}$
+\State $S.\texttt{pop}$
+\State $A\gets A+t.\texttt{value}$
+\If{$t.\texttt{right}\neq \texttt{null}$} \Comment Add right child first
+\State $S\gets S+t.\texttt{right}$
+\EndIf
+\If{$t.\texttt{left}\neq \texttt{null}$} \Comment Add left child
+\State $S\gets S+t.\texttt{left}$
+\EndIf
+\EndWhile
+\State \Return $A$
+\EndProcedure
+\end{algorithmic}
+\end{algorithm}
+\subsection{Morris Traversal}
+The idea is to go down from the node to its predecessor $P$, and each predecessor $P$ will be visited twice. Suppose we are at node $T_0$, from this node we check if we can go left
+\begin{itemize}
+\item If the left child of $T_0$ exists, go right from the right child node of the left child until end. When we visit a leaf (node's predecessor) \textbf{1st time}, it has a zero right child, so we update output and establish the pseudo link $P.\texttt{right} = T_0$ to mark the fact the predecessor is visited. When we visit the same predecessor \textbf{the 2nd time}, it already points to $T_0$, thus we remove pseudo link and move right to the next node.
+\item If the left child of $T_0$ is null, update output and move right to next node.
+\end{itemize}
+An example with detailed steps is shown as following:
+\begin{figure}[H]
+\begin{tikzpicture}
+[mynode/.style={draw,circle,minimum size=5mm, fill=gray!20!}]
+\node(){};
+\node[mynode](1)[fill=red!20!] {1};
+\node[mynode](2)[below=8mm of 1, xshift=-10mm] {2};
+\node[mynode](5)[below=8mm of 1, xshift=10mm] {5};
+\node[mynode](3)[below=8mm of 2, xshift=-8mm] {3};
+\node[mynode](4)[below=8mm of 2, xshift=8mm] {4};
+\draw[>=stealth,->] (1) -- (2);
+\draw[>=stealth,->] (1) -- (5);
+\draw[>=stealth,->] (2) -- (3);
+\draw[>=stealth,->] (2) -- (4);
+\end{tikzpicture}
+\end{figure}
+Starting from node 1. The status is: $T_0 = 1$. Is left child of $T_0$ \texttt{null}? No, then go left. 
+\begin{figure}[H]
+\begin{tikzpicture}
+[mynode/.style={draw,circle,minimum size=5mm, fill=gray!20!}]
+\node(){};
+\node[mynode](1)[fill=red!20!] {1};
+\node[mynode](2)[below=8mm of 1, xshift=-10mm, fill=blue!20!] {2};
+\node[mynode](5)[below=8mm of 1, xshift=10mm] {5};
+\node[mynode](3)[below=8mm of 2, xshift=-8mm] {3};
+\node[mynode](4)[below=8mm of 2, xshift=8mm] {4};
+\draw[>=stealth,->] (1) -- (2);
+\draw[>=stealth,->] (1) -- (5);
+\draw[>=stealth,->] (2) -- (3);
+\draw[>=stealth,->] (2) -- (4);
+\end{tikzpicture}
+\end{figure}
+Current Status: $T_0 = 1$, $P \gets 2$. Go right of $P$ until you meet \texttt{null} or current node $T_0$
+\begin{figure}[H]
+\begin{tikzpicture}
+[mynode/.style={draw,circle,minimum size=5mm, fill=gray!20!}]
+\node(){};
+\node[mynode](1)[fill=red!20!] {1};
+\node[mynode](2)[below=8mm of 1, xshift=-10mm, fill=blue!20!] {2};
+\node[mynode](5)[below=8mm of 1, xshift=10mm] {5};
+\node[mynode](3)[below=8mm of 2, xshift=-8mm] {3};
+\node[mynode](4)[below=8mm of 2, xshift=8mm,fill=blue!20!] {4};
+\draw[>=stealth,->] (1) -- (2);
+\draw[>=stealth,->] (1) -- (5);
+\draw[>=stealth,->] (2) -- (3);
+\draw[>=stealth,->] (2) -- (4);
+\end{tikzpicture}
+\end{figure}
+Current Status: $T_0 = 1$, $P \gets 4$, $P.\texttt{right}=\texttt{null}$. Now the right traverse reaches end, then
+\begin{enumerate}
+\item Add $T_0$'s value to the output
+\item Link $P.\texttt{right}$ to $T_0$, i.e., $4.\texttt{right} = 1$.
+\item Move $T_0$ to its left child, i.e. 2
+\end{enumerate}
+Now, output is $[1]$
+\begin{figure}[H]
+\begin{tikzpicture}
+[mynode/.style={draw,circle,minimum size=5mm, fill=gray!20!}]
+\node(){};
+\node[mynode](1) {1};
+\node[mynode](2)[below=8mm of 1, xshift=-10mm, fill=red!20!] {2};
+\node[mynode](5)[below=8mm of 1, xshift=10mm] {5};
+\node[mynode](3)[below=8mm of 2, xshift=-8mm] {3};
+\node[mynode](4)[below=8mm of 2, xshift=8mm] {4};
+\draw[>=stealth,->] (1) -- (2);
+\draw[>=stealth,->] (1) -- (5);
+\draw[>=stealth,->] (2) -- (3);
+\draw[>=stealth,->] (2) -- (4);
+\draw[>=stealth,->] (4) to[bend right=15] (1);
+\end{tikzpicture}
+\end{figure}
+Current Status: $T_0 = 2$. Is left child of the node is \texttt{null}? No, then go left.
+\begin{figure}[H]
+\begin{tikzpicture}
+[mynode/.style={draw,circle,minimum size=5mm, fill=gray!20!}]
+\node(){};
+\node[mynode](1) {1};
+\node[mynode](2)[below=8mm of 1, xshift=-10mm, fill=red!20!] {2};
+\node[mynode](5)[below=8mm of 1, xshift=10mm] {5};
+\node[mynode](3)[below=8mm of 2, xshift=-8mm, fill=blue!20!] {3};
+\node[mynode](4)[below=8mm of 2, xshift=8mm] {4};
+\draw[>=stealth,->] (1) -- (2);
+\draw[>=stealth,->] (1) -- (5);
+\draw[>=stealth,->] (2) -- (3);
+\draw[>=stealth,->] (2) -- (4);
+\draw[>=stealth,->] (4) to[bend right=15] (1);
+\end{tikzpicture}
+\end{figure}
+Current Status: $T_0 = 2$, $P = 3$. Go right of $P$ until you meet \texttt{null} or $T_0$. Since the right of 3 is \texttt{null}, then
+\begin{enumerate}
+\item Add $T_0$'s value to the output
+\item Link $P.\texttt{right}$ to $T_0$, i.e., $3.\texttt{right} = 2$.
+\item Move $T_0$ to its left child, i.e. 3
+\end{enumerate}
+Now, output is $[1,2]$
+\begin{figure}[H]
+\begin{tikzpicture}
+[mynode/.style={draw,circle,minimum size=5mm, fill=gray!20!}]
+\node(){};
+\node[mynode](1) {1};
+\node[mynode](2)[below=8mm of 1, xshift=-10mm] {2};
+\node[mynode](5)[below=8mm of 1, xshift=10mm] {5};
+\node[mynode](3)[below=8mm of 2, xshift=-8mm, fill=red!20!] {3};
+\node[mynode](4)[below=8mm of 2, xshift=8mm] {4};
+\draw[>=stealth,->] (1) -- (2);
+\draw[>=stealth,->] (1) -- (5);
+\draw[>=stealth,->] (2) -- (3);
+\draw[>=stealth,->] (2) -- (4);
+\draw[>=stealth,->] (4) to[bend right=15] (1);
+\draw[>=stealth,->] (3) to[bend right=30] (2);
+\end{tikzpicture}
+\end{figure}
+Current Status: $T_0 = 3$. Is left child of $T_0$ is \texttt{null}? Yes, then
+\begin{enumerate}
+\item Add $T_0$'s value to the output
+\item Move to the right child of $T_0$, which is a 2.
+\end{enumerate}
+Now, output is $[1,2,3]$
+\begin{figure}[H]
+\begin{tikzpicture}
+[mynode/.style={draw,circle,minimum size=5mm, fill=gray!20!}]
+\node(){};
+\node[mynode](1) {1};
+\node[mynode](2)[below=8mm of 1, xshift=-10mm,fill=red!20!] {2};
+\node[mynode](5)[below=8mm of 1, xshift=10mm] {5};
+\node[mynode](3)[below=8mm of 2, xshift=-8mm] {3};
+\node[mynode](4)[below=8mm of 2, xshift=8mm] {4};
+\draw[>=stealth,->] (1) -- (2);
+\draw[>=stealth,->] (1) -- (5);
+\draw[>=stealth,->] (2) -- (3);
+\draw[>=stealth,->] (2) -- (4);
+\draw[>=stealth,->] (4) to[bend right=15] (1);
+\draw[>=stealth,->] (3) to[bend right=30] (2);
+\end{tikzpicture}
+\end{figure}
+Current Status: $T_0 = 2$. Is left child of $T_0$ is \texttt{null}? No, then go left. 
+\begin{figure}[H]
+\begin{tikzpicture}
+[mynode/.style={draw,circle,minimum size=5mm, fill=gray!20!}]
+\node(){};
+\node[mynode](1) {1};
+\node[mynode](2)[below=8mm of 1, xshift=-10mm,fill=red!20!] {2};
+\node[mynode](5)[below=8mm of 1, xshift=10mm] {5};
+\node[mynode](3)[below=8mm of 2, xshift=-8mm, fill=blue!20!] {3};
+\node[mynode](4)[below=8mm of 2, xshift=8mm] {4};
+\draw[>=stealth,->] (1) -- (2);
+\draw[>=stealth,->] (1) -- (5);
+\draw[>=stealth,->] (2) -- (3);
+\draw[>=stealth,->] (2) -- (4);
+\draw[>=stealth,->] (4) to[bend right=15] (1);
+\draw[>=stealth,->] (3) to[bend right=30] (2);
+\end{tikzpicture}
+\end{figure}
+Current Status: $T_0 = 2$, $P = 3$. Go right of $P$ until you meet \texttt{null} or $T_0$. Now, go right of 3 will meet 2, so
+\begin{enumerate}
+\item \textbf{Delete link} $P.\texttt{right}=T_0$, i.e., $3.\texttt{right} = 2$
+\item Move to right child of $T_0$, i.e., 4.
+\end{enumerate}
+\begin{figure}[H]
+\begin{tikzpicture}
+[mynode/.style={draw,circle,minimum size=5mm, fill=gray!20!}]
+\node(){};
+\node[mynode](1) {1};
+\node[mynode](2)[below=8mm of 1, xshift=-10mm] {2};
+\node[mynode](5)[below=8mm of 1, xshift=10mm] {5};
+\node[mynode](3)[below=8mm of 2, xshift=-8mm] {3};
+\node[mynode](4)[below=8mm of 2, xshift=8mm, fill=red!20!] {4};
+\draw[>=stealth,->] (1) -- (2);
+\draw[>=stealth,->] (1) -- (5);
+\draw[>=stealth,->] (2) -- (3);
+\draw[>=stealth,->] (2) -- (4);
+\draw[>=stealth,->] (4) to[bend right=15] (1);
+\draw[>=stealth,->] (3) to[bend right=30] (2);
+\end{tikzpicture}
+\end{figure}
+Current Status: $T_0 = 4$. Is left child of $T_0$ \texttt{null}? Yes, then
+\begin{enumerate}
+\item Add $T_0$'s value to output.
+\item Move to the right child of $T_0$, which is 1.
+\end{enumerate}
+Now, output is $[1,2,3,4]$
+\begin{figure}[H]
+\begin{tikzpicture}
+[mynode/.style={draw,circle,minimum size=5mm, fill=gray!20!}]
+\node(){};
+\node[mynode](1)[fill=red!20!] {1};
+\node[mynode](2)[below=8mm of 1, xshift=-10mm] {2};
+\node[mynode](5)[below=8mm of 1, xshift=10mm] {5};
+\node[mynode](3)[below=8mm of 2, xshift=-8mm] {3};
+\node[mynode](4)[below=8mm of 2, xshift=8mm] {4};
+\draw[>=stealth,->] (1) -- (2);
+\draw[>=stealth,->] (1) -- (5);
+\draw[>=stealth,->] (2) -- (3);
+\draw[>=stealth,->] (2) -- (4);
+\draw[>=stealth,->] (4) to[bend right=15] (1);
+\end{tikzpicture}
+\end{figure}
+Current Status: $T_0 = 1$. Is left child of $T_0$ is \texttt{null}? No, then go left. 
+\begin{figure}[H]
+\begin{tikzpicture}
+[mynode/.style={draw,circle,minimum size=5mm, fill=gray!20!}]
+\node(){};
+\node[mynode](1)[fill=red!20!] {1};
+\node[mynode](2)[below=8mm of 1, xshift=-10mm, fill=blue!20!] {2};
+\node[mynode](5)[below=8mm of 1, xshift=10mm] {5};
+\node[mynode](3)[below=8mm of 2, xshift=-8mm] {3};
+\node[mynode](4)[below=8mm of 2, xshift=8mm] {4};
+\draw[>=stealth,->] (1) -- (2);
+\draw[>=stealth,->] (1) -- (5);
+\draw[>=stealth,->] (2) -- (3);
+\draw[>=stealth,->] (2) -- (4);
+\draw[>=stealth,->] (4) to[bend right=15] (1);
+\end{tikzpicture}
+\end{figure}
+Current Status: $T_0 = 1$, $P = 2$. Go right of $P$ until we meet \texttt{null} or $T_0$.
+\begin{figure}[H]
+\begin{tikzpicture}
+[mynode/.style={draw,circle,minimum size=5mm, fill=gray!20!}]
+\node(){};
+\node[mynode](1)[fill=red!20!] {1};
+\node[mynode](2)[below=8mm of 1, xshift=-10mm, fill=blue!20!] {2};
+\node[mynode](5)[below=8mm of 1, xshift=10mm] {5};
+\node[mynode](3)[below=8mm of 2, xshift=-8mm] {3};
+\node[mynode](4)[below=8mm of 2, xshift=8mm, fill=blue!20!] {4};
+\draw[>=stealth,->] (1) -- (2);
+\draw[>=stealth,->] (1) -- (5);
+\draw[>=stealth,->] (2) -- (3);
+\draw[>=stealth,->] (2) -- (4);
+\draw[>=stealth,->] (4) to[bend right=15] (1);
+\end{tikzpicture}
+\end{figure}
+Current Status: $T_0 = 1$, $P = 4$, $P.\texttt{right} = T_0$. We meet $T_9$, therefore
+\begin{enumerate}
+\item Delete link $P.\texttt{right} = T_)$, (i.e. $4.\texttt{right} = 1$).
+\item Move to right child of $T_0$, i.e., 5.
+\end{enumerate}
+\begin{figure}[H]
+\begin{tikzpicture}
+[mynode/.style={draw,circle,minimum size=5mm, fill=gray!20!}]
+\node(){};
+\node[mynode]{1};
+\node[mynode](2)[below=8mm of 1, xshift=-10mm] {2};
+\node[mynode](5)[below=8mm of 1, xshift=10mm, fill=red!20!] {5};
+\node[mynode](3)[below=8mm of 2, xshift=-8mm] {3};
+\node[mynode](4)[below=8mm of 2, xshift=8mm] {4};
+\draw[>=stealth,->] (1) -- (2);
+\draw[>=stealth,->] (1) -- (5);
+\draw[>=stealth,->] (2) -- (3);
+\draw[>=stealth,->] (2) -- (4);
+\end{tikzpicture}
+\end{figure}
+Current Status: $T_0 = 5$. Is left child of $T_0$ \texttt{null}? Yes, then
+\begin{enumerate}
+\item Add $T_0$'s value to output.
+\item Move to right child of $T_0$
+\end{enumerate}
+Since we reach a $\texttt{null}$ node, the whole process is finished.
+\begin{algorithm}[H]
+\caption{Morris Traversal}
+\begin{algorithmic}[1]
+\Procedure{Preorder}{$R$}
+\State $A:=\emptyset$ \Comment The result array contains the preorder traverse result
+\State $T:=R$
+\While{$T\neq\texttt{null}$}
+\If{$T.\texttt{left}=\texttt{null}$}
+\State $A\gets A+T.\texttt{value}$ \Comment Output current node $T$
+\State $T\gets T.\texttt{right}$ \Comment Move to right child
+\Else
+\State $P:=T.\texttt{left}$ \Comment The predecessor node
+\While{$P.\texttt{right}\neq\texttt{null}$ \textbf{and} $P.\texttt{right}\neq T$} \Comment Go right of $P$ until meets end or $T$
+\State $P\gets P.\texttt{right}$
+\EndWhile
+\If{$P.\texttt{right}=\texttt{null}$} \Comment First time to visit
+\State $A\gets A + T.\texttt{value}$ \Comment Output $T$
+\State $P.\texttt{right}\gets T$ \Comment Link the right of $P$ to current node $T$
+\State $T\gets T.\texttt{left}$ \Comment Move $T$ to its left child
+\Else \Comment Second time to visit
+\State $P.\texttt{right}\gets \texttt{null}$ \Comment Delete the link of right $P$ to $T$
+\State $T\gets T.\texttt{right}$ \Comment Move $T$ to its right child
+\EndIf
+\EndIf
+\EndWhile
+\State \Return $A$
+\EndProcedure
+\end{algorithmic}
+\end{algorithm}

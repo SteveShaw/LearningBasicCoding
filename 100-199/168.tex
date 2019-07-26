@@ -1,0 +1,81 @@
+\section{168 --- Excel Sheet Column Title}
+Given a positive integer $N$, return its corresponding column title as appear in an Excel sheet.
+\par
+For example:
+\begin{table}[H]
+\begin{tabular}{lcl}
+1 & $\to$ & A \\
+2 & $\to$ & B \\
+3 & $\to$ & C \\
+ & $\cdots$ & \\
+26 & $\to$ & Z  \\
+27 & $\to$ &AA  \\
+28 & $\to$ &AB  
+\end{tabular}
+\end{table}
+\paragraph{Example 1:}
+\begin{flushleft}
+\textbf{Input}: 1
+\\
+\textbf{Output}: \textcolor{red}{A}
+\end{flushleft}
+\paragraph{Example 2:}
+\begin{flushleft}
+\textbf{Input}: 28
+\\
+\textbf{Output}: \textcolor{red}{AB}
+\end{flushleft}
+\paragraph{Example 3:}
+\begin{flushleft}
+\textbf{Input}: 701
+\\
+\textbf{Output}: \textcolor{red}{ZY}
+\end{flushleft}
+\subsection{26 Base Number}
+\begin{CJK*}{UTF8}{gbsn}
+这道题目其实就是转换成26进制表示的数。由于没有0，因此每次都需要把当前的数减1
+\end{CJK*}
+\setcounter{algorithm}{0}
+\begin{algorithm}[H]
+\caption{}
+\begin{algorithmic}[1]
+\Procedure{ConvertToTitle}{$N$}
+\State $S:=\emptyset$ \Comment The result string
+\State start the process of transforming
+\algstore{168algo}
+\end{algorithmic}
+\end{algorithm}
+\begin{algorithm}[H]
+\begin{algorithmic}[1]
+\algrestore{168algo}
+\While{$N \neq 0$}
+\State $N\gets N-1$
+\State $q:=N/26$ \Comment Get quotient
+\State $r:=N - q \times 26$ \Comment Get remainder
+\State Append $r$ corresponding letter to $S$
+\State $N\gets q$ \Comment Continue to the next quotient
+\EndWhile
+\State Reverse $S$ since the number is added reversely
+\State \Return $S$
+\EndProcedure
+\end{algorithmic}
+\end{algorithm}
+\setcounter{lstlisting}{0}
+\begin{lstlisting}[style=customc, caption={Source Code}]
+string convertToTitle( int n )
+{
+    string ans;
+
+    while( n > 0 )
+    {
+        int q = ( n - 1 ) / 26;
+        int r = n - 1 - q * 26;
+        ans.push_back( r + 'A' );
+        n = q;
+    }
+
+    reverse( ans.begin(), ans.end() );
+
+    return ans;
+}
+\end{lstlisting}

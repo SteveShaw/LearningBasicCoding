@@ -1,0 +1,92 @@
+\section{1115 --- Print FooBar Alternately}
+Suppose you are given the following code:
+
+\begin{lstlisting}[style=customc]
+class FooBar {
+  public void foo() {
+    for (int i = 0; i < n; i++) {
+      print(foo);
+    }
+  }
+
+  public void bar() {
+    for (int i = 0; i < n; i++) {
+      print(bar);
+    }
+  }
+}
+\end{lstlisting}
+
+The same instance of \texttt{FooBar} will be passed to two different threads. Thread A will call \texttt{foo} while thread B will call \texttt{bar}. Modify the given program to output \texttt{foobar} $n$ times.
+
+\paragraph{Example 1:}
+
+\begin{flushleft}
+\textbf{Input}: $ n = 1 $
+
+\textbf{Output}: \texttt{foobar}
+
+\textbf{Explanation}: There are two threads being fired asynchronously. One of them calls \texttt{foo}, while the other calls \texttt{bar}. \texttt{foobar} is being output 1 time.
+
+\end{flushleft}
+
+\paragraph{Example 2:}
+
+\begin{flushleft}
+\textbf{Input}: $ n = 2 $
+
+\textbf{Output}: \texttt{foobarfoobar}
+
+\textbf{Explanation}: \texttt{foobar} is being output 2 times.
+\end{flushleft}
+
+\subsection{Condition Variable}
+
+\setcounter{lstlisting}{0}
+\begin{lstlisting}[style=customc, caption={Condition Variable}]
+class FooBar {
+private:
+    int n;
+    
+    mutex m_mtx;
+    condition_variable m_cv;
+    
+    bool m_flag;
+
+public:
+    FooBar(int n) {
+        this->n = n;
+        m_flag = true; //show foo
+    }
+
+    void foo(function<void()> printFoo) {
+        
+        unique_lock<mutex> lk(m_mtx);
+        for (int i = 0; i < n; i++) {
+            m_cv.wait(lk, [this]{return m_flag;});
+        	// printFoo() outputs "foo". Do not change or remove this line.
+        	printFoo();
+            
+            m_flag = false;
+            lk.unlock();
+            m_cv.notify_one();
+            lk.lock();
+        }
+    }
+
+    void bar(function<void()> printBar) {
+         unique_lock<mutex> lk(m_mtx);
+        for (int i = 0; i < n; i++) {
+            m_cv.wait(lk, [this]{return !m_flag;});
+        	// printBar() outputs "bar". Do not change or remove this line.
+        	printBar();
+            
+            m_flag = true;
+            
+            lk.unlock();
+            m_cv.notify_one();
+            lk.lock();
+        }
+    }
+};
+\end{lstlisting}

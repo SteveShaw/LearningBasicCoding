@@ -1,0 +1,125 @@
+\section{101 --- Symmetric Tree}
+Given a binary tree $T$, check whether it is a mirror of itself (ie, symmetric around its center).
+\par
+For example, this binary tree is symmetric:
+\begin{figure}[H]
+\begin{tikzpicture}
+[mynode/.style={draw,circle,minimum size=5mm, fill=gray!20!}]
+\node(){};
+\node[mynode](1) {1};
+\node[mynode](2l) [below = 8mm of 1, xshift=-15mm] {2};
+\node[mynode](2r) [below = 8mm of 1, xshift=15mm] {2};
+\node[mynode](3l) [below = 8mm of 2l, xshift=-6mm] {3};
+\node[mynode](4l) [below = 8mm of 2l, xshift=6mm] {4};
+\node[mynode](3r) [below = 8mm of 2r, xshift=6mm] {3};
+\node[mynode](4r) [below = 8mm of 2r, xshift=-6mm] {4};
+\draw[>=stealth,->] (1) -- (2l);
+\draw[>=stealth,->] (1) -- (2r);
+\draw[>=stealth,->] (2l) -- (3l);
+\draw[>=stealth,->] (2l) -- (4l);
+\draw[>=stealth,->] (2r) -- (3r);
+\draw[>=stealth,->] (2r) -- (4r);
+\end{tikzpicture}
+\end{figure}
+But the following is not:
+\begin{figure}[H]
+\begin{tikzpicture}
+[mynode/.style={draw,circle,minimum size=5mm, fill=gray!20!}]
+\node(){};
+\node[mynode](1) {1};
+\node[mynode](2l) [below = 8mm of 1, xshift=-12mm] {2};
+\node[mynode](2r) [below = 8mm of 1, xshift=12mm] {2};
+\node[mynode](3l) [below = 8mm of 2l, xshift=6mm] {3};
+\node[mynode](3r) [below = 8mm of 2r, xshift=6mm] {3};
+\draw[>=stealth,->] (1) -- (2l);
+\draw[>=stealth,->] (1) -- (2r);
+\draw[>=stealth,->] (2l) -- (3l);
+\draw[>=stealth,->] (2r) -- (3r);
+\end{tikzpicture}
+\end{figure}
+\paragraph{Note:}
+Bonus points if you could solve it both recursively and iteratively.
+\subsection{Recursion}
+\begin{CJK*}{UTF8}{gbsn}
+首先注意到，用于做比较的函数肯定需要两个nodes $n_1$ and $n_2$，因此需要一个额外的辅助函数来进行递归，因为主函数只有一个输入就是根节点。接下来，如果$n_1$ and $n_2$都是空节点，显然是相等的，否则如果都是非空节点并且$n_1$的值和$n_2$的值相等，则递归比较$n_1$的左子树和$n_2$的右子树以及$n_1$的右子树和$n_2$的左子树。
+\end{CJK*}
+\subsubsection{Algorithm}
+\setcounter{algorithm}{0}
+\begin{algorithm}[H]
+\caption{Recursion}
+\begin{algorithmic}[1]
+\Procedure{IsSymmetric}{$T$}
+\If{$T=\text{NULL}$}
+\State \Return \texttt{true} \Comment Empty node
+\EndIf
+\State $\texttt{ans}:=\texttt{DFS}(\text{LEFT}(T), \text{RIGHT}(T))$
+\algstore{101algo}
+\end{algorithmic}
+\end{algorithm}
+\begin{algorithm}[H]
+\begin{algorithmic}[1]
+\algrestore{101algo}
+\EndProcedure
+\end{algorithmic}
+\end{algorithm}
+\begin{algorithm}[H]
+\caption{Recursive Function}
+\begin{algorithmic}[1]
+\Function{DFS}{$n_1, n_2$}
+\If{$n_1=\text{NULL}$ \textbf{and} $n_2=\text{NULL}$}
+\State \Return \texttt{true}
+\EndIf
+\If{$n_1\neq\text{NULL}$ \textbf{and} $n_2\neq\text{NULL}$ \textbf{and} $\text{Value}(n_1)=\text{Value}(n_2)$}
+\State $\texttt{ans}:= \texttt{DFS}(\text{LEFT}(n_1), \text{RIGHT}(n_2))$ \Comment Compare left against right
+\If{$\texttt{ans}=\texttt{false}$}
+\State \Return \texttt{false}
+\EndIf
+\State $\texttt{ans}\gets \texttt{DFS}(\text{RIGHT}(n_1), \text{LEFT}(n_2))$ \Comment Compare right against left
+\State \Return \texttt{ans}
+\EndIf
+\State \Return \texttt{false}
+\EndFunction
+\end{algorithmic}
+\end{algorithm}
+\subsection{Iteration}
+\begin{CJK*}{UTF8}{gbsn}
+这里需要两个queue，一个存放根节点的左子树，另外一个存放根节点的右子树，然后算法基本就和recursion一样。
+\end{CJK*}
+\subsubsection{Algorithm}
+\begin{algorithm}[H]
+\caption{Iteration}
+\begin{algorithmic}[1]
+\Procedure{IsSymmetric}{$T$}
+\If{$T=\text{NULL}$}
+\State \Return \texttt{true}
+\EndIf
+\State Initialize $Q_1$ and $Q_2$ as two empty queues
+\State $Q_1\gets Q_1 + \text{LEFT}(T)$
+\State $Q_2\gets Q_2 + \text{RIGHT}(T)$
+\algstore{102algo}
+\end{algorithmic}
+\end{algorithm}
+\begin{algorithm}[H]
+\begin{algorithmic}[1]
+\algrestore{102algo}
+\While{$Q_1\neq \emptyset$ \textbf{and} $Q_2\neq \emptyset$}
+\State $n_1:=\text{FRONT}(Q_1)$
+\State $\text{POP}(Q_1)$
+\State $n_2:=\text{FRONT}(Q_2)$
+\State $\text{POP}(Q_2)$
+\If{$n_1=\text{NULL}$ \textbf{and} $n_2=\text{NULL}$}
+\State \texttt{continue} \Comment Continue to next items
+\EndIf
+\If{$n_1\neq\text{NULL}$ \textbf{and} $n_2\neq\text{NULL}$ \textbf{and} $\text{Value}(n_1)=\text{Value}(n_2)$}
+\State $Q_1\gets Q_1 + \text{LEFT}(n_1)$
+\State $Q_2\gets Q_2 + \text{RIGHT}(n_2)$
+\State $Q_1\gets Q_1 + \text{RIGHT}(n_1)$
+\State $Q_2\gets Q_2 + \text{LEFT}(n_2)$
+\Else
+\State \Return \texttt{false}
+\EndIf
+\EndWhile
+\State \Return \texttt{true}
+\EndProcedure
+\end{algorithmic}
+\end{algorithm}

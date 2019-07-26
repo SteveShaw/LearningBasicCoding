@@ -1,0 +1,68 @@
+\section{127 --- Word Ladder}
+Given two words ($\alpha$ and $\beta$), and a dictionary's word list $A$, find the length of shortest transformation sequence from $\alpha$ to $\beta$, such that:
+\begin{itemize}
+\item Only one letter can be changed at a time.
+\item Each transformed word must exist in the word list. Note that begin word $\alpha$ is not a transformed word.
+\end{itemize}
+\paragraph{Note:}
+\begin{itemize}
+\item Return 0 if there is no such transformation sequence.
+\item All words have the same length.
+\item All words contain only lowercase alphabetic characters.
+\item You may assume no duplicates in the word list.
+\item You may assume $\alpha$ and $\beta$ are non-empty and are not the same.
+\end{itemize}
+\paragraph{Example 1:}
+\begin{flushleft}
+\textbf{Input}: $\alpha$ = \textbf{hit}, $\beta$ = \textbf{cog}, $A$ = (hot, dot, dog, lot, log, cog)
+\\
+\textbf{Output}: 5
+\\
+\textbf{Explanation}: As one shortest transformation is hit \textrightarrow hot \textrightarrow dot \textrightarrow dog \textrightarrow cog, return its length 5.
+\end{flushleft}
+\paragraph{Example 2:}
+\begin{flushleft}
+\textbf{Input}: $\alpha$ = \textbf{hit},  $\beta$ = \textbf{cog}, $A$ = (hot, dot, dog, lot, log)
+\\
+\textbf{Output}: 0
+\\
+\textbf{Explanation}: The end word \textit{cog} is not in $A$, therefore no possible transformation.
+\end{flushleft}
+\begin{CJK*}{UTF8}{gbsn}
+这道题和上一题类似，但是相对简单，因为只需要求出最短路径的长度。同样是用一个hash set代表当前层的所有string，然后根据给定的规则进行变换，得到下一层的hash set，然后交换这两个hash set，使得算法能够前进到下一层，如果在变换中找到目标string即$\beta$，则返回找到的层数，也就是最短路径的长度。
+\end{CJK*}
+\setcounter{algorithm}{0}
+\begin{algorithm}[H]
+\caption{BFS}
+\begin{algorithmic}[1]
+\Procedure{LadderLength}{$\alpha, \beta, A$}
+\If{$\beta \notin A$} \Comment The end word is not in the given word list
+\State \Return 0
+\EndIf
+\State $x:=\emptyset$ \Comment $x$ is a hash set which has all strings in current level in the BFS tree
+\State $x\gets x+\alpha$ \Comment The BFS tree's root is $\alpha$
+\State $\ell:=0$ \Comment The length of transformation
+\While{$x\neq \emptyset$}
+\State $\ell\gets \ell +1$ \Comment Increment level when searching in a new level in the BFS tree
+\State $y:=\emptyset$ \Comment $y$ is a hash set which has all strings transformed from words in $x$
+\For{$w\in x$} \label{127for3}
+\State $s:=w$
+\For{$i:=0\to |s|$} \Comment Start transform process \label{127for2}
+\State $c:=s[i]$ \Comment Current letter 
+\For{$k:=\texttt{char}(a) \to \texttt{char}(z)$ \textbf{and} $k\neq c$} \Comment Try each lowercase letter \label{127for1}
+\State $s[i]\gets k$ \Comment Do transform
+\If{$s=\beta$} \Comment Reach the end word
+\State \Return $\ell +1$ \Comment Need to return the number of next level
+\EndIf
+\State $A\gets A- s$ \Comment Remove $s$ from $A$ to avoid repeating search
+\State $y\gets y+s$ \Comment Add to next level
+\EndFor \Comment End[\ref{127for1}]
+\State $s[i] = c$ \Comment Restore $s$
+\EndFor \Comment End[\ref{127for2}]
+\EndFor \Comment End[\ref{127for3}]
+\State $x\gets y$ \Comment Update $x$ as next level
+\EndWhile
+\State \Return 0 \Comment Cannot reach end word
+\EndProcedure
+\end{algorithmic}
+\end{algorithm}

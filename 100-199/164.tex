@@ -1,0 +1,67 @@
+\section{164 --- Maximum Gap}
+Given an unsorted array $A$, find the maximum difference between the successive elements in its sorted form.
+\par
+Return 0 if the array contains less than 2 elements.
+\paragraph{Example 1:}
+\begin{flushleft}
+\textbf{Input}: $[3,6,9,1]$
+\\
+\textbf{Output}: 3
+\\
+\textbf{Explanation}: The sorted form of the array is $[1,3,6,9]$, either $(3,6)$ or $(6,9)$ has the maximum difference 3.
+\end{flushleft}
+\paragraph{Example 2:}
+\begin{flushleft}
+\textbf{Input}: $[10]$
+\\
+\textbf{Output}: 0
+\\
+\textbf{Explanation}: The array contains less than 2 elements, therefore return 0.
+\end{flushleft}
+\paragraph{Note:}
+\begin{itemize}
+    \item You may assume all elements in the array are non-negative integers and fit in the 32-bit signed integer range.
+    \item Try to solve it in linear time/space.
+\end{itemize}
+\subsection{Bucket Sort}
+\begin{algorithm}[H]
+\begin{algorithmic}[1]
+\Procedure{MaximumGap}{$A,L$}
+\If{$L<2$}
+\State \Return 0
+\EndIf
+\State $\alpha:=\min\limits_{0\leq i <L}A[i]$
+\State $\beta:=\max\limits_{0\leq i <L}A[i]$
+\State $s:=\max(1, (\beta-\alpha)/(L-1))$ \Comment The size of each bucket
+\State $\ell:=(\beta-\alpha) / b +1$ \Comment The number of buckets
+\algstore{164algo}
+\end{algorithmic}
+\end{algorithm}
+\begin{algorithm}[H]
+\begin{algorithmic}[1]
+\algrestore{164algo}
+\State Create an array $B_{s\times 1}$ for the buckets.
+\State Each bucket has three elements: 
+\State $u$ --- If the bucket has elements, set to zero initially 
+\State $b_0$ --- The maximum in current bucket and 
+\State $b_1$ --- The minimum in current bucket
+\State Update each bucket in the following loop
+\For{$i:= 0 \to L-1$}
+\State $b_i:=(A[i]-b_{\min})/s$ \Comment The bucket index
+\State $B[b_i].u\gets 1$ \Comment Indicate this bucket has numbers
+\State $B[b_i].b_0\gets \min(B[b_i].b_0, A[i])$ \Comment Update minimum in the bucket
+\State $B[b_i].b_1\gets \min(B[b_i].b_1, A[i])$ \Comment Update maximum in the bucket
+\EndFor
+\State Then, compare the gap between the buckets
+\State $t:=\alpha$ \Comment $t$ is the maximum value of last bucket and is $\min(A)$ at start
+\State $G:=0$ \Comment The result: maximum gap
+\For{$i:=0\to \ell-1$} \Comment Iterate each bucket
+\If{$B[i].u=1$} \Comment This bucket $B[i]$ has numbers
+\State $G\gets \max(G, B[i].b_0 - t)$ \Comment Current bucket's minimum value minus t
+\State $t\gets B[i].b_1$ \Comment Update the maximum value of last bucket
+\EndIf
+\EndFor
+\State \Return $G$
+\EndProcedure
+\end{algorithmic}
+\end{algorithm}
