@@ -1,0 +1,91 @@
+\section{451 --- Sort Characters By Frequency}
+Given a string $s$, sort it in decreasing order based on the frequency of characters.
+
+\paragraph{Example 1:}
+
+\begin{flushleft}
+\textbf{Input}: \texttt{tree}
+
+\textbf{Output}: \texttt{eert}
+
+\textbf{Explanation}:
+
+\texttt{e} appears twice while \texttt{r} and \texttt{t} both appear once.
+
+So \texttt{e} must appear before both \texttt{r} and \texttt{t}. Therefore \texttt{eetr} is also a valid answer.
+
+\end{flushleft}
+
+\paragraph{Example 2:}
+
+\begin{flushleft}
+\textbf{Input}: \texttt{cccaaa}
+
+\textbf{Output}: \texttt{cccaaa}
+
+\textbf{Explanation}:
+
+Both \texttt{c} and \texttt{a} appear three times, so \texttt{aaaccc} is also a valid answer.
+
+Note that \texttt{cacaca} is incorrect, as the same characters must be together.
+
+\end{flushleft}
+
+
+\paragraph{Example 3:}
+
+\begin{flushleft}
+\textbf{Input}: \texttt{Aabb}
+
+\textbf{Output}: \texttt{bbAa}
+
+\textbf{Explanation}:
+
+\texttt{bbaA} is also a valid answer, but \texttt{Aabb} is incorrect.
+
+Note that \texttt{A} and \texttt{a} are treated as two different characters.
+\end{flushleft}
+
+\subsection{Bucket Sort}
+\begin{itemize}
+\item The maximum frequency of a character in $s$ is the length of $s$, say $\ell$. Therefore we can create $\ell$ buckets to put same frequency characters into one bucket.
+\end{itemize}
+
+\setcounter{lstlisting}{0}
+\begin{lstlisting}[style=customc, caption={Bucket Sort}]
+string frequencySort( string s )
+{
+    unordered_map<int, int> m;
+    //put characters with x frequence
+    //into buckets[x-1]
+    vector<string> buckets( s.size() );
+
+    for( auto c : s )
+    {
+        m[c] += 1;
+    }
+
+    for( const auto& p : m )
+    {
+        int count = p.second;
+        char c = p.first;
+        //add count of c into buckets[count-1]
+        buckets[count - 1].append( count, c );
+    }
+
+    string ans;
+    //buckets[i] has frequence i+1
+    //therefore we need to group the letters
+    //from end of bucket
+    for( size_t i = s.size(); i >= 1 ; --i )
+    {
+        if( !buckets[i - 1].empty() )
+        {
+            //only add non-empty
+            //bucket
+            ans += buckets[i - 1];
+        }
+    }
+    return ans;
+}
+\end{lstlisting}

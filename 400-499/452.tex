@@ -1,0 +1,74 @@
+\section{452 --- Minimum Number of Arrows to Burst Balloons}
+There are a number of spherical balloons spread in two-dimensional space. For each balloon, provided input is the start and end coordinates of the horizontal diameter. Since it's horizontal, $y$-coordinates don't matter and hence the $x$-coordinates of start and end of the diameter suffice. Start is always smaller than end. There will be at most 104 balloons.
+
+An arrow can be shot up exactly vertically from different points along the $x$-axis. A balloon with start position $\alpha$ and end position $\beta$ bursts by an arrow shot at $x$ if $\alpha \leq x\leq \beta$. There is no limit to the number of arrows that can be shot. An arrow once shot keeps traveling up infinitely. The problem is to find the minimum number of arrows that must be shot to burst all balloons.
+
+\paragraph{Example:}
+
+\begin{flushleft}
+\textbf{Input}: $[[10,16], [2,8], [1,6], [7,12]]$
+
+\textbf{Output}: 2
+
+\textbf{Explanation}:
+
+One way is to shoot one arrow for example at $x = 6$ (bursting the balloons $[2,8]$ and $[1,6]$) and another arrow at $x = 11$ (bursting the other two balloons).
+
+\end{flushleft}
+
+\subsection{Greedy}
+\begin{itemize}
+\item This is a deviation of a problem that find the overlapped ranges
+\item At start, sort the input ranges per the end position.
+\item Set first end $y$ as the first range's end position in the sorted ranges. Iterate all the other ranges, if a range's start position is no larger than $y$, we know that an arrow can burst them together. Otherwise, increments the number of arrows.
+\item The difference between this problem and the problem that find overlapped ranges, we do not update $y$ as the merged range's end position. We leave $y$ as it is. 
+\end{itemize}
+
+\setcounter{lstlisting}{0}
+\begin{lstlisting}[style=customc, caption={Greedy}]
+int findMinArrowShots( vector<vector<int>>& points )
+{
+    if( points.empty() )
+    {
+        return 0;
+    }
+
+    //sort the points per the end position
+    sort( begin( points ), end( points ), []( const vector<int>& p1, const vector<int>& p2 )
+    {
+        if( p1[1] < p2[1] )
+        {
+            return true;
+        }
+
+        if( p1[1] == p2[1] )
+        {
+            return p1[0] < p2[0];
+        }
+
+        return false;
+    } );
+
+    int ans = 1;
+
+    int end = points[0][1];
+
+    for( size_t i = 1; i < points.size(); ++i )
+    {
+        if( points[i][0] <= end )
+        {
+            //point i can be burst together
+            //notice: we do not update end
+            //as in finding overlapped ranges
+        }
+        else
+        {
+            //we need another arrow
+            ++ans;
+            end = points[i][1];
+        }
+    }
+
+    return ans;
+}
+\end{lstlisting}

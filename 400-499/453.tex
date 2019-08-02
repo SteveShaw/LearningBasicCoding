@@ -1,0 +1,95 @@
+\section{453 --- Minimum Moves to Equal Array Elements}
+Given a non-empty integer array $A$ of size $n$, find the minimum number of moves required to make all array elements equal, where a move is incrementing $n - 1$ elements by 1.
+
+\paragraph{Example:}
+
+\begin{flushleft}
+\textbf{Input}: $[1,2,3]$
+
+\textbf{Output}: 3
+
+\textbf{Explanation}: 
+
+Only three moves are needed (remember each move increments two elements):
+
+$[1,2,3]  \Longrightarrow  [2,3,3]  \Longrightarrow  [3,4,3] \Longrightarrow  [4,4,4]$
+\end{flushleft}
+
+\subsection{Math}
+Adding 1 to all the elements except one is equivalent to decrementing 1 from a single element, since we are interested in the relative levels of the elements which need to be equalized. Thus, the problem is simplified to find the number of decrement operations required to equalize all the elements of the given array. 
+
+For finding this, it is obvious that we'll reduce all the elements of the array to the minimum element. But, in order to find the solution, we need not actually decrement the elements. We can find the number of moves required as $\sum\limits_{i=0}^{\ell-1} A[i] - \min(A)\times \ell$, where $\ell$ is the length of the array.
+
+\setcounter{lstlisting}{0}
+\begin{lstlisting}[style=customc, caption={Math}]
+int minMoves( vector<int>& nums )
+{
+    //get minimum element
+    auto it = min_element( begin( nums ), end( nums ) );
+    auto min_e = *it;
+
+    int ans = 0;
+
+    //sum - min(nums) * L
+    //=sum(A[i] - min(nums));
+    for( int n : nums )
+    {
+        ans += ( n - min_e );
+    }
+
+    return ans;
+}
+\end{lstlisting}
+
+\subsection{Brute Force}
+In order to make all the elements equal to each other with minimum moves, we need to do the increments in all but the maximum element of the array. 
+
+Thus, in this approach, we scan the complete array to find the maximum and the minimum element. After this, we add 1 to all the elements except the maximum element, and increment the number of moves. Again, we repeat the same process, and this continues until the maximum and the minimum element become equal to each other.
+
+But we can do better. In order to make the minimum element equal to the maximum element, we need to add 1 at least $k$ times, after which, the maximum element could change. Thus, instead of incrementing in steps of 1, we can increase the number of moves by $ k=\max-\min$. Thus, we scan the complete array to find the maximum and minimum element. Then, we increment every element by $k$ units and add $k$ to the count of moves. Again we repeat the same process, until the maximum and minimum element become equal.
+
+\begin{lstlisting}[style=customc, caption={Better Brute Force}]
+int minMoves( vector<int>& nums )
+{
+    //Time Limit Exceed
+    //Only for demonstration
+    int ans = 0;
+    while( true )
+    {
+        auto minmax_p = minmax_element( begin( nums ), end( nums ) );
+        int min_n = *( minmax_p.first );
+        int max_n = *( minmax_p.second );
+
+        int diff = max_n - min_n;
+
+        if( diff == 0 )
+        {
+            break;
+        }
+
+        ans += diff;
+
+        for( auto it = begin( nums ); it != end( nums ); ++it )
+        {
+            //skip the first maximum found
+            if( it != minmax_p.second )
+            {
+                *it += diff;
+            }
+        }
+    }
+
+    return ans;
+}
+\end{lstlisting}
+
+\subsection{Sorting}
+If the array is sorted, we can find the maximum and minimum element in $O(1)$. Actually, we don't need to update each element in $A$.
+
+\begin{enumerate}
+\item At start, the last element is the largest element. Therefore, $d = A[n-1]-A[0]$. 
+\item We add $d$ to all the elements except the last one, i.e., $A[n-1]$. Now, the updated element at index 0, $A[0]$ will be $A[0]+d = A[n-1]$. Thus, the smallest element $A[0]$ is now equal to the previous largest element $A[n-1]$. Because $A$ is sorted, the element $A[n-2]$ will become the largest element after updated. Also, $A[0]$ is still the smallest element.
+\item For the 2nd update, difference $d$ is $A[n-2]-A[0]$. Thus, $A[0]$ will become equal to $A[n-2]$ after update. Further, since $A[0]$ is equal to $A[n-1]$, we have $A[0]=A[n-2]=A[n-1]$. Now, the largest element will be $A[n-3]$. 
+
+\item Continue the above steps, and keep on incrementing the number of moves with the difference found at every step.
+\end{enumerate}
