@@ -1,0 +1,129 @@
+\section{457 --- Circular Array Loop}
+You are given a circular array $A$ of positive and negative integers. If a number $ k $ at an index is positive, then move forward $k$ steps. Conversely, if it's negative ($-k$), move backward $k$ steps. Since the array is circular, you may assume that the last element's next element is the first element, and the first element's previous element is the last element.
+
+Determine if there is a loop (or a cycle) in $A$. A cycle must start and end at the same index and the cycle's length is larger than 1. Furthermore, movements in a cycle must all follow a single direction. In other words, a cycle must not consist of both forward and backward movements.
+
+ 
+\paragraph{Example 1:}
+
+\begin{flushleft}
+\textbf{Input}: [2,-1,1,2,2]
+
+\textbf{Output}: \texttt{true}
+
+\textbf{Explanation}: There is a cycle, from index $0 \longrightarrow 2 \longrightarrow 3 \longrightarrow 0$. The cycle's length is 3.
+\end{flushleft}
+
+
+\paragraph{Example 2:}
+
+\begin{flushleft}
+\textbf{Input}: [-1,2]
+
+\textbf{Output}: \texttt{false}
+
+\textbf{Explanation}: The movement from index $1 \longrightarrow 1 \longrightarrow 1 \ldots$ is not a cycle, because the cycle's length is 1. By definition the cycle's length must be greater than 1.
+
+\end{flushleft}
+
+
+\paragraph{Example 3:}
+
+\begin{flushleft}
+\textbf{Input}: [-2,1,-1,-2,-2]
+
+\textbf{Output}: \texttt{false}
+
+\textbf{Explanation}: The movement from index $1 \longrightarrow 2 \longrightarrow 1 \longrightarrow \ldots$ is not a cycle, because movement from index $1 \longrightarrow 2$ is a forward movement, but movement from index $2 \longrightarrow 1$ is a backward movement. All movements in a cycle must follow a single direction.
+\end{flushleft}
+ 
+
+\paragraph{Note:}
+
+\begin{itemize}
+\item $-1000 \leq A[i] \leq 1000$
+\item $A[i] \neq 0$
+\item $1 \leq \lvert A\rvert \leq 5000$
+ \end{itemize}
+
+\paragraph{Follow up:}
+
+\begin{itemize}
+\item Could you solve it in $O(n)$ time complexity and $O(1)$ extra space complexity?
+\end{itemize}
+
+\setcounter{lstlisting}{0}
+\begin{lstlisting}[style=customc, caption={Fast And Slow Pointers}]
+bool circularArrayLoop( vector<int>& nums )
+{
+
+    int L = static_cast<int>( nums.size() );
+
+    auto next = [L, &nums]( int x )
+    {
+
+        int y = x + nums[x];
+        y = ( y % L );
+
+        if( y < 0 )
+        {
+            y += L;
+        }
+
+        return y;
+    };
+
+    //start from each index
+    //to see if there is a loop
+    for( int i = 0; i < L; ++i )
+    {
+        if( nums[i] == 0 )
+        {
+            continue;
+        }
+
+        int slow = i;
+        int fast = next( i );
+
+        //fast will jump two index
+        //so make sure these two index has
+        //same directions as i
+        while( ( nums[fast] * nums[i] > 0 ) && ( nums[next( fast )] * nums[i] > 0 ) )
+        {
+            if( slow == fast )
+            {
+                //the loop contains only element
+                if( slow == next( slow ) )
+                {
+                    break;
+                }
+
+                //we found a loop
+                return true;
+            }
+
+            //jump one index for slow
+            slow = next( slow );
+            //jump two index for fast
+            fast = next( next( fast ) );
+        }
+
+
+        //we cannot find loop starting from i
+        int x = i;
+        int val = nums[i];
+        //set the elements in the path from i to zero
+        while( nums[x] * val > 0 )
+        {
+            //nums[x] needs to be the
+            //same direction as x
+            int y = next( x );
+            nums[x] = 0;
+            x = y;
+        }
+    }
+
+    return false;
+}
+
+\end{lstlisting}

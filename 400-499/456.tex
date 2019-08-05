@@ -34,6 +34,98 @@ Note: $n$ will be less than 15,000.
 
 \end{flushleft}
 
+\subsection{Brute Froce}
+The most direct approach is to test each $(i,j,k)$ to check if the corresponding numbers satisfy the 132 criteria.
+
+To improve the efficiency, we can observe the following fact: For a number $A[j]$, if we find a smallest $A[i]$ such that $A[i] < A[j]$ and $i<j$, then for any $k> j$, the likelihood that $A[k]$ is between $A[i]$ and $A[j]$ is increased.
+
+Thus, we can keep track of minimum number $x$ until $j$, and then check all the index $k> j$ to see if there is any $A[k]<A[j]$ and $A[k]> x$.
+
+\setcounter{lstlisting}{0}
+\begin{lstlisting}[style=customc, caption={Better Brute Force}]
+bool find132pattern( vector<int>& nums )
+{
+    if( nums.empty() || nums.size() < 3 )
+    {
+        return false;
+    }
+
+    int x = nums[0];
+
+    for( size_t j = 0; j < nums.size() - 1; ++j )
+    {
+        //keep track of minimum number so far
+        x = ( min )( x, nums[j] );
+
+        for( size_t k = j + 1; k < nums.size(); ++k )
+        {
+            //nums[k] is in [x, nums[j]]
+            if( ( nums[k] < nums[j] ) && ( nums[k] > x ) )
+            {
+                return true;
+            }
+        }
+    }
+
+    return false;
+}
+\end{lstlisting}
+
+\subsection{Searching Intervals}
+This approach is relying on the fact: to maximize the likelihood that we can find $A[k]$, $A[i]$ and $A[j]$ must be the start and end points of a local increasing segment. 
+
+To achieve this, we can keep track of minimum number, $x$, found after the last peak.  Whenever we encounter $A[y] < A[y-1]$, we know that $A[y-1]$ was the endpoint of the last found increasing segment. Thus, we can iterate over $k > y$ to find the 132 pattern.
+
+But, we can bypass the iteration process if we can store all the local increasing segments found so far. Therefore, during the traversing, suppose $x$ is the start of a segment, whenever we find $A[y] < A[y-1]$, add the local increasing segment $A[x\ldots y-1]$ into the stored ranges. At the same time, we check if the current number falls in any of the ranges found so far. If so, 132 pattern is found.
+
+If no such element is found at the end, this means we cannot find 132 pattern in $A$.
+
+\begin{lstlisting}[style=customc, caption={Search Intervals}]
+bool find132pattern( vector<int>& nums )
+{
+
+    size_t x = 0;
+
+    //store the local increasing segments so far
+    vector<array<int, 2>> segs;
+
+    for( size_t y = 1; y < nums.size(); ++y )
+    {
+        if( nums[y - 1] > nums[y] ) //or nums[y - 1] >= nums[y]
+        {
+            //the last local increasing segment
+            //ends
+            if( x < y - 1 )
+            {
+                //exclude the case x=y-1
+                //add local increasing segment
+                //[x,y-1] to the stored segs
+                segs.push_back( array<int, 2> {x, y - 1} );
+            }
+
+            //update next segement start as y
+            x = y;
+        }
+
+        //check if nums[y] is in the ranges that in segs
+        for( const auto& seg : segs )
+        {
+            if( ( nums[seg[0]] < nums[y] ) && ( nums[y] < nums[seg[1]] ) )
+            {
+                return true;
+            }
+        }
+    }
+
+    return false;
+}
+\end{lstlisting}
+
+ 
+
+\subsection{Stack}
+Suppose we want to find a 123 sequence with $n_1 < n_2 < n_3$, we just need to find $n_3$, followed by $n_2$ and $n_1$. Now if we want to find a 132 sequence with $n_1 < n_3 < n_2$, we need to switch up the order of searching. we want to first find $n_2$, followed by $n_3$, then $n_1$.
+
 \setcounter{lstlisting}{0}
 \begin{lstlisting}[style=customc, caption={Stack}]
 bool find132pattern( vector<int>& nums )
