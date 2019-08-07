@@ -123,10 +123,97 @@ bool find132pattern( vector<int>& nums )
 
  
 
-\subsection{Stack}
-Suppose we want to find a 123 sequence with $n_1 < n_2 < n_3$, we just need to find $n_3$, followed by $n_2$ and $n_1$. Now if we want to find a 132 sequence with $n_1 < n_3 < n_2$, we need to switch up the order of searching. we want to first find $n_2$, followed by $n_3$, then $n_1$.
+\subsection{Stack With Minimum Number Array}
+Based on the last approach, we can make the process of finding $A[k]$ faster if we store the minimum value in $A[0,j-1]$ when considering $A[j]$ in an array, say $B[j]$. 
 
-\setcounter{lstlisting}{0}
+After $B$ is created, we need to maintain a list of $A[k]$ ($k>j$), such that they are larger than $B[j]$. From these $A[k]$ candidates, the best one is the minimum of them, say $A[\hat{k}]$. If $A[\hat{k}] < A[j]$, 132 pattern is found. 
+
+The best way to keep track of these $A[k]$ is using a stack and traverse from the end of $A$. We place the minimum of $A[k]$ candidates on the top of the stack. 
+
+\begin{itemize}
+\item if $A[j] \leq B[j]$, continue to $A[j-1]$
+\item Otherwise, we keep on popping from the stack until the top element is larger than $B[j]$. This process ensures that 
+\begin{enumerate}
+\item All remaining elements in the stack are larger than $B[j]$.
+\item All popped elements from the stack are $\leq B[j]$. In array $B$, if $u > v$, we have $B[u]\leq B[v]$. Therefore, for any index $t$ less than $j$, $B[j]\leq B[t]$, and then all these popped elements are also $\leq B[t]$. This means these popped elements cannot be the candidates even for any $A[t]$ where $0\leq t <j$. 
+\end{enumerate}
+\item  If current top element of the stack is less than $A[j]$, 132 pattern is found. Otherwise, we push $A[j]$ into the stack. The reason is: $A[j] \geq B[j]$, so $A[j]$ could be a candidate to satisfy a 132 pattern for the elements before $B[j]$. We can note that, pushing $A[j]$ into the stack still making sure the contained elements are sorted.
+\item One more thing to note is that when $A[j]\leq B[j]$, we don't push $A[j]$ into the stack because $A[j]$ is less than the minimum of elements of its left and cannot be the candidate of $A[k]$.
+\end{itemize}
+
+\begin{lstlisting}[style=customc, caption={Stack With Minimum Number Array}]
+bool find132pattern( vector<int>& nums )
+{
+    if( nums.empty() )
+    {
+        return false;
+    }
+
+    //stores the minimum number in nums[0, j-1]
+    //when considering element nums[j]
+    vector<int> v_min( nums.size() );
+
+    v_min[0] = nums[0];
+
+    for( size_t i = 1; i < nums.size(); ++i )
+    {
+        v_min[i] = ( min )( v_min[i - 1], nums[i] );
+    }
+
+    stack<int> stk;
+
+    for( size_t i = nums.size(); i >= 1; --i )
+    {
+        //since we using size_t
+        //i>=0 will cause infinite loop
+        auto j = i - 1;
+
+        if( nums[j] > v_min[j] )
+        {
+            //only when nums[j] > v_min[j]
+            //132 pattern can be possile.
+
+            while( !stk.empty() && ( stk.top() <= v_min[j] ) )
+            {
+                //pop all the nums[k] that are not
+                //candidate
+                stk.pop();
+            }
+
+            if( !stk.empty() && ( nums[j] > stk.top() ) )
+            {
+                //found 132 pattern
+                return true;
+            }
+
+            //push nums[j] to the stack
+            //since it is a nums[k] candidate
+            //for the elements before v_min[j]
+            stk.push( nums[j] );
+        }
+
+    }
+
+    return false;
+}
+\end{lstlisting}
+ 
+\subsection{Only Stack}
+We can improve the approach based on stack without using a auxiliary array to store the minimum number.
+
+We can make use of a stack only by tracking the minimum number of the $A[k]$ candidates. We still traverse the array from right end.
+\begin{enumerate}
+\item We maintain the minimum number so far, say $x$. 
+\item If the stack is not empty, and current number $A[i]$ is less than $x$, we know that
+\begin{itemize}
+\item $A[j]$ must be one of elements in the stack.
+\item $x$ is $A[k]$.
+\end{itemize}
+Thus, we are sure 132 pattern is found.
+\item Otherwise, we keep popping the top element when it is less than current number $A[i]$. Thus, we put $A[j]$ candidates into the stack.
+\item Whenever the stack pop its top element, update the minimum number so far, $x$, by the popped element. Thus, we obtain the minimum of $A[k]$ candidates.
+\item Then, push current number into the stack.
+\end{enumerate}
 \begin{lstlisting}[style=customc, caption={Stack}]
 bool find132pattern( vector<int>& nums )
 {
