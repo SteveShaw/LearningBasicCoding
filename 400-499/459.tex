@@ -1,0 +1,95 @@
+\section{459 --- Repeated Substring Pattern}
+Given a non-empty string, $S$, check if it can be constructed by taking a substring of it and appending multiple copies of the substring together. You may assume the given string consists of lowercase English letters only and its length will not exceed 10000.
+
+\paragraph{Example 1:}
+
+\begin{flushleft}
+\textbf{Input}: $ abab $
+
+\textbf{Output}: \texttt{True}
+
+\textbf{Explanation}: It's the substring $ ab $ twice.
+
+\end{flushleft}
+
+\paragraph{Example 2:}
+
+\begin{flushleft}
+\textbf{Input}: $ aba $
+
+\textbf{Output}: \texttt{False}
+\end{flushleft}
+
+
+\paragraph{Example 3:}
+
+\begin{flushleft}
+\textbf{Input}: $ abcabcabcabc $
+
+\textbf{Output}: \texttt{True}
+
+\textbf{Explanation}: It's the substring $ abc $ four times. (And the substring $ abcabc $ twice.)
+
+\end{flushleft}
+
+\subsection{KMP}
+\begin{itemize}
+\item We build KMP table $T$ first from $S$.
+\item Any entry in KMP table, $T[i]$, is the length of longest proper prefix of $S[0,i]$, which is also a suffix of $S[0,i]$.
+\item Thus $T[L-1]$ ($L$ is the length of $S$) is the length of longest proper prefix of $S$. Thus, if $S$ can be built by one of its substring, say $U$, then $U$ must be the suffix of $S$ and also the proper prefix of $S$.
+\item We only need to check if $T[L-1]$ is greater than zero and $L$ is the multiple of $L-T[L-1]$.  
+\end{itemize}
+
+\setcounter{lstlisting}{0}
+\begin{lstlisting}[style=customc, caption={KMP}]
+bool repeatedSubstringPattern( string s )
+{
+    //build kmp table
+    vector<size_t> f( s.size(), 0 );
+
+    for( size_t i = 1; i < s.size(); ++i )
+    {
+        auto t = f[i - 1];
+
+        while( ( t > 0 ) && ( s[i] != s[t] ) )
+        {
+            t = f[t - 1];
+        }
+
+        if( s[i] == s[t] )
+        {
+            t = t + 1;
+        }
+
+        f[i] = t;
+    }
+
+    //if s is made of a multiple substring t
+    //then x = (r-1) * len(t) where r is the
+    //count of t in x
+    //so l-x is the length of the t
+    //we need to make sure x is not zero
+    //and l can be devided by (l-x)
+
+    auto x = f.back();
+
+    auto l = s.size();
+
+    if( ( x > 0 ) && ( l % ( l - x ) == 0 ) )
+    {
+        return true;
+    }
+
+    return false;
+}
+\end{lstlisting}
+
+\subsection{The Trick To Find A Repeatable String}
+Based on this fact:
+\begin{itemize}
+\item First char of input string is first char of repeated sub-string
+\item Last char of input string is last char of repeated sub-string
+\item Assume $T = S+S$ where $S$ is the input string.
+\item Remove first and last letter from $T$.
+\item If $S$ exists in $T$, we know that $S$ contains a repeatable sub-string. Suppose index $i$ in $T$ is the index where $S$ starts, then the repeatable string in $S$ has length $i+1$ and the repeat sub-string in $S$ is $S[0, i]$.
+\end{itemize}

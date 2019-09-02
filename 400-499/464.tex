@@ -1,0 +1,96 @@
+\section{464 --- Can I Win}
+In the \textbf{100 game}, two players take turns adding, to a running total, any integer from 1 to 10. The player who first causes the running total to reach or exceed 100 wins.
+
+What if we change the game so that players cannot re-use integers?
+
+For example, two players might take turns drawing from a common pool of numbers of $[1, 15]$ without replacement until they reach a total $\geq 100$.
+
+Given an integer $x$ which is the maximum integer that the players can choose, and another integer $y$ which is the desired total, determine if the first player to move can force a win, assuming both players play optimally.
+
+You can always assume that $x$ will not be larger than 20 and $y$ will not be larger than 300.
+
+\paragraph{Example}
+
+\begin{flushleft}
+\textbf{Input}: $x = 10$ , $y = 11$
+
+\textbf{Output}: \texttt{false}
+
+\textbf{Explanation}: No matter which integer the first player choose, the first player will lose.
+
+The first player can choose an integer from 1 up to 10.
+
+If the first player choose 1, the second player can only choose integers from 2 up to 10.
+
+The second player will win by choosing 10 and get a total equal to 11, which is equal or larger than $y$.
+
+Same with other integers chosen by the first player, the second player will always win.
+\end{flushleft}
+
+\subsection{Depth First Search}
+
+\setcounter{lstlisting}{0}
+\begin{lstlisting}[style=customc, caption={Depth First Search}]
+bool canIWin( int maxChoosableInteger, int desiredTotal )
+{
+    if( desiredTotal < 2 )
+    {
+        return true;
+    }
+
+    int sum = ( 1 + maxChoosableInteger ) * maxChoosableInteger / 2;
+
+    if( sum < desiredTotal )
+    {
+        //no one can win
+        return false;
+    }
+
+    if( sum == desiredTotal )
+    {
+        //only odd number first person can win
+        return ( maxChoosableInteger & 1 );
+    }
+
+    unordered_map<int, unsigned char> memo;
+
+    return dfs( maxChoosableInteger, desiredTotal, memo, 0 );
+}
+
+//the helper function to do depth first search
+bool dfs( int x, int y, unordered_map<int, unsigned char>& memo, int state )
+{
+    auto it = memo.find( state );
+    if( it != memo.end() )
+    {
+        return it->second == 1;
+    }
+
+    for( int i = 0; i < x; ++i )
+    {
+        //number i+1 is not selected
+        if( !( state & ( 1 << i ) ) )
+        {
+            if( y <= ( i + 1 ) )
+            {
+                //since the first person will select (i+1)
+                //if y < (i+1)
+                //first person can win;
+                memo.emplace( state, 1 );
+                return true;
+            }
+
+            int next_state = ( state | ( 1 << i ) );
+
+            if( !dfs( x, y - ( i + 1 ), memo, next_state ) )
+            {
+                memo.emplace( state, 1 );
+                return true;
+            }
+        }
+    }
+
+    memo.emplace( state, 0 );
+    return false;
+}
+\end{lstlisting}

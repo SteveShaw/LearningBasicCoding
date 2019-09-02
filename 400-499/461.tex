@@ -1,0 +1,56 @@
+\section{461 --- Hamming Distance}
+The Hamming distance between two integers is the number of positions at which the corresponding bits are different.
+
+Given two integers $x$ and $y$, calculate the Hamming distance.
+
+\paragraph{Note:}
+\begin{itemize}
+\item $0 \leq x, y < 2^{31}$.
+\end{itemize}
+
+\paragraph{Example:}
+
+\begin{flushleft}
+\textbf{Input}: x = 1, y = 4
+
+\textbf{Output}: 2
+
+\textbf{Explanation}:
+
+\begin{table}[H]
+\begin{tabular}{lcccc}
+1: & 0 & \textcolor{red}{0} & 0 & \textcolor{red}{1}\\
+4: & 0 & \textcolor{red}{1} & 0 & \textcolor{red}{0}
+\end{tabular}
+\end{table}
+\end{flushleft}
+
+\subsection{XOR}
+
+\begin{itemize}
+\item 首先做异或。
+\item 然后用\lstinline[language=C++, basicstyle=\small\ttfamily, keywordstyle=\bfseries\color{green!40!black}]|(x-1)&x| 的方法统计bit 1的个数，这种方法运行一次就会将right most bit 1去除掉。
+\end{itemize}
+
+\setcounter{lstlisting}{0}
+\begin{lstlisting}[style=customc, caption={XOR}]
+int hammingDistance( int x, int y )
+{
+    //get xor
+    int z = x ^ y;
+
+    int ans = 0;
+
+    //calculate number of 1s
+    while( z )
+    {
+        z = ( ( z - 1 ) &z );
+
+        ++ans;
+    }
+
+    return ans;
+}
+\end{lstlisting}
+
+

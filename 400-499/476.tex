@@ -1,0 +1,53 @@
+\section{476 --- Number Complement}
+Given a positive integer $n$, output its complement number. The complement strategy is to flip the bits of its binary representation.
+
+\paragraph{Note:}
+\begin{itemize}
+\item The given integer is guaranteed to fit within the range of a 32-bit signed integer.
+\item You could assume no leading zero bit in the integer’s binary representation.
+\end{itemize}
+
+\paragraph{Example 1:}
+\begin{flushleft}
+\textbf{Input}: 5
+
+\textbf{Output}: 2
+
+\textbf{Explanation}: The binary representation of 5 is 101 (no leading zero bits), and its complement is 010. So you need to output 2.
+\end{flushleft}
+
+\paragraph{Example 2:}
+\begin{flushleft}
+\textbf{Input}: 1
+
+\textbf{Output}: 0
+
+\textbf{Explanation}: The binary representation of 1 is 1 (no leading zero bits), and its complement is 0. So you need to output 0.
+\end{flushleft}
+
+\subsection{Binary Operation}
+
+\setcounter{lstlisting}{0}
+\begin{lstlisting}[style=customc, caption={Binary Operation}]
+int findComplement( int num )
+{
+    int x = INT_MAX;
+    int mask = 1;
+
+    //generate 1111...1
+    //the highest bit 1 is same as the position
+    //of highest bit 1 of num
+    for( int i = 31; i >= 0; --i )
+    {
+        if( ( num ) & ( 1 << i ) )
+        {
+            break;
+        }
+
+        mask = ( x >> ( 31 - i ) );
+    }
+
+    //xor is the result
+    return num ^ mask;
+}
+\end{lstlisting}

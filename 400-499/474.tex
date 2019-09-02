@@ -1,0 +1,210 @@
+\section{474 --- Ones and Zeroes}
+In the computer world, use restricted resource you have to generate maximum benefit is what we always want to pursue.
+
+For now, suppose you are a dominator of $m$ 0s and $n$ 1s respectively. On the other hand, there is an array with strings consisting of only 0s and 1s.
+
+Now your task is to find the maximum number of strings that you can form with given $m$ 0s and $n$ 1s. Each 0 and 1 can be used at most once.
+
+\paragraph{Note:}
+
+\begin{itemize}
+\item The given numbers of 0s and 1s will both not exceed 100
+\item The size of given string array won't exceed 600.
+\end{itemize} 
+
+\paragraph{Example 1}
+
+\begin{flushleft}
+\textbf{Input}: \lstinline[language=C++, basicstyle=\small\ttfamily, keywordstyle=\bfseries\color{green!40!black}]|A = {"10", "0001", "111001", "1", "0"}|, $m = 5$, $n = 3$
+
+\textbf{Output}: 4
+
+\textbf{Explanation}: This are totally 4 strings can be formed by the using of 5 0s and 3 1s, which are 10, 0001, 1, 0
+\end{flushleft}
+ 
+
+\paragraph{Example 2:}
+\begin{flushleft}
+
+\textbf{Input}: \lstinline[language=C++, basicstyle=\small\ttfamily, keywordstyle=\bfseries\color{green!40!black}]|A = {"10", "0", "1"}|, $m = 1$, $n = 1$
+
+\textbf{Output}: 2
+
+\textbf{Explanation}: You could form 10, but then you'd have nothing left. Better form 0 and 1.
+\end{flushleft}
+
+\subsection{Brute Force}
+In the brute force approach, we consider every subset of $A$ and count the total number of zeroes and ones in that subset. The subset with zeroes less than equal to $m$ and ones less than equal to $n$ will be considered as the valid subsets. The maximum length subset among all valid subsets will be the answer.
+
+To improve the efficiency, we can limit the number of subsets by breaking the loop when total number of zeroes exceed $m$ or total number of ones exceed $n$. But this will reduce little computation not the complexity.
+
+Obviously, there are $2^{\ell}$ subsets possible for the list of length $\ell$ and here we are using \lstinline[language=C++, basicstyle=\small\ttfamily, keywordstyle=\bfseries\color{green!40!black}]|int|(32 bits) for iterating every subset. So this method will not work for the list having length greater than 32.
+
+
+\subsection{Backtracking}
+In the brute force approach, we consider every subset iteratively. We can also make use of backtracking approach in a recursive manner. Suppose the function is \lstinline[language=C++, basicstyle=\small\ttfamily, keywordstyle=\bfseries\color{green!40!black}]|F(A, i, ones, zeroes)|. This function takes the given list of strings $A$ and gives the size of the largest subset with 1s and 0s considering the strings lying after the index \lstinline[language=C++, basicstyle=\small\ttfamily, keywordstyle=\bfseries\color{green!40!black}]|i|th index(including itself) in \lstinline[language=C++, basicstyle=\small\ttfamily, keywordstyle=\bfseries\color{green!40!black}]|A|.
+
+For each current string, we have two options
+
+\begin{enumerate}
+\item Include the current string in the subset currently being considered and deduct the number of 0's and 1's in the current string from $m$ and $n$ respectively. We also need to increment the total number of strings considered so far by 1. 
+\item Not include the current string in the current subset. In this case, we don't the count of 1s and 0s. 
+\end{enumerate}
+
+The larger value out of these two options represents the required result to be returned for the current function call.
+
+Finally, the maximum number of subsets is given by calling \lstinline[language=C++, basicstyle=\small\ttfamily, keywordstyle=\bfseries\color{green!40!black}]|F(A, 0, m, n)|.
+
+\setcounter{lstlisting}{0}
+\begin{lstlisting}[style=customc, caption={Backtrack}]
+int findMaxForm( vector<string>& strs, int m, int n )
+{
+    return F( strs, 0, 0, 0, m, n );
+}
+
+//backtrack recursive function
+int F( vector<string>& A, size_t start, int ones, int zeros, int m, int n )
+{
+    if( start == A.size() )
+    {
+        //No string available
+        return 0;
+    }
+
+    auto get_ones = []( const string & s )
+    {
+        int count_1s = 0;
+
+        for( auto c : s )
+        {
+            count_1s += ( c - '0' );
+        }
+
+        return count_1s;
+    };
+
+    int num_ones = get_ones( A[start] );
+    int num_zeros = static_cast< int >( A[start].size() ) - num_ones;
+
+    int sel = 0;
+
+    if( ( ( ones + num_ones ) <= n ) && ( ( zeros + num_zeros ) <= m ) )
+    {
+        //try option 1: put A[start] into the subset
+        sel = F( A, start + 1, ones + num_ones, zeros + num_zeros, m, n ) + 1;
+    }
+
+    //try option 2: don't put A[start] into the subset
+    int non_sel = F( A, start + 1, ones, zeros, m, n );
+
+    return ( max )( sel, non_sel );
+}
+\end{lstlisting}
+
+\subsection{Backtracking With Memorization}
+The previous backtracking approach makes use of a lot of redundant function calls for  the same values of \lstinline[language=C++, basicstyle=\small\ttfamily, keywordstyle=\bfseries\color{green!40!black}]|(i, zeroes, ones)|. This redundancy in the recursive tree can be pruned off by making use of a 3-D memorization array, say, $M$.
+
+$M[i][j][k]$ is used to store the result obtained for the function call \lstinline[language=C++, basicstyle=\small\ttfamily, keywordstyle=\bfseries\color{green!40!black}]|F(A, i, j, k)|. Or in other words, it stores the maximum number of subsets possible considering the strings starting from the \lstinline[language=C++, basicstyle=\small\ttfamily, keywordstyle=\bfseries\color{green!40!black}]|i|th index onwards, provided only \lstinline[language=C++, basicstyle=\small\ttfamily, keywordstyle=\bfseries\color{green!40!black}]|j| zeros and \lstinline[language=C++, basicstyle=\small\ttfamily, keywordstyle=\bfseries\color{green!40!black}]|k| ones are available to be used.
+
+Thus, whenever $M[i][j][k]$ has a valid value, we can apply the result directly.
+
+\begin{lstlisting}[style=customc, caption={Backtracking With Memorization}]
+int findMaxForm( vector<string>& strs, int m, int n )
+{
+    //memorization cache
+    vector<vector<vector<int>>> M( strs.size(), vector<vector<int>>( m + 1, vector<int>( n + 1, 0 ) ) );
+
+    return F( strs, 0, 0, 0, m, n, M );
+}
+
+int F( vector<string>& A, size_t start, int ones, int zeros, int m, int n, vector<vector<vector<int>>>& M )
+{
+    if( start == A.size() )
+    {
+        return 0;
+    }
+
+    if( M[start][zeros][ones] )
+    {
+        //directly use cached result
+        return M[start][zeros][ones];
+    }
+
+    auto get_ones = []( const string & s )
+    {
+        int count_1s = 0;
+
+        for( auto c : s )
+        {
+            count_1s += ( c - '0' );
+        }
+
+        return count_1s;
+    };
+
+    int num_ones = get_ones( A[start] );
+    int num_zeros = static_cast< int >( A[start].size() ) - num_ones;
+
+    int sel = 0;
+
+    if( ( ( ones + num_ones ) <= n ) && ( ( zeros + num_zeros ) <= m ) )
+    {
+        sel = F( A, start + 1, ones + num_ones, zeros + num_zeros, m, n, M ) + 1;
+    }
+
+    int non_sel = F( A, start + 1, ones, zeros, m, n, M );
+
+    //save value to cache
+    M[start][zeros][ones] = ( max )( sel, non_sel );
+    return M[start][zeros][ones];
+}
+\end{lstlisting}
+
+\subsection{0-1 knapsack problem}
+For each string, we have two options: either use or not using it. This is a typical 0--1 knapsack problem. This problem can be solved by using 2-D Dynamic Programming. 
+
+We can make use of an array, $\delta$ such that an entry $\delta[x][y]$ denotes the maximum number of strings that can be included in the subset given only $x$ zeros and $y$ ones are available.
+
+To fill $\delta$, we traverse the given strings. Suppose current string $s$ contains $i$ zeros and $j$ ones. If we choose to put $s$ in any one possible subset, as long as adding $s$ will not exceed given $m$ zeros and $n$ ones, we have $\delta[x][y] = 1 + \delta[x-i][y-j]$.
+
+But we can also choose not to select $s$. In summary, $\delta[x][y] = \max(1 + \delta[x-i][y-j], \delta[x][y])$.
+
+Thus, after the complete list of strings has been traversed, $\delta[m][n]$ gives the answer.
+
+\setcounter{lstlisting}{0}
+\begin{lstlisting}[style=customc, caption={0-1 knapsack problem}]
+int findMaxForm( vector<string>& strs, int m, int n )
+{
+    //the search space is from (0,0) to (m,n)
+    vector<vector<int>> F( m + 1, vector<int>( n + 1, 0 ) );
+
+    //for m=0 and n=0, we cannot select any string
+    //from strs, therefore F[0][0]=0
+
+    for( const auto& s :  strs )
+    {
+        //get 0s and 1s in s
+        int ones = 0;
+
+        for( auto c : s )
+        {
+            ones += ( c - '0' );
+        }
+
+        int zeros = static_cast<int>( s.size() ) - ones;
+
+        for( int i = m; i >= zeros; --i )
+        {
+            for( int j = n; j >= ones; --j )
+            {
+                //find in the search space
+                //where (i-zeros, j-ones) contains
+                //the number of strings that can form with s
+                F[i][j] = ( max )( F[i][j], 1 + F[i - zeros][j - ones] );
+            }
+        }
+    }
+
+    return F[m][n];
+}
+\end{lstlisting}

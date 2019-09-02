@@ -1,0 +1,107 @@
+\section{475 --- Heaters}
+Winter is coming! Your first job during the contest is to design a standard heater with fixed warm radius to warm all the houses.
+
+Now, you are given positions of houses and heaters on a horizontal line, find out minimum radius of heaters so that all houses could be covered by those heaters.
+
+So, your input will be the positions of houses and heaters separately, and your expected output will be the minimum radius standard of heaters.
+
+\paragraph{Note:}
+
+\begin{flushleft}
+\item Numbers of houses and heaters you are given are non-negative and will not exceed 25000.
+\item Positions of houses and heaters you are given are non-negative and will not exceed $10^9$.
+\item As long as a house is in the heaters' warm radius range, it can be warmed.
+\item All the heaters follow your radius standard and the warm radius will the same.
+\end{flushleft}
+ 
+
+\paragraph{Example 1:}
+
+\begin{flushleft}
+\textbf{Input}: $[\,1,\,2,\,3\,]$, $[2]$
+
+\textbf{Output}: 1
+
+\textbf{Explanation}: The only heater was placed in the position 2, and if we use the radius 1 standard, then all the houses can be warmed.
+
+\end{flushleft} 
+
+\paragraph{Example 2:}
+
+\begin{flushleft}
+\textbf{Input}: $[\,1,\,2,\,3,\,4\,]$, $[1,\,4]$
+
+\textbf{Output}: 1
+
+\textbf{Explanation}: The two heater was placed in the position 1 and 4. We need to use radius 1 standard, then all the houses can be warmed.
+\end{flushleft}
+
+\subsection{Binary Search}
+
+We have to sort the positions of all heaters at start. Then, we iterate each house position, and using binary search to find closest adjacent heaters. 
+
+\begin{itemize}
+\item If we only find one heater, this house will be at either end of heaters. The distance between this heater and house is the radius that we must used to determine the global maximum radius.
+\item If we find two heaters, we select the one heater with less distance as the radius, and used it to determine the global maximum radius.
+\end{itemize}
+
+\setcounter{lstlisting}{0}
+\begin{lstlisting}[style=customc, caption={Binary Search}]
+int findRadius( vector<int>& houses, vector<int>& heaters )
+{
+    int ans = 0;
+
+    //sort heaters first
+    sort( heaters.begin(), heaters.end() );
+
+    int sz_h = static_cast<int>( heaters.size() );
+
+    for( int n : houses )
+    {
+        int l = 0;
+        int r = sz_h;
+
+        //leftmost binary search
+        //find the first heater that is
+        //at right of current house
+        while( l < r )
+        {
+            int mid = l + ( r - l ) / 2;
+
+            if( heaters[mid] < n )
+            {
+                l = mid + 1;
+            }
+            else
+            {
+                r = mid;
+            }
+        }
+
+
+        if( l == 0 )
+        {
+            //we need the radius enough from the first heater
+            //to cover this house
+            ans = ( max )( ans, heaters[l] - n );
+        }
+        else if( l == sz_h )
+        {
+            //we need the radius enough from the last heater
+            //to cover this house
+            ans = ( max )( ans, n - heaters[l - 1] );
+        }
+        else
+        {
+            //two heaters may cover this house
+            //select minimum radius from them
+            int x = min( n - heaters[l - 1], heaters[l] - n );
+            //we still need maximum radius to cover all cases
+            ans = ( max )( ans, x );
+        }
+
+    }
+
+    return ans;
+}
+\end{lstlisting}

@@ -1,0 +1,241 @@
+\section{462 --- Minimum Moves to Equal Array Elements II}
+Given a non-empty integer array $A$, find the minimum number of moves required to make all array elements equal, where a move is incrementing a selected element by 1 or decrementing a selected element by 1.
+
+You may assume the array's length is at most 10,000.
+
+\paragraph{Example:}
+
+\begin{flushleft}
+\textbf{Input}: $[1,2,3]$
+
+\textbf{Output}: 2
+
+\textbf{Explanation}: Only two moves are needed (remember each move increments or decrements one element): $[1,2,3]  \longrightarrow  [2,2,3]  \longrightarrow  [2,2,2]$
+
+\end{flushleft}
+
+\subsection{Brute Force}
+This simple approach just simply test each possible number from the minimum to the maximum of $A$ to get the best movements.
+
+However, we can prove that we can use every element in $A$ as the possible number to test. 
+
+Suppose $A=[x_1, x_2, x_3, x_4, x_5, x_6, x_7]$, if we equalize all elements to $x_4$, the total movements will be 
+ \[
+ z = (x_4-x_1) + (x_4-x_2) + \ldots +(x_7-x_4)
+ \]
+ 
+Now, suppose we try to equalize all elements to a number $y$, which is not in $A$ and is slightly larger than $x_4$, i.e., $y=x_4+\delta$, the total movements will become
+
+\begin{align*}
+z_y &= (x_4+\delta - x_1) + (x_4+\delta-x_2) + \ldots + (x_7-x_4-\delta) \\
+    & = (x_4-x_1) + (x_4-x_2) + \ldots + (x_4-x_7) + 4\delta - 3\delta) \\
+    & = (x_4-x_1) + (x_4-x_2) + \ldots + (x_4-x_7) + \delta
+\end{align*}
+
+From this equation, it is clear that the number of moves required to settle to some number present in the array like $x_4$   is always fewer than the number of moves required to settle down to some other number not in the array like $y = x_4 + \delta$. Thus, we just test each number in the array to find out the number that can bring minimum total movements.
+
+\subsection{Sorting}
+We can optimize the brute force a little bit with help of sorting. Suppose $B$ is the sorting of $A$. If all numbers in $B$ are equalized to a number in $B$, which is at index $x$.
+
+The number of moves required to raise the elements smaller than $B[x]$ to equalize them to $B[x]$ will be 
+\[
+x \times B[x] - \sum\limits_{i = 0}^{x-1}B[i]
+\]
+
+Similarly, the number of moves required to  decrement the elements larger than $B[x]$ to equalize them to $B[x]$ will be
+\[
+\sum\limits_{i = x+1}^{L-1}B[i] - (L-x-1)\times B[x]
+\]
+
+Thus, the total moves to equalize all elements to $B[x]$ is the sum of the above two. We just iterate over $B$, and for each number in index $i$, $B[i]$, we accumulate the summation before $B[i]$ and after $B[i]$, with $i\times B[i] - (L-i)\times B[i]$. Find the minimum from these values in each index $i$.
+
+\setcounter{lstlisting}{0}
+\begin{lstlisting}[style=customc, caption={Sorting}]
+int minMoves2( vector<int>& nums )
+{
+    //using long long to avoid type overflow
+    using ll_t = long long;
+
+    sort( begin( nums ), end( nums ) );
+
+    auto total = accumulate( begin( nums ), end( nums ), 0LL );
+
+    ll_t sum_before = 0;
+    ll_t sum_after = total - nums[0];
+
+    ll_t L = static_cast<ll_t>( nums.size() );
+
+    //the movements to increments the elements
+    //that are less than nums[i]
+    //plus the movement to decrements the elements
+    //that are larger than nums[i]
+    ll_t best = sum_after - sum_before - ( L - 1 ) * static_cast<ll_t>( nums[0] );
+
+    for( ll_t i = 1; i < L; ++i )
+    {
+        //update the sum of elements less than nums[i]
+        sum_before += static_cast<ll_t>( nums[i - 1] );
+        //update the sum of elements larger than nums[i]
+        sum_after -= static_cast<ll_t>( nums[i] );
+
+        //total movements to equalize all elements to nums[i]
+        auto z = sum_after - sum_before;
+        z += static_cast<ll_t>( nums[i] ) * i - ( L - i - 1 ) * static_cast<ll_t>( nums[i] );
+
+        best = ( min )( best, z );
+    }
+
+    return best;
+}
+\end{lstlisting}
+
+\subsection{Find Median By STL}
+This problem can be viewed as: Given a set of points in 1-d. Find a point $k$k such that the cumulative sum of distances between $k$ and the rest of the points is minimum. This is a very common mathematical problem whose answer is known. The point $k$k is the \textbf{median} of the given points.
+
+We can make use of a function \lstinline[language=C++, basicstyle=\small\ttfamily, keywordstyle=\bfseries\color{green!40!black}]|nth_element| from STL to find the median.
+
+\begin{lstlisting}[style=customc, caption={Find Median By STL}]
+int minMoves2( vector<int>& nums )
+{
+    size_t i = nums.size() / 2;
+    auto e = begin( nums );
+    advance( e, i );
+
+    //after calling this function, median is at nums[n]
+    nth_element( nums.begin(), e, nums.end() );
+
+    int ans = 0;
+    int median = nums[i];
+
+    for( int n : nums )
+    {
+        ans += abs( n - median );
+    }
+
+    return ans;
+};
+\end{lstlisting}
+
+\subsection{Without Finding Median}
+Actually, after sorting, there is no need to find median to get the minimum movements. suppose $x$ and $y$ are minimum and maximum elements in $A$ respectively. We assume all the numbers are changed to number $k$, then for $x$, the movements are $k-x$, while for $y$, are $y-k$. Therefore, the total movements for both $x$ and $y$ are $k-x+y-k= y-x$. This result is independent of $k$. This is same for next element of $x$ and previous element of $y$ which are the new minimum and maximum elements by not considering $x$ and $y$.
+
+\begin{lstlisting}[style=customc, caption={Without Finding Median}]
+int minMoves2( vector<int>& nums )
+{
+    sort( begin( nums ), end( nums ) );
+
+    size_t l = 0;
+    size_t r = nums.size() - 1;
+
+    int ans = 0;
+
+    while( l < r )
+    {
+        //nums[l] and nums[r]
+        //are the min and max
+        //of nums[l, r]
+        ans += nums[r] - nums[l];
+        ++l;
+        --r;
+    }
+
+    return ans;
+}
+\end{lstlisting}
+
+\subsection{Quick Select}
+We can find the median directly using the Quick-Select method, which doesn't use sorting.
+
+The quick-select method is similar to the Quick-Sort method. In a single iteration, we choose a pivot and put it to its correct position in the array. If the position happens to be the central position (corresponding to the median), we can return the median directly from there. 
+
+Quick-Select makes use of two functions \lstinline[language=C++, basicstyle=\small\ttfamily, keywordstyle=\bfseries\color{green!40!black}]|partition| and \lstinline[language=C++, basicstyle=\small\ttfamily, keywordstyle=\bfseries\color{green!40!black}]|select|. 
+
+\lstinline[language=C++, basicstyle=\small\ttfamily, keywordstyle=\bfseries\color{green!40!black}]|select| function takes the leftmost and the rightmost indices of the given array and the central index as well. If the element reaching the correct position in the current function call to \lstinline[language=C++, basicstyle=\small\ttfamily, keywordstyle=\bfseries\color{green!40!black}]|select| function happens to be the median (i.e. it reaches the central position), we return the element(since it is the median). 
+
+The function \lstinline[language=C++, basicstyle=\small\ttfamily, keywordstyle=\bfseries\color{green!40!black}]|partition| takes the leftmost and the rightmost indices of the array and returns the correct position of the current pivot(which is chosen as the rightmost element of the array). This function makes use of two pointers (indices) $i$ and $j$. Both are initially point to the leftmost element of the array.
+
+At every step, we compare the element $A[j]$ with the pivot element $p$. 
+\begin{itemize}
+\item If $A[j] < p$, we swap the elements $A[i]$ and $A[j]$, and increment $i$ and $j$. 
+\item Otherwise, only $j$ is incremented. 
+\item When $j$ reaches the end of the array, we swap the pivot $p$ with $A[i]$. In this way, now, all the elements fewer than $p$ lie to the left of $A[i]$, and all the elements larger than $p$ lie to the right of $A[i]$ and thus, the pivot $p$ reaches at its correct position in the array. 
+\item If this position isn't the central index of the array, we again make use of the \lstinline[language=C++, basicstyle=\small\ttfamily, keywordstyle=\bfseries\color{green!40!black}]|select| function by passing the left and the right subarrays relative to $A[i]$.
+\end{itemize}
+\begin{lstlisting}[style=customc, caption={Find Median}]
+int minMoves2( vector<int>& nums )
+{
+    //get median using quick select
+    int L = static_cast<int>( nums.size() );
+    int ans = 0;
+    if( L & 1 )
+    {
+        int median = qselect( nums, 0, L - 1, L / 2 );
+        for( int n : nums )
+        {
+            ans += abs( median - n );
+        }
+
+        return ans;
+    }
+
+    //for even length
+    //need to find the middle two elements
+    int m1 = qselect( nums, 0, L - 1, L / 2 );
+    int m2 = qselect( nums, 0, L - 1, L / 2 - 1 );
+    //the median is the average of the two elements
+    int median = ( m1 + m2 ) / 2;
+    for( int n : nums )
+    {
+        ans += abs( median - n );
+    }
+
+    return ans;
+
+}
+
+//parition algorithm
+int partition( vector<int>& A, int begin, int end, int pivot )
+{
+    int x = A[pivot];
+    swap( A[pivot], A[end] );
+
+    int l = begin;
+
+    for( int i = begin; i < end; ++i )
+    {
+        if( A[i] < x )
+        {
+            swap( A[i], A[l] );
+            ++l;
+        }
+    }
+
+    swap( A[end], A[l] );
+
+    return l;
+}
+
+//quick select algorithm
+//k is the order statistic
+int qselect( vector<int>& A, int begin, int end, int k )
+{
+    while( begin < end )
+    {
+        int x = partition( A, begin, end, k );
+        if( x == k )
+        {
+            return A[k];
+        }
+        else if( x < k )
+        {
+            begin = x + 1;
+        }
+        else
+        {
+            end = x - 1;
+        }
+    }
+
+    return A[begin];
+}
+\end{lstlisting}

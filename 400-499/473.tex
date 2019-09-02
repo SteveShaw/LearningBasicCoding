@@ -1,0 +1,265 @@
+\section{473 --- Matchsticks to Square}
+Remember the story of Little Match Girl? By now, you know exactly what matchsticks the little match girl has, please find out a way you can make one square by using up all those matchsticks. You should not break any stick, but you can link them up, and each matchstick must be used exactly one time.
+
+Your input will be several matchsticks the girl has, represented with their stick length. Your output will either be \lstinline[language=C++, basicstyle=\small\ttfamily, keywordstyle=\bfseries\color{green!40!black}]|true| or \lstinline[language=C++, basicstyle=\small\ttfamily, keywordstyle=\bfseries\color{green!40!black}]|false|, to represent whether you could make one square using all the matchsticks the little match girl has.
+
+\paragraph{Example 1:}
+
+\begin{flushleft}
+\textbf{Input}: \lstinline[language=C++, basicstyle=\small\ttfamily, keywordstyle=\bfseries\color{green!40!black}]|[1,1,2,2,2]|
+
+\textbf{Output}: \lstinline[language=C++, basicstyle=\small\ttfamily, keywordstyle=\bfseries\color{green!40!black}]|true|
+
+\textbf{Explanation}: You can form a square with length 2, one side of the square came two sticks with length 1.
+\end{flushleft}
+
+\paragraph{Example 2:}
+\begin{flushleft}
+\textbf{Input}: \lstinline[language=C++, basicstyle=\small\ttfamily, keywordstyle=\bfseries\color{green!40!black}]|[3,3,3,3,4]|
+
+\textbf{Output}: \lstinline[language=C++, basicstyle=\small\ttfamily, keywordstyle=\bfseries\color{green!40!black}]|false|
+
+\textbf{Explanation}: You cannot find a way to form a square with all the matchsticks.
+
+\end{flushleft}
+
+\paragraph{Note:}
+\begin{itemize}
+\item The length sum of the given matchsticks is in the range of 0 to $10^9$.
+\item The length of the given matchstick array will not exceed 15.
+\end{itemize}
+
+\subsection{Depth First Search Without Optimization}
+It is possible that a matchstick can be a part of any of the 4 sides of the resulting square, but which one of these choices leads to an actual square is what we don't know.
+
+This means that for every matchstick in the given array, we have 4 different subsets that this matchstick can be a part of.
+
+We try out all of them and keep on doing this recursively until we exhaust all of the possibilities or until we find an arrangement of our matchsticks such that they form the square.
+
+The algorithm can implemented by DFS. In this approach, we make use of a function that takes the current matchstick index we are to process and also the number of sides of the square that are completely formed untill now
+\begin{enumerate}
+\item If all of the matchsticks have been used up and 4 sides have been completely formed, that implies our square is completely formed. This is the base case for the recursion.
+\item For the current matchstick, we have 4 different options. This matchstick can be a part of any of the sides of the square. We try out the 4 options recursively.
+\item If any of these recursive calls returns \lstinline[language=C++, basicstyle=\small\ttfamily, keywordstyle=\bfseries\color{green!40!black}]|true|, we are sure that these matchsticks can form a square. Otherwise, we cannot form a square.
+\end{enumerate}
+
+This solution is very slow as is. However, we can speed it up considerably by sorting the given array in reverse order before processing them recursively.
+
+The reason for this is that if there is no solution, trying a longer matchstick first will get to negative conclusion earlier.
+
+For example, \lstinline[language=C++, basicstyle=\small\ttfamily, keywordstyle=\bfseries\color{green!40!black}]|[8,4,4,4]|. In this case we can have a square of size 5 but the largest side 8 does not fit in any subset and hence we can simply return \lstinline[language=C++, basicstyle=\small\ttfamily, keywordstyle=\bfseries\color{green!40!black}]|false| without even considering the remaining matchsticks.
+
+\setcounter{lstlisting}{0}
+\begin{lstlisting}[style=customc, caption={Brute Force DFS}]
+bool makesquare( vector<int>& nums )
+{
+    if( nums.empty() || ( nums.size() < 4 ) )
+    {
+        return false;
+    }
+
+    int z = accumulate( begin( nums ), end( nums ), 0 );
+
+    int side = z / 4;
+
+    if( side * 4 != z )
+    {
+        return false;
+    }
+
+    //sort the sticks from long to short
+    sort( begin( nums ), end( nums ), greater<int>() );
+
+    array<int, 4> sides;
+
+    sides.fill( 0 );
+
+    return dfs( nums, 0, sides, side );
+}
+
+bool dfs( vector<int>& sticks, size_t start, array<int, 4>& sides, int square_side )
+{
+    if( start == sticks.size() )
+    {
+        //check if all sides
+        //equal to the target side
+        bool flag = true;
+
+        for( int side : sides )
+        {
+            if( side != square_side )
+            {
+                flag = false;
+            }
+        }
+
+        return flag;
+    }
+
+    for( int i = 0; i < 4; ++i )
+    {
+        if( sticks[start] + sides[i] <= square_side )
+        {
+            //we can test this stick for sides[i]
+            sides[i] += sticks[start];
+
+            if( dfs( sticks, start + 1, sides, square_side ) )
+            {
+                return true;
+            }
+
+            //backtracing
+            sides[i] -= sticks[start];
+        }
+    }
+
+    return false;
+}
+\end{lstlisting}
+
+\subsection{Depth First Search With Memorization}
+To use a memorization in DFS, the important decision is the state we need to put into the memorization structure.
+
+Suppose we have \lstinline[language=C++, basicstyle=\small\ttfamily, keywordstyle=\bfseries\color{green!40!black}]|[3,3,4,4,5,5]| as our matchsticks. We can see the possible formed square side is 8, and there are many states regarding to how the sides can be constructed (either fully or partially constructed). For example, we may have
+
+\begin{itemize}
+\item 3 sides have been fully constructed: \lstinline[language=C++, basicstyle=\small\ttfamily, keywordstyle=\bfseries\color{green!40!black}]|(4, 4), (3, 5), (3, 5)|
+\item 0 sides have been fully constructed: \lstinline[language=C++, basicstyle=\small\ttfamily, keywordstyle=\bfseries\color{green!40!black}]|(3, 4), (3, 5), (4), (5)|
+\item 1 side completely constructed: \lstinline[language=C++, basicstyle=\small\ttfamily, keywordstyle=\bfseries\color{green!40!black}]|(3, 3), (4, 4), (5), (5)| 
+\end{itemize}
+
+As we can see above, there are multiple ways to use the same set of matchsticks and land up in completely different states.
+
+This means that if we only set the state as those matchsticks have been used, we cannot determine the complete picture regarding to the current recursion state because a single set of used matchsticks can represent multiple different unrelated sub-problems.
+
+Thus, We also need to add to the state with number of sides of the square that have been completely formed until now.
+
+\begin{lstlisting}[style=customc, caption={}]
+let square_side = sum( matchsticks ) / 4
+
+func recurse( matchsticks_used, sides_formed )
+{
+    if( sides_formed == 4 )
+	{
+		Square Formed!!
+	}
+
+for match in matchsticks available, do
+    {
+        add match to matchsticks_used
+
+        let result = recurse( matchsticks_used, sides_formed )
+
+        if (result is True) 
+        {
+            return True
+        }
+		
+        remove match from matchsticks_used;
+    }
+	
+	return False
+}
+\end{lstlisting}
+
+It is very clear from the pseudo-code above that the state of a recursion is defined by two variables \lstinline[language=C++, basicstyle=\small\ttfamily, keywordstyle=\bfseries\color{green!40!black}]|matchsticks_used| and \lstinline[language=C++, basicstyle=\small\ttfamily, keywordstyle=\bfseries\color{green!40!black}]|sides_formed|. Hence, these are the two variables that will be used to cache the results for that specific sub-problem.
+
+From the given problem description, we know that the max number of matchsticks are 15. Thus, we can use bits to efficiently represent all the used matchsticks. Through this way, we only have to hash an integer value which represents these bits with maximum value $2^{15}$. Since we need to add number of already formed sides into the state and it can only be up to 4, the state can be easily formed by left shift the used matchsticks bits by 3 bit positions and put the number of sides in the lowest 3 bit positions. 
+
+Also, we shall notice that we don't really need to see if 4 sides have been completely formed. This is because, we already know that the sum of all the matchsticks is divisible by 4. So, if 3 equal sides have been formed by using some of the matchsticks, then the remaining matchsticks would definitely form the remaining side of our square. Hence, we only need to check if 3 sides of our square can be formed or not.
+
+
+
+\setcounter{lstlisting}{0}
+\begin{lstlisting}[style=customc, caption={DFS With Memorization}]
+bool makesquare( vector<int>& nums )
+{
+    if( nums.empty() || ( nums.size() < 4 ) )
+    {
+        return false;
+    }
+
+    int z = accumulate( begin( nums ), end( nums ), 0 );
+
+    int side = z / 4;
+
+    if( side * 4 != z )
+    {
+        return false;
+    }
+
+    unordered_map<int, unsigned char> memo;
+
+    return dfs( nums, 0, 0, 0, side, memo );
+
+}
+
+//mask:  the current selected elements that compose the mask
+//sum: current total sum of selected elements
+//sides: how many complete side has been formed
+//side: length of side of the square
+//memo: the memory for DP
+bool dfs( vector<int>& nums, int mask, int sum, int sides, int side, unordered_map<string, unsigned char> &memo )
+{
+    //use current mask and how many sides can be formed as the key
+    //mask occupy the highest 15 bits
+    //and squaire_side in the lowest 3 bits
+    int key = mask;
+    key <<= 3;
+    key |= square_side;
+
+    auto it = memo.find( key );
+
+    if( it != memo.end() )
+    {
+        return it->second == 1;
+    }
+
+    if( ( sum > 0 ) && ( ( sum % side ) == 0 ) )
+    {
+        ++sides;
+    }
+
+    if( sides == 3 )
+    {
+        //if we already forms three side
+        //then we be sure the square can be formed
+        return true;
+    }
+
+    //rems is the remaining length to make current or next side
+    //if sum % side !=0, this means current side has not been formed yet
+    //rems is the remaining length to make up current side
+    //otherwisie, current side is completed, rems is equal to side
+    //which means next side has not started formed
+    int rems = ( sum / side + 1 ) * side - sum;
+
+    for( size_t i = 0; i < nums.size(); ++i )
+    {
+        if( ( 1 << i ) & mask )
+        {
+            continue;
+        }
+
+        if( nums[i] <= rems )
+        {
+            //only the element tha is less than the remain length
+            //is considered
+            int next_mask = mask | ( 1 << i );
+
+            if( dfs( nums, next_mask, sum + nums[j], sides, side, memo ) )
+            {
+                memo.emplace( key, 1 );
+                return true;
+            }
+        }
+    }
+
+    memo.emplace( key, 0 );
+
+    return false;
+}
+\end{lstlisting}
+
+
+

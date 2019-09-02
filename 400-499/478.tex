@@ -120,3 +120,131 @@ public:
     double m_y;
 };
 \end{lstlisting}
+
+\subsection{Rejection Sampling}
+To get uniform random points in a circle with radius $r$ at center $(x,y)$, we can generate uniform random points in the square with side length $2r$ at center point$(x,y)$, keeping all of the points that are at no larger than $r$ distance from the center, and rejecting all others not meeting this criteria. This technique is called rejection sampling. Each possible location on the circle has the same probability of being generated, so the sampling of points will be uniformly distributed.
+
+The area of the square is $(2r)^2 = 4r^2$ and the area of the circle is $\pi r \approx 3.14R$. Then, we get $\dfrac{3.14R}{4R} = \dfrac{3.14}{4} = .785$. Therefore, we will get a usable sample approximately $78.5\%$ of the time and the expected number of times that we will need to sample until we get a usable sample is $\dfrac{1}{.785} \approx 1.274 $
+
+\begin{lstlisting}[style=customc, caption={Rejection Sampling}]
+class Solution
+{
+public:
+    Solution( double radius, double x_center, double y_center )
+    {
+        c_x = x_center;
+        c_y = y_center;
+        c_r = radius;
+    }
+
+    vector<double> randPoint()
+    {
+        //get the bottom left point of the square
+        double x0 = c_x - c_r;
+        double y0 = c_y - c_r;
+
+        while( true )
+        {
+            //rand_x in range [x0, x0+2*c_r]
+            double rand_x = x0 + rand_gen( seed_gen ) * 2 * c_r;
+
+            //rand_y in range [y0, y0+2*c_r]
+            double rand_y = y0 + rand_gen( seed_gen ) * 2 * c_r;
+
+            double dx = ( rand_x - c_x );
+            double dy = ( rand_y - c_y );
+
+            //get the square distance from the center (c_x, c_y)
+            double square_d = dx * dx + dy * dy;
+
+            if( square_d <= c_r * c_r )
+            {
+                //this point is inside the circle
+                return {rand_x, rand_y};
+            }
+        }
+
+        return {};
+    }
+
+    double c_x;
+    double c_y;
+    double c_r;
+
+    //c++1x random number generation
+    mt19937 seed_gen{random_device{}()};
+    uniform_real_distribution<double> rand_gen{0, 1};
+};
+\end{lstlisting}
+
+\subsection{Inverse Transform Sampling}
+Assume that we are given a circle, $\alpha$, with radius 1 that is centered at the origin, and our task is to sample uniform random points on this circle.
+
+Lets imagine another circle, $\beta$, with radius $\dfrac{1}{2}$, which is also centered at the origin.
+
+The circumference of $\alpha$ is twice that of $\beta$. Also, the probability of sampling a point from a sub-region in circle $\alpha$ is directly proportional to the area of the sub-region. Therefore, the probability of sampling a point on the perimeter of $\alpha$ is twice that of sampling a point on the perimeter of $\beta$.
+
+More generally, what is implied is that the sampling probability is directly proportional to the distance from the origin, from $0$ to $r$. This can be modeled as a \textbf{probability density function} $f$, where $x$ is the distance from the origin and $f(x)$ is the relative sampling probability at $x$, and $f(x)=cx$ where $c$ is a constant.
+
+Since the area under any probability density function curve must be $1$, and the radius of circle $\alpha$ is 1, we have $ f(x) = cx* 1/2=1 \implies c=2$. Thus $f(x)=2x$.
+
+Using this PDF $f$, we can compute the \textbf{cumulative distribution function} (CDF), $F$, where $F(x)$ is the probability of sampling a point within a distance of $x$ from the origin.
+
+CDF is the integral of the probability density function, when we have
+\[
+F(x) = \int{f(x)} = \int{2x} = x^2
+\]
+
+Now, CDF $F$ can be used to compute the inverse cumulative distribution function $F^{-1}$, which accepts uniform random value in $[0,1]$, and returns a random distance from origin in accordance with $f$.
+ 
+\begin{align*}
+F^{-1}\left(F(x)\right) &= x \\
+F^{-1}\left(x^2\right) &= x\\
+F^{-1}(x) &= \sqrt{x}
+\end{align*}
+
+Now, to generate a uniform random point on CC, we just need to compute a random distance $D$ from origin using $F^{-1}$  and a uniform random angle $\theta$ over the range $[0, 2\cdot \pi)$
+
+The points will be generated as polar coordinates. To convert to cartesian coordinates, we can use the following formulas.
+
+\begin{align*}
+x &= D \cdot \cos(\theta) \\ y &= D \cdot \sin(\theta)
+\end{align*}
+
+\begin{lstlisting}[style=customc, caption={Inverse Transform Sampling}]
+class Solution
+{
+public:
+    Solution( double radius, double x_center, double y_center )
+    {
+        c_x = x_center;
+        c_y = y_center;
+        c_r = radius;
+    }
+
+    vector<double> randPoint()
+    {
+        //generate random distance from origin
+        //by a uniform rand value x in [0,1]
+        //using CDF F(x) = sqrt(x)
+
+        double D = sqrt( rand_gen( seed_gen ) ) * c_r;
+
+        //generate radom theta in [0,2pi]
+        double theta = rand_gen( seed_gen ) * 2 * 3.1415926;
+
+        double x = D * cos( theta );
+        double y = D * sin( theta );
+
+        return {x + c_x, y + c_y};
+
+    }
+
+    double c_x;
+    double c_y;
+    double c_r;
+
+    mt19937 seed_gen{random_device{}()};
+    uniform_real_distribution<double> rand_gen{0, 1};
+};
+\end{lstlisting}

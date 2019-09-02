@@ -1,0 +1,68 @@
+\section{477 --- Total Hamming Distance}
+The Hamming distance between two integers is the number of positions at which the corresponding bits are different.
+
+Now your job is to find the total Hamming distance between all pairs of the given numbers.
+
+\paragraph{Example:}
+\begin{flushleft}
+
+\textbf{Input}: 4, 14, 2
+
+\textbf{Output}: 6
+
+\textbf{Explanation}: 
+
+In binary representation, the 4 is 0100, 14 is 1110, and 2 is 0010 (just
+showing the four bits relevant in this case). So the answer will be: $2 + 2 + 2 = 6$.
+
+
+\end{flushleft}
+\paragraph{Note:}
+
+\begin{itemize}
+\item Elements of the given array are in the range of 0 to $10^9$
+\item Length of the array will not exceed $10^4$.
+\end{itemize}
+
+\subsection{Bit Manipulation}
+\begin{itemize}
+\item 统计每个bit位上的0和1的个数$m$ and $n$。
+\item 于是每个bit位上两两数字所能产生的不同的bit位的个数即为$m\times n$。 而因为$m+n=L$（$L$是数组的长度），因此只需算出1的个数即可。
+\end{itemize}
+
+
+\setcounter{lstlisting}{0}
+\begin{lstlisting}[style=customc, caption={Bit Manipulation}]
+int totalHammingDistance( vector<int>& nums )
+{
+    int mask = 1;
+
+    int ans = 0;
+
+    int L = static_cast<int>( nums.size() );
+
+    for( int i = 0; i < 32; ++i )
+    {
+        int ones = 0;
+
+        mask = ( 1 << i );
+
+        //get 1s at current bit
+        for( int n : nums )
+        {
+            if( mask & n )
+            {
+                ++ones;
+            }
+        }
+
+        //total hamming distance at current bit
+        //is ones * (L-ones)
+        ans += ones * ( L - ones );
+
+    }
+	
+    return ans;
+}
+
+\end{lstlisting}

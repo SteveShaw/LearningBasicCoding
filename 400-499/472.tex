@@ -1,0 +1,229 @@
+\section{472 --- Concatenated Words}
+Given a list of words $A$ (\textbf{without duplicates}), please write a program that returns all concatenated words in the given list of words.
+
+A concatenated word is defined as a string that is comprised entirely of at least two shorter words in the given array.
+
+\paragraph{Example:}
+
+\begin{flushleft}
+\textbf{Input}: [\texttt{cat}, \texttt{cats}, \texttt{catsdogcats}, \texttt{dog}, \texttt{dogcatsdog}, \texttt{hippopotamuses}, \texttt{rat}, \texttt{ratcatdogcat}]
+
+\textbf{Output}: [\texttt{catsdogcats}, \texttt{dogcatsdog}, \texttt{ratcatdogcat}]
+
+\textbf{Explanation}: 
+
+\texttt{catsdogcats} can be concatenated by \texttt{cats}, \texttt{dog} and \texttt{cats}; 
+
+\texttt{dogcatsdog} can be concatenated by \texttt{dog}, \texttt{cats} and \texttt{dog}; 
+
+\texttt{ratcatdogcat} can be concatenated by \texttt{rat}, \texttt{cat}, \texttt{dog} and \texttt{cat}.
+
+\end{flushleft}
+
+\paragraph{Note}:
+\begin{itemize}
+\item The number of elements of the given array will not exceed 10,000
+\item The length sum of elements in the given array will not exceed 600,000.
+\item All the input string will only include lower case letters.
+\item The returned elements order does not matter.
+\end{itemize}
+
+\subsection{Build Trie Tree With Depth First Search}
+We build a trie tree from all the input string. For the trie assoicated with the last letter in each string, we set the flag field to \lstinline[language=C++, basicstyle=\small\ttfamily, keywordstyle=\bfseries\color{green!40!black}]|true| to indicate this trie indicates an input string.
+
+To check if a string is composed of the other strings, we make use of a depth first search on the built trie tree
+\begin{enumerate}
+\item Iterate each letter in the string.
+\item If the associated trie's flag is \lstinline[language=C++, basicstyle=\small\ttfamily, keywordstyle=\bfseries\color{green!40!black}]|true|, it means we find a substring that is also in the input string. Then we recursively go to next letter and repeat the process from the root of the trie tree.
+\item We need to try each letter from current index to end of the string.
+\end{enumerate}
+
+\setcounter{lstlisting}{0}
+\begin{lstlisting}[style=customc, caption={DFS And Trie}]
+vector<string> findAllConcatenatedWordsInADict( vector<string>& words )
+{
+    Trie* root = new Trie;
+
+    //build trie
+    for( const auto& w : words )
+    {
+        if( w.empty() )
+        {
+            continue;
+        }
+
+        build( root, w );
+    }
+
+    //find the candidates
+    vector<string> ans;
+
+    for( const auto& w :  words )
+    {
+        if( w.empty() )
+        {
+            continue;
+        }
+
+        if( dfs( w.c_str(), w.size(), 0, 0, root ) )
+        {
+            ans.emplace_back( w.c_str() );
+        }
+    }
+
+    return ans;
+}
+
+
+private:
+
+
+struct Trie
+{
+    unordered_map<char, Trie*> m_nexts;
+    bool is_word = false;
+
+    Trie() = default;
+};
+
+bool dfs( const char* word, size_t len, size_t start, int parts, Trie* root )
+{
+    auto node = root;
+
+    for( size_t i = start; i < len; ++i )
+    {
+        auto it = node->m_nexts.find( word[i] );
+
+        if( it == node->m_nexts.end() )
+        {
+            return false;
+        }
+
+        node = it->second;
+
+        if( node->is_word )
+        {
+            //keep checking word[i+1...len-1]
+            if( i == len - 1 )
+            {
+                //already at the end of word
+                //if parts >=1, this means
+                //we have already found
+                //at least one substring in the words
+                //now from the last matched position to i
+                //there is another word can be matched
+                //so the condition is parts>=1
+                //not parts >1
+                return parts >= 1;
+            }
+
+            //if we can find from i+1
+            //we find the anwer
+            if( dfs( word, len, i + 1, parts + 1, root ) )
+            {
+                return true;
+            }
+        }
+    }
+
+    return false;
+}
+
+void build( Trie* root, const string& w )
+{
+    auto node = root;
+
+    for( char c : w )
+    {
+        auto it = node->m_nexts.find( c );
+        if( it == node->m_nexts.end() )
+        {
+            it = node->m_nexts.emplace( c, new Trie() ).first;
+        }
+
+        node = it->second;
+    }
+
+    node->is_word = true;
+}
+
+\end{lstlisting}
+
+\subsection{Dynamic Programming}
+We can refer to (Problem 139 --- Word Break) for this approach. In summary, 
+
+\begin{itemize}
+\item Put all the input strings into a hash set.
+\item Suppose $F[i]$ is the dynamic program function, which means in current string $S$, sub-string $S[0, i-1]$ can be composed of other input strings. To cover empty string case, $F$ has length $\ell+1$ where $\ell$ is the length of $S$.
+\item We need two loops to check each string $S$. The outermost loop is iterate each index $i$ in $S$, and the inner one is checking index $j$ from $0$ to $i-1$ and set value of $F[i]$. 
+
+\begin{lstlisting}[style=customc, caption={}]
+for( size_t i = 0; i <= S.size(); ++i )
+{
+    for( size_t j = 0; j < i; ++j )
+    {
+        if( ( F[j] == true ) && ( HashSet.contains( S.substr( j, i - j ) ) ) )
+        {
+            //S[0,j] can be composed from input string
+            //and S[j+1, i] is also one of input strings.
+            F[i] = true;
+            break;
+        }
+    }
+}
+\end{lstlisting}
+\item If $F[\ell]$ is \lstinline[language=C++, basicstyle=\small\ttfamily, keywordstyle=\bfseries\color{green!40!black}]|true|, $S$ is the one meets the requirements and add it to the output list.
+\item When processing each string, we need to temporarily removing it from the hash set to avoid matching itself.
+\end{itemize}
+
+\begin{lstlisting}[style=customc, caption={}]
+vector<string> findAllConcatenatedWordsInADict( vector<string>& words )
+{
+    unordered_set<string> hash_set( begin( words ), end( words ) );
+
+    vector<string> ans;
+
+    for( const auto& word : words )
+    {
+        //F[i] indicates if word[0, i-1] can be
+        //composed from input strings
+
+        if( word.empty() )
+        {
+            continue;
+        }
+
+        hash_set.erase( word );
+        vector<unsigned char> F( word.size() + 1, 0 );
+
+        F[0] = 1;
+        for( size_t i = 0; i <= word.size(); ++i )
+        {
+            //for each j between[0,i-1]
+            //we use the saved result F[j]
+            //and check substring word[j, i-j]
+
+            for( size_t j = 0; j < i; ++j )
+            {
+                if( F[j] && hash_set.count( word.substr( j, i - j ) ) )
+                {
+                    //this means word[0,i-1] can be composed
+                    //at least two of input strings
+                    F[i] = 1;
+                    break;
+                }
+            }
+        }
+
+        if( F[word.size()] == 1 )
+        {
+            //word meets the requirement
+            ans.push_back( word );
+        }
+
+        hash_set.insert( word );
+    }
+
+    return ans;
+}
+\end{lstlisting}

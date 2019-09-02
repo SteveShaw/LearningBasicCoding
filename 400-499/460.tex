@@ -1,0 +1,210 @@
+\section{460 --- LFU Cache}
+Design and implement a data structure for Least Frequently Used (\texttt{LFU}) cache. It should support the following operations: \texttt{get} and \texttt{put}.
+
+\begin{lstlisting}[style=customc]
+/*
+Get the value (will always be positive) of the key
+if the key exists in the cache,
+otherwise return -1.
+*/
+int get( int key );
+
+/*
+Set or insert the value if the key is not already present.
+When the cache reaches its capacity, it should invalidate
+the least frequently used item before inserting a new item.
+For the purpose of this problem, when there is a tie
+(i.e., two or more keys that have the same frequency),
+the least recently used key would be evicted.
+*/
+void put( int key, int value );
+
+\end{lstlisting}
+
+\paragraph{Follow up:}
+
+\begin{itemize}
+\item Could you do both operations in O(1) time complexity?
+\end{itemize}
+
+\paragraph{Example:}
+
+\begin{lstlisting}[style=customc]
+LFUCache cache = new LFUCache( 2 /* capacity */ );
+
+cache->put(1, 1);
+cache->put(2, 2);
+cache->get(1);       // returns 1
+cache->put(3, 3);    // evicts key 2
+cache->get(2);       // returns -1 (not found)
+cache->get(3);       // returns 3
+cache->put(4, 4);    // evicts key 1
+cache->get(1);       // returns -1 (not found)
+cache->get(3);       // returns 3
+cache->get(4);       // returns 4
+\end{lstlisting}
+
+\subsection{Double Linked List And Hash Map}
+注意：这里是LFU不是LRU。即如果有多个元素都是最少访问的，那么需要从中删除最近没有访问过的。
+
+We have to make use of two lists. One list is used to store the key/value and another is used to store the frequency related key/value list. We also need a hash map to store each key and its position in the two lists.
+
+\setcounter{lstlisting}{0}
+\begin{lstlisting}[style=customc, caption={List And Hash Map}]
+class LFUCache
+{
+public:
+    LFUCache( int capacity )
+    {
+        m_cap = capacity;
+        m_size = 0;
+    }
+
+    int get( int key )
+    {
+        auto p_dict = m_dict.find( key );
+        if( p_dict == m_dict.end() )
+        {
+            return -1;
+        }
+
+        //find in m_list
+        auto outer = p_dict->second.outer;
+        auto inner = p_dict->second.inner;
+
+        //save value
+        int value = inner->v;
+
+        //increments the frequency
+        auto n_outer = outer;
+        ++n_outer; //the next of outer;
+
+        //erase (key, value) from outer's kv list L
+        outer->L.erase( inner );
+
+        if( ( n_outer == m_list.end() ) || ( n_outer->f != outer->f + 1 ) )
+        {
+            //we need to insert a new node in m_list
+            n_outer = m_list.emplace( n_outer, outer->f + 1 );
+            n_outer->L.emplace_back( key, value );
+        }
+        else
+        {
+            //just use n_outer's L to insert (key, value)
+            n_outer->L.emplace_back( key, value );
+        }
+
+        p_dict->second.outer = n_outer;
+        p_dict->second.inner = --( n_outer->L.end() );
+
+        if( outer->L.empty() )
+        {
+            //L is empty
+            //remove outer from m_list
+            m_list.erase( outer );
+        }
+
+        return value;
+    }
+
+    void put( int key, int value )
+    {
+        if( m_cap <= 0 )
+        {
+            return;
+        }
+
+
+        int x = get( key );
+        if( x != -1 )
+        {
+            //we aready update key/value
+            //to new position
+            m_dict[key].inner->v = value;
+            return;
+        }
+
+        if( m_size == m_cap )
+        {
+            //remove item from the start of m_list
+            auto p_kv = m_list.begin()->L.begin();
+            int d_key = p_kv->k;
+
+            //remove it from the map
+            m_dict.erase( d_key );
+            m_list.begin()->L.erase( p_kv );
+            if( m_list.begin()->L.empty() )
+            {
+                m_list.erase( m_list.begin() );
+            }
+
+            --m_size;
+        }
+
+        ++m_size;
+
+        //either m_list has no element
+        //or the start frequency is not 1
+        if( m_list.empty() || ( m_list.begin()->f != 1 ) )
+        {
+            //insert a new item at the beginning() with freq equal to 1
+            m_list.emplace_front( 1 );
+        }
+
+        //add (key,value) in the m_list first node's list's end
+        m_list.begin()->L.emplace_back( key, value );
+
+        //insert (key, out iterator/inner iterator) to the map
+        auto p_dict = m_dict.emplace( std::piecewise_construct, std::forward_as_tuple( key ), std::forward_as_tuple() ).first;
+        p_dict->second.outer = m_list.begin();
+        p_dict->second.inner = --( m_list.begin()->L.end() );
+    }
+
+private:
+
+    //inner list node
+    struct kv
+    {
+        int k;
+        int v;
+
+        kv() = default;
+
+        kv( int k_, int v_ )
+            : k( k_ )
+            , v( v_ )
+        {
+        }
+    };
+
+    //outer list node
+    struct node
+    {
+        int f;
+
+        list<kv> L;
+
+        node() = default;
+
+        explicit node( int f_ )
+            : f( f_ )
+        {
+        }
+    };
+
+    //double iterators
+    struct diter
+    {
+        list<node>::iterator outer;
+        list<kv>::iterator inner;
+        diter() = default;
+    };
+
+    list<node> m_list;
+
+    unordered_map<int, diter> m_dict;
+
+    int m_cap;
+    int m_size;
+};
+\end{lstlisting}

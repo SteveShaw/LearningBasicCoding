@@ -1,0 +1,168 @@
+\section{471 --- Encode String with Shortest Length}
+\textcolor{red}{\large Locked}
+
+
+Given a non-empty string $s$, encode the string such that its encoded length is the shortest.
+
+The encoding rule is: $k[t]$, where the $t$ inside the square brackets is being repeated exactly $k$ times.
+
+\paragraph{Note:}
+\begin{itemize}
+\item $k$ will be a positive integer and encoded string will not be empty or have extra space.
+\item You may assume that the input string contains only lowercase English letters. The string's length is at most 160.
+\item If an encoding process does not make the string shorter, then do not encode it. If there are several solutions, return any of them is fine.
+\end{itemize}
+
+\paragraph{Example 1:}
+
+\begin{flushleft}
+\textbf{Input}: \texttt{aaa}
+
+\textbf{Output}: \texttt{aaa}
+
+\textbf{Explanation}: There is no way to encode it such that it is shorter than the input string, so we do not encode it.
+
+\end{flushleft}
+\paragraph{Example 2:}
+
+\begin{flushleft}
+\textbf{Input}: \texttt{aaaaa}
+
+\textbf{Output}: 5[\texttt{a}]
+
+\textbf{Explanation}: 5[\texttt{a}] is shorter than \texttt{aaaaa} by 1 character.
+
+\end{flushleft}
+
+\paragraph{Example 3:}
+
+\begin{flushleft}
+
+\textbf{Input}: \texttt{aaaaaaaaaa}
+
+\textbf{Output}: 10[\texttt{a}]
+
+\textbf{Explanation}: \texttt{a}9[\texttt{a}] or 9[\texttt{a}]\texttt{a} are also valid solutions, both of them have the same length  5, which is the same as 10[\texttt{a}].
+
+\end{flushleft}
+\paragraph{Example 4:}
+
+\begin{flushleft}
+
+\textbf{Input}: \texttt{aabcaabcd}
+
+\textbf{Output}: 2[\texttt{aabc}]d
+
+\textbf{Explanation}: \texttt{aabc} occurs twice, so one answer can be 2[\texttt{aabc}]d.
+
+\end{flushleft}
+\paragraph{Example 5:}
+
+\begin{flushleft}
+\textbf{Input}: \texttt{abbbabbbcabbbabbbc}
+
+\textbf{Output}: 2[2[\texttt{abbb}]\texttt{c}]
+
+\textbf{Explanation}: \texttt{abbbabbbc} occurs twice, but \texttt{abbbabbbc} can also be encoded to 2[\texttt{abbb}]\texttt{c}, so one answer can be 2[2[\texttt{abbb}]\texttt{c}].
+\end{flushleft}
+
+
+\subsection{Dynamic Programming}
+Suppose $F[i][j]$ is the minimum encoded string for $s[i,j]$. 
+
+\begin{enumerate}
+\item Break $s[i,j]$ in each index $x\in [i+1, j-1]$, we can get $F[i][x]$ and $F[x+1][j]$. 
+\item Get the total length of $F[i][x]$ and $F[x+1][j]$, compared to and update the global minimum length when possible. 
+\item We still also need to check if $s[i,j]$ can be directly represented by a minimum encoded string. If this is possible, we may need to compare this encoded string length to string acquired in the step 2. (Note: in this step, suppose the $s[i][j]$ has a repeatable string $z$, we may also need $z$'s minimum encoded string not $z$ by itself)
+\end{enumerate}
+
+\setcounter{lstlisting}{0}
+\begin{lstlisting}[style=customc, caption={Dynamic Programming}]
+string encode( string s )
+{
+
+    //F[i][j] is the minimum encoded string for s[i,j];
+
+    vector<vector<string>> F( s.size(), vector<string>( s.size() ) );
+
+    //fill size 1
+
+    for( size_t i = 0; i < s.size(); ++i )
+    {
+        F[i][i].push_back( s[i] );
+    }
+
+    //file size 2
+    for( size_t i = 0; i < s.size() - 1; ++i )
+    {
+        F[i][i + 1].push_back( s[i] );
+        F[i][i + 1].push_back( s[i + 1] );
+    }
+
+    for( size_t l = 3; l <= s.size(); ++l )
+    {
+        for( size_t i = 0; i + l <= s.size(); ++i )
+        {
+            auto j = l + i - 1;
+
+            size_t best = l;
+            size_t best_x = i;
+
+            F[i][j] = s.substr( i, l );
+            //test each x between[i+1,j-1]
+            for( size_t x = i + 1; x < j; ++x )
+            {
+                auto left_size = F[i][x].size();
+                auto right_size = F[x + 1][j].size();
+
+                if( left_size + right_size < best )
+                {
+                    best = left_size + right_size;
+                    best_x = x;
+                }
+            }
+
+            //check if s[i,j] can be directly represented by a repeable string
+            //right now, F[i][j] is s[i,j]
+            //using the trick same as problem 459
+            auto y = F[i][j];
+            y += y;
+            y.pop_back();
+
+            auto pos = y.find( F[i][j], 1 );
+
+            if( pos < l )
+            {
+                //there is a repeatable substring inside s[i, j]
+                //that is s[i, i+pos-1]
+
+                //generate the pattern
+                auto z = to_string( l / pos );
+                z.push_back( '[' );
+
+                //the repeatable pattern is F[i][i+pos-1]
+                //not s.substr(i, i+pos-1)
+                //because F[i][i+pos-1] is the shortest form of
+                //s.substr(i, i+pos-1)
+                z += F[i][i + pos - 1];
+
+                z.push_back( ']' );
+
+                swap( F[i][j], z );
+            }
+
+            if( F[i][j].size() > best )
+            {
+                //we can get better result
+                //using F[i][best_x] + F[best_x+1][j]
+                F[i][j] = F[i][best_x];
+                F[i][j] += F[best_x + 1][j];
+            }
+
+        } //end for(i)
+
+    } //end for(l)
+
+    return F[0][s.size() - 1];
+}
+\end{lstlisting}
