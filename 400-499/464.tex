@@ -29,6 +29,27 @@ Same with other integers chosen by the first player, the second player will alwa
 
 \subsection{Depth First Search}
 
+There are two facts we can directly use: Suppose $z$ is the he total summation by adding 1 to $x$, i.e., $z=\sum\limits_{i=1}^{x} i$;
+
+\begin{itemize}
+\item If $z$ smaller than the desired total $y$, nobody can win.
+\item If $z$ is equal to $y$, the first player can win only if there are odd numbers of integers, i.e. $x$ is a odd number.
+\end{itemize}
+
+When $z$ is larger than $y$, we make use of DFS approach
+
+\begin{enumerate}
+\item Since there are no larger than 20 numbers, we can use bit operation to represent current numbers that first player has selected.
+\item Starting from the first player, we try each number $n$ from 1 to $x$. When $n$ is not selected by the first player
+\begin{itemize}
+\item If the remaining total is no larger than $n$, the first player can select $n$ to win the game.
+\item Otherwise, let first player select $n$ by marking the bit $n$ as 1, and decreased the desired total by $n$. 
+\item Next time is second player to choose the number, the recursive function will be called again. If the result is \lstinline[language=C++, basicstyle=\small\ttfamily, keywordstyle=\bfseries\color{green!40!black}]|false|, we know that second player lose the game. Hence, we return \lstinline[language=C++, basicstyle=\small\ttfamily, keywordstyle=\bfseries\color{green!40!black}]|true| here for first player.
+\item Finally, if no any choice can result first player win, we return \lstinline[language=C++, basicstyle=\small\ttfamily, keywordstyle=\bfseries\color{green!40!black}]|false| here for first player.
+\end{itemize}
+\end{enumerate}
+
+
 \setcounter{lstlisting}{0}
 \begin{lstlisting}[style=customc, caption={Depth First Search}]
 bool canIWin( int maxChoosableInteger, int desiredTotal )
