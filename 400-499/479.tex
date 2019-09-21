@@ -24,6 +24,15 @@ Since the result could be very large, you should return the largest palindrome m
 
 \subsection{Try All From Largest}
 
+We can try each number from $10 ^{n-1}$ until $10^{n}-1$. To speed the process, we can try from the largest number until smallest one.
+
+For current number $x$
+\begin{enumerate}
+\item generate a palindrome number, $z$, from $x$.
+\item Search in $[10^{n-1}, 10^n-1]$ to see if there exits a number $y$ such that $z$ is the multiple of $y$. If it is, we know $z$ is the answer.
+\item To find $y$, we still test each number starting from the largest one, i.e. $10^n-1$, until we have $y\times y < z$. Because after that, $y < z/y$ and we just repeat the process.
+\end{enumerate}
+
 \setcounter{lstlisting}{0}
 \begin{lstlisting}[style=customc, caption={Try All From Largest}]
 int largestPalindrome( int n )
@@ -58,7 +67,7 @@ int largestPalindrome( int n )
         //since we test starting from the larger number
         //we should stop when y^2 >= z since after that
         //y will be smaller than z/y, it will repeat
-        //so y >= z/y ==> y ^2 >=z
+        //so y >= z/y ==> y^2 >=z
         for( long long y = r; y * y >= z; --y )
         {
             if( ( z % y ) == 0 )

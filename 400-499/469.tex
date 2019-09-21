@@ -1,0 +1,48 @@
+\section{469 --- Convex Polygon}
+Given a list of points that form a polygon when joined sequentially, find if this polygon is convex (Convex polygon definition).
+
+
+\paragraph{Note:}
+
+\begin{itemize}
+\item There are at least 3 and at most 10,000 points.
+\item Coordinates are in the range $-10,000$ to 10,000.
+\item You may assume the polygon formed by given points is always a simple polygon (Simple polygon definition). In other words, we ensure that exactly two edges intersect at each vertex, and that edges otherwise don't intersect each other.
+
+\end{itemize}
+
+\paragraph{Example 1:}
+
+\begin{flushleft}
+\textbf{Input}: [[0,0],[0,1],[1,1],[1,0]]
+
+\begin{figure}[H]
+\begin{tikzpicture}[thick]
+\draw[fill=green!60!white!] (0,0) rectangle ++(3,3);
+\end{tikzpicture}
+\end{figure}
+
+
+\textbf{Output}: \texttt{True}
+\end{flushleft}
+
+
+\paragraph{Example 2:}
+
+\textbf{Input}: $[[0,0],[0,10],[10,10],[10,0],[5,5]]$
+
+\textbf{Output}: \texttt{False}
+
+\textbf{Explanation}:
+
+\begin{figure}[H]
+\begin{tikzpicture}[thick]
+\draw[fill=red!60!white] (0,0) -- (0,3) -- (3,3) --(3,0) -- (1.5,1.5) -- (0,0);
+\end{tikzpicture}
+\end{figure}
+
+\subsection{Normal Vector}
+
+
+
+

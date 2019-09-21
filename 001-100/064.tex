@@ -1,0 +1,66 @@
+\section{64 --- Minimum Path Sum}
+Given a $m \times n$ grid filled with non-negative numbers, find a path from top left to bottom right which minimizes the sum of all numbers along its path.
+
+Note: You can only move either down or right at any point in time.
+
+\paragraph{Example:}
+\begin{flushleft}
+
+
+\textbf{Input}:
+\[
+\begin{bmatrix}
+1 & 3 & 1\\
+1 & 5 & 1\\
+4 & 2 & 1
+\end{bmatrix}
+\]
+
+\textbf{Output}: 7
+
+\textbf{Explanation}: Because the path $1\to 3 \to 1 \to 1 \to 1$ minimizes the sum.
+
+
+\end{flushleft}
+
+\subsection{Dynamic Programming 2D}
+Suppose $F[i][j]$ is the minimum sum of the path from the index $(i,j)$ to the bottom rightmost element. 
+
+We start by initializing the bottom rightmost element of $F$ as the last element of the given matrix. Then for each element starting from the bottom right, we traverse backwards and fill in the matrix with the required minimum sums. 
+
+Now, we need to note that at every element, we can move either rightwards or downwards. Therefore, for filling in the minimum sum, we use the equation: $F[i][j] = G[i][j] + \min(F[i+1][j], F[i][j+1])$.
+
+\setcounter{lstlisting}{0}
+\begin{lstlisting}[style=customc, caption={2D DP}]
+int minPathSum( vector<vector<int>>& grid )
+{
+    auto M = grid.size();
+    auto N = grid[0].size();
+
+    vector<vector<int>> F( M, vector<int>( N, 0 ) );
+
+    F[M - 1][N - 1] = grid[M - 1][N - 1];
+    //fill the right column
+    for( size_t r = M - 1; r >= 1; --r )
+    {
+        F[r - 1][N - 1] = F[r][N - 1] + grid[r - 1][N - 1];
+    }
+    //fill the last row
+    for( size_t c = N - 1; c >= 1; --c )
+    {
+        F[M - 1][c - 1] = F[M - 1][c] + grid[M - 1][c - 1];
+    }
+    //Fill DP from bottom right to to left
+    for( size_t r = M - 1; r >= 1; --r )
+    {
+        for( size_t c = N - 1; c >= 1; --c )
+        {
+            //current value plus minimum of
+            //its right and down neighbors
+            F[r - 1][c - 1] = grid[r - 1][c - 1] + ( min )( F[r][c - 1], F[r - 1][c] );
+        }
+    }
+
+    return F[0][0];
+}
+\end{lstlisting}

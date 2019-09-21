@@ -53,8 +53,11 @@ The idea is, if we know the max number of unique substrings in $p$ ends with $a,
 \begin{lstlisting}[style=customc, caption={Dynamic Programming}]
 int findSubstringInWraproundString( string p )
 {
+	//the maximum contiguous substring length 
+	//ending in each letter.
     int count[26] = {0};
 
+	//current contiguous substring length
     int x = 1;
 
     for( size_t i = 0; i < p.size(); ++i )
@@ -70,10 +73,16 @@ int findSubstringInWraproundString( string p )
 
             if( next == ci )
             {
-                ++x; //increments the contiguous substring length
+				//last letter and current letter
+				//is contiguous
+				//increments the contiguous substring length
+				//ending in current letter
+                ++x; 
             }
             else
             {
+				//reset the contiguous substring length
+				//ending in current letter
                 x = 1;
             }
         }
