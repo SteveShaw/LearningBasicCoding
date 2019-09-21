@@ -64,3 +64,76 @@ int minPathSum( vector<vector<int>>& grid )
     return F[0][0];
 }
 \end{lstlisting}
+
+\subsection{Dynamic Programming 1D}
+ Instead of using a 2D matrix for $F$, we can do the same work using an array of the column size as $F$, since for making the current entry all we need is the $F$ entry for the bottom and the right element. 
+
+Thus, we start by initializing only the last element of the array as the last element of the given matrix. The last entry is the bottom rightmost element of the given matrix. Then, we start moving towards the left and update the entry $F[j]$ as: $F[j] = G[i][j] + \min(F[j], F[j+1])$. We repeat the same process for every row as we move upwards. At the end $F[0]$ gives the required minimum sum.
+
+\begin{lstlisting}[style=customc, caption={1D DP}]
+int minPathSum( vector<vector<int>>& grid )
+{
+    auto M = grid.size();
+    auto N = grid[0].size();
+
+    vector<int> F( N, 0 );
+    //initially, the last item of F
+    //is the bottom right of grid
+    F.back() = grid[M - 1][N - 1];
+
+    //fill last row
+    for( size_t c = N - 1; c >= 1; --c )
+    {
+        F[c - 1] = grid[M - 1][c - 1] + F[c];
+    }
+
+    //fill from bottom right to top left
+    for( size_t r = M - 1; r >= 1; --r )
+    {
+        //update F[N-1] since this is
+        //the first item we need to update
+        //at current row
+        F[N - 1] += grid[r - 1][N - 1];
+
+        for( size_t c = N - 1; c >= 1; --c )
+        {
+            F[c - 1] = grid[r - 1][c - 1] + ( min )( F[c], F[c - 1] );
+        }
+    }
+    return F[0];
+}
+\end{lstlisting}
+
+\subsection{Dynamic Programming Without Extra Space}
+Instead of using another 2D array as $F$, we can store the minimum sums in the original matrix itself, since we need not retain the original matrix here. Thus, the governing equation now becomes:
+
+\[
+G[i][j] = G[i][j] + \min(G[i+1][j], G[i][j+1])
+\]
+
+\begin{lstlisting}[style=customc, caption={DP Without Extra Space}]
+int minPathSum( vector<vector<int>>& grid )
+{
+    auto M = grid.size();
+    auto N = grid[0].size();
+    //update last row
+    for( size_t c = N - 1; c >= 1; --c )
+    {
+        grid[M - 1][c - 1] += grid[M - 1][c];
+    }
+    //update last column
+    for( size_t r = M - 1; r >= 1; --r )
+    {
+        grid[r - 1][N - 1] += grid[r][N - 1];
+    }
+    //update from bottom right to top left
+    for( size_t r = M - 1; r >= 1; --r )
+    {
+        for( size_t c = N - 1; c >= 1; --c )
+        {
+            grid[r - 1][c - 1] += ( min )( grid[r - 1][c], grid[r][c - 1] );
+        }
+    }
+    return grid[0][0];
+}
+\end{lstlisting}

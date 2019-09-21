@@ -1,0 +1,94 @@
+\section{68 --- Text Justification}
+Given an array of words and a width \fcj{maxWidth}, format the text such that each line has exactly \fcj{maxWidth} characters and is fully (left and right) justified.
+
+You should pack your words in a greedy approach; that is, pack as many words as you can in each line. Pad extra spaces \fcj{' '} when necessary so that each line has exactly \fcj{maxWidth} characters.
+
+Extra spaces between words should be distributed as evenly as possible. If the number of spaces on a line do not divide evenly between words, the empty slots on the left will be assigned more spaces than the slots on the right.
+
+For the last line of text, it should be left justified and no extra space is inserted between words.
+
+\paragraph{Note:}
+
+\begin{itemize}
+\item A word is defined as a character sequence consisting of non-space characters only.
+
+\item Each word's length is guaranteed to be greater than 0 and not exceed \fcj{maxWidth}.
+
+\item The input array \fcj{words} contains at least one word.
+
+\end{itemize}
+
+\paragraph{Example 1:}
+\begin{flushleft}
+
+
+\textbf{Input}:
+
+\fcj{words = ["This", "is", "an", "example", "of", "text", "justification."]}
+
+\fcj{maxWidth = 16}
+
+\textbf{Output}:
+
+\begin{lstlisting}[style=customc]
+[
+   "This    is    an",
+   "example  of text",
+   "justification.  "
+]
+\end{lstlisting}
+\end{flushleft}
+
+\paragraph{Example 2:}
+\begin{flushleft}
+
+\textbf{Input}:
+
+\fcj{words = ["What","must","be","acknowledgment","shall","be"]}
+
+\fcj{maxWidth = 16}
+
+\textbf{Output}:
+\begin{lstlisting}[style=customc]
+[
+  "What   must   be",
+  "acknowledgment  ",
+  "shall be        "
+]
+\end{lstlisting}
+
+\textbf{Explanation}: 
+
+Note that the last line is \fcj{"shall be    "} instead of \fcj{"shall     be"},
+
+because the last line must be left-justified instead of fully-justified.
+
+Note that the second line is also left-justified becase it contains only one word.
+
+\end{flushleft}
+
+\paragraph{Example 3:}
+\begin{flushleft}
+
+
+\textbf{Input}:
+\begin{lstlisting}[style=customc]
+words = ["Science","is","what","we","understand","well","enough","to",
+"explain", "to","a","computer.",
+"Art","is","everything","else","we","do"]
+\end{lstlisting}
+
+\fcj{maxWidth = 20}
+
+\textbf{Output}:
+\begin{lstlisting}[style=customc]
+[
+  "Science  is  what we",
+  "understand      well",
+  "enough to explain to",
+  "a  computer.  Art is",
+  "everything  else  we",
+  "do                  "
+]
+\end{lstlisting}
+\end{flushleft}

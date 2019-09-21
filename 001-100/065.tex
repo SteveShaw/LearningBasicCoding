@@ -1,0 +1,48 @@
+\section{65 --- Valid Number}
+Validate if a given string can be interpreted as a decimal number.
+
+\paragraph{Some examples:}
+
+\begin{flushleft}
+
+
+\fcc{"0" => true}
+
+\fcc{" 0.1 " => true}
+
+\fcc{"abc" => false}
+
+\fcc{"1 a" => false}
+
+\fcc{"2e10" => true}
+
+\fcc{" -90e3   " => true}
+
+\fcc{" 1e" => false}
+
+\fcc{"e3" => false}
+
+\fcc{" 6e-1" => true}
+
+\fcc{" 99e2.5 " => false}
+
+\fcc{"53.5e93" => true}
+
+\fcc{" --6 " => false}
+
+\fcc{"-+3" => false}
+
+\fcc{"95a54e53" => false}
+
+\end{flushleft}
+
+\paragraph{Note:} 
+
+It is intended for the problem statement to be ambiguous. You should gather all requirements up front before implementing one. However, here is a list of characters that can be in a valid decimal number:
+
+\begin{itemize}
+\item Numbers 0-9
+\item Exponent - \fcc{"e"}
+\item Positive/negative sign \fcc{- "+"/"-"}
+\item Decimal point - \fcc{"."}
+\end{itemize}
