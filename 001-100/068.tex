@@ -92,3 +92,139 @@ words = ["Science","is","what","we","understand","well","enough","to",
 ]
 \end{lstlisting}
 \end{flushleft}
+
+\subsection{Greedy}
+The algorithm can be divided into three steps:
+\begin{enumerate}
+\item Check if current word can be added into current line
+\item Determine how many spaces we need to insert
+\item Process the last line.
+\end{enumerate}
+
+We make use of an array $T$ to record added words.
+
+To check if current word can be added to $T$
+\begin{itemize}
+\item Get total characters $x$ By assuming insert only one space between words in $T$ and current word.
+\item If $x < L$ ($L$ is \fcj{maxWidth}), we add current word into $T$. Otherwise, we pad all the words in $T$ with spaces.
+\end{itemize}
+
+To pad the words in $T$, 
+\begin{enumerate}
+\item Get total length of all words, say $\ell$, in $T$.
+\item Get number of words in $T$, say $y$.
+\item The average number of spaces, say, $z$, inserted between two consecutive words are $\ell/(y-1)$.
+\item The extra spaces, say $r$, will be $\bmod(\ell, y-1)$.
+\item To greedily used extra spaces, for the first $r+1$ words, the inserted spaces between two consecutive ones are $ z + 1$
+\end{enumerate}
+
+If there is only word in $T$, we just print the word and pad with required spaces.
+
+\setcounter{lstlisting}{0}
+\begin{lstlisting}[style=customc, caption={Greedy}]
+vector<string> fullJustify( vector<string>& words, int maxWidth )
+{
+    size_t L = static_cast< size_t >( maxWidth );
+    //record selected word in current line
+    vector<string_view> text;
+    //total length of selected word in current line
+    size_t text_len = 0;
+
+    vector<string> ans;
+
+    for( const auto& word : words )
+    {
+        //assume we put only one space between already selected words
+        //and this word, we may need <text.size() - 1 + 1 = text.size()> spaces
+        auto spaces = text.size();
+        //check if we can select <word>
+        if( text_len + spaces + word.size() <= L )
+        {
+            //add <word> into current line <text>
+            text.emplace_back( word.c_str(), word.size() );
+            //update <text_len>
+            text_len += word.size();
+        }
+        else
+        {
+            //we will arrange current line <text>
+            string line = gen_line( text, text_len, L );
+            ans.push_back( "" );
+            ans.back().swap( line );
+
+            //remove all current words in the <text>
+            text.clear();
+            //add current word
+            text.emplace_back( word.c_str(), word.size() );
+            //reset total length of selected words
+            text_len = word.size();
+        }
+    }//end for(word)
+
+    //add final line
+    string line;
+    line.reserve( L );
+
+    //we add each word plus one space
+    auto spaces = L - text_len;
+
+    for( size_t i = 0; i < text.size() - 1; ++i )
+    {
+        line += text[i];
+        line.append( 1, ' ' );
+        --spaces;
+    }
+    //add last word
+    line += text.back();
+    if( spaces )
+    {
+        //pad spaces
+        line.append( spaces, ' ' );
+    }
+
+    ans.emplace_back( line );
+    return ans;
+}
+//helper function to generate left justified line
+string gen_line( vector<string_view>& text, size_t text_len, size_t L )
+{
+    //the required spaces to be inserted
+    auto spaces = L - text_len;
+
+    string line;
+    line.reserve( L );
+
+    if( text.size() == 1 )
+    {
+        //we only have one word in this line
+        //just add the word and required spaces
+        line += text[0];
+        line.append( spaces, ' ' );
+
+        return line;
+    }
+    //the number of spaces between two words
+    auto sep_spaces = spaces / ( text.size() - 1 );
+    //the number of extra spaces will put in the front of line
+    auto extra_spaces = spaces - sep_spaces * ( text.size() - 1 );
+
+    for( size_t i = 0; i < text.size() - 1; ++i )
+    {
+        line += text[i];
+        auto insert_spaces = sep_spaces;
+        if( extra_spaces )
+        {
+            //we insert one more space
+            //to consume extra spaces
+            ++insert_spaces;
+            --extra_spaces;
+        }
+        line.append( insert_spaces, ' ' );
+    }
+
+    //add final word
+    line += text.back();
+
+    return line;
+}
+\end{lstlisting}

@@ -1,0 +1,62 @@
+\section{70 --- Climbing Stairs}
+You are climbing a stair case. It takes n steps to reach to the top.
+
+Each time you can either climb 1 or 2 steps. In how many distinct ways can you climb to the top?
+
+Note: Given $n$ will be a positive integer.
+
+Example 1:
+
+\begin{flushleft}
+\textbf{Input}: 2
+
+\textbf{Output}: 2
+
+\textbf{Explanation}: There are two ways to climb to the top.
+
+\begin{enumerate}
+\item 1 step $+$ 1 step
+\item 2 steps
+\end{enumerate}
+\end{flushleft}
+
+\paragraph{Example 2:}
+
+\begin{flushleft}
+\textbf{Input}: 3
+
+\textbf{Output}: 3
+
+\textbf{Explanation}: There are three ways to climb to the top.
+
+\begin{enumerate}
+\item 1 step $+$ 1 step + 1 step
+\item 1 step $+$ 2 steps
+\item 2 steps $+$ 1 step
+\end{enumerate}
+\end{flushleft}
+
+\subsection{Fibonacci Number}
+This is actually a Fibonacci Number.
+
+\setcounter{lstlisting}{0}
+\begin{lstlisting}[style=customc, caption={Dynamic Programming}]
+int climbStairs( int n )
+{
+    if( n <= 2 )
+    {
+        return n;
+    }
+
+    int x1 = 1;
+    int x2 = 2;
+
+    for( int i = 3; i <= n; ++i )
+    {
+        int x3 = x1 + x2;
+        x1 = x2;
+        x2 = x3;
+    }
+    return x2;
+}
+\end{lstlisting}

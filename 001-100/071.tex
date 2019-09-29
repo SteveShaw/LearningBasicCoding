@@ -1,0 +1,128 @@
+\section{71 --- Simplify Path}
+Given an absolute path for a file (Unix-style), simplify it. Or in other words, convert it to the canonical path.
+
+In a UNIX-style file system, a period \fcj{.} refers to the current directory. Furthermore, a double period \fcj{..} moves the directory up a level.
+
+Note that the returned canonical path must always begin with a slash \fcj{/}, and there must be only a single slash \fcj{/} between two directory names. The last directory name (if it exists) must not end with a trailing \fcj{/}. Also, the canonical path must be the shortest string representing the absolute path.
+ 
+
+\paragraph{Example 1:}
+
+\begin{flushleft}
+\textbf{Input}: \fcj{"/home/"}
+
+\textbf{Output}: \fcj{"/home"}
+
+\textbf{Explanation}: Note that there is no trailing slash after the last directory name.
+\end{flushleft}
+
+\paragraph{Example 2:}
+\begin{flushleft}
+\textbf{Input}: \fcj{"/../"}
+
+\textbf{Output}: \fcj{"/"}
+
+\textbf{Explanation}: Going one level up from the root directory is a no-op, as the root level is the highest level you can go.
+\end{flushleft}
+\paragraph{Example 3:}
+\begin{flushleft}
+
+
+\textbf{Input}: \fcj{"/home//foo/"}
+
+\textbf{Output}: \fcj{"/home/foo"}
+
+\textbf{Explanation}: In the canonical path, multiple consecutive slashes are replaced by a single one.
+\end{flushleft}
+\paragraph{Example 4:}
+\begin{flushleft}
+
+
+\textbf{Input}: \fcj{"/a/./b/../../c/"}
+
+\textbf{Output}: \fcj{"/c"}
+\end{flushleft}
+
+\paragraph{Example 5:}
+
+\begin{flushleft}
+Input: \fcj{"/a/../../b/../c//.//"}
+
+Output: \fcj{"/c"}
+\end{flushleft}
+
+\paragraph{Example 6:}
+
+\begin{flushleft}
+\textbf{Input}: \fcj{"/a//b////c/d//././/.."}
+
+\textbf{Output}: \fcj{"/a/b/c"}
+\end{flushleft}
+
+\subsection{Iterative Parsing}
+\begin{itemize}
+\item The separator is \fcj{'/'}. We can treat whole path are comprised of multiple substrings between \fcj{'/'}.
+\item If there is only \fcj{'.'} between two \fcj{'/'}, we just ignore it.
+\item If there is \fcj{'..'} between two \fcj{'/'}, we delete the last path name.
+\end{itemize}
+
+Thus, we make use of a stack to push found path name between two \fcj{'/'}. 
+
+\setcounter{lstlisting}{0}
+\begin{lstlisting}[style=customc, caption={Stack}]
+string simplifyPath( string path )
+{
+    string_view sv_path( path.c_str(), path.size() );
+    vector<string_view> groups;
+    size_t start = 0;
+    while( start < sv_path.size() )
+    {
+        auto p = start;
+        //find next '/'
+        while( ( start < sv_path.size() ) && ( sv_path[start] != '/' ) )
+        {
+            ++start;
+        }
+        if( p == start )
+        {
+            //no sub path
+            ++start;
+            continue;
+        }
+        if( ( start == p + 1 ) && ( sv_path[p] == '.' ) )
+        {
+            //current directory (one period)
+            //ignore
+            ++start;
+            continue;
+        }
+        auto sub_path = sv_path.substr( p, start - p );
+        if( sub_path == ".." )
+        {
+            //go to up level
+            //pop up last path
+            if( !groups.empty() )
+            {
+                groups.pop_back();
+            }
+        }
+        else
+        {
+            //this is a sub path name
+            //save it
+            groups.push_back( sub_path );
+        }
+    }
+    if( groups.empty() )
+    {
+        return "/";
+    }
+    string ans;
+    for( const auto& sub_path : groups )
+    {
+        ans.push_back( '/' );
+        ans += sub_path;
+    }
+    return ans;
+}
+\end{lstlisting}

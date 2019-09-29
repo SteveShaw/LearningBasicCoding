@@ -1,0 +1,70 @@
+\section{69 --- Sqrt(x)}
+Implement \fcc{int sqrt(int x)}.
+
+Compute and return the square root of $x$, where $x$ is guaranteed to be a non-negative integer.
+
+Since the return type is an integer, the decimal digits are truncated and only the integer part of the result is returned.
+
+\paragraph{Example 1:}
+
+\begin{flushleft}
+\textbf{Input}: 4
+
+\textbf{Output}: 2
+\end{flushleft}
+
+\paragraph{Example 2:}
+
+\begin{flushleft}
+\textbf{Input}: 8
+
+\textbf{Output}: 2
+
+\textbf{Explanation}: 
+
+The square root of 8 is $2.82842\ldots$, and since the decimal part is truncated, 2 is returned.
+\end{flushleft}
+
+\subsection{Binary Search}
+For $x \ge 2$, the square root is always smaller than $x / 2$ and larger than 0: $0 < a < x / 2$.
+
+Since $a$ is an integer, the problem goes down to the iteration over the sorted set of integer numbers. Here the binary search enters the scene.
+
+We can use a leftmost binary search to find the square root
+
+\setcounter{lstlisting}{0}
+\begin{lstlisting}[style=customc, caption={Binary Search}]
+int mySqrt( int x )
+{
+    if( x < 2 )
+    {
+        return x;
+    }
+    //the square root
+    //is in [2, x/2]
+    int l = 2;
+    int r = x / 2 + 1;
+    //leftmost binary search
+    while( l < r )
+    {
+        auto mid = static_cast<long long>( ( l + r ) / 2 );
+
+        if( mid * mid < x )
+        {
+            l = mid + 1;
+        }
+        else
+        {
+            r = mid;
+        }
+    }
+    //check if l*l=x
+    auto y = static_cast<long long>( l );
+    if( y * y == x )
+    {
+        return l;
+    }
+    //return the previous one
+    return l - 1;
+}
+\end{lstlisting}
