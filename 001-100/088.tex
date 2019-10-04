@@ -15,33 +15,45 @@ $B = [2,5,6]$, $n = 3$
 \\
 \textbf{Output}: $[1,2,2,3,5,6]$
 \end{flushleft}
-\subsection{Analysis}
-\begin{CJK*}{UTF8}{gbsn}
+\subsection{Two Pointers Copy From End}
 由于合并后$A$数组的大小必定是$m+n$，所以从最后面开始往前赋值，先比较$A$和$B$中最后一个元素的大小，把较大的那个插入到$m+n-1$的位置上，再依次向前处理。如果当$A$循环结束，$B$中还有元素没加入$A$，则把$B$中剩下的数fill到$A$中剩下的位置。否则的话，意味着A中剩下的元素保持位置不变，不做任何处理。
-\end{CJK*}
-\subsubsection{Code}
-\setcounter{algorithm}{0}
-\begin{algorithm}[H]
-\caption{Reversed Fill}
-\begin{algorithmic}[1]
-\Procedure{Merge}{$A, n, B, m$}
-\State $k:=n+m-1$
-\State $\alpha:=n-1, \beta=m-1$
-\While{$\alpha \geq 0$ \textbf{and} $\beta \geq 0$}
-\If{$A[\alpha] \leq B[\beta]$}
-\State $A[k]\gets B[\beta]$
-\State $\beta\gets \beta-1$ \Comment Move $\beta$ 
-\Else
-\State $A[k]\gets A[\alpha]$
-\State $\alpha\gets \alpha-1$ \Comment Move $\alpha$ 
-\EndIf
-\State $k\gets k-1$ \Comment Decrements the merged position
-\EndWhile
-\While{$\beta \geq 0$} \Comment $B$ still have elements remains
-\State $A[k]\gets B[\beta]$
-\State $\beta\gets \beta-1$
-\State $k\gets k-1$
-\EndWhile
-\EndProcedure
-\end{algorithmic}
-\end{algorithm}
+
+\setcounter{lstlisting}{0}
+\begin{lstlisting}[style=customc, caption={Two Pointers}]
+void merge( vector<int>& nums1, int m, vector<int>& nums2, int n )
+{
+    //index to nums1
+    int p1 = m - 1;
+    //index to nums2
+    int p2 = n - 1;
+    //the positin to copy in nums1
+    int p = m + n - 1;
+    //copy from end
+    while( ( p1 >= 0 ) && ( p2 >= 0 ) )
+    {
+        if( nums1[p1] < nums2[p2] )
+        {
+            //copy nums2[p2] to nums1[p]
+            nums1[p] = nums2[p2];
+            --p2;
+        }
+        else
+        {
+            //copy nums1[p1] to nums1[p]
+            nums1[p] = nums1[p1];
+            --p1;
+        }
+        --p;
+    }
+    //when nums2 has not completely
+    //copied yet, copy remainings
+    //we don't need to copy nums1 remainings
+    //because they are already at their positions
+    while( p2 >= 0 )
+    {
+        nums1[p] = nums2[p2];
+        --p;
+        --p2;
+    }
+}
+\end{lstlisting}

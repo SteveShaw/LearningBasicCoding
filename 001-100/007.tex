@@ -33,52 +33,66 @@ Given a 32-bit signed integer $x$, reverse digits of an integer.
 
 \subsection{Pop and Push Digits And Check before Overflow}
 We can build up the reverse integer one digit at a time. While doing so, we can check beforehand whether or not appending another digit would cause overflow.
-\begin{itemize}
-	\item We want to repeatedly \textbf{pop} the last digit off of $x$ and \textbf{push} it to the back of the result number $y$. In the end, $y$ will be the reverse of the $x$.
-	\item To \textbf{pop} and \textbf{push} digits without the help of some auxiliary stack/array
-	\begin{itemize}
-		\item \textbf{pop}: 
-		
-		\begin{align*}
-			z &= x \bmod 10 \\
-			x &= \frac{x}{10}
-		\end{align*}
-		
-		\item \textbf{push}:
-		\begin{align*}
-			t &= y \times 10 + z \\
-			y &= t
-		\end{align*}
-	\end{itemize}
-	\item However, $t$ could be overflow, Suppose $I$ is the maximum value represented by integer type.
-	\begin{enumerate}
-		\item if $t = y \times 10 + z$ has overflow, it must be $y \geq \dfrac{I}{10}$
-		\item if $y > \dfrac{I}{10} $, $t$ will be overflow for sure.
-		\item if $y = \dfrac{I}{10}$, $t$ will be overflow $\iff z > 7$, because $I = 2^{31} - 1 = 2147483647$
-	\end{enumerate}
-	\item similar when $t$ is underflow, and the minimum value represented by integer type is $J = -2^{31} = -2147483648$
-\end{itemize}
 
-\setcounter{algorithm}{0}
-\begin{algorithm}[H]
-	\caption{Reverse an integer}
-	\begin{algorithmic}[1]
-		\Procedure{ReverseInteger}{$x$}
-		\State $y:=0$ \Comment $y$ is the result of reverse
-		\State $y_0:= I/10$ \Comment threshold for $y$ to avoid overflow
-		\State $y_1:= J/10$ \Comment threshold for $y$ to avoid underflow
-		\While{$x \neq 0$}
-		\State $z := x \bmod 10$
-		\State $x = x/10$
-		\If{$y > y_0$ \textbf{or} ($y=y_1$ \textbf{and} $z > 7$)} \Comment overflow
-		\State \Return 0
-		\ElsIf{$y < y_1$ \textbf{or} ($y=y_1$ \textbf{and} $z < -8$)} \Comment underflow
-		\State \Return 0
-		\Else
-		\State $y\gets y\times 10 + z$
-		\EndIf
-		\EndWhile
-		\State \Return $y$
-		\EndProcedure
-	\end{algorithmic}
-\end{algorithm}
+
+\setcounter{lstlisting}{0}
+\begin{lstlisting}[style=customc, caption={Check before over/underflow}]
+int reverse( int x )
+{
+    int n = x;
+    int res = 0;
+    //helper function to check if
+    //k is larger than INT_MAX
+    auto is_overflow = []( int k, int r, int thr ) -> bool
+    {
+        return ( k > thr ) || ( ( k == thr ) && ( r > 7 ) );
+    };
+    //helper function to check if
+    //k is smaller than INT_MIN
+    auto is_underflow = []( int k, int r, int thr ) -> bool
+    {
+        return ( k < thr ) || ( ( k == thr ) && ( r < -8 ) );
+    };
+    if( x > 0 )
+    {
+        //process positive number
+        //threshold
+        int thr = INT_MAX / 10;
+        while( n != 0 )
+        {
+            //get quotient q
+            //and remainder r
+            int q = n / 10;
+            int r = n - q * 10;
+            n = q;
+            //check if res will be larger than INT_MIN
+            if( is_overflow( res, r, thr ) )
+            {
+                return 0;
+            }
+            res = res * 10 + r;
+        }
+    }
+    else
+    {
+        //process negative number
+        //the threshold
+        int thr = INT_MIN / 10;
+        while( n != 0 )
+        {
+            //get quotient q
+            //and remainder r
+            int q = n / 10;
+            int r = n - q * 10;
+            n = q;
+            //check if res will be less than INT_MIN
+            if( is_underflow( res, r, thr ) )
+            {
+                return 0;
+            }
+            res = res * 10 + r;
+        }
+    }
+    return res;
+}
+\end{lstlisting}

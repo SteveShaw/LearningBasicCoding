@@ -10,34 +10,49 @@ Given $A = [1,1,1,2,2,3]$, Your function should return $5$, with the first five 
 \begin{flushleft}
 Given $A = [0,0,1,1,1,1,2,3,3]$, Your function should return 7, with the first seven elements of $A$ being modified to 0, 0, 1, 1, 2, 3 and 3 respectively. It does not matter what values are set beyond the returned length.
 \end{flushleft}
-\subsection{Swap And Linear Scanning}
-\begin{CJK*}{UTF8}{gbsn}
-这里需要一个counter来记录重复元素出现的次数。如果碰到不同的数字，把counter重新设为1。如果遇到重复的数字，需要首先检查这个counter，如果这个counter已经是2（如果进行推广，这里的2也可以换成任意指定的所允许的重复个数$k$）， 我们就跳过这个数字， 否则仍然保留这个数字。这里需要两个index $\alpha$和$\beta$，前者用于指定拷贝元素的位置，而后者则是扫描数组用的。
-\end{CJK*}
-\subsubsection{Code}
-Procedure \texttt{RemoveDuplicates} only keep $k$ duplicates for each unique number and remove others from input array $A$ with length $L$
-\setcounter{algorithm}{0}
-\begin{algorithm}[H]
-\caption{Linear Scanning}
-\begin{algorithmic}[1]
-\Procedure{RemoveDuplicates}{$A, L, k$}
-\State $\alpha:=1, \beta:=1$ 
-\State $\delta:=1$ \Comment The counter
-\While{$\beta < L$}
-\If{$A[\beta-1]\neq A[\beta]$} \Comment Found different number
-\State $\delta \gets 1$ \Comment Reset counter to 1
-\State $A[\alpha] \gets A[\beta]$ \Comment Copy to index $\alpha$
-\State $\alpha \gets \alpha +1$ \Comment Increments the copy index $\alpha$
-\Else
-\If{$\delta < k$} \Comment Has not yet reach the threshold $k$
-\State $\delta\gets \delta +1$
-\State $A[\alpha] \gets A[\beta]$ \Comment Copy to index $\alpha$
-\State $\alpha \gets \alpha +1$ \Comment Increments the copy index $\alpha$
-\EndIf
-\EndIf
-\State $\beta\gets \beta+1$
-\EndWhile
-\State \Return $\alpha$
-\EndProcedure
-\end{algorithmic}
-\end{algorithm}
+\subsection{Read And Write Pointers}
+这里需要一个counter来记录重复元素出现的次数。如果碰到不同的数字，把counter重新设为1。如果遇到重复的数字，需要首先检查这个counter，如果这个counter已经是2（如果进行推广，这里的2也可以换成任意指定的所允许的重复个数$k$）， 我们就跳过这个数字， 否则仍然保留这个数字。这里需要两个index:\fcj{write} and \fcj{read}，前者用于指定拷贝元素的位置，而后者则是扫描数组用的。
+
+\setcounter{lstlisting}{0}
+\begin{lstlisting}[style=customc, caption={Read And Write Pointers}]
+int removeDuplicates( vector<int>& nums )
+{
+    if( nums.empty() )
+    {
+        return 0;
+    }
+    //write index
+    int write = 0;
+    int n = static_cast<int>( nums.size() );
+    //count of duplicate numbers
+    int count = 1;
+    for( int read = 1; read < n; ++read )
+    {
+        if( nums[read] == nums[write] )
+        {
+            if( count == 1 )
+            {
+                //count is going to be 2
+                //so we can still keep nums[read]
+                //write to next index
+                ++write;
+                nums[write] = nums[read];
+                ++count;
+            }
+        }
+        else
+        {
+            //reset counter to 1
+            count = 1;
+            //write to next index
+            ++write;
+            nums[write] = nums[read];
+        }
+    }
+    //when read index is finished
+    //write index is in the final
+    //valid number.
+    //The length is write + 1
+    return write + 1;
+}
+\end{lstlisting}

@@ -1,0 +1,84 @@
+\section{76 --- Minimum Window Substring}
+Given a string $S$ and a string $T$, find the minimum window in $S$ which will contain all the characters in $T$ in complexity $O(n)$.
+
+\paragraph{Example:}
+
+\begin{flushleft}
+Input: 
+
+$S$: \fcj{"ADOBECODEBANC"} 
+$T$: \fcj{"ABC"}
+
+\textbf{Output}: \fcj{"BANC"}
+\end{flushleft}
+
+\paragraph{Note:}
+
+\begin{enumerate}
+\item If there is no such window in $S$ that covers all characters in $T$, return the empty string \fcj{""}.
+\item If there is such window, you are guaranteed that there will always be only one unique minimum window in $S$.
+\end{enumerate}
+
+
+\subsection{Sliding Window}
+In any sliding window based problem we have two pointers (indexes). A $r$ pointer whose job is to \textbf{expand} the current window and then we have the $l$ pointer whose job is to \textbf{contract} a given window. At any point in time only one of these pointers move and the other one remains fixed.
+
+The solution is pretty intuitive. We keep expanding the window by moving the $r$ pointer. When the window has all the \textbf{desired} characters, we contract (if possible) and update the smallest window until now.
+
+\setcounter{lstlisting}{0}
+\begin{lstlisting}[style=customc, caption={Sliding Window}]
+string minWindow( string s, string t )
+{
+    int ns = static_cast< int >( s.size() );
+    int nt = static_cast< int >( t.size() );
+    //the count of each character
+    vector<int> dict( 256, 0 );
+    for( char c : t )
+    {
+        dict[c] += 1;
+    }
+    //the left edge of sliding window
+    int left = 0;
+    //the smallest size of sliding window
+    int best = ns + 1;
+    //the left edge of smallest window
+    int best_left = -1;
+    //the count of characters in T
+    int count = 0;
+    for( int right = 0; right < ns; ++right )
+    {
+        auto c = s[right];
+        dict[c] -= 1;
+        if( dict[c] >= 0 )
+        {
+            //c is in T
+            //increments the count
+            ++count;
+        }
+        while( count == nt )
+        {
+            if( right - left + 1 < best )
+            {
+                //update minimum window
+                best = right - left + 1;
+                best_left = left;
+            }
+            c = s[left];
+            dict[c] += 1;
+            if( dict[c] > 0 )
+            {
+                //we have exclude a letter in T
+                --count;
+            }
+            ++left;
+        }
+    }
+    if( best_left < 0 )
+    {
+        //no such window exists
+        return "";
+    }
+    string ans( s, best_left, best );
+    return ans;
+}
+\end{lstlisting}

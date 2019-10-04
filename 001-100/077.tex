@@ -1,0 +1,66 @@
+\section{77 --- Combinations}
+Given two integers $n$ and $k$, return all possible combinations of $k$ numbers out of $1, 2, \ldots, n$.
+
+\paragraph{Example:}
+
+\begin{flushleft}
+\textbf{Input}: $n = 4$, $k = 2$
+
+\textbf{Output}:
+
+\[
+\begin{bmatrix}
+2 & 4\\
+3 & 4\\
+2 & 3\\
+1 & 2\\
+1 & 3\\
+1 & 4
+\end{bmatrix}
+\]
+\end{flushleft}
+
+\subsection{Backtracking}
+Typical backtrack algorithm.
+
+For this problem, we make use of a helper function to do backtracking. 
+
+\begin{enumerate}
+\item If the number of current selected integers is $k$, add these selections into output.
+\item Iterate over the integers from a start number $s$ to $n$.
+\item Add current integer $i$ into the current selected integers, say $A$.
+\item Recursively add more integers into $A$.
+\item Backtrack by removing $i$ from $A$.
+\end{enumerate}
+
+\setcounter{lstlisting}{0}
+\begin{lstlisting}[style=customc, caption={Backtracking}]
+vector<vector<int>> combine( int n, int k )
+{
+    vector<int> sels;
+    vector<vector<int>> ans;
+    //backtracking
+    dfs( 1, n, k, sels, ans );
+    return ans;
+}
+//backtracking helper function
+void dfs( int start, int n, size_t k, vector<int>& cur, vector<vector<int>>& ans )
+{
+    if( cur.size() == k )
+    {
+        //we have k numbers
+        //add to oo
+        ans.emplace_back( begin( cur ), end( cur ) );
+        return;
+    }
+    for( int i = start; i <= n; ++i )
+    {
+        //add i to selections
+        cur.push_back( i );
+        //go to next integer recursively
+        dfs( i + 1, n, k, cur, ans );
+        //backtrack
+        cur.pop_back();
+    }
+}
+\end{lstlisting}

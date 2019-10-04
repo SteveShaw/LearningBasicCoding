@@ -1,0 +1,117 @@
+\section{74 --- Search a 2D Matrix}
+Write an efficient algorithm that searches for a value in an $m \times n$ matrix $M$. This matrix has the following properties:
+
+Integers in each row are sorted from left to right.
+
+The first integer of each row is greater than the last integer of the previous row.
+
+\paragraph{Example 1:}
+\begin{flushleft}
+
+
+\textbf{Input}:
+
+\fcj{matrix}:
+
+\[
+\begin{bmatrix}
+1  &  3 &   5 &   7\\
+10 &  11 &  16 &  20\\
+23 &  30 &  34 &  50
+\end{bmatrix}
+\]
+
+\fcj{target}: 3
+
+Output: \fcj{true}
+
+\end{flushleft}
+
+\paragraph{Example 2:}
+\begin{flushleft}
+
+\textbf{Input}:
+
+\fcj{matrix}:
+
+\[
+\begin{bmatrix}
+1 &    3 &   5 &   7\\
+10 &  11 &  16 &  20\\
+23 &  30 &  34 &  50
+\end{bmatrix}
+\]
+
+\fcj{target}: 13
+
+\textbf{Output}: \fcj{false}
+
+\end{flushleft}
+
+\subsection{Binary Search}
+We can make use of two binary search (leftmost). First to locate the row that the target might be in, and the second one is to locate the target in the given row.
+
+\setcounter{lstlisting}{0}
+\begin{lstlisting}[style=customc, caption={Binary Search}]
+bool searchMatrix( vector<vector<int>>& matrix, int target )
+{
+    if( matrix.empty() || matrix[0].empty() )
+    {
+        return false;
+    }
+    auto M = matrix.size();
+    auto N = matrix[0].size();
+    //first to locate the row that the target might be in
+    size_t l = 0;
+    size_t r = M;
+    while( l < r )
+    {
+        auto mid = ( l + r ) / 2;
+        if( matrix[mid][0] < target )
+        {
+            l = mid + 1;
+        }
+        else
+        {
+            r = mid;
+        }
+    }
+    //determine if the row is vali
+    auto row = l;
+    if( ( row != M ) && ( matrix[row][0] == target ) )
+    {
+        //found the target
+        return true;
+    }
+    //this target is less than all the numbers in matrix
+    if( row == 0 )
+    {
+        return false;
+    }
+    //the last row is the possible one
+    --row;
+    //locate target in this given row
+    l = 0;
+    r = N;
+    while( l < r )
+    {
+        auto mid = ( l + r ) / 2;
+        if( matrix[row][mid] < target )
+        {
+            l = mid + 1;
+        }
+        else
+        {
+            r = mid;
+        }
+    }
+    auto col = l;
+    if( ( col != N ) && ( matrix[row][col] == target ) )
+    {
+        //found the target
+        return true;
+    }
+    //failed to find the target
+    return false;
+}
+\end{lstlisting}

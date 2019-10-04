@@ -19,81 +19,63 @@ You are given a target value $T$ to search. If found in the array return 1, othe
     \item This is a follow up problem to Search in Rotated Sorted Array, where $A$ may contain duplicates. Would this affect the run-time complexity? How and why?
 \end{itemize}
 \subsection{Binary Search And Linear Search}
-\begin{CJK*}{UTF8}{gbsn}
-主要的难点难点在于我们不知道原数组在哪旋转了，不过可以通过观察例子找出规律。 例如$A=(0, 1, 2, 4, 5, 6, 7)$ 共有下列七种旋转方法：
+这道是之前那道 \textbf{Search in Rotated Sorted Array} 的延伸，现在数组中允许出现重复数字，这个也会影响我们选择哪半边继续搜索，由于之前那道题不存在相同值，我们在比较中间值和最右值时就完全符合之前所说的规律：
 
-\begin{table}[H]
-\begin{tabular}{lllllll}
-0 & 1 & 2 & {\color{red} 4} & 5 & 6 & 7 \\
-7 & 0 & 1 & {\color{red} 2} & 4 & 5 & 6 \\
-6 & 7 & 0 & {\color{red} 1} & 2 & 4 & 5 \\
-5 & 6 & 7 & {\color{red} 0} & 1 & 2 & 4 \\
-4 & 5 & 6 & {\color{red} 7} & 0 & 1 & 2 \\
-2 & 4 & 5 & {\color{red} 6} & 7 & 0 & 1 \\
-1 & 2 & 4 & {\color{red} 5} & 6 & 7 & 0
-\end{tabular}
-\end{table}
-可以看到如果中间的数小于最右边的数，最小值在左半段，若中间数大于最右边数，则最小值就出现在右半段。因此首先用二分法寻找从左至右第一个最小值出现的位置。如果中间的数小于最右边的数，则在左半段寻找，这是右边界设为中间位置，若中间数大于最右边数，则在右半段寻找，这是左边界设置为中间位置加1。而如果可以有重复值，就会出现来面两种情况，$(3, 1, 1)$ 和 $(1,1,3,1)$，对于这两种情况中间值等于最右值时，目标值3既可以在左边又可以在右边，对于这种情况就要把右边界向左移动一位，如果还相同则继续移，直到移到不同值为止。
-\par
-但是这种方法找到的最小值是从左到右的第一个，但不是旋转发生的位置。例如$(1,1,1,3,1)$，从左到右的第一个最小值位置是0， 但是发生旋转的位置发生在4。这时候，我们需要从当前找到的位置向左移动，如果小于0，就从数组末尾开始左移，直到找到第一个不同于这个最小值的位置。这个位置往前加1就是旋转发生的地址。
-\par
-找到旋转发生的index，我们就知道了原数组每个元素在旋转后的数组中的位置。假设某个元素在原数组中的位置为$i$，旋转发生的位置为$t$，那么其在旋转后的数组中的位置就是$(i+t)\bmod L$。$L$是数组的长度。于是接着用leftmost binary search寻找是否存在目标值。
-\end{CJK*}
-\subsubsection{Code}
-Procedure \texttt{Search} search a target $T$ in a rotated sorted array $A$ with length $L$.
-\setcounter{algorithm}{0}
-\begin{algorithm}[H]
-\caption{Binary Search With Linear Search}
-\begin{algorithmic}[1]
-\Procedure{Search}{$A, L, T$}
-\State $l:=0, r:=L-1$ \Comment The binary seach left and right index
-\While{$l < r$}
-\State $m:=(l+r)/2$
-\If{$A[m] > A[r]$} \Comment The minimum value is in right hand
-\State $l\gets m+1$
-\ElsIf{$A[m] < A[r]$}
-\State $r \gets m$ \Comment The minimum value is in left hand
-\Else \Comment The middle value is same as the right value
-\State $r\gets r-1$ \Comment Decrements right index
-\EndIf
-\EndWhile
-\State $\alpha:= (l - 1 + L) \bmod L$ \Comment The index that rotation happens
-\While{$\alpha \neq l$}
-\If{$A[\alpha] \neq A[l]$}
-\State \texttt{break} \Comment Found the rotate position.
-\Else
-\State $\alpha \gets (\alpha-1+L)\bmod L$ \Comment Keep left shit
-\algstore{81algo}
-\end{algorithmic}
-\end{algorithm}
-\begin{algorithm}[H]
-\begin{algorithmic}[1]
-\algrestore{81algo}
-\EndIf
-\EndWhile
-\If{$\alpha = l$} \Comment All elements in $A$ are equal
-\If{$A[\alpha]=T$}
-\State \Return 1
-\Else
-\State \Return 0;
-\EndIf
-\EndIf
-\State $l\gets 0,\; r\gets L$ \Comment Prepare for leftmost binary search
-\While{$l< r$}
-\State $m:=(l+r)/2$
-\State $\hat{m}:=(m+\alpha)\bmod L$ \Comment The middle index in current rotated array
-\If{$A[\hat{m}] < T$} \Comment Search in right side of non-rotated array
-\State $l\gets m+1$
-\Else
-\State $r \gets m$ \Comment Search in left side of non-rotated array
-\EndIf
-\EndWhile
-\State $\hat{l}:=(l+\alpha)\bmod L$ \Comment $\hat{l}$ is the found index in current rotated array
-\If{$A[\hat{l}] = T$} \Comment $A[l]$ is the first element in non-rotated array no less than $T$
-\State \Return 1
-\Else
-\State \Return 0
-\EndIf
-\EndProcedure
-\end{algorithmic}
-\end{algorithm}
+如果中间的数小于最右边的数，则搜寻右半段，若中间数大于最右边数，则搜寻左半段。
+
+而如果可以有重复值，就会出现下面两种情况，\fcj{[3 1 1]} 和 \fcj{[1 1 3 1]}，对于这两种情况中间值等于最右值时，目标值3既可以在左边又可以在右边，对于这种情况其实处理非常简单，只要把最右值向左一位即可继续循环，如果还相同则继续移，直到移到不同值为止，然后其他部分还采用 \textbf{Search in Rotated Sorted Array} 中的方法。
+
+
+\setcounter{lstlisting}{0}
+\begin{lstlisting}[style=customc, caption={Binary Search}]
+bool search( vector<int>& nums, int target )
+{
+    int n = static_cast< int >( nums.size() );
+    int l = 0;
+    int r = n - 1;
+    while( l <= r )
+    {
+        auto mid = ( l + r ) / 2;
+        int vm = nums[mid];
+        if( vm == target )
+        {
+            return true;
+        }
+        if( vm < nums[r] )
+        {
+            //check in the right half
+            if( ( vm < target ) && ( nums[r] >= target ) )
+            {
+                //target in the [mid+1,r]
+                l = mid + 1;
+            }
+            else
+            {
+                //target in the [l,mid-1]
+                r = mid - 1;
+            }
+        }
+        else if( vm > nums[r] )
+        {
+            //check in the left half
+            if( ( vm > target ) && ( nums[l] <= target ) )
+            {
+                //target in the [l,mid-1]
+                r = mid - 1;
+            }
+            else
+            {
+                //target in the [mid+1,r]
+                l = mid + 1;
+            }
+        }
+        else
+        {
+            //duplicate number
+            //move back right
+            --r;
+        }
+    }
+    return false;
+}
+\end{lstlisting}

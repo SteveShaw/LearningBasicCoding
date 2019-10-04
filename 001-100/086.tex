@@ -46,40 +46,56 @@ You should preserve the original relative order of the nodes in each of the two 
 \end{figure}
 \end{flushleft}
 \subsection{Two Dummy Nodes Approach}
-\begin{CJK*}{UTF8}{gbsn}
-首先创建两个dummy node $\alpha$和$\beta$，其中一个是用于链接小于$x$的nodes， 另外一个用于链接大于$x$的nodes。然后遍历链表，每次完成所需的链接后，必须把链接的节点的\texttt{next}指针设为空。否则会造成无限循环。
-\end{CJK*}
-\subsubsection{Code}
-Procedure \texttt{Partition} arranges the input linked list $L$ per $x$
-\setcounter{algorithm}{0}
-\begin{algorithm}[H]
-\caption{Two Dummy Nodes Approach}
-\begin{algorithmic}[1]
-\Procedure{Partition}{$L, x$}
-\State Create $\alpha$ and $\beta$ as two nodes
-\State $H_{\alpha}:=\alpha,\; H_{\beta} := \beta$ \Comment Save the headers 
-\State $\ell:=L$
-\State $p:=\varnothing$ \Comment Helper pointer
-\algstore{86algo}
-\end{algorithmic}
-\end{algorithm}
-\begin{algorithm}[H]
-\begin{algorithmic}[1]
-\algrestore{86algo}
-\While{$\ell\neq \varnothing$}
-\If{$V(\ell) < x$}
-\State $\alpha_n\gets \ell$ \Comment Link node less than $x$
-\State $\alpha\gets \alpha_n$ \Comment Move forward to next in $\alpha$
-\Else
-\State $\beta_n\gets \ell$ \Comment Link node no less than $x$
-\State $\beta\gets \beta_n$ \Comment Move forward to next in $\beta$
-\EndIf
-\State $p\gets \ell$ \Comment Save current node to $p$
-\State $\ell\gets \ell_n$ \Comment Move to next in $L$
-\State $p_n\gets \varnothing$ \Comment Set current node's next pointer to empty
-\EndWhile
-\State $\alpha_n \gets (H_{\beta})_n$ \Comment Link $\alpha$ and $\beta$
-\State \Return $(H_{\alpha})_n$ \Comment The new linked list start from next of $\alpha$
-\EndProcedure
-\end{algorithmic}
-\end{algorithm}
+首先创建两个dummy node $\alpha$和$\beta$，其中一个是用于链接小于$x$的nodes， 另外一个用于链接大于$x$的nodes。然后遍历链表
+When found a node's value is less than $x$, link to $\alpha$. Otherwise, link it to $\beta$.
+
+\setcounter{lstlisting}{0}
+\begin{lstlisting}[style=customc, caption={Two Dummy Nodes}]
+ListNode* partition( ListNode* head, int x )
+{
+    if( !head )
+    {
+        return nullptr;
+    }
+    //create two headers
+    //alpha is used to link nodes with values < x
+    //beta is used to link nodes with values >= x
+    auto alpha = new ListNode( -1 );
+    auto beta = new ListNode( -2 );
+    //we need keep headers
+    //so use s and l to traverse alpha and beta
+    auto s = sh;
+    auto l = lh;
+    //traverse from head
+    auto node = head;
+    while( node )
+    {
+        if( node->val < x )
+        {
+            //link to alpha
+            s->next = node;
+            //move s to next
+            s = s->next;
+        }
+        else
+        {
+            //link to beta
+            l->next = node;
+            //move to next
+            l = l->next;
+        }
+        //move node to next
+        node = node->next;
+    }
+    //we will put alpha before beta
+    //set last node in beta's next node as null
+    l->next = nullptr;
+    //link last node of alpha to beta
+    s->next = lh->next;
+    lh->next = nullptr;
+    //return the next node of alpha
+    auto ans = sh->next;
+    sh->next = nullptr;
+    return ans;
+}
+\end{lstlisting}

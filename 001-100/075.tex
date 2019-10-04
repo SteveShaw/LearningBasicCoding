@@ -1,0 +1,75 @@
+\section{75 --- Sort Colors}
+Given an array with $n$ objects colored red, white or blue, sort them \textbf{in-place} so that objects of the same color are adjacent, with the colors in the order red, white and blue.
+
+Here, we will use the integers 0, 1, and 2 to represent the color red, white, and blue respectively.
+
+Note: You are not suppose to use the library's sort function for this problem.
+
+\paragraph{Example:}
+\begin{flushleft}
+
+\textbf{Input}: \fcj{[2,0,2,1,1,0]}
+
+\textbf{Output}: \fcj{[0,0,1,1,2,2]}
+\end{flushleft}
+
+\paragraph{Follow up:}
+
+\begin{itemize}
+\item Could you come up with a one-pass algorithm using only constant space?
+\end{itemize}
+
+\subsection{Dutch National Flag Problem}
+The problem is known as \textbf{Dutch National Flag Problem} and first was proposed by \textbf{Edsger W. Dijkstra}. The idea is to attribute a color to each number and then to arrange them following the order of colors on the Dutch flag.
+
+The approach makes use of three pointers (indexes) to track the rightmost boundary of zeros ($p_0$), the leftmost boundary of twos ($p_2$) and the current element under the consideration ($p_1$).
+
+The idea is to move $p_1$ along the array, if $A[p_1] = 0$, swap it with $A[p_0]$, and if $A[p_1] = 2$, swap it with $A[p_2]$.
+
+\begin{enumerate}
+\item Initialize the rightmost boundary of \textbf{zeros}: $p_0 = 0$. During the algorithm execution, $A[i < p_0] = 0$.
+
+\item Initialize the leftmost boundary of \textbf{twos}: $p_2 = n - 1$. During the algorithm execution, $A[i > p_2] = 2$.
+
+\item Initialise the index of current element to consider: $p_1 = 0$.
+
+\item The iteration will stop when $p_1 > p_2$. During the iterating $A$
+
+\begin{itemize}
+\item If $A[p_1] = 0$: swap $A[p_1]$ and $A[p_0]$ and move both pointers to the right.
+\item If $A[p_1] = 2$: swap $A[p_1]$ and $A[p_2]$ and move $p_2$ to the left.
+\item If $A[p_1] = 1$: move $p_1$ to the right.
+\end{itemize}
+\end{enumerate}
+
+\setcounter{lstlisting}{0}
+\begin{lstlisting}[style=customc, caption={One Pass}]
+void sortColors( vector<int>& nums )
+{
+    int n = static_cast<int>( nums.size() );
+    int p0 = 0;
+    int p1 = 0;
+    int p2 = n - 1;
+    while( p1 <= p2 )
+    {
+        if( nums[p1] == 0 )
+        {
+            swap( nums[p1], nums[p0] );
+            //move both p0 and p1 right
+            ++p0;
+            ++p1;
+        }
+        else if( nums[p1] == 2 )
+        {
+            swap( nums[p1], nums[p2] );
+            //only move left p2
+            --p2;
+        }
+        else
+        {
+            //only move p1 right
+            ++p1;
+        }
+    }
+}
+\end{lstlisting}

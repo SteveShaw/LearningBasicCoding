@@ -93,67 +93,130 @@ Given two strings $S_1$ and $S_2$ of the same length, determine if $S_2$ is a sc
 \textbf{Output}: 0 (\texttt{false})
 \end{flushleft}
 \subsection{Recrusive Approach}
-\begin{CJK*}{UTF8}{gbsn}
 基本思路是将$S_1$分为两个substring，长度分别为$\ell$和$L-\ell$。那么 $S_1$和$S_2$为scramble当且仅当
 \begin{itemize}
 \item $S_1[0\ldots\ell-1]$和$S_2[0\ldots \ell-1]$ 是scramble，同时$S_1[\ell\ldots L-1]$和$S_2[\ell\ldots L-1]$也是scramble. 或者
 \item $S_1[0\ldots\ell-1]$和$S_2[\ell\ldots L-1]$ 是scramble，同时$S_1[L-\ell\ldots L-1]$和$S_2[0\ldots L-\ell-1]$也是scramble
 \end{itemize} 
 以 \texttt{rgeat} 和 \texttt{great} 为例，\texttt{rgeat} 可分成 \texttt{rg} 和 \texttt{eat} 两段， \texttt{great} 可分成 \texttt{gr} 和 \texttt{eat} 两段，\texttt{rg} 和 \texttt{gr} 是scrambled的， \texttt{eat} 和 \texttt{eat} 当然是scrambled。因此递归算法需要测试每个index进行上述判断。
-\end{CJK*}
-\subsubsection{Code}
-Procedure $B$ check if two strings $S_1$ and $S_2$ are scramble string or not. The length of $S_1$ and $S_2$ are all $L$
-\setcounter{algorithm}{0}
-\begin{algorithm}[H]
-\caption{Recursive Approach Main Procedure}
-\begin{algorithmic}[1]
-\Procedure{$B$}{$S_1, S_2, L$}
-\State \Return $\Gamma(S_1, S_2, L, L)$
-\EndProcedure
-\end{algorithmic}
-\end{algorithm}
-Function $\Gamma$ recursively check if two strings $S_1$ with length $L_1$ and $S_2$ with length $L_2$ are scramble strings or not.
-\begin{algorithm}[H]
-\caption{Recursive Approach Function}
-\begin{algorithmic}[1]
-\Function{$\Gamma$}{$S_1, S_2$}
-\If{$|S_1|\neq |S_2|$} \Comment The length of two strings are not equal
-\State \Return 0 \Comment \texttt{false}
-\EndIf
-\State $\delta$ as $\delta[0]=\ldots=\delta[255]:=0$ The character counter array
-\State $L := |S_1|$
-\For{$i:=0$ to $L-1$}
-\State $\delta[S_1[i]]\gets \delta[S_1[i]] + 1$
-\State $\delta[S_2[i]]\gets \delta[S_2[i]] - 1$
-\EndFor
-\For{$j:=0$ \textbf{to} 255}
-\If{$\delta[j]\neq 0$}
-\State \Return 0 \Comment Found different character in $S_1$ and $S_2$
-\EndIf
-\EndFor
-\For{$\ell:=0$ \textbf{to} $L$ }
-\State $\alpha_1:=S_1[0,\ell-1], \alpha_2:=S_1[\ell, L-1]$
-\State $\beta_1:=S_2[0,\ell-1], \beta_2:=S_2[\ell, L-1]$ \Comment Check $S_2$ from left to right
-\If{$\Gamma(\alpha_1, \beta_1)=1$ \textbf{and} $\Gamma(\alpha_2, \beta_2)=1$} \Comment Recursively check $\alpha_1,\;\beta_1$ and $\alpha_2,\;\beta_2$
-\State \Return 1 \Comment $S_1$ and $S_2$ are scramble
-\EndIf
-\algstore{87algo}
-\end{algorithmic}
-\end{algorithm}
-\begin{algorithm}[H]
-\begin{algorithmic}[1]
-\algrestore{87algo}
-\State $\beta_1:=S_2[0,L-\ell-1], \beta_2:=S_2[L-\ell, L-1]$ \Comment Check $S_2$ from right to left
-\If{$\Gamma(\alpha_1, \beta_2)=1$ \textbf{and} $\Gamma(\alpha_2, \beta_1)=1$} \Comment Recursively check $\alpha_1,\;\beta_2$ and $\alpha_2,\;\beta_1$
-\State \Return 1 \Comment $S_1$ and $S_2$ are scramble
-\EndIf
-\EndFor
-\State \Return 0 \Comment $S_1$ and $S_2$ are not scramble
-\EndFunction
-\end{algorithmic}
-\end{algorithm}
+
+\setcounter{lstlisting}{0}
+\begin{lstlisting}[style=customc, caption={Recursion}]
+bool isScramble( string s1, string s2 )
+{
+
+    if( s1.size() != s2.size() )
+    {
+        //if the size of both string are different
+        //cannot be scramble strings
+        return false;
+    }
+    string_view vs1( s1.c_str(), s1.size() );
+    string_view vs2( s2.c_str(), s2.size() );
+    return dfs( vs1, vs2 );
+}
+//helper function
+bool dfs( string_view vs1, string_view vs2 )
+{
+    if( vs1 == vs2 )
+    {
+        return true;
+    }
+    //check if vs1 and vs2 has same letters
+    int count[128] = {0};
+    for( size_t i = 0; i < vs1.size(); ++i )
+    {
+        char c1 = vs1[i];
+        char c2 = vs2[i];
+        count[c1 - '\0'] += 1;
+        count[c2 - '\0'] -= 1;
+    }
+    for( int i = 0; i < 128; ++i )
+    {
+        if( count[i] )
+        {
+            //vs1 and vs2 have different letters
+            return false;
+        }
+    }
+    auto L = vs1.size();
+    for( size_t i = 1; i < L; ++i )
+    {
+        auto a1 = vs1.substr( 0, i );
+        auto a2 = vs1.substr( i );
+        auto b1 = vs2.substr( 0, i );
+        auto b2 = vs2.substr( i );
+
+        //test s1[0,i-1] vs s2[0,i-1]
+        //and s1[i, L-1] vs s2[i, L-1]
+        if( dfs( a1, b1 ) && dfs( a2, b2 ) )
+        {
+            return true;
+        }
+
+        auto c1 = vs2.substr( L - i );
+        auto c2 = vs2.substr( 0, L - i );
+        //test s1[0,i-1] vs s2[L-i,L-1]
+        //and s1[L-i, L-1] vs s2[0, i-1]
+        if( dfs( a1, c1 ) && dfs( a2, c2 ) )
+        {
+            return true;
+        }
+    }
+    return false;
+}
+\end{lstlisting}
+%Procedure $B$ check if two strings $S_1$ and $S_2$ are scramble string or not. The length of $S_1$ and $S_2$ are all $L$
+%\setcounter{algorithm}{0}
+%\begin{algorithm}[H]
+%\caption{Recursive Approach Main Procedure}
+%\begin{algorithmic}[1]
+%\Procedure{$B$}{$S_1, S_2, L$}
+%\State \Return $\Gamma(S_1, S_2, L, L)$
+%\EndProcedure
+%\end{algorithmic}
+%\end{algorithm}
+%Function $\Gamma$ recursively check if two strings $S_1$ with length $L_1$ and $S_2$ with length $L_2$ are scramble strings or not.
+%\begin{algorithm}[H]
+%\caption{Recursive Approach Function}
+%\begin{algorithmic}[1]
+%\Function{$\Gamma$}{$S_1, S_2$}
+%\If{$|S_1|\neq |S_2|$} \Comment The length of two strings are not equal
+%\State \Return 0 \Comment \texttt{false}
+%\EndIf
+%\State $\delta$ as $\delta[0]=\ldots=\delta[255]:=0$ The character counter array
+%\State $L := |S_1|$
+%\For{$i:=0$ to $L-1$}
+%\State $\delta[S_1[i]]\gets \delta[S_1[i]] + 1$
+%\State $\delta[S_2[i]]\gets \delta[S_2[i]] - 1$
+%\EndFor
+%\For{$j:=0$ \textbf{to} 255}
+%\If{$\delta[j]\neq 0$}
+%\State \Return 0 \Comment Found different character in $S_1$ and $S_2$
+%\EndIf
+%\EndFor
+%\For{$\ell:=0$ \textbf{to} $L$ }
+%\State $\alpha_1:=S_1[0,\ell-1], \alpha_2:=S_1[\ell, L-1]$
+%\State $\beta_1:=S_2[0,\ell-1], \beta_2:=S_2[\ell, L-1]$ \Comment Check $S_2$ from left to right
+%\If{$\Gamma(\alpha_1, \beta_1)=1$ \textbf{and} $\Gamma(\alpha_2, \beta_2)=1$} \Comment Recursively check $\alpha_1,\;\beta_1$ and $\alpha_2,\;\beta_2$
+%\State \Return 1 \Comment $S_1$ and $S_2$ are scramble
+%\EndIf
+%\algstore{87algo}
+%\end{algorithmic}
+%\end{algorithm}
+%\begin{algorithm}[H]
+%\begin{algorithmic}[1]
+%\algrestore{87algo}
+%\State $\beta_1:=S_2[0,L-\ell-1], \beta_2:=S_2[L-\ell, L-1]$ \Comment Check $S_2$ from right to left
+%\If{$\Gamma(\alpha_1, \beta_2)=1$ \textbf{and} $\Gamma(\alpha_2, \beta_1)=1$} \Comment Recursively check $\alpha_1,\;\beta_2$ and $\alpha_2,\;\beta_1$
+%\State \Return 1 \Comment $S_1$ and $S_2$ are scramble
+%\EndIf
+%\EndFor
+%\State \Return 0 \Comment $S_1$ and $S_2$ are not scramble
+%\EndFunction
+%\end{algorithmic}
+%\end{algorithm}
 \subsection{Dynamic Programming Approach}
-\begin{CJK*}{UTF8}{gbsn}
 上面递归算法复杂度会达到指数级因为重复进行了很多次判断。如果用Dynamic Programming方法，这里的Recursive function $F$其实是一个三维数组。$F[i][j][\ell]$表示字符串$S_1[i, i+\ell-1]$和$S_2[j,j+\ell-1]$是否为scramble。
 \par
 接着就是建立recursive formula，也就是怎么根据历史信息来得到$F[i][j][\ell]$。首先是把当前$S_1[i, i+\ell-1]$字符串分成左右两部分，假设左半部分长度为$k$，即划分成$S_1[i, i+k-1]$ and $S_1[i+k, i+\ell-1]$。分两种情况进行比较：
@@ -176,50 +239,55 @@ Function $\Gamma$ recursively check if two strings $S_1$ with length $L_1$ and $
 F[i][j][\ell] = \bigcup_{k=1}^{\ell-1}\{(F[i][j][k]\land F[i+k][j+k][\ell-k])\lor(F[i][j+\ell-k][k]\land F[i+k][j][\ell-k])\}
 \]
 总时间复杂度因为是三维动态规划，需要三层循环，加上每一步需要线行时间求解递推式，所以是$O(n^4)$。虽然已经比较高了，但是至少不是指数量级的，动态规划还是有很大优势的，空间复杂度是$O(n^3)$。
-\end{CJK*}
-\subsubsection{Code}
-\begin{algorithm}[H]
-\caption{Dynamic Programming Approach}
-\begin{algorithmic}[1]
-\Procedure{IsScramble}{$S_1, S_2$}
-\If{$|S_1|\neq |S_2|$} \Comment The lengths of $S_1$ and $S_2$ are not equal
-\State \Return 0
-\EndIf
-\If{$S_1=S_2$} \Comment $S_1$ is same as $S_2$
-\State \Return 1
-\EndIf
-\State $L:=|S_1|$
-\State $F$ as $F[0][0][0]=\cdots=F[L-1][L-1][L]:=0$ \Comment The \texttt{DP} array
-\For{$i:=0$ \textbf{to} $L-1$}
-\For{$j:=0$ \textbf{to} $L-1$}
-\If{$S_1[i]=S_2[j]$}
-\State $F[i][j][1]\gets 1$ \Comment Fill the case when $\ell=1$
-\EndIf
-\EndFor
-\EndFor
-\For{$\ell:=2$ \textbf{to} $L-1$} \label{087loop1}
-\For{$i:=0$ \textbf{to} $L-\ell$} \label{087loop2}
-\For{$j:=0$ \textbf{to} $L-\ell$} \label{087loop3}
-\For{$k:=1$ \textbf{to} $\ell-1$} \label{087loop4}
-\If{$F[i][j][k]=1$ \textbf{and} $F[i+k][j+k][\ell-k]=1$}
-\State $F[i][j][\ell]\gets 1$
-\State \texttt{break} \Comment Exit loop [\ref{087loop4}]
-\EndIf
-\algstore{087algo}
-\end{algorithmic}
-\end{algorithm}
-\begin{algorithm}[H]
-\begin{algorithmic}[1]
-\algrestore{087algo}
-\If{$F[i][j+\ell-k][k]=1$ \textbf{and} $F[i+k][j][\ell-k]=1$}
-\State $F[i][j][\ell]\gets 1$
-\State \texttt{break} \Comment Exit loop [\ref{087loop4}]
-\EndIf
-\EndFor \Comment End [\ref{087loop4}]
-\EndFor \Comment End [\ref{087loop3}]
-\EndFor \Comment End [\ref{087loop2}]
-\EndFor \Comment End [\ref{087loop1}]
-\State \Return $F[0][0][L]$
-\EndProcedure
-\end{algorithmic}
-\end{algorithm}
+
+\begin{lstlisting}[style=customc, caption={Dynamic Programming}]
+bool isScramble( string s1, string s2 )
+{
+    using v2d = vector<vector<unsigned char>>;
+    if( s1.size() != s2.size() )
+    {
+        return false;
+    }
+    if( s1 == s2 )
+    {
+        return true;
+    }
+    auto L = s1.size();
+    //F[i][j][l] = 1
+    //indicate s1[i,i+l-1] and s2[j,j+l-1] are scramble
+    vector<v2d> F( L, v2d( L, vector<unsigned char>( L + 1, 0 ) ) );
+    //fill the length equal to 1
+    for( size_t i = 0; i < L; ++i )
+    {
+        for( size_t j = 0; j < L; ++j )
+        {
+            F[i][j][1] = s1[i] == s2[j] ? 1 : 0;
+        }
+    }
+    //fill from l=2 to L
+    for( size_t l = 2; l <= L; ++l )
+    {
+        for( size_t i = 0; i + l <= L; ++i )
+        {
+            for( size_t j = 0; j + l <= L; ++j )
+            {
+                for( size_t k = 1; k < l; ++k )
+                {
+                    if( F[i][j][k] && F[i + k][j + k][l - k] )
+                    {
+                        F[i][j][l] = 1;
+                    }
+                    if( F[i][j][l] == 0 )
+                    {
+                        if( F[i + k][j][l - k] && F[i][j + l - k][k] )
+                        {
+                            F[i][j][l] = 1;
+                        }
+                    }
+                } //end for (k)
+            } //end for(j)
+        }//end for(i)
+    }//end for(l)
+    return F[0][0][L];
+}
+\end{lstlisting}

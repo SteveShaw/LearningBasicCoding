@@ -1,0 +1,95 @@
+\section{79 --- Word Search}
+Given a 2D \fcj{board} and a \fcj{word}, find if the word exists in the grid.
+
+The word can be constructed from letters of sequentially adjacent cell, where \fcj{"adjacent"} cells are those horizontally or vertically neighboring. The same letter cell may not be used more than once.
+
+\paragraph{Example:}
+\begin{flushleft}
+
+
+\fcj{board}: =
+
+\begin{lstlisting}[style=customc]
+{
+  {'A','B','C','E'},
+  {'S','F','C','S'},
+  {'A','D','E','E'}
+}
+\end{lstlisting}
+
+Given \fcj{word = "ABCCED"}, return \fcj{true}.
+
+Given \fcj{word = "SEE"}, return \fcj{true}.
+
+Given \fcj{word = "ABCB"}, return \fcj{false}.
+
+\end{flushleft}
+
+\subsection{Backtracking}
+This is still the backtracking algorithm. For each cell match the first letter of the given word, we start the recursive matching of remaining letters.
+
+If a cell matches against current letter, we first change this cell to a unique value to indicate it is used, then recursively matching the remaining letters. If match is failed, we reset the cell to its previous letter.
+
+\setcounter{lstlisting}{0}
+\begin{lstlisting}[style=customc, caption={Backtracking}]
+bool exist( vector<vector<char>>& board, string word )
+{
+    auto M = static_cast< int >( board.size() );
+    auto N = static_cast< int >( board[0].size() );
+    for( int r = 0; r < M; ++r )
+    {
+        for( int c = 0; c < N; ++c )
+        {
+            if( board[r][c] == word[0] )
+            {
+                auto b = board[r][c];
+                //change to 0 to indicate
+                //board[r][c] is visited
+                board[r][c] = '\0';
+                if( dfs( board, r, c, word, 1 ) )
+                {
+                    return true;
+                }
+                //backtracking
+                board[r][c] = b;
+            }
+        }
+    }
+    return false;
+}
+//backtracking helper function
+bool dfs( vector<vector<char>>& B, int r, int c, string_view word_view, size_t start )
+{
+    if( start == word_view.size() )
+    {
+        return true;
+    }
+    auto M = B.size();
+    auto N = B[0].size();
+    //four adjacent cells offsets
+    int dr[] = { -1, 0, 1, 0 };
+    int dc[] = { 0, -1, 0, 1 };
+    for( int i = 0; i < 4; ++i )
+    {
+        int nr = r + dr[i];
+        int nc = c + dc[i];
+        if( ( nr >= 0 ) && ( nr < M ) && ( nc >= 0 ) && ( nc < N ) )
+        {
+            if( B[nr][nc] == word_view[start] )
+            {
+                auto b = B[nr][nc];
+                //change to 0 to indicate
+                //board[nr][nc] is visited
+                B[nr][nc] = '\0';
+                if( dfs( B, nr, nc, word_view, start + 1 ) )
+                {
+                    return true;
+                }
+                //backtracking
+                B[nr][nc] = b;
+            }
+        }
+    }
+    return false;
+}
+\end{lstlisting} 
