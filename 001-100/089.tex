@@ -53,6 +53,21 @@ unsigned int BinaryToGray(unsigned int num)
 \end{lstlisting}
 只要从0到$2^n-1$用上述函数计算gray code放到输出数组中即可。
 
+\setcounter{lstlisting}{0}
+\begin{lstlisting}[style=customc, caption={Math}]
+vector<int> grayCode( int n )
+{
+    int end = ( 1 << n ) - 1;
+    vector<int> ans( end + 1, 0 );
+    for( int i = 0; i <= end; ++i )
+    {
+        //apply the formula (x ^ (x >>1))
+        ans[i] = ( i ^ ( i >> 1 ) );
+    }
+    return ans;
+}
+\end{lstlisting}
+
 \subsection{Iterative}
 We can generate the sequence iteratively. 
 
@@ -60,7 +75,7 @@ For example, when $n=2$, the sequence is \fcj{00, 01, 11, 10}.
 
 To obtain sequence for $n=3$, the process is as following:
 
-\fcj{00, 01, 11, 10 -> 000, 001, 011, 010}
+\fcj{00, 01, 11, 10 -> 000, 001, 011, 010} --- This is same as $n=2$
 
 Then add 1 to the symmetric of the sequence of \fcj{00, 01, 11, 10}
 

@@ -20,60 +20,50 @@ Given a non-empty string containing only digits, determine the total number of w
 \\
 \textbf{Explanation}: It could be decoded as \texttt{BZ} (2 and 26), \texttt{VF} (22 and 6), or \texttt{BBF} (2, 2 and 6).
 \end{flushleft}
-\subsection{Analysis}
-\begin{CJK*}{UTF8}{gbsn}
+\subsection{Dynamic Programming}
 与斐波那契数列很像，但是有限制条件，假设$F[i]$表示number of decode ways for $S[0\ldots i]$。初始化时为0，即$F[i] = 0$
 \begin{itemize}
-\item 如果$S[i]$不为0，则$F[i] \gets F[i] + F[i-1]$
-\item 如果$S[i-1]$为1，或者$S[i-1]=2$ and $0\leq S[i]\leq 6$，则$F[i] \gets F[i] + F[i-2]$
+\item 如果$S[i]$不为0，则$F[i] \gets F[i] + F[i-1]\times 1$，因为$S[i]$可以decode为一个letter，即有一种方式。
+\item 如果$S[i-1]$为1，或者$S[i-1]=2$ and $0\leq S[i]\leq 6$，则$F[i] \gets F[i] + F[i-2]\times 1$，即$S[i-1,i-2]$可以decode为一个letter，即有一种方式。
 \end{itemize}
-由于$F[i]$仅仅取决于$F[i-1]$和$F[i-2]$，因此可以用两个变量$\alpha$ and $\beta$来分别代表$F[i-2]$ and $F[i-1]$，然后逐步更新。
-\end{CJK*}
-\subsubsection{Code}
-\setcounter{algorithm}{0}
-\begin{algorithm}[H]
-\caption{Dynamic Programming Approach}
-\begin{algorithmic}[1]
-\Procedure{NumDecodings}{$S, L$}
-\State $\alpha:=0, \beta:=0$ \Comment $F[i-2]$ and $F[i-1]$
-\algstore{091algo}
-\end{algorithmic}
-\end{algorithm}
-\begin{algorithm}[H]
-\begin{algorithmic}[1]
-\algrestore{091algo}
-\If{$L = 0 $}
-\State \Return 0 \Comment Empty string
-\EndIf
-\State $\pi_0:= S[0] - \texttt{char}(0)$ \Comment Save $S[0]$ as integer
-\If{$\pi_0 \neq 0$}
-\State $\alpha\gets 1$
-\EndIf
-\If{$L = 1$}
-\State \Return $\alpha$ \Comment Only one character
-\EndIf
-\State $\pi_1:=S[1] - \texttt{char}(0)$ \Comment Save $S[1]$ as integer
-\If{$\pi_1 \neq 0$}
-\State $\beta \gets \beta + \alpha$
-\EndIf
-\If{$\pi_0=1$ \textbf{or} ($\pi_0 = 2$ \textbf{and} $0\leq \pi_1 \leq 6 $)}
-\State $\beta\gets \beta +1$
-\EndIf
-\State $\pi_0\gets \pi_1$ \Comment Update $\pi_0$ as $\pi_1$
-\For{$i:=2$ \textbf{to} $L-1$}
-\State $\delta:=0$ \Comment $F[i]$
-\State $\pi_1 \gets S[i] - \texttt{char}(0)$
-\If{$\pi_1 > 0$}
-\State $\delta \gets \delta + \beta$ \Comment $F[i] \gets F[i] + F[i-1]$
-\EndIf
-\If{$\pi_0=1$ \textbf{or} ($\pi_0 = 2$ \textbf{and} $0\leq \pi_1 \leq 6 $)}
-\State $\delta\gets \delta + \alpha$ \Comment $F[i] \gets F[i] + F[i-2]$
-\EndIf
-\State $\pi_0\gets \pi_1$
-\State $\alpha\gets \beta$ \Comment $F[i-2]\gets F[i-1]$
-\State $\beta \gets \delta$ \Comment $F[i-1]\gets F[i]$
-\EndFor
-\State \Return $\beta$
-\EndProcedure
-\end{algorithmic}
-\end{algorithm}
+由于$F[i]$仅仅取决于$F[i-1]$和$F[i-2]$，因此可以用两个变量$x_0$ and $x_1$来分别代表$F[i-2]$ and $F[i-1]$，然后逐步更新。
+
+\setcounter{lstlisting}{0}
+\begin{lstlisting}[style=customc, caption={Dynamic Programming}]
+int numDecodings( string s )
+{
+    //empty string has one way to decode
+    int x0 = 1;
+    //the first letter has 1 way to decode if it is not '0'
+    int x1 = s[0] == '0' ? 0 : 1;
+    for( size_t i = 1; i < s.size(); ++i )
+    {
+        int x2 = 0;
+        if( s[i] != '0' )
+        {
+            //we have one way to decode s[i]
+            //so x2=x1 x 1
+            x2 = x1;
+        }
+        if( s[i - 1] == '1' )
+        {
+            //we have one way to decode s[i-1,i]
+            //so x2+=x0 times 1
+            x2 += x0;
+        }
+        if( s[i - 1] == '2' )
+        {
+            //we have one way to decode s[i-1,i]
+            //so x2+=x0 times 1
+            if( ( s[i] >= '0' ) && ( s[i] <= '6' ) )
+            {
+                x2 += x0;
+            }
+        }
+        //overwrite previous values
+        x0 = x1;
+        x1 = x2;
+    }
+    return x1;
+}
+\end{lstlisting}

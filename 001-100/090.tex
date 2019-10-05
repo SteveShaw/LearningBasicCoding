@@ -10,3 +10,50 @@ Note: The solution set must not contain duplicate subsets.
 \\
 $(2),(1),(1,2,2),(2,2), (1,2), ()$
 \end{flushleft}
+
+\subsection{Backtracking}
+To avoid contain duplicate subsets, we will 
+\begin{enumerate}
+\item Sort the input array
+\item For those duplicate numbers starting from index $i$, we first recursively generate subsets including these duplicate numbers, and then jump to the next number which is different from the number at $i$. For example, suppose $A=(1,2,2,2,4)$. There are three 2s in $A$ starting from index 1. We generate subsets containing these 2s. When backtracking, we jump to 4 by passing remaining 2s.
+\end{enumerate}
+
+\setcounter{lstlisting}{0}
+\begin{lstlisting}[style=customc, caption={Backtracking}]
+vector<vector<int>> subsetsWithDup( vector<int>& nums )
+{
+    //need to sort to remove duplicate subsets
+    sort( begin( nums ), end( nums ) );
+    vector<int> sel;
+    vector<vector<int>> ans;
+    backtrack( nums, 0, sel, ans );
+    return ans;
+}
+//backtracking helper function
+void backtrack( vector<int>& A, size_t start, vector<int>& sel, vector<vector<int>>& ans )
+{
+    //add current set to output
+    ans.emplace_back( begin( sel ), end( sel ) );
+    for( size_t i = start; i < A.size(); ++i )
+    {
+        //find next number that is different from A[i]
+        auto j = i + 1;
+        while( ( j < A.size() ) && ( A[j] == A[i] ) )
+        {
+            ++j;
+        }
+        //generate subset containing
+        //same numbers as A[i]
+        sel.push_back( A[i] );
+        //generate subset containing
+        //same numbers as A[i]
+        backtrack( A, i + 1, sel, ans );
+        //backtracking
+        sel.pop_back();
+        //jump to the next number that is different from A[i]
+        //notice since for loop has ++i
+        //we first decrement i
+        i = j - 1;
+    }
+}
+\end{lstlisting}
