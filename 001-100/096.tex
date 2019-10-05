@@ -43,7 +43,6 @@ Given $n = 3$, there are a total of $5$ unique BST's:
 \end{figure}
 
 \subsection{Dynamic Programming}
-\begin{CJK*}{UTF8}{gbsn}
 为了从有序序列$1\ldots n$中构造出BST，可以enumerate each number $i$， 然后用这个$i$作为 root， 接着剩下的数字$1, \ldots, i-1$作为$i$的left branch，而 $i+1, \ldots, n$则作为$i$的right branch。然后用recursive的方式构建出subtree。通过上述这种方法，可以保证构造出的BST是unique的，因为这些BST的roots都是unqiue的。
 \par
 从上述分析可以看出，这个问题可以 reduced into problems with smaller sizes，即subproblems。因此可以保存这些 subproblem 的 solution 并且 reuse them later。这正好就是Dynamic Programming Way。
@@ -62,10 +61,10 @@ G(n) = \sum_{i=1}^{n} F(i, n) \qquad \qquad
 G(0) = 1, \qquad G(1) = 1
 \]
 对于$n>1$，也就是对于序列$1, \ldots, n$中，选择一个number $i$ 做为 root， 那么 the number of unique BST with this number as root 其实就是 $F(i,n)$。 这个$F(i,n)$ 也称之为 the \textbf{cartesian product} of the number of BST for its left and right subtrees。如下图所示
-\begin{figure}[H]
-    \centering
-    \includegraphics[width=15cm]{96BST.png}
-\end{figure}
+%\begin{figure}[H]
+%    \centering
+%    \includegraphics[width=15cm]{96BST.png}
+%\end{figure}
 例如 $F(3,7)$，即the number of unique BST tree with the number 3 as its root。这就需要从其left subsequence $(1,2)$ 中construct left subtree，并且从其 right subsequence $(4,5,6,7)$中construct right subtree。然后combine them together (i.e. cartesian product)。现在比较tricky的是 the number of unique BST out of sequence $(1,2)$ 其实就是 $G(2)$， 而同样  the number of of unique BST out of sequence $(4, 5, 6, 7)$ 就是 $G(4)$。对于$G(n)$来说，只是需要直到所从中构建的sequence的长度。因此$F(3,2) = G(2)\cdot G(4)$。其中$\cdot$是cartesian product。因此$F(i,n)$和$G(n)$的关系就是
 \[
 F(i,n) = G(i-1)\cdot G(n-i)
@@ -75,20 +74,19 @@ F(i,n) = G(i-1)\cdot G(n-i)
 G(n) = \sum\limits_{i=1}^{n}G(i-1) \cdot G(n-i)
 \]
 计算过程从lower number开始，因为$G(n)$ depends on $G(0), \ldots, G(n-1)$。
-\end{CJK*}
-\subsubsection{Algorithm}
-\setcounter{algorithm}{0}
-\begin{algorithm}[H]
-\caption{Dynamic Programming}
-\begin{algorithmic}[1]
-\Procedure{NumTrees}{$n$}
-\State $G$ as $G[0]:=1,\;G[1]:= 1,\; G[2]=\ldots=G[n]:=0$
-\For{$x:=2$ \textbf{to} $n$}
-\For{$k:=1$ \textbf{to} $x$}
-\State $G[x] \gets G[x] + G[k-1]\times G[x-k]$
-\EndFor
-\EndFor
-\State \Return $G[n]$
-\EndProcedure
-\end{algorithmic}
-\end{algorithm}
+%\subsubsection{Algorithm}
+%\setcounter{algorithm}{0}
+%\begin{algorithm}[H]
+%\caption{Dynamic Programming}
+%\begin{algorithmic}[1]
+%\Procedure{NumTrees}{$n$}
+%\State $G$ as $G[0]:=1,\;G[1]:= 1,\; G[2]=\ldots=G[n]:=0$
+%\For{$x:=2$ \textbf{to} $n$}
+%\For{$k:=1$ \textbf{to} $x$}
+%\State $G[x] \gets G[x] + G[k-1]\times G[x-k]$
+%\EndFor
+%\EndFor
+%\State \Return $G[n]$
+%\EndProcedure
+%\end{algorithmic}
+%\end{algorithm}

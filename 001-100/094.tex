@@ -21,7 +21,7 @@ Given a binary tree $T$, return the \textbf{inorder} traversal of its nodes' val
 Recursive solution is trivial, could you do it iteratively?
 \end{flushleft}
 \subsection{Iterative Method Based On Stack}
-从root开始，先将root压入栈，然后再将其所有left child nodes压入栈，然后取出栈顶node，保存节点值，再将当前指针移到其right child node上，若存在right child node，则在下次循环时又可将其所有left child nodes压入栈中。这样就保证了访问顺序为left--root--right。
+从\fcj{root}开始，先将\fcj{root}压入栈，然后再将其所有left child nodes压入栈，然后取出栈顶node，保存节点值，再将当前指针移到其right child node上，若存在right child node，则在下次循环时又可将其所有left child nodes压入栈中。这样就保证了访问顺序为left--root--right。
 %\setcounter{algorithm}{0}
 %\begin{algorithm}[H]
 %\caption{Iterative With Stack}

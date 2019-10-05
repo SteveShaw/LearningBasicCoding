@@ -51,60 +51,59 @@ The above output corresponds to the 5 unique BST's shown below:
 \end{figure}
 \end{flushleft}
 \subsection{Recursive}
-Let's pick up number i out of the sequence 1 ..n and use it as the root of the current tree. Then there are i - 1 elements available for the construction of the left subtree and n - i elements available for the right subtree. As we already discussed that results in G(i - 1) different left subtrees and G(n - i) different right subtrees, where G is a Catalan number.
+Let's pick up number $ i $ out of the sequence $1$, $\ldots$, $n$ and use it as the root of the current tree. Then there are $ i - 1 $ elements available for the construction of the left subtree and n - i elements available for the right subtree. As we already discussed that results in $ G(i - 1) $ different left subtrees and $ G(n - i) $ different right subtrees, where $G$ is a Catalan number.
 
 BST
 
-Now let's repeat the step above for the sequence 1 ... i - 1 to construct all left subtrees, and then for the sequence i + 1 ... n to construct all right subtrees.
+Now let's repeat the step above for the sequence $1$, $\ldots$, $i - 1$ to construct all left subtrees, and then for the sequence $i + 1$, $\ldots$, $n$ to construct all right subtrees.
 
-This way we have a root i and two lists for the possible left and right subtrees. The final step is to loop over both lists to link left and right subtrees to the root.
+This way we have a root $i$ and two lists for the possible left and right subtrees. The final step is to loop over both lists to link left and right subtrees to the root.
 
-\begin{CJK*}{UTF8}{gbsn}
 与96题类似的分析，从序列$1,\ldots,n$中取出一个数$i$，将其作为root。然后其左分支有$1,\ldots,i-1$，右分支上有$i+1,\ldots,n$。从96题的分析直到左边有$G(i-1)$个不同的subtree，右边有$G(n-i)$个不同的subtree。因此，重复上述步骤到$1,\ldots, i-1$上construct所有的left subtree，然后在$i+1,\ldots,n$上construct 所有的right subtree。 这时候就得到一个以$i$为节点的root，以及两个subtree array，即左子树和右子树array，最后就是loop over both array to link left and right subtree to the root
-\end{CJK*}
-\subsubsection{Algorithm}
-\setcounter{algorithm}{0}
-\begin{algorithm}[H]
-\caption{Recursive Construction}
-\begin{algorithmic}[1]
-\Procedure{GenerateTrees}{$n$}
-\State $\texttt{ans}:=\texttt{DFS}(1, n)$
-\State \Return \texttt{ans}
-\EndProcedure
-\end{algorithmic}
-\end{algorithm}
-Function \texttt{DFS} recursively create unique BST from sequence $(\alpha, \beta)$
-\begin{algorithm}[H]
-\caption{Recursively Construct BST}
-\begin{algorithmic}[1]
-\Function{DFS}{$\alpha,\;\beta$}
-\State $\texttt{ans}:=\emptyset$
-\If{$\alpha > \beta$}
-\State $\texttt{ans} \gets \texttt{ans} + \varnothing$ \Comment Add an empty tree
-\State \Return \texttt{ans}
-\EndIf
-\For{$k:=\alpha$ \textbf{to} $\beta$}
-\State $\texttt{left}:=\texttt{DFS}(\alpha, k-1)$
-\State $\texttt{right}:=\texttt{DFS}(k+1, \beta)$
-\For{$l \in \texttt{left}$  }
-\For{$r \in \texttt{right}$}
-\State Create a node $T$ with $\texttt{Value}(T):=k$
-\State $\texttt{LEFT}(T)\gets l$ \Comment Set $T$'s left subtree
-\State $\texttt{RIGHT}(T)\gets r$ \Comment Set $T$'s right subtree
-\State $\texttt{ans} \gets \texttt{ans} + T $ \Comment Add $T$ to result array
-\EndFor
-\EndFor
-\algstore{95algo}
-\end{algorithmic}
-\end{algorithm}
-\begin{algorithm}[H]
-\begin{algorithmic}[1]
-\algrestore{95algo}
-\EndFor
-\State \Return \texttt{ans}
-\EndFunction
-\end{algorithmic}
-\end{algorithm}
+%
+%\subsubsection{Algorithm}
+%\setcounter{algorithm}{0}
+%\begin{algorithm}[H]
+%\caption{Recursive Construction}
+%\begin{algorithmic}[1]
+%\Procedure{GenerateTrees}{$n$}
+%\State $\texttt{ans}:=\texttt{DFS}(1, n)$
+%\State \Return \texttt{ans}
+%\EndProcedure
+%\end{algorithmic}
+%\end{algorithm}
+%Function \texttt{DFS} recursively create unique BST from sequence $(\alpha, \beta)$
+%\begin{algorithm}[H]
+%\caption{Recursively Construct BST}
+%\begin{algorithmic}[1]
+%\Function{DFS}{$\alpha,\;\beta$}
+%\State $\texttt{ans}:=\emptyset$
+%\If{$\alpha > \beta$}
+%\State $\texttt{ans} \gets \texttt{ans} + \varnothing$ \Comment Add an empty tree
+%\State \Return \texttt{ans}
+%\EndIf
+%\For{$k:=\alpha$ \textbf{to} $\beta$}
+%\State $\texttt{left}:=\texttt{DFS}(\alpha, k-1)$
+%\State $\texttt{right}:=\texttt{DFS}(k+1, \beta)$
+%\For{$l \in \texttt{left}$  }
+%\For{$r \in \texttt{right}$}
+%\State Create a node $T$ with $\texttt{Value}(T):=k$
+%\State $\texttt{LEFT}(T)\gets l$ \Comment Set $T$'s left subtree
+%\State $\texttt{RIGHT}(T)\gets r$ \Comment Set $T$'s right subtree
+%\State $\texttt{ans} \gets \texttt{ans} + T $ \Comment Add $T$ to result array
+%\EndFor
+%\EndFor
+%\algstore{95algo}
+%\end{algorithmic}
+%\end{algorithm}
+%\begin{algorithm}[H]
+%\begin{algorithmic}[1]
+%\algrestore{95algo}
+%\EndFor
+%\State \Return \texttt{ans}
+%\EndFunction
+%\end{algorithmic}
+%\end{algorithm}
 \subsection{Morris Traversal}
 In this method, we have to use a new data structure --- \textbf{Threaded Binary Tree}, and the strategy is as follows:
 \begin{itemize}

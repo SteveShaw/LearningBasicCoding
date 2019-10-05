@@ -63,45 +63,43 @@ Two elements of a binary search tree (BST) are swapped by mistake. Recover the t
 A solution using $O(n)$ space is pretty straight forward. Could you devise a constant space solution?
 \end{flushleft}
 \subsection{Inorder Traverse}
-\begin{CJK*}{UTF8}{gbsn}
 用中序遍历树，并将所有nodes存到一个array $A$中，把所有节点值存到另一个array $B$中，然后对存节点值的$B$排序，然后将$A$中保存的node的value按照排序好的$B$的顺序进行赋值。这种最一般的解法可针对任意个数目的节点错乱的情况
-\end{CJK*}
-\subsubsection{Algorithm}
-\setcounter{algorithm}{0}
-\begin{algorithm}[H]
-\caption{Inorder Traverse}
-\begin{algorithmic}[1]
-\Procedure{RecoverTree}{$T$}
-\State Initialize $A$ and $B$ as two 1-d array
-\State $A:=\emptyset,\ B:=\emptyset$
-\State $\texttt{Inorder}(T, A, B)$ \Comment Call inorder function to save nodes and related values into $A$ and $B$
-\State $\texttt{Sort}(B)$ \Comment Sort the values saved in $B$
-\For{$i:=0\to |A|-1$}
-\State $\texttt{Value}(A[i])\gets B[i]$ \Comment Assign the values in $B$ to nodes in $A$
-\EndFor
-\EndProcedure
-\end{algorithmic}
-\end{algorithm}
-\begin{CJK*}{UTF8}{gbsn}
-下面的函数\texttt{Inorder}中序遍历$T$，然后按照顺序把访问到的node及其value存入$A$和$B$中。
-\end{CJK*}
-\begin{algorithm}[H]
-\caption{Inorder Traverse Function}
-\begin{algorithmic}[1]
-\Function{Inorder}{$T, A, B$}
-\If{$T=\text{NULL}$}
-\State \Return
-\EndIf
-\algstore{99algo}
-\end{algorithmic}
-\end{algorithm}
-\begin{algorithm}[H]
-\begin{algorithmic}[1]
-\algrestore{99algo}
-\State $\texttt{Inorder}(\text{LEFT}(T), A, B)$ \Comment Visit left child tree of $T$
-\State $A\gets A + T$ \Comment Save node to $A$
-\State $B\gets B + \text{Value}(T)$ \Comment Save node's value to $B$
-\State  $\texttt{Inorder}(\text{RIGHT}(T), A, B)$ \Comment Visit left child tree of $T$
-\EndFunction
-\end{algorithmic}
-\end{algorithm}
+%\subsubsection{Algorithm}
+%\setcounter{algorithm}{0}
+%\begin{algorithm}[H]
+%\caption{Inorder Traverse}
+%\begin{algorithmic}[1]
+%\Procedure{RecoverTree}{$T$}
+%\State Initialize $A$ and $B$ as two 1-d array
+%\State $A:=\emptyset,\ B:=\emptyset$
+%\State $\texttt{Inorder}(T, A, B)$ \Comment Call inorder function to save nodes and related values into $A$ and $B$
+%\State $\texttt{Sort}(B)$ \Comment Sort the values saved in $B$
+%\For{$i:=0\to |A|-1$}
+%\State $\texttt{Value}(A[i])\gets B[i]$ \Comment Assign the values in $B$ to nodes in $A$
+%\EndFor
+%\EndProcedure
+%\end{algorithmic}
+%\end{algorithm}
+%\begin{CJK*}{UTF8}{gbsn}
+%下面的函数\texttt{Inorder}中序遍历$T$，然后按照顺序把访问到的node及其value存入$A$和$B$中。
+%\end{CJK*}
+%\begin{algorithm}[H]
+%\caption{Inorder Traverse Function}
+%\begin{algorithmic}[1]
+%\Function{Inorder}{$T, A, B$}
+%\If{$T=\text{NULL}$}
+%\State \Return
+%\EndIf
+%\algstore{99algo}
+%\end{algorithmic}
+%\end{algorithm}
+%\begin{algorithm}[H]
+%\begin{algorithmic}[1]
+%\algrestore{99algo}
+%\State $\texttt{Inorder}(\text{LEFT}(T), A, B)$ \Comment Visit left child tree of $T$
+%\State $A\gets A + T$ \Comment Save node to $A$
+%\State $B\gets B + \text{Value}(T)$ \Comment Save node's value to $B$
+%\State  $\texttt{Inorder}(\text{RIGHT}(T), A, B)$ \Comment Visit left child tree of $T$
+%\EndFunction
+%\end{algorithmic}
+%\end{algorithm}

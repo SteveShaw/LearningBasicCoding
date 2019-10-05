@@ -47,29 +47,29 @@ Reads 01 from right to left. Therefore it is not a palindrome.
 \item 得到last half of $x$的方法是将$x$不断除以10，而反转的那部分number是不断乘以10，因此如果发现某个时候$x$小于或者反转的部分，就表明已经处理完了一半的$x$了。
 \item 不过，当$x$的长度是奇数时，例如\textbf{12321}，当处理完一半$x$时，反转的number是123，而$x$变成了12。这时候还需要检查$x$是否等于$123/10$。
 \end{itemize}
-\setcounter{algorithm}{0}
-\begin{algorithm}[H]
-\caption{Check if the integer is a palindrome number}
-\begin{algorithmic}[1]
-\Procedure{IsPalindrome}{$x$}
-\If{$x < 0$ \textbf{or} $x \bmod 10 \equiv 0$} \Comment 负数和10的倍数都不是palindrome number
-\State \Return \texttt{false} 
-\EndIf
-\State \textbf{$y := 0$} \Comment $y$ 是reversed last half of $x$
-\While{$x > y$} 
-\State $q := N\div 10$
-\State $r := N\bmod 10$
-\State $y \gets y\times 10 + r$
-\State $x\gets y$ 
-\EndWhile
-\If{$x \neq y$ \textbf{and} $x \neq y/10$} 
-\State \Return \texttt{false}
-\Else
-\State \Return \texttt{true}
-\EndIf
-\EndProcedure
-\end{algorithmic}
-\end{algorithm}
+%\setcounter{algorithm}{0}
+%\begin{algorithm}[H]
+%\caption{Check if the integer is a palindrome number}
+%\begin{algorithmic}[1]
+%\Procedure{IsPalindrome}{$x$}
+%\If{$x < 0$ \textbf{or} $x \bmod 10 \equiv 0$} \Comment 负数和10的倍数都不是palindrome number
+%\State \Return \texttt{false} 
+%\EndIf
+%\State \textbf{$y := 0$} \Comment $y$ 是reversed last half of $x$
+%\While{$x > y$} 
+%\State $q := N\div 10$
+%\State $r := N\bmod 10$
+%\State $y \gets y\times 10 + r$
+%\State $x\gets y$ 
+%\EndWhile
+%\If{$x \neq y$ \textbf{and} $x \neq y/10$} 
+%\State \Return \texttt{false}
+%\Else
+%\State \Return \texttt{true}
+%\EndIf
+%\EndProcedure
+%\end{algorithmic}
+%\end{algorithm}
 \setcounter{lstlisting}{0}
 \begin{lstlisting}[style=customc, caption={Revert half of the number}]
 bool isPalindrome( int x )

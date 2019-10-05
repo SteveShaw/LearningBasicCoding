@@ -4,16 +4,15 @@ Given $s_1$, $s_2$, $s_3$, find whether $s_3$ is formed by the interleaving of $
 \begin{flushleft}
 \textbf{Input}: $s_1 = \texttt{aabcc}$, $s_2 = \texttt{dbbca}$, $s_3 = \texttt{aadbbcbcac}$
 \\
-\textbf{Output}: \texttt{true}
+\textbf{Output}: \fcj{true}
 \end{flushleft}
 \paragraph{Example 2:}
 \begin{flushleft}
 \textbf{Input}: $s_1 = \texttt{aabcc}$, $s_2 = \texttt{dbbca}$, $s_3 = \texttt{aadbbbaccc}$
 \\
-\textbf{Output}: \texttt{false}
+\textbf{Output}: \fcj{false}
 \end{flushleft}
 \subsection{Dynamic Programming}
-\begin{CJK*}{UTF8}{gbsn}
 Define $F(r,c)$表示$s_3[0\ldots r+c-1]$是否是$s_1[0\ldots r-1]$ and $s_2[0\ldots c-1]$ interleave的结果。这时候会有下列几种情况
 \begin{itemize}
 \item $s_1[r-1]\neq s_3[r+c-1]$ and $s_2[c-1]\neq s_3[r+c-1]$，这种情况下，很容易知道$s_3[0\ldots r+c-1]$肯定不是$s_1[0\ldots r-1]$ and $s_2[0\ldots c-1]$ interleave的结果
@@ -32,63 +31,60 @@ F[r-1][c] &\qquad s_1[r-1]= s_3[r+c-1] \; \texttt{or} \\
 F[r][c-1] &\qquad s_2[c-1]= s_3[r+c-1] 
 \end{cases}
 \]
-另外$F(r,c)$中，$r \in [0, L_1]$ and $c\in[0, L_2]$，$L_1$ and $L_2$分别是$s_1$ and $s_2$的长度。这样$F(0,0)$就意味着$s_1$, $s_2$ and $s_3$都是空字符串，肯定为1。最后看$F[L_1][L_2]$是否为\texttt{true}。
-\end{CJK*}
+另外$F(r,c)$中，$r \in [0, L_1]$ and $c\in[0, L_2]$，$L_1$ and $L_2$分别是$s_1$ and $s_2$的长度。这样$F(0,0)$就意味着$s_1$, $s_2$ and $s_3$都是空字符串，肯定为1。最后看$F[L_1][L_2]$是否为\fcj{true}。
 
-\subsubsection{Algorithm}
-\setcounter{algorithm}{0}
-\begin{algorithm}[H]
-\caption{Dynamic Programming}
-\begin{algorithmic}[1]
-\Procedure{IsInterleave}{$s_1, L_1, s_2, L_2, s_3, L_3$}
-\If{$s_1=\varnothing$}
-\State \Return $\texttt{StrCmp}(s_2, s_3)$ \Comment $s_1$ is empty, just compare $s_2$ against $s_3$ directly
-\EndIf
-\If{$s_2=\varnothing$}
-\State \Return $\texttt{StrCmp}(s_1 s_3)$ \Comment $s_2$ is empty, just compare $s_1$ against $s_3$ directly
-\EndIf
-\If{$L_1+L_2 \neq L_3$}
-\State \Return \texttt{false}
-\EndIf
-\State $F$ as $F[0][0]=\ldots=F[L_1][L_2]:=0$
-\State $F[0][0]\gets 1$
-\For{$r:=1$ \textbf{to} $L_1$}
-\If{$s_1[r-1] = s_3[r-1]$} \Comment $c=0$ so only compare $s_1$ with $s_3$
-\State $F[r][0] \gets F[r-1][0]$
-\EndIf
-\EndFor
-\For{$c:=1$ \textbf{to} $L_2$}
-\If{$s_2[c-1] = s_3[c-1]$} \Comment $r=0$ so only compare $s_2$ with $s_3$
-\State $F[0][c] \gets F[0][c-1]$
-\EndIf
-\EndFor
-\For{$r:=1$ \textbf{to} $L_1$}
-\For{$c:=1$ \textbf{to} $L_2$}
-\If{$s_1[r-1] = s_3[r+c-1]$}
-\State $F[r][c] \gets F[r-1][c]$
-\EndIf
-\If{$s_2[c-1] = s_3[r+c-1]$}
-\State $F[r][c] \gets F[r][c] + F[r][c-1]$
-\EndIf
-\algstore{97algo}
-\end{algorithmic}
-\end{algorithm}
-\begin{algorithm}[H]
-\begin{algorithmic}[1]
-\algrestore{97algo}
-\EndFor
-\EndFor
-\If{$F[L_1][L_2] > 0$}
-\State \Return \texttt{true}
-\Else
-\State \Return \texttt{false}
-\EndIf
-\EndProcedure
-\end{algorithmic}
-\end{algorithm}
-\begin{CJK*}{UTF8}{gbsn}
+%\subsubsection{Algorithm}
+%\setcounter{algorithm}{0}
+%\begin{algorithm}[H]
+%\caption{Dynamic Programming}
+%\begin{algorithmic}[1]
+%\Procedure{IsInterleave}{$s_1, L_1, s_2, L_2, s_3, L_3$}
+%\If{$s_1=\varnothing$}
+%\State \Return $\texttt{StrCmp}(s_2, s_3)$ \Comment $s_1$ is empty, just compare $s_2$ against $s_3$ directly
+%\EndIf
+%\If{$s_2=\varnothing$}
+%\State \Return $\texttt{StrCmp}(s_1 s_3)$ \Comment $s_2$ is empty, just compare $s_1$ against $s_3$ directly
+%\EndIf
+%\If{$L_1+L_2 \neq L_3$}
+%\State \Return \texttt{false}
+%\EndIf
+%\State $F$ as $F[0][0]=\ldots=F[L_1][L_2]:=0$
+%\State $F[0][0]\gets 1$
+%\For{$r:=1$ \textbf{to} $L_1$}
+%\If{$s_1[r-1] = s_3[r-1]$} \Comment $c=0$ so only compare $s_1$ with $s_3$
+%\State $F[r][0] \gets F[r-1][0]$
+%\EndIf
+%\EndFor
+%\For{$c:=1$ \textbf{to} $L_2$}
+%\If{$s_2[c-1] = s_3[c-1]$} \Comment $r=0$ so only compare $s_2$ with $s_3$
+%\State $F[0][c] \gets F[0][c-1]$
+%\EndIf
+%\EndFor
+%\For{$r:=1$ \textbf{to} $L_1$}
+%\For{$c:=1$ \textbf{to} $L_2$}
+%\If{$s_1[r-1] = s_3[r+c-1]$}
+%\State $F[r][c] \gets F[r-1][c]$
+%\EndIf
+%\If{$s_2[c-1] = s_3[r+c-1]$}
+%\State $F[r][c] \gets F[r][c] + F[r][c-1]$
+%\EndIf
+%\algstore{97algo}
+%\end{algorithmic}
+%\end{algorithm}
+%\begin{algorithm}[H]
+%\begin{algorithmic}[1]
+%\algrestore{97algo}
+%\EndFor
+%\EndFor
+%\If{$F[L_1][L_2] > 0$}
+%\State \Return \texttt{true}
+%\Else
+%\State \Return \texttt{false}
+%\EndIf
+%\EndProcedure
+%\end{algorithmic}
+%\end{algorithm}
 也可以只用一个one dimension array作为$F$，这时候$F$的长度为$L_2$(也可以是$L_1$)。那么类似的有
-\end{CJK*}
 \[
 F(c) = 
 \begin{cases}
@@ -97,6 +93,4 @@ F[c] &\qquad s_1[r-1]= s_3[r+c-1] \; \texttt{or} \\
 F[c-1] &\qquad s_2[c-1]= s_3[r+c-1] 
 \end{cases}
 \]
-\begin{CJK*}{UTF8}{gbsn}
 不过循环仍然是二维循环。
-\end{CJK*}
