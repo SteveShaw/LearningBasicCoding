@@ -8,25 +8,26 @@ $[2,3,4]$, the median is 3
 $[2,3]$, the median is $(2 + 3) / 2 = 2.5$
 \par
 Design a data structure that supports the following two operations:
-
-\begin{lstlisting}[style=customc]
-// Add a integer number from the data stream to the data structure.
-void addNum(int num);
-// Return the median of all elements so far. 
-double findMedian(); 
-\end{lstlisting}
+\begin{itemize}
+\item \fcj{void addNum(int num)}: Add a integer number from the data stream to the data structure.
+\item \fcj{double findMedian()}: Return the median of all elements so far.
+\end{itemize}
  
 
 \paragraph{Example:}
 
 \begin{flushleft}
-\begin{lstlisting}[style=customc]
-addNum(1);
-addNum(2);
-findMedian(); //1.5
-addNum(3); 
-findMedian(); // 2
-\end{lstlisting}
+
+\fcj{addNum(1)}
+
+\fcj{addNum(2)}
+
+\fcj{findMedian() -> 1.5}
+
+\fcj{addNum(3) }
+
+\fcj{findMedian() -> 2}
+
 \end{flushleft}
 
 \paragraph{Follow up:}
@@ -35,3 +36,235 @@ findMedian(); // 2
 \item If all integer numbers from the stream are between 0 and 100, how would you optimize it?
 \item If 99\% of all integer numbers from the stream are between 0 and 100, how would you optimize it?
 \end{itemize}
+
+\subsection{Two Heaps}
+We could maintain two heaps in the following way:
+
+\begin{itemize}
+\item A max-heap to store the smaller half of the input numbers
+\item A min-heap to store the larger half of the input numbers
+\end{itemize}
+
+We also make sure the two heaps meet following conditions:
+
+\begin{itemize}
+\item Both the heaps are balanced (or nearly balanced)
+\item The \textbf{max-heap} contains all the smaller numbers while the \textbf{min-heap} contains all the larger numbers
+\end{itemize}
+
+By meeting the above conditions
+\begin{itemize}
+\item All the numbers in the \textbf{max-heap} are smaller or equal to the top element of the max-heap, say $x$.
+\item All the numbers in the \textbf{min-heap} are larger or equal to the top element of the min-heap, say $y$.
+\end{itemize}
+
+Then $x$ and/or $y$ are smaller than (or equal to) almost half of the elements and larger than (or equal to) the other half. That is the definition of median elements. 
+
+Thus, we need to balance the two heaps to make sure the conditions are met.
+
+\paragraph{Algorithm}
+
+Suppose a \textbf{max-heap} $L$ to store the smaller half of the numbers and a \textbf{min-heap} $H$ to store the larger half of the numbers. To balance the two heaps, the \textbf{max-heap} $L$ is allowed to store, at worst, one more element more than the \textbf{min-heap} $H$. Hence if we have processed $k$ elements:
+
+\begin{itemize}
+\item If $k=2\times n+1$, $L$ is is allowed to hold $n+1$ elements, while $H$ can hold $n$ elements.
+\item if $k=2\times n$, both heaps are balanced and hold $n$ elements each.
+\end{itemize}
+
+This gives us the nice property that when the heaps are perfectly balanced, the median can be derived from the tops of both heaps. Otherwise, the top of the max-heap lo holds the legitimate median.
+
+\begin{itemize}
+\item When adding a number $z$ to max-heap $L$, since $L$ received a new element, we must do a balancing step for $H$. Thus we remove the largest element from $L$ and add it to $H$. 
+\item After the previous operation, the \textbf{min-heap} $H$ might holding more elements than the \textbf{max-heap} $L$. We fix this by removing the smallest element from $H$ and add it to $L$.
+\end{itemize}
+
+We can use an example to show the process: suppose we take input from the stream 
+
+\fcj{[41, 35, 62, 5, 97, 108]}. 
+
+The run-though of the algorithm looks like this:
+
+\begin{lstlisting}[style=customc]
+/*
+Adding number 41
+MaxHeap lo: [41]
+MinHeap hi: []
+Median is 41
+=======================
+Adding number 35
+MaxHeap lo: [35]
+MinHeap hi: [41]
+Median is 38
+=======================
+Adding number 62
+MaxHeap lo: [41, 35]
+MinHeap hi: [62]
+Median is 41
+=======================
+Adding number 4
+MaxHeap lo: [35, 4]
+MinHeap hi: [41, 62]
+Median is 38
+=======================
+Adding number 97
+MaxHeap lo: [41, 35, 4]
+MinHeap hi: [62, 97]
+Median is 41
+=======================
+Adding number 108
+MaxHeap lo: [41, 35, 4]
+MinHeap hi: [62, 97, 108]
+Median is 51.5
+*/
+\end{lstlisting}
+
+\setcounter{lstlisting}{0}
+\begin{lstlisting}[style=customc, caption={Two Heaps}]
+class MedianFinder
+{
+public:
+    /** initialize your data structure here. */
+    MedianFinder()
+    {
+    }
+    void addNum( int num )
+    {
+        //add to max heap L
+        L.push( num );
+        //balance L and H
+        H.push( L.top() );
+        L.pop();
+        if( L.size() < H.size() )
+        {
+            //make sure L.size()>=H.size()
+            L.push( H.top() );
+            H.pop();
+        }
+    }
+    double findMedian()
+    {
+        if( L.size() > H.size() )
+        {
+            //L.top() is the answer
+            return static_cast<double>( L.top() );
+        }
+        //L.size()==H.size()-->the half of sum of tops
+        //is the answer
+        return static_cast<double>( L.top() + H.top() ) * 0.5;
+    }
+    //min-heap: minimum number at the top
+    priority_queue<int> H;
+    //max-heap" maximum number at the top
+    priority_queue<int, vector<int>, greater<int>> L;
+};
+\end{lstlisting}
+
+\subsection{Multiset And Two Pointers}
+
+We maintain two pointers: one for the lower median element and the other for the higher median element. 
+
+\begin{itemize}
+\item When the total number of elements is odd, both the pointers point to the same median element (since there is only one median in this case). 
+
+\item When the number of elements is even, the pointers point to two consecutive elements, whose mean is the representative median of the input.
+\end{itemize}
+
+\paragraph{Algorithm}
+We maintain two iterators/pointers $l$ and $h$ of a multiset $S$.
+
+While adding a number $n$, three cases arise:
+
+\begin{enumerate}
+\item $S$ is currently empty. We simply insert $n$ and set both pointers to point to this element.
+
+\item The container currently holds an odd number of elements. This means that both the pointers currently point to the same element.
+
+\begin{itemize}
+\item If $n$ is not equal to the current median element, $n$ goes on either side of it. Whichever side it goes, the size of that part increases and hence the corresponding pointer is updated. For example, if $n$ is less than the median element, the size of the smaller half of input increases by 1 on inserting $n$. In this case, we decrement $l$.
+\item If $n$ is equal to the current median element, then the action taken is dependent on how $n$ is inserted into $S$. In \fcj{C++}, \fcj{std::multiset::insert} inserts an element after all elements of equal value. As a result, we increment $h$.
+\end{itemize}
+
+\item The container currently holds an even number of elements. This means that the pointers currently point to consecutive elements.
+
+\begin{itemize}
+\item If $n$ is a number between both median elements, $n$ becomes the new median. Both pointers must point to it.
+\item Otherwise, $n$ increases the size of either the smaller or larger half of the input. We update the pointers accordingly. It is important to remember that both the pointers must point to the same element now.
+\end{itemize}
+\end{enumerate}
+
+\begin{lstlisting}[style=customc, caption={Multiset And Two Pointers}]
+class MedianFinder
+{
+public:
+    /** initialize your data structure here. */
+    MedianFinder()
+    {
+    }
+    void addNum( int num )
+    {
+        if( S.empty() )
+        {
+            S.insert( num );
+            l = S.begin();
+            h = S.begin();
+            return;
+        }
+        auto sz = S.size();
+        S.insert( num );
+        if( sz & 1 )
+        {
+            //add num change sz to even
+            if( num < *l )
+            {
+                //lower half increments
+                //decrement l iterator
+                --l;
+            }
+            else
+            {
+                //higher half increments
+                //increment h iterator
+                //num is added at the end of equal range
+                ++h;
+            }
+        }
+        else
+        {
+            //add num change sz to odd
+            if( ( num > *l ) && ( num < *h ) )
+            {
+                //num is between l and h
+                //l and h are not invalidated
+                ++l;
+                --h;
+            }
+            else if( num >= *h )
+            {
+                //larger half part increments
+                //we increments l iterator
+                ++l;
+            }
+            else
+            {
+                //num<=l<h
+                //lower half part increments
+                //we decrements h iterator
+                //if num==l
+                //num will added to the end of equal range
+                //we need to decrement h first
+                //and reset l to h
+                --h;
+                l = h;
+            }
+        }
+    }
+    double findMedian()
+    {
+        return static_cast<double>( *l + *h ) * 0.5;
+    }
+private:
+    multiset<int> S;
+    multiset<int>::iterator l;
+    multiset<int>::iterator h;
+};
+\end{lstlisting}
