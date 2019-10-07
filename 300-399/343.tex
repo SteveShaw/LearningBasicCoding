@@ -1,0 +1,81 @@
+\section{343 --- Integer Break}
+Given a positive integer $ n $, break it into the sum of at least two positive integers and maximize the product of those integers. Return the maximum product you can get.
+
+\paragraph{Example 1:}
+
+\begin{flushleft}
+\textbf{Input}: 2
+\\
+\textbf{Output}: 1
+\\
+\textbf{Explanation}: $2 = 1 + 1$, $1 \times 1 = 1$.
+\end{flushleft}
+
+\paragraph{Example 2:}
+
+\begin{flushleft}
+\textbf{Input}: 10
+\\
+\textbf{Output}: 36
+\\
+\textbf{Explanation}: $10 = 3 + 3 + 4$, $3 \times 3 \times 4 = 36$.
+\end{flushleft}
+
+\paragraph{Note:} 
+\begin{itemize}
+\item You may assume that $ n $ is not less than 2 and not larger than 58.
+\end{itemize}
+
+\subsection{Dynamic Programming}
+\begin{itemize}
+\item 假设$ F(n) $为整数$n$分解后能得到的最大product，我们需要从1到$ n-1 $逐个进行分解测试，
+\item 如果当前测试的数为$ i $，这时候$ n $ 分解成 $ i $和$ n-i $两个数字，那么有两种情况
+\begin{enumerate}
+\item $ n-i $不再进行分解，这时候的product为$i \times (n-i)$
+\item $n-i$ 继续分解，所能得到的最大product为 $ F(n-i) $， 而$ n $能得到的product为 $ i\times F[n-i] $
+\item 取这两者的最大值与当前$ F(n) $进行比较，将$ F(n) $ update为较大值。
+\end{enumerate}
+
+\begin{algorithm}[H]
+\caption{Dynamic Programming}
+\begin{algorithmic}[1]
+\Procedure{IntegerBreak}{$ n $}
+\State $\star$ Initialize an array $F$ with size $n+1$ with all elements set to 1
+\State $\ast$ Following is the dynamic programming process
+\For{$ i:=3 $ \textbf{to} $ n $}
+\For{$ j:=1 $ \textbf{to} $i-1$}
+\algstore{343algo}
+\end{algorithmic}
+\end{algorithm}
+\begin{algorithm}[H]
+\begin{algorithmic}[1]
+\algrestore{343algo}
+\State $F[i]\gets \max(F[i], i\times (n-i))$ \Comment Treat $n-i$ as one number
+\State $F[i]\gets \max(F[i], i\times F[n-1])$ \Comment Get maximum product by dissecting $n-i$
+\EndFor
+\EndFor
+\State \Return $F[n]$
+\EndProcedure
+\end{algorithmic}
+\end{algorithm}
+\end{itemize}
+
+\setcounter{lstlisting}{0}
+\begin{lstlisting}[style=customc, caption={Dynamic Programming}]
+int integerBreak( int n )
+{
+    vector<int> F( n + 1, 1 );
+
+    for( int i = 3; i <= n; ++i )
+    {
+        for( int j = 1; j < i; ++j )
+        {
+            F[i] = ( max )( F[i], ( i - j ) * j ); // (i-j) is one number
+            F[i] = ( max )( F[i], j * F[i - j] ); // dissecting (i-j)
+        }
+    }
+
+    return F[n];
+}
+
+\end{lstlisting}

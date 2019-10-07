@@ -1,0 +1,133 @@
+\section{395 --- Longest Substring with At Least K Repeating Characters}
+Find the length of the longest substring $T$ of a given string $S$ (consists of lowercase letters only) such that every character in $T$ appears no less than $k$ times.
+
+\paragraph{Example 1:}
+
+\begin{flushleft}
+\textbf{Input}: $S = \texttt{aaabb}$, $k = 3$
+\\
+\textbf{Output}: 3
+\\
+\textbf{Explanation}: The longest substring is \texttt{aaa}, as \texttt{a} is repeated 3 times.
+\end{flushleft}
+
+\paragraph{Example 2:}
+
+\begin{flushleft}
+\textbf{Input}: $S = \texttt{ababbc}$, $k = 2$
+\\
+\texttt{Output}: 5
+\\
+\textbf{Explanation}: The longest substring is \texttt{ababb}, as \texttt{a} is repeated 2 times and \texttt{b} is repeated 3 times.
+\end{flushleft}
+
+\subsection{Mask With Hash Map}
+\begin{enumerate}
+\item 用mask来解决确认当前sliding window中的字符的出现次数是否大于或者等于$k$。由于字母只有26个，而整型mask有32位，每一位代表一个letter。当该letter出现次数小于$k$，时，将对应的bit位设为1，否则设为0。
+\item 遍历字符串，对于当前的遍历到的位置$i$，将其视为一个sliding window的起点，然后遍历到字符串末尾。因此需要双重循环。
+\item 在遍历当前sliding window时，统计每个letter的出现次数，按照刚才的方法设定mask。然后check mask是否为0。
+\begin{itemize}
+\item 如果mask为0， 表示从当前index $i$到字符串末尾的sliding window中出现了一个符合题目要求的substring，然后与全局最大长度进行比较，如果这个substring的长度比全局最大长度还大，那么update全局最大长度为这个substring的长度，另外将这个substring的end position保存为$p$。
+\end{itemize}
+\item 当遍历完当前sliding window后，将下一个遍历的位置更新为$p+1$。以寻找可能的具有更大长度的substring。
+\end{enumerate}
+
+\setcounter{lstlisting}{0}
+\begin{lstlisting}[style=customc, caption={Mask With Hash Map}]
+int longestSubstring( string s, int k )
+{
+    int start = 0;
+    int L = static_cast<int>( s.size() );
+
+    int ans = 0;
+
+    //only search until there are remaining k letters
+    while( start + k <= L )
+    {
+        //counts of each letter
+        int m[26] = {0};
+
+        //the end index of the substring with maximum size
+        int max_end = start;
+
+        int mask = 0;
+
+        for( int i = start; i < L; ++i )
+        {
+            int ci = s[i] - 'a';
+            m[ci] += 1;
+
+            if( m[ci] < k )
+            {
+                //set ci bit to 1
+                mask |= ( 1 << ci );
+            }
+            else
+            {
+                //set ci bit to 0
+                mask &= ( ~( 1 << ci ) );
+            }
+
+            if( mask == 0 )
+            {
+                //found a substring
+                int l = i - start + 1;
+                if( l > ans )
+                {
+                    //update ans
+                    //and the end
+                    ans = l;
+                    max_end = i;
+                }
+            }
+        }
+
+        //next start will start from next position
+        //of the substring
+        start = max_end + 1;
+    }
+
+    return ans;
+}
+\end{lstlisting}
+
+\subsection{Divide and Conquer}
+\begin{itemize}
+\item Count each letter's appearances in $S$
+\item Iterate $S$ again. If current letter's counts is less than $k$, divide the string into two parts at this index
+\item Recursively doing the same thing for the two parts and get the maximum results of the two parts
+\end{itemize}
+
+\begin{lstlisting}[style=customc, caption={Recursion}]
+int longestSubstring( string s, int k )
+{
+    int m[26] = {0};
+
+    for( auto c : s )
+    {
+        m[c - 'a'] += 1;
+    }
+
+    size_t p = 0;
+
+    for( ; p < s.size(); ++p )
+    {
+        if( m[s[p] - 'a'] < k )
+        {
+            break;
+        }
+    }
+
+    if( p == s.size() )
+    {
+        //all letters in s appear no less than k
+        return static_cast<int>( s.size() );
+    }
+
+    //divide s into two parts s[0,p-1] and s[p, l-1]
+    int left = longestSubstring( s.substr( 0, p ), k );
+    int right = longestSubstring( s.substr( p + 1 ), k );
+
+    return ( max )( left, right );
+}
+\end{lstlisting}

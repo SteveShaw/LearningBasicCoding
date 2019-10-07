@@ -1,0 +1,152 @@
+\section{327 --- Count of Range Sum}
+Given an integer array $ A $, return the number of range sums that lie in $ [l, u] $ inclusive.
+Range sum $ S(i, j) $ is defined as the sum of the elements in $ A $ between indices $ i $ and $ j $ ($ i \leq j $), inclusive.
+
+\paragraph{Note:}
+\begin{itemize}
+\item A naive algorithm of $ O(n^2) $ is trivial. You MUST do better than that.
+\end{itemize}
+
+\paragraph{Example:}
+
+\begin{flushleft}
+\textbf{Input}: $ A = [-2,5,-1] $, \quad $ l = -2 $, \quad $ u = 2 $
+\\
+\textbf{Output}: 3 
+\\
+\textbf{Explanation}: 
+\\
+The three ranges are : $ [0,0] $, $ [2,2] $, $ [0,2] $ and their respective sums are:$  -2 $, $ -1 $, $ 2 $.
+\end{flushleft}
+\subsection{Prefix Sum}
+\begin{itemize}
+\item 获得$A$的prefix sum array $Z$。
+\item 对于当前的prefix sum $Z[j]$，要找到某个$Z[i]$，使得$l\leq Z[j]-Z[i]\leq u$。即$Z[j]-u\leq Z[i]\leq Z[j]+l$。这个分别通过leftmost and rightmost binary search可以快速定位。
+\item 由于prefix sum可能会相同，因此tree map的value是一个array，用来存放对应的index。
+\item 最后统计有多少个index满足上述要求。
+\item 为了防止数据类型越界，map和prefix sum array的数据类型都用\texttt{long long}。
+\end{itemize}
+\setcounter{lstlisting}{0}
+\begin{lstlisting}[style=customc, caption={Tree Map And Binary Search}]
+int countRangeSum( vector<int>& nums, int lower, int upper )
+{
+    vector<long long> Z( nums.size() + 1, 0 );
+
+    map<long long, vector<int>> m;
+    m.emplace( 0, initializer_list<int> {-1} );
+
+    int ans = 0;
+
+    int L = static_cast< int >( nums.size() );
+
+    for( int i = 1; i <= L; ++i )
+    {
+        Z[i] = Z[i - 1] + nums[i - 1];
+
+        //find the first key in m
+        //which is equal or larger than Z[i]- upper
+        auto it_low = m.lower_bound( Z[i] - upper );
+
+        if( it_low != m.end() )
+        {
+            //If this key exists
+            //then search for the first key in m
+            //which is larger than Z[i]-lower
+            auto it_high = m.upper_bound( Z[i] - lower );
+
+            if( it_high != m.begin() )
+            {
+                //The numbers between *it_low and *it_hight
+                //are all candidates. Then accumulate their
+                //counts, i.e. the size of the array
+                for( auto it = it_low; it != it_high; ++it )
+                {
+                    ans += static_cast< int >( it->second.size() );
+                }
+            }
+        }
+
+        //Put Z[i] into m
+        auto it = m.find( Z[i] );
+        if( it == m.end() )
+        {
+            m.emplace( Z[i], std::initializer_list<int> {i} );
+        }
+        else
+        {
+            it->second.push_back( i );
+        }
+    }
+
+    return ans;
+}
+\end{lstlisting}
+\subsection{Merge Sort}
+\begin{itemize}
+\item 仍然是计算prefix sum。
+\item 假设当前的left part和right part都已经sorted。当遍历left part时，对于每个index $i$，需要在right part中找出两个index $k$和$j$，使得
+\begin{enumerate}
+\item $ Z[j] $ is the first such that $Z[j] - Z[i] > u$
+\item $ Z[k] $ is the first such that $ Z[k] - Z[i] \geq l $
+\end{enumerate}
+这样满足difference为$ [l,u] $之间的区间的个数就是$j-k$。
+\item 另外由于这是merge sort，需要另外一个index $\alpha$，用来copy所有满足$Z[\alpha]<Z[i]$的prefix sum到一个cache中以便完成排序的过程。
+\item 同样为了避免数据类型越界，prefix sum的类型也是\texttt{long long}。
+\end{itemize}
+\begin{lstlisting}[style=customc, caption={Merge Sort}]
+int countRangeSum( vector<int>& nums, int lower, int upper )
+{
+    //get prefix sum
+    vector<long> sums( nums.size() + 1, 0 );
+    for( int i = 0; i < nums.size(); ++i )
+    {
+        sums[i + 1] = sums[i] + nums[i];
+    }
+    //call merge sort function
+    return countAndMergeSort( sums, 0, sums.size(), lower, upper );
+}
+int countAndMergeSort( vector<long> &sums, int start, int end, int lower, int upper )
+{
+    if( end - start <= 1 ) return 0;
+
+    int mid = start + ( end - start ) / 2;
+    //split sums into [start,mid-1] and [mid, end]
+    int cnt = countAndMergeSort( sums, start, mid, lower, upper ) + countAndMergeSort( sums, mid, end, lower, upper );
+
+    int j = mid, k = mid, t = mid;
+
+    //cache will have the sorted sums elements between start and end
+    vector<int> cache( end - start, 0 );
+
+    for( int i = start, r = 0; i < mid; ++i, ++r )
+    {
+        //find the first sums[k] in right part
+        //so that sums[k] - sum[i] >= lower
+        while( ( k < end ) && ( sums[k] - sums[i] < lower ) )
+        {
+            ++k;
+        }
+
+        //find the first sums[j] in right part
+        //so that sums[j] - sum[i] < upper
+        while( ( j < end ) && ( sums[j] - sums[i] <= upper ) )
+        {
+            ++j;
+        }
+
+        //Put all numbers in the right half that less than sums[i]
+        //into cache
+        while( ( t < end ) && ( sums[t] < sums[i] ) )
+        {
+            cache[r++] = sums[t++];
+        }
+        cache[r] = sums[i];
+
+        //The indices between [k,j] are
+        //making the range sum fall between [lower, upper]
+        cnt += j - k;
+    }
+    copy( cache.begin(), cache.begin() + t - start, sums.begin() + start );
+    return cnt;
+}
+\end{lstlisting}

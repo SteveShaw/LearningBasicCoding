@@ -1,0 +1,88 @@
+\section{386 --- Lexicographical Numbers}
+Given an integer $n$, return 1 --- $n$ in lexicographical order.
+\par
+For example, given 13, return: $[1,\;10,\;11,\;12,\;13,\;2,\;3,\;4,\;5,\;6,\;7,\;8,\;9]$.
+\par
+Please optimize your algorithm to use less time and space. The input size may be as large as 5,000,000
+
+\subsection{DFS}
+Just repeatedly try from 1 to 9, $1 \to 10 \to 100$ first, and then plus 1 to the deepest number. Take 13 as example:
+\begin{itemize}
+\item $1\to 10 \to 100$, but 100 is larger than 13, then
+\item $11\to 110$, but 110 is larger than 13, then
+\item $12\to 120$, but 120 is larger than 13, then
+\item $13\to 130$, but 130 is larger than 13, then
+\item $2 \to 20$, but 20 is larger than 13, then
+\item $3 \to 30$, but 30 is larger than 13, then
+\item $\ldots$
+\item $9\to 90$, then we stop
+\end{itemize}
+
+\setcounter{algorithm}{0}
+\begin{algorithm}[H]
+\caption{DFS}
+\begin{algorithmic}[1]
+\Procedure{LexicalOrder}{$n$}
+\State $\star$ Create an array $A$ to store the results
+\State \Call{DFS}{$1, n, A$} \Comment Call helper function
+\State \Return $A$
+\EndProcedure
+\end{algorithmic}
+\end{algorithm}
+
+Function \texttt{DFS} generate the sequence with lexical order from number $x$ to $n$ and save the results to $A$
+
+\begin{algorithm}[H]
+\caption{Helper Function}
+\begin{algorithmic}[1]
+\Function{DFS}{$x, n, A$}
+\If{$x > n$}
+\State \Return
+\EndIf
+\algstore{386algo}
+\end{algorithmic}
+\end{algorithm}
+\begin{algorithm}[H]
+\begin{algorithmic}[1]
+\algrestore{386algo}
+\State $A\gets A+n$ \Comment Add current number to $A$
+\State \Call{DFS}{$x\times 10, n, A$} \Comment try ten times,i.e. add zero
+\If{$x\bmod 10 \neq 9$} \Comment $x$ is not end with number 9
+\State \Call{DFS}{$x+1, n, A$} \Comment try plus 1
+\EndIf
+\EndFunction
+\end{algorithmic}
+\end{algorithm}
+
+\setcounter{lstlisting}{0}
+\begin{lstlisting}[style=customc, caption={DFS}]
+vector<int> lexicalOrder( int n )
+{
+    vector<int> ans;
+
+    dfs( 1, n, ans );
+
+    return ans;
+
+}
+//helper function to generate
+//lexical order sequence from x to n
+void dfs( int x, int n, vector<int>& ans )
+{
+    if( x > n )
+    {
+        return;
+    }
+
+    ans.push_back( x );
+
+    //try to add zeros to x
+    dfs( x * 10, n, ans );
+
+    if( ( x % 10 ) != 9 )
+    {
+        //try next number to x
+        dfs( x + 1, n, ans );
+    }
+}
+\end{lstlisting}

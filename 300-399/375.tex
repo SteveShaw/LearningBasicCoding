@@ -1,0 +1,109 @@
+\section{375 --- Guess Number Higher or Lower II}
+We are playing the Guess Game. The game is as follows:
+
+\begin{itemize}
+\item I pick a number from 1 to $ n $. You have to guess which number I picked.
+
+\item Every time you guess wrong, I'll tell you whether the number I picked is higher or lower.
+
+\item However, when you guess a particular number $ x $, and you guess wrong, you pay \$$x$. You win the game when you guess the number I picked.
+\end{itemize}
+
+\paragraph{Example:}
+
+\begin{flushleft}
+$ n = 10 $, I pick 8.
+\\
+First round:  You guess 5, I tell you that it's higher. You pay \$5.
+\\
+Second round: You guess 7, I tell you that it's higher. You pay \$7.
+\\
+Third round:  You guess 9, I tell you that it's lower. You pay \$9.
+\\
+Game over. 8 is the number I picked.
+\\
+You end up paying $\$5 + \$7 + \$9 = \$21$
+\end{flushleft}
+
+Given a particular $n \geq 1$, find out how much money you need to have to guarantee a win.
+
+\subsection{MinMax Algorithm}
+\begin{itemize}
+\item 建立一个二维的数组$F$用于Dynamic Programming，其中$F[i][j]$表示从数字$i$到$j$之间猜中任意一个数字最少需要花费的钱数。
+\item 需要遍历每一段可能的区间$[x, y]$，用$t$表示全局最小值，然后遍历$ [x,y] $的中每一个数字$k$，猜中$k$所需要花费的money $u_k = k + \max(F[x][k - 1], F[k + 1][i])$，也就是是将区间$ [x,y] $在每一个位置$k$都分为两段，然后取当前位置的花费加上左右两段中较大的花费之和。
+\item 取两者之间的较大值的原因是在MinMax中，需要从最坏的情况下获得最佳值。
+\item 最后取$\underbrace{\min}_{x< k < y}u_k$作为$F[x][y]$。
+\item 如果$y=x+1$，很显然$F[x][y]=x$。
+\end{itemize}
+
+\setcounter{algorithm}{0}
+\begin{algorithm}[H]
+\caption{Dynamic Programming}
+\begin{algorithmic}[1]
+\Procedure{GetMoneyAmount}{$n$}
+\State $\star$ 创建二维数组$F$作为递推数组，大小为$n\times n$
+\State $ \star $We use $[0,n-1]$ to represent integers in $[1,n]$
+\For{$i:=0$ \textbf{to} $n-1$}
+\State $F[i][i]=0$ \Comment Since $i$ is the guess number, so no money is needed
+\EndFor
+\For{$i:=0$ \textbf{to} $n-2$}
+\State $F[i][i+1]=i+1$ \Comment We try to guess the smaller number $i+1$ to put less money $i+1$
+\EndFor
+\For{$\ell:=3$ \textbf{to} $n$}  \label{375note1}
+\For{$x:=0$ \textbf{to} $n-\ell$} \label{375note2}
+\State $y:=x+\ell-1$ \Comment range $[x,y]$
+\State $F[x][y] \gets +\infty$
+\For{$k:=x+1$ \textbf{to} $y-1$} \label{375note3}
+\State $u := k+1+\max(F[x][k-1], F[k+1][y])$ \Comment The money needed to guess number $k+1$
+\State $F[x][y]\gets \min(F[x][y], u)$ \Comment Update the money to guess number in range $[x,y]$
+\EndFor \Comment End loop[\ref{375note3}]
+\EndFor \Comment End loop[\ref{375note2}]
+\EndFor \Comment End loop[\ref{375note1}]
+\State \Return $F[0][n-1]$
+\EndProcedure
+\end{algorithmic}
+\end{algorithm}
+
+\setcounter{lstlisting}{0}
+\begin{lstlisting}[style=customc, caption={Dynamic Programming}]
+int getMoneyAmount( int n )
+{
+    //we use [0,n-1] to represent range [1,n]
+    vector<vector<int>> F( n, vector<int>( n, INT_MAX ) );
+
+    for( int i = 0; i < n; ++i )
+    {
+        //i is the correct guessed number
+        //no money is needed
+        F[i][i] = 0;
+    }
+
+    for( int i = 0; i < n - 1; ++i )
+    {
+        //we want to guess smaller number i+1
+        //to put less money i+1
+        //notice we use [0,n-1] to represent range [1,n]
+        F[i][i + 1] = i + 1;
+    }
+
+    for( int l = 3; l <= n; ++l )
+    {
+        for( int x = 0; x + l - 1 < n; ++x )
+        {
+            int y = x + l - 1;
+
+            //find minimum money for guessing number in range
+            //[x+1][y+1]
+            for( int k = x + 1; k < y; ++k )
+            {
+                //for each number k+1
+                //the cost to guess this number
+                int u = k + 1 + ( max )( F[x][k - 1], F[k + 1][y] );
+                F[x][y] = ( min )( F[x][y], u );
+            }
+        }
+    }
+
+    return F[0][n - 1];
+}
+\end{lstlisting}

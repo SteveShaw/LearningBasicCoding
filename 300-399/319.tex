@@ -1,0 +1,36 @@
+\section{319 --- Bulb Switcher}
+There are $ n $ bulbs that are initially off. You first turn on all the bulbs. Then, you turn off every second bulb. On the third round, you toggle every third bulb (turning on if it's off or turning off if it's on). For the $ i $-th round, you toggle every $ i $ bulb. For the $ n $-th round, you only toggle the last bulb. Find how many bulbs are on after n rounds.
+
+\paragraph{Example:}
+
+\begin{flushleft}
+\textbf{Input}: 3
+\\
+\textbf{Output}: 1 
+\\
+\textbf{Explanation}: 
+\\
+At first, the three bulbs are [\texttt{off}, \texttt{off}, \texttt{off}].
+\\
+After first round, the three bulbs are [\texttt{on}, \texttt{on}, \texttt{on}].
+\\
+After second round, the three bulbs are [\texttt{on}, \texttt{off}, \texttt{on}].
+\\
+After third round, the three bulbs are [\texttt{on}, \texttt{off}, \texttt{off}]. 
+\\
+So you should return 1, because there is only one bulb is on.
+\end{flushleft}
+\subsection{Mathematic Induction}
+\begin{itemize}
+\item A bulb最后如果是on的状态，那么它一定是被toggle了奇数次。
+\item bulb $ i $ 在 round $ x $如果被toggle了，那么$ i\bmod x = 0 $。因此如果bulb $ i $最后是on的状态，那么它一定有奇数个divisors。
+\item Suppose $ i=12 $， 那么它的divisors为$ (1,\;12) $，$ (2,\;6) $，$ (3,\;4) $。很显然对于一般的数来说由于divisor都是成对出现的，因此divisor的数量都是偶数。只有一种情况除外，即square number。在这种情况下，由于某两个divisor是相等的，因此divisor的数量为奇数。
+\item 综上所述，最后处于on状态的bulb的编号肯定是平方数。而要计算小于等于$ n $的平方数的个数，直接对$n$开平方取整即可。因为假设$R=\lfloor\sqrt{n}\rfloor$，那么小于$ n $的完全平方数的根就是从1到$ R $，即总共有$R$个。
+\end{itemize}
+\setcounter{lstlisting}{0}
+\begin{lstlisting}[style=customc, caption={Count Of Square Numbers}]
+int bulbSwitch( int n )
+{
+    return sqrt( n );
+}
+\end{lstlisting}

@@ -1,0 +1,277 @@
+\section{324 --- Wiggle Sort II}
+Given an unsorted array $ A $, reorder it such that $A[0] < A[1] > A[2] < A[3] \ldots$
+
+\paragraph{Example 1:}
+
+\begin{flushleft}
+\textbf{Input}: $A = [1, 5, 1, 1, 6, 4]$
+\\
+\textbf{Output}: One possible answer is $ [1, 4, 1, 5, 1, 6] $.
+\end{flushleft}
+
+\paragraph{Example 2:}
+
+\begin{flushleft}
+\textbf{Input}: $A = [1, 3, 2, 2, 3, 1]$
+\\
+\textbf{Output}: One possible answer is $ [2, 3, 1, 3, 1, 2] $.
+
+\end{flushleft}
+\paragraph{Note:}
+\begin{itemize}
+\item You may assume all input has valid answer.
+\end{itemize}
+
+\paragraph{Follow Up:}
+\begin{itemize}
+\item Can you do it in $ O(n) $ time and/or in-place with $ O(1) $ extra space?
+\end{itemize}
+
+\subsection{Sort}
+\begin{itemize}
+\item Copy原数组到$B$，对B进行排序
+\item 从中间将$B$分为两个部分，用两个index，分别指向左右两个部分的最后一个元素
+\item 然后遍历原数组，先把左边的最后一个元素放入原数组的第一个位置，然后把右边的最后一个元素放入原数组的第二个位置，接着是左边的倒数第二个元素，然后是右边的倒数第二个元素。依次类推。
+\end{itemize}
+\setcounter{algorithm}{0}
+\begin{algorithm}[H]
+\caption{Sort}
+\begin{algorithmic}[1]
+\Procedure{WiggleSort}{$A, L$}
+\State $\star$ Copy $A$ to $B$ and then sort $B$
+\State $x:=L-1$ \Comment The last position of right part
+\State $y:=(L-1)/2$ \Comment The last position of left part
+\For{$i:=0$ \textbf{to} $L-1$}
+\If{$i\bmod 2=0$} 
+\State $ A[i]\gets B[y] $ \Comment Put $B[y]$ at $A[0], A[2],\ldots$
+\State $y\gets y-1$
+\Else
+\State $ A[i]\gets B[x] $ \Comment Put $B[x]$ at $A[1], A[3],\ldots$
+\State $x\gets x-1$
+\EndIf
+\EndFor
+\EndProcedure
+\end{algorithmic}
+\end{algorithm}
+\setcounter{lstlisting}{0}
+\begin{lstlisting}[style=customc, caption={Sort}]
+void wiggleSort( vector<int>& nums )
+{
+    vector<int> A( nums.begin(), nums.end() );
+
+    sort( A.begin(), A.end() );
+
+    int L = static_cast<int>( A.size() );
+
+    //split A into left and right parts
+    //at middle
+    // A[x] is the last element of right part
+    int x = L - 1;
+    // A[y] is the last element of left part
+    int y = ( L - 1 ) / 2;
+
+
+    //Put A[y] at A[0], A[2], ...
+    //Put A[x] at A[1], A[3], ...
+    for( int i = 0; i < L; ++i )
+    {
+        if( i & 1 )
+        {
+            nums[i] = A[x];
+            --x;
+        }
+        else
+        {
+            nums[i] = A[y];
+            --y;
+        }
+    }
+}
+\end{lstlisting}
+\subsection{Partition Based On Median}
+\begin{itemize}
+\item 首先找到按照median element对$A$进行partition(基于quick select的方法，这种方法的平均复杂度是$ O(n) $)，注意，parition后，$A$中numbers的位置都发生了变化，而中间位置的number为$A$的median number。
+\item 由于$A$在经过quick select之后，$A(0,\ldots \lfloor (L-1)/2\rfloor)$都是小于median value的number，而$A(\lfloor L/2\rfloor, L-1)$都是大于median value的number，为了能够得到wiggle sort的排列方式，需要将quick select之后$A$中前半段的indcies即$[0\ldots (L-1)/2]$放到$A$中的even indices上，而后半段的indices即$[(L+1)/2\ldots L-1]$放到$A$中的odd indices上。
+\par
+举例说明，Suppose $ A = [10,11,\ldots 19]$. 经过quick select median value的partition，$A$可能变为
+\begin{table}[H]
+\begin{tabular}{l*{10}{c}}
+index: &  0 &  1 &  2 &  3 &   4 &   5 &  6 &  7 &  8 &   9\\
+\hline
+$A$[index]:&  11 & 14&  10&  13&   15&   18&  17 & 19&  16&  15
+\end{tabular}
+\end{table}
+其中median为15，目标是将$A$ rearrange为
+\begin{table}[H]
+\begin{tabular}{l*{10}{c}}
+Index: &  0 & 1 & 2 & 3 & 4 & 5 & 6 & 7 & 8 & 9 \\
+Mapped: &  5 & 0 & 6 & 1 & 7 & 2 & 8 & 3 & 9 & 4\\
+\hline
+$A$[index]:&  11 & 18 & 14 & 17 & 10 & 19 & 13 & 16 & 12 & 15
+\end{tabular}
+\end{table}
+其中，大于15的值在quick select后的indicies都在$[5, 9]$中，rearrange后这些数被放入到$A$的奇数indicies中，即$1, 3, 5, \ldots$中。同理，小于15的值在quick select后的indicies都在$[0,3]$中，rearrange后这些数被放入到$A$的偶数indicies中，即$0,2,4,\ldots$中。
+\item 一种简单易行的index mapping算法如下
+\begin{algorithm}[H]
+\caption{Index Mapping Method}
+\begin{algorithmic}[1]
+\Procedure{M}{$i, n$}
+\State $\ast$ We need to find the closest odd number to $n$ which is $n\lor 1$
+\State \Return $(2\times i +1)\bmod(n\lor 1)$ 
+\EndProcedure
+\end{algorithmic}
+\end{algorithm}
+可以看出，通过这个算法，前半段的index映射为奇数，而后半段的index映射为偶数。例如对于0--9，其对应的mapping index如下所示
+\begin{table}[H]
+\begin{tabular}{l*{10}{c}}
+Original: &  0 & 1 & 2 & 3 & 4 & 5 & 6 & 7 & 8 & 9 \\
+Mapped: & 1  &  3 &   5 &   7 &  9 &   0  &  2  &  4 &   6 &   8
+\end{tabular}
+\end{table}
+与之前我们需要rearrange的目标相比，刚好是相反的。
+\item 因此为了能够使用上述index mapping算法，采用three-way partition算法。从左到右遍历quick select后的$A$，看当前index的mapping index上$A$的值，由于上述算法和我们的rerarrnage目标相反，所以要将大于median value的swap到前半段indidices的mapping indices上，即那些奇数位置，而小于median value的swap到后半段indices的mapping indices上，即那些偶数位置。所以$A$中三个部分：top, middle 和bottom，top对应大于median value的numbers，middle对应等于median value的numbers，而bottom就是那些小于median value的numbers。
+算法如下：
+\begin{algorithm}[H]
+\caption{Three-way partition}
+\begin{algorithmic}[1]
+\Procedure{WiggleSort}{$A, L$}
+\State $\star$ Partition $A$ so that median number $\pi$ is at index  $\lfloor (L-1)/2\rfloor$ with quick select algorithm
+\algstore{324algo}
+\end{algorithmic}
+\end{algorithm}
+\begin{algorithm}[H]
+\begin{algorithmic}[1]
+\algrestore{324algo}
+\State $l:=0$ \Comment The index to be mapped to put numbers larger than $\pi$
+\State $m:=0$ \Comment The index to be mapped to put numbers equal to $\pi$
+\State $r:=n-1$ \Comment The index to be mapped to put put numbers less than $\pi$
+\While{$m < r$}
+\State $\hat{m}:=$ \Call{M}{$ m $} \Comment Get mapped index
+\If{$A[\hat{m}] > \pi$}
+\State $ \hat{l}:= $ \Call{M}{$ l $} \Comment Get mapped index to put the numbers larger than median
+\State Swap $A[\hat{l}]$ with $A[\hat{m}]$
+\State $m\gets m+1$
+\State $l\gets l+1$
+\ElsIf{$A[\hat{m}] < \pi$}
+\State $ \hat{r}:= $ \Call{M}{$ r $} \Comment Get mapped index to put the numbers less than median
+\State Swap $A[\hat{r}]$ with $A[\hat{m}]$
+\State $r\gets r-1$
+\Else \Comment Put median value in mapped $m$
+\State $m\gets m+1$ 
+\EndIf
+\EndWhile
+\EndProcedure
+\end{algorithmic}
+\end{algorithm}
+\end{itemize}
+\begin{lstlisting}[style=customc, caption={Quick Select And Three-way Partition}]
+void wiggleSort( vector<int>& nums )
+{
+    //quick select to arrange nums by putting
+    //median value at center
+    nth_element( nums.begin(), nums.begin() + nums.size() / 2, nums.end() );
+
+    //the median value
+    int md = nums[nums.size() / 2];
+
+    //index mapping function
+    auto getIndex = []( int i, int L )
+    {
+        return ( 2 * i + 1 ) % ( L );
+    };
+
+    int sz = static_cast<int>( nums.size() );
+    int oddSz = ( sz | 1 );
+
+    int l = 0; //top part
+    int m = 0; //middle part
+    int r = sz - 1; //bottom part
+
+    while( m <= r )
+    {
+        //get mapped index
+        int mi = getIndex( m, oddSz );
+        if( nums[mi] > md )
+        {
+            //top part has the numbers
+            //that are larger than median value
+            //because top part indices are mapped
+            //to odd indices
+            int li = getIndex( l, oddSz );
+            swap( nums[mi], nums[li] );
+            ++m;
+            ++l;
+        }
+        else if( nums[mi] < md )
+        {
+            //bottom part has the numbers
+            //that are smaller than median value
+            //because bottom part indices are mapped
+            //to even indices
+            int ri = getIndex( r, oddSz );
+            swap( nums[mi], nums[ri] );
+            --r;
+        }
+        else
+        {
+            ++m;
+        }
+    }
+}
+
+\end{lstlisting}
+\subsection{Three Way Parition}
+\begin{itemize}
+\item 这个算法最开始是解决如下问题的：
+\par
+The flag of the Netherlands consists of three colors: red, white and blue. Given balls of these three colors arranged randomly in a line (the actual number of balls does not matter), the task is to arrange them such that all balls of the same color are together and their collective color groups are in the correct order.
+\item 该算法将一个数组$A$分为三个部分: bottom, middle, and top
+\item 在该算法中
+\begin{itemize}
+\item the top group grow down from the top of the array (即从右到左)
+\item the bottom group grow up from the bottom (即从左到右)
+\item keep the middle group just above the bottom
+\end{itemize}
+\item Three-way partition算法保存三个indices，分别是
+\begin{enumerate}
+\item the index just below the top group
+\item the index just above the bottom group, and
+\item the index just above the middle.
+\end{enumerate}
+\item At each step, examine the element just right to the middle.
+\begin{enumerate}
+\item If it belongs to the top group, swap it with the element just below the top.
+\item If it belongs in the bottom, swap it with the element just above the bottom.
+\item If it is in the middle, leave it. Update the appropriate index. 
+\end{enumerate}
+\item Complexity is $ O(n) $ moves and examinations.
+\end{itemize}
+对应的算法如下，算法中
+\begin{itemize}
+\item Maintain 3个indices $l$, $ m $ and $ r $。其中$ l\leq m $
+\item $r$ holds the boundary of numbers greater than middle $M$.
+\item $m$ is the position of number under consideration.
+\item $l$ is the boundary for the numbers lesser than the middle $M$.
+\end{itemize}
+\begin{algorithm}[H]
+\caption{Three-way Partition Algorithm}
+\begin{algorithmic}[1]
+\Procedure{ThreeWayPartition}{$A, L, M$} \Comment M is the middle value
+\State $l:=0$
+\State $r:=L-1$
+\State $m:=0$
+\While{$m\leq r$}
+\If{$A[m] < M$}
+\State $\star$ Swap $A[m]$ and $A[l]$
+\State $l\gets l+1$
+\State $m\gets m+1$
+\ElsIf{$ A[m] > M $}
+\State $\star$ Swap $A[m]$ and $A[r]$
+\State $r\gets r-1$
+\Else
+\State $m\gets m+1$
+\EndIf
+\EndWhile
+\EndProcedure
+\end{algorithmic}
+\end{algorithm}

@@ -1,0 +1,212 @@
+\section{352 --- Data Stream as Disjoint Interxs}
+Given a data stream input of non-negative integers $ a_1 $, $ a_2 $,$ \ldots$, $ a_n $, $ \ldots $, summarize the numbers seen so far as a list of disjoint interxs.
+\par
+For example, suppose the integers from the data stream are $ 1, 3, 7, 2, 6, \ldots $, then the summary will be:
+\begin{tabular}{ccc}
+$ [1, 1] $ & & \\
+$ [1, 1] $ & $ [3, 3] $ & \\
+$ [1, 1] $ & $ [3, 3 $] & $ [7, 7] $\\
+$ [1, 3] $ & $ [7, 7] $  & \\
+$ [1, 3] $ & $ [6, 7] $
+\end{tabular}
+
+
+\paragraph{Follow up:}
+\begin{itemize}
+\item What if there are lots of merges and the number of disjoint interxs are small compared to the data stream's size?
+\end{itemize}
+\subsection{Binary Search}
+\begin{itemize}
+\item 和merge range的题目相同。
+\item 用一个tree map作为数据结构，其中key是range的start，而value则是range的end。
+\item 对每次加入的value $x$，用upper bound (rightmost binary search)找到第一个start大于$ x $的range。总共有如下三种情况
+\begin{enumerate}
+\item $x$比当前map中的最后一个range的start大，这时候比较$x$和最后一个range的end，如果$x$刚好等于这个end加1，那么将这个$x$ merge到最后一个range，同时修改这个range的end为$x$。而如果$x$小于这个range的end，说明$x$落在这最后一个range内，不需要做处理。如果$x$不能和最后一个range merge，创建一个新的range $[x,x]$。
+\item $x$小于当前map的第一个range的start，如果$x$和第一个range的start相差1，将$x$ merge到第一个range，同时修改第一个range的start为$x$。否则，$ x $不能和第一个range merge
+，创建一个新的range $[x,x]$。
+\item $x$落在当前map的两个range中间。这时候需要比较$x$与右边的range的start以及$x$与左边的range的end。
+\begin{itemize}
+\item 如果$x$和右边range的start相差1，需要把$x$和右边range进行merge，即将右边range的start修改为$x$。
+\item 如果$x$小于或者等于左边range的end，那么说明$x$落在左边range中，需要把$x$ merge到左边的range中。
+\item 如果$x$和左边range的end相差1，也需要把$x$和左边range进行merge，即将左边range的end修改为$x$。
+\item 如果$x$即能够和右边range merge，又能够和左边range merge，说明右边和左边的range都要merge到一起。需要把左边和右边的range从map中删除，代替以一个新的range，这个新的range将包含之前左边和右边的range。
+\end{itemize}
+\end{enumerate}
+\end{itemize}
+下面的算法是function \texttt{addNum}的算法描述。
+\setcounter{algorithm}{0}
+\begin{algorithm}[H]
+\caption{Binary Search}
+\begin{algorithmic}[1]
+\Procedure{AddNum}{$x$}
+\State $\star$ tree map $M$ is the member of class
+\If{$M$ is empty}
+\State $M[x]:=x$ \Comment 插入range $ [x,x] $
+\State \Return
+\EndIf
+\State $\star$ 在$M$中找到第一个range $r$，其start $r_0$大于$ x $
+\If{$x$ is larger than the start $ r_0 $ of last range $r$ in $M$}
+\State $\ast$ 比较$x$与$ r $的end $r_1$
+\If{$x-r_1=1$ }
+\State $r_1\gets x$ \Comment Modify the end of $r$ as $x$
+\ElsIf{$x-r_1>1$} \Comment $x$ does not touch $r$
+\State $M[x]:=x$ \Comment 插入range $ [x,x] $
+\EndIf
+\State \Return
+\EndIf
+\If{$x$ is smaller than the start $ r_0 $ of first range $r$ in $M$}
+\State $\ast$ 比较$x$与$ r $的start $r_0$
+\If{$r_0-x=1$}
+\State $r_0\gets x$ \Comment Modify the start of $r$ as $x$
+\Else \Comment $x$ does not touch $r$
+\State $M[x]:=x$ \Comment 插入range $ [x,x] $
+\EndIf
+\algstore{352algo}
+\end{algorithmic}
+\end{algorithm}
+\begin{algorithm}[H]
+\begin{algorithmic}[1]
+\algrestore{352algo}
+\State \Return
+\EndIf
+\State $\ast$ $r$既不是第一个也不是最后一个range。
+\State $\star$ Get the previous range $l$ in $M$ next to $r$
+\State $\alpha:=x$ \Comment The start of new range
+\State $\beta:=x$ \Comment The end of new range
+\If{$r_0-x=1$} \Comment $x$ touch $r$
+\State $\beta \gets r_1$ \Comment Update the end of new range
+\State $\ast$ 将$r$从$M$中删除
+\EndIf
+\If{$x-l_1=1$ \textbf{or} $x_1\leq l_1$} \Comment $x$ can be merged with $l$
+\State $\alpha\gets \min(\alpha, l_0)$ \Comment The start of new range is the smaller of $l$'s start $l_0$ and $\alpha$
+\State $\beta\gets \max(\beta, l_1)$ \Comment The end of new range is the bigger of $l$'s end $l_1$ and $\beta$
+\State $\ast$ 将$l$从$M$中删除
+\EndIf
+\State $M[\alpha]:=\beta$ \Comment 插入range $ [\alpha,\beta] $
+\EndProcedure
+\end{algorithmic}
+\end{algorithm}
+
+\setcounter{lstlisting}{0}
+\begin{lstlisting}[style=customc, caption={Binary Search}]
+class SummaryRanges
+{
+public:
+    /** Initialize your data structure here. */
+    SummaryRanges()
+    {
+
+    }
+
+    void addNum( int val )
+    {
+
+        if( m_itv.empty() )
+        {
+            m_itv.emplace( val, val );
+            return;
+        }
+
+        //auto it = m_itv.find(
+        auto it = m_itv.upper_bound( val );
+
+        if( it == m_itv.end() )
+        {
+            --it;
+            if( val == it->second + 1 )
+            {
+                //merge
+                it->second = val;
+            }
+            else if( val > it->second + 1 )
+            {
+                //not touched, create a new interval
+                m_itv.emplace( val, val );
+            }
+            //in other cases val is inside the range [it->first, it->second]
+
+            return;
+        }
+
+        if( it == m_itv.begin() )
+        {
+            if( it->first - val == 1 )
+            {
+                //merge
+                int b = val;
+                int e = it->second;
+
+                m_itv.erase( it );
+                m_itv.emplace( b, e );
+
+            }
+            else
+            {
+                //not touched, create a new interval
+                m_itv.emplace( val, val );
+            }
+
+            return;
+        }
+
+
+        auto prev = it;
+        --prev;
+
+        int b = val;
+        int e = val;
+
+        bool b_del_right = false;
+
+        if( it->first - val == 1 )
+        {
+            //merge: we must create a new interval
+            b = val;
+            e = it->second;
+
+            b_del_right = true;
+        }
+
+        bool b_del_left = false;
+        if( ( val <= prev->second ) || ( val - prev->second == 1 ) )
+        {
+            b = ( min )( prev->first, b );
+            e = ( max )( prev->second, e );
+            b_del_left = true;
+        }
+
+        if( b_del_right )
+        {
+            m_itv.erase( it );
+        }
+
+        if( b_del_left )
+        {
+            m_itv.erase( prev );
+        }
+
+        //insert new range [b,e]
+        m_itv.emplace( b, e );
+    }
+
+    vector<vector<int>> getIntervals()
+    {
+        vector<vector<int>> ans;
+        ans.reserve( m_itv.size() );
+
+        for( const auto&p : m_itv )
+        {
+            ans.emplace_back( initializer_list<int> {p.first, p.second} );
+        }
+
+        return ans;
+    }
+
+    map<int, int> m_itv;
+};
+\end{lstlisting}
+
+\subsection{Follow Up}
+\begin{itemize}
+\item 如果有大量的merge操作，而disjoint interxs相对来说较少的情况下，上述binary search的算法是最佳的。
+\end{itemize}

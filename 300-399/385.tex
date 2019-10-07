@@ -1,0 +1,228 @@
+\section{385 --- Mini Parser}
+Given a nested list of integers represented as a string, implement a parser to deserialize it.
+\par
+Each element is either an integer, or a list -- whose elements may also be integers or other lists.
+
+\paragraph{Note:} 
+\begin{itemize}
+\item You may assume that the string is well-formed:
+\begin{itemize}
+\item String is non-empty.
+\item String does not contain white spaces.
+\item String contains only digits 0-9, left and right bracket, comma and dash.
+\end{itemize}
+
+\end{itemize}
+
+
+\paragraph{Example 1:}
+\begin{flushleft}
+\textbf{Input}: $S=324$
+\\
+\textbf{Output}:
+\\
+You should return a \texttt{NestedInteger} object which contains a single integer 324.
+\end{flushleft}
+
+\paragraph{Example 2:}
+\begin{flushleft}
+\textbf{Input}: $[123,[456,[789]]]$
+\\
+\textbf{Output}:
+\\
+Return a \texttt{NestedInteger} object containing a nested list with 2 elements:
+\begin{enumerate}
+\item An integer containing value 123.
+\item A nested list containing two elements:
+\begin{enumerate}
+\item An integer containing value 456.
+\item A nested list with one element:
+\begin{enumerate}
+\item An integer containing value 789.
+\end{enumerate}
+\end{enumerate}
+\end{enumerate}
+\end{flushleft}
+
+\subsection{Stack}
+\begin{enumerate}
+\item 个人觉得NestedInteger这个类必须是copyable的
+\item 如果字符串只包含数字，那么stack是emtpy，需要考虑这种情况。
+\item 遇到一个left bracket，就往stack中放入一个新的\texttt{NestedInteger}。
+\item 遇到逗号，要么前面是数字，这时候创建一个包含该数字的\texttt{NestedInteger}，并加入到stack的top element的list中。不是数字的话，则已经创建出了一个list的\texttt{NestedInteger}，并已经加入到stack的top element中，所以可以跳过。
+\item 遇到right bracket，检查stack是否包含两个或两个以上的元素，如果是，则将当前的top element弹出，加入到其下一层的\texttt{NestedInteger} object中。如果不是，则表示我们已经搜寻到了字符串的末尾了。可以直接跳过
+\item 最后返回stack的top element
+\end{enumerate}
+
+\setcounter{lstlisting}{0}
+\begin{lstlisting}[style=customc, caption={Iterative With Stack}]
+NestedInteger deserialize( string s )
+{
+    stack<NestedInteger> stk;
+
+    int x = 0;
+    int sign = 1;
+
+    char last = 0;
+
+    for( auto c : s )
+    {
+        if( c == '[' )
+        {
+            //add a new NestedInteger object
+            stk.push( NestedInteger() );
+            continue;
+        }
+
+        if( c == '-' )
+        {
+            //the sign symbol
+            sign = -1;
+            last = c;
+            continue;
+        }
+
+        if( ( c >= '0' ) && ( c <= '9' ) )
+        {
+            x = x * 10 + ( c - '0' );
+            last = c;
+            continue;
+        }
+
+        if( c == ',' )
+        {
+            if( ( last >= '0' ) && ( last <= '9' ) )
+            {
+                //last element is number
+                //add to top element
+                stk.top().add( NestedInteger( x * sign ) );
+                x = 0;
+                sign = 1;
+            }
+
+            last = c;
+            continue;
+        }
+
+        if( c == ']' )
+        {
+            if( ( last >= '0' ) && ( last <= '9' ) )
+            {
+                //add a new NestedInteger object to top element
+                stk.top().add( NestedInteger( x * sign ) );
+
+                x = 0;
+                sign = 1;
+            }
+
+            if( stk.size() > 1 )
+            {
+                //pop top and add to its parent
+                auto t = stk.top();
+                stk.pop();
+
+                stk.top().add( t );
+            }
+
+            last = c;
+        }
+    }
+
+    if( stk.empty() )
+    {
+        //s only contain numbers
+        return NestedInteger( x * sign );
+    }
+
+    return stk.top();
+}
+\end{lstlisting}
+
+\subsection{Recursive}
+\begin{enumerate}
+\item Iterate over $s$, if a left bracket is met, recursively parsing the substring starting from next index.
+\item otherwise, extract a number from $s$ and add to current \texttt{NestInteger} object.
+\item For comma, just skip.
+\item For right bracket, end current build process
+\end{enumerate}
+
+\begin{lstlisting}[style=customc, caption={Recursion}]
+NestedInteger deserialize( string s )
+{
+    size_t p = 0;
+
+    if( s[p] == '[' )
+    {
+        //call function to create list
+        return parse_list( s, p );
+    }
+
+    //call function to create number
+    return parse_digit( s, p );
+}
+
+NestedInteger parse_list( string& s, size_t& start )
+{
+    ++start; //skip '['
+    NestedInteger obj_ni;
+
+    while( start < s.size() )
+    {
+        auto c = s[start];
+        if( c == '[' )
+        {
+            obj_ni.add( parse_list( s, start ) );
+        }
+        else if( ( c == '-' ) || ( ( c <= '9' ) && ( c >= '0' ) ) )
+        {
+            obj_ni.add( parse_digit( s, start ) );
+        }
+        else if( c == ',' )
+        {
+            //skip
+            ++start;
+        }
+        else if( c == ']' )
+        {
+            ++start; //skip ']' and then break
+            break;
+        }
+    }
+
+    return obj_ni;
+}
+
+NestedInteger parse_digit( string& s, size_t& start )
+{
+    int x = 0;
+    int sign = 1;
+    //check if the number is negative
+    if( s[start] == '-' )
+    {
+        sign = -1;
+    }
+    else
+    {
+        x = s[start] - '0';
+    }
+
+    ++start;
+
+    while( start < s.size() )
+    {
+        auto c = s[start];
+
+        if( ( c > '9' ) || ( c < '0' ) )
+        {
+            break;
+        }
+
+        x = x * 10 + ( c - '0' );
+
+        ++start;
+    }
+
+    return NestedInteger( x * sign );
+}
+\end{lstlisting}
+

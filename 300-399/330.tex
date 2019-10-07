@@ -1,0 +1,112 @@
+\section{330 --- Patching Array}
+Given a sorted positive integer array $A$ and an integer $ n $, add/patch elements to the array such that any number in range $ [1, n] $ inclusive can be formed by the sum of some elements in the array. Return the minimum number of patches required.
+
+\paragraph{Example 1:}
+
+\begin{flushleft}
+\textbf{Input}: $A = [1,3]$, $n = 6$
+\\
+\textbf{Output}: 1 
+\\
+\textbf{Explanation}:
+\\
+Combinations of $A$ are $[1]$, $[3]$, $ [1,3] $, which form possible sums of: 1, 3, 4.
+\\
+Now if we add/patch 2 to $ A $, the combinations are: $ [1] $, $ [2] $, $ [3] $, $ [1,3] $, $ [2,3] $, $ [1,2,3] $.
+\\
+Possible sums are 1, 2, 3, 4, 5, 6, which now covers the range $ [1, 6] $.
+\\
+So we only need 1 patch.
+\end{flushleft}
+
+\paragraph{Example 2:}
+
+\begin{flushleft}
+\textbf{Input}: $ A = [1,5,10] $, $ n = 20 $
+\\
+\textbf{Output}: 2
+\\
+\textbf{Explanation}: The two patches can be $ [2, 4] $.
+\end{flushleft}
+
+\paragraph{Example 3:}
+
+\begin{flushleft}
+\textbf{Input}: $A = [1,2,2]$, $n = 5$
+\\
+\textbf{Output}: 0
+\end{flushleft}
+\subsection{Dynamic Programming}
+\begin{enumerate}
+\item 定义一个变量$ x $，用来表示目前数组$A$加上已经有的patch number不能够build出的最小值，即当前build出的range为$[0\ldots x-1]$。
+\item 初始化为$x$为1。
+\item 由于能得到的数字范围是$[0, x-1]$，如果在$A$中有number $y\leq x$，那么我们可以把build的范围扩大到$[0\ldots x-1+y]$。
+\item 而如果$y>x$，那么此时就需要添加一个patch number。这个number需要选择为能最大限度的增加能够得到的range。很显然这个数就是$x$。
+\item 按照上述过程遍历完整个数组，即可得到结果所要求的patch number。
+\end{enumerate}
+例如，假设输入数组$A = [1, 5, 10] $， $ n=20 $。
+\begin{itemize}
+\item 初始化$x$为1。即最开始能够得到range为$[0]$。
+\item 由于$A$中第一个数1小等于$x$，因此直接加上这个数扩展range。这时候range扩展为$[0, 1]$，$x$更新为2。
+\item $A$下一个数5对于2来说比较大，因此要加上一个patch number $x$即2，扩展range到$[0, 3]$，$x$更新为4。
+\item 接下来5仍然大于$x$，因此继续加上一个patch number 4，扩展range到$[0,8]$，$x$更新为9。
+\item 由于这时候5小于$x$，加上这个数继续扩展range，这时候range扩展为$[0, 14]$，$x$更新为15。
+\item  $A$再下一个数10小于15，加上这个扩展range为$[0, 25]$。已经能够覆盖$[0,20]$了。
+\end{itemize}
+
+\setcounter{algorithm}{0}
+\begin{algorithm}[H]
+\caption{Dynamic Programming}
+\begin{algorithmic}[1]
+\Procedure{MinPatches}{$A, L, n$}
+\State $x:=1$ \Comment We have built range $ [0\ldots x-1] $
+\State $\alpha:=0$ \Comment The number of patches
+\State $i:=0$ \Comment The index in $A$
+\While{$ x \leq  n $}
+\If{$i<L$ \textbf{and} $ A[i] \leq x $}
+\State $x\gets x+A[i]$ \Comment Extend the range to $[0\ldots x-1+A[i]]$
+\State $i\gets i+1$
+\Else
+\State $x\gets x$ \Comment Add a patch number $x$ to extend range to $[0\ldots x-1+x]$
+\State $\alpha\gets \alpha+1$ \Comment Increments the number of patches
+\EndIf
+\EndWhile
+\State \Return $\alpha$
+\EndProcedure
+\end{algorithmic}
+\end{algorithm}
+
+\setcounter{lstlisting}{0}
+\begin{lstlisting}[style=customc, caption={Dynamic Programming}]
+int minPatches( vector<int>& nums, int n )
+{
+    //expand to long long type
+    //to avoid data type overflow
+    long long x = 1;
+    auto ll_n = static_cast<int>( n );
+
+    size_t i = 0;
+    int ans = 0;
+
+    while( x <= ll_n )
+    {
+        if( ( i < nums.size() ) && ( nums[i] <= x ) )
+        {
+            //extend the range to [0,x-1+nums[i]]
+            x += nums[i];
+            ++i;
+        }
+        else
+        {
+            //add a patch number x
+            //extend the range to [0, x-1+x]
+            x += x;
+            ++ans;
+        }
+    }
+
+    return ans;
+}
+
+\end{lstlisting}
+

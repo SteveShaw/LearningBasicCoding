@@ -1,0 +1,680 @@
+\section{307 --- Range Sum Query: Mutable}
+Given an integer array $A$, find the sum of the elements between indices $i$ and $j$ ($i \leq j$), inclusive.
+\par
+The \texttt{update} function modifies $A$ by updating the element at index $i$ to a given value.
+\begin{lstlisting}[style=customc]
+void update( int i, int val )
+{
+}
+\end{lstlisting}
+
+\paragraph{Example:}
+
+\begin{lstlisting}[style=customc]
+//A = [1, 3, 5]
+sumRange(0, 2) // 9
+update(1, 2)
+sumRange(0, 2) // 8
+\end{lstlisting}
+
+\paragraph{Note:}
+
+\begin{itemize}
+\item The array is only modifiable by the \texttt{update} function.
+\item You may assume the number of calls to \texttt{update} and \texttt{sumRange} function is distributed evenly.
+\end{itemize}
+
+\subsection{Bit Indexed Tree}
+\begin{itemize}
+\item Bit Indexed Tree 的存储方式是array.
+\item BIT的每个node存放的是原有数组中某些元素的sum。
+\item The size of the BIT is equal to the size of the input array。In actual implementation, the size of BIT array is $n+1$ where $n$ is the size of the input array.
+\end{itemize}
+如果要得到sum of the subarray $A[0\ldots x]$,算法步骤如下：
+\begin{enumerate}
+\item Denote the sum as $y$ and $B$ as the array for BIT，从index $i = L+1$开始进行循环，其中$L$是$ A $的长度。
+\item 循环中的每一步
+\begin{itemize}
+\item $y\gets y+B[i]$
+\item 然后Go to the parent of $B[i]$，这里$ B[i] $的parent是通过removing the last 1 bit from $ i $得到的，即$i\gets i - (i\land(-i))$。
+\end{itemize}
+\end{enumerate}
+For example: suppose $A = [2, 1, 1, 3, 2, 3, 4, 5, 6, 7, 8, 9]$，生成的BIT如下所示
+\begin{figure}[H]
+\begin{tikzpicture}
+[my/.style={draw, circle split, fill=red!20!}]
+\node[my](0){\footnotesize {$ 0 $}\nodepart{lower}{\footnotesize \texttt{Dummy}}};
+\node[my](1)[below=1cm of 0, xshift=-4cm]{\footnotesize {$ 2 $}\nodepart{lower}{\footnotesize $ 1 $}};
+\node[my](2)[below=1cm of 0, xshift=-2cm]{\footnotesize {$ 3 $}\nodepart{lower}{\footnotesize $ 2 $}};
+\node[my](3)[below=1cm of 0, xshift=3mm]{\footnotesize {$ 7 $}\nodepart{lower}{\footnotesize $ 4 $}};
+\node[my](4)[below=1cm of 0, xshift=4.3cm]{\footnotesize {$ 21 $}\nodepart{lower}{\footnotesize $ 8 $}};
+\node[my](5)[below=1cm of 2, xshift=-8mm]{\footnotesize {$ 1 $}\nodepart{lower}{\footnotesize $3$}};
+\node[my](6)[below=1cm of 3, xshift=-8mm]{\footnotesize {$ 2 $}\nodepart{lower}{\footnotesize $ 5 $}};
+\node[my](7)[below=1cm of 3, xshift=8mm]{\footnotesize {$ 5 $}\nodepart{lower}{\footnotesize $ 6 $}};
+\node[my](8)[below=1cm of 4, xshift=-1.4cm]{\footnotesize {$ 6 $}\nodepart{lower}{\footnotesize $ 9 $}};
+\node[my](9)[below=1cm of 4]{\footnotesize {$ 13 $}\nodepart{lower}{\footnotesize $ 10 $}};
+\node[my](10)[below=1cm of 4, xshift=1.4cm]{\footnotesize {$ 30 $}\nodepart{lower}{\footnotesize $ 12 $}};
+\node[my](11)[below=1cm of 7]{\footnotesize {$ 4 $}\nodepart{lower}{\footnotesize $ 7 $}};
+\node[my](12)[below=1cm of 9]{\footnotesize {$ 8 $}\nodepart{lower}{\footnotesize $ 11 $}};
+\draw[line width=1pt] (0)--(1);
+\draw[line width=1pt] (0)--(2);
+\draw[line width=1pt] (0)--(3);
+\draw[line width=1pt] (0)--(4);
+\draw[line width=1pt] (2)--(5);
+\draw[line width=1pt] (3)--(6);
+\draw[line width=1pt] (3)--(7);
+\draw[line width=1pt] (4)--(8);
+\draw[line width=1pt] (4)--(9);
+\draw[line width=1pt] (4)--(10);
+\draw[line width=1pt] (7)--(11);
+\draw[line width=1pt] (9)--(12);
+\end{tikzpicture}
+\end{figure}
+其中
+\begin{itemize}
+\item $B[0]$ 是dummy node
+\item $B[y]$ is the parent of $B[x]$ if $y=x-(x\land(-x))$
+\item $ B[y] $的子节点$ B[x] $保存的是$A[y\ldots x]$的sum。
+\end{itemize}
+对于Update操作，即update index $i$ by adding a value $t$ or $A[i]\gets A[i]+t$，算法大致步骤如下
+\begin{enumerate}
+\item 同样从从index $i = L+1$开始进行循环，其中$L$是$ A $的长度。
+\item 在循环的每一步：
+\begin{itemize}
+\item Update $B[i]$ as $B[i] + t$
+\item Go to parent of $ B[i] $，这里$ B[i] $的parent是通过incrementing the last 1 bit of current index $ i $得到的，即$i\gets i + (i\land(-i))$。
+\end{itemize}
+\end{enumerate}
+\subsubsection{How does Binary Indexed Tree work?}
+\begin{itemize}
+\item The idea is based on the fact that all positive integers can be represented as the sum of powers of 2。例如19可以表示成$19=16+2+1$。
+\item BIT中的每个node保存的是sum of $n$ elements where n is a power of 2。例如，在上述示意图中，the sum of the first 12 elements 可以分为两个部分
+\begin{enumerate}
+\item The sum of the last 4 elements (from 9 to 12)。
+\item The sum of the first 8 elements (from 1 to 8)。
+\end{enumerate}
+\item 而number $ n$对应的二进制数中bit 1的个数是$ \lceil\log n\rceil $。因此上述两个操作最多只需要遍历$ \lceil\log n\rceil $ nodes。
+\item 构建$BIT$的时间复杂度为$ O(n\log n) $，因为需要call update operation for all $ n $ elements。
+\end{itemize}
+相关的算法如下:
+\begin{enumerate}
+\item Get sum of $A[0\ldots i]$
+\setcounter{algorithm}{0}
+\begin{algorithm}[H]
+\caption{Get Sum of $ A[0\ldots i] $}
+\begin{algorithmic}[1]
+\Procedure{GetSum}{$B, i$}
+\State $z:=0$
+\State $i\gets i+1$ \Comment Index in $ B $ is 1 more than the one in $ A $
+\While{$ i>0 $}
+\State $z\gets z+B[i]$
+\State $i\gets i - (i\land (-1))$ \Comment Move to the parent of $i$
+\EndWhile 
+\EndProcedure
+\end{algorithmic}
+\end{algorithm}
+\item Update BIT by adding the given value $ d $ to $B[i+1]$ and all of its ancestors.
+\begin{algorithm}[H]
+\caption{Update BIT at index $ i+1 $ and all its ancestors}
+\begin{algorithmic}[1]
+\Procedure{Update}{$ B, L, i, d $}
+\State $i\gets i+1$ \Comment Change to index in $B$
+\While{$i \leq L-1$} \Comment $L-1$ is the length of original array
+\State $ B[i]\gets B[i] + d $ \Comment Add $ d $ to current node of BIT
+\State $ i\gets i + i\land(-i)  $
+\EndWhile
+\EndProcedure
+\end{algorithmic}
+\end{algorithm}
+\item Contruct BIT, suppose the input array $A$ has size $ n $
+\begin{algorithm}[H]
+\caption{Construct BIT}
+\begin{algorithmic}[1]
+\Procedure{Construct}{$ A, n $}
+\State $\star$ 创建一个大小为$ n+1 $的数组$B$作为BIT，同时初始化所有元素为零
+\State $\ast$ Call \texttt{Update} by adding $A[i]$ to $B[i+1]$ and all of its ancetors
+\For{$i:=0$ \textbf{to} $ n-1 $}
+\State \Call{Update}{$ B, n+1, i, A[i] $}
+\EndFor 
+\State \Return $ B $
+\EndProcedure
+\end{algorithmic}
+\end{algorithm}
+\end{enumerate}
+运用到本题中，要注意到\texttt{Update}中，输入的$d$其实是$A[i]$的增量。而在本题中，value是$A[i]$update之后的值，所以$d$就是$ A[i] $前后的插值。
+\setcounter{lstlisting}{0}
+\begin{lstlisting}[style=customc, caption={BIT}]
+class NumArray
+{
+public:
+    NumArray( vector<int> nums )
+    {
+
+        int n = static_cast<int>( nums.size() );
+
+        vector<int> tmp( n + 1, 0 );
+
+        swap( tmp, BIT );
+
+        swap( A, nums );
+
+        //Construct BIT
+        for( int i = 0; i < n; ++i )
+        {
+            updateBIT( i, A[i] );
+        }
+
+    }
+
+    //update BIT for the changes values in A[i]
+    void updateBIT( int i, int diff )
+    {
+        int x = i + 1;
+        int n = static_cast<int>( A.size() );
+
+        while( x <= n )
+        {
+            BIT[x] += diff;
+            x += ( x & ( -x ) );
+        }
+    }
+
+    //val is the value that A[i] will be updated to
+    //not the different
+    void update( int i, int val )
+    {
+
+        int diff = val - A[i];
+
+        //Don't forget to update A[i]
+        A[i] = val;
+
+        updateBIT( i, diff );
+
+    }
+
+    int getSum( int i )
+    {
+        int x = i + 1;
+
+        int sum = 0;
+
+        while( x > 0 )
+        {
+            sum += BIT[x];
+
+            x -= ( x & ( -x ) );
+        }
+
+        return sum;
+    }
+
+    int sumRange( int i, int j )
+    {
+
+        int s1 = getSum( i - 1 );
+        int s2 = getSum( j );
+
+        return s2 - s1;
+    }
+
+
+    vector<int> BIT;
+
+    vector<int> A;
+};
+
+\end{lstlisting}
+\subsection{Segment Tree}
+这是range sum最典型的数据结构，其中
+\begin{itemize}
+\item 叶子节点是输入数组的elements.
+\item Each internal node represents some merging of the leaf nodes. The merging are different for different problems. 对于本题, merging 则代表 the sum of leaves under a node.
+\item Segment Trees一般用array来代表。For each node at index $i$, the left child is at index $2\times i+1$, right child at $2\times i+2$ and the parent is at $ \lfloor (i-1)/2\rfloor $ 
+\item 和Heap不同，Segment Tree不是完全二叉树，只是full binary tree，即每个node有0或者2 nodes。
+\end{itemize}
+具体的算法包括Construct，Query和Update。
+\begin{itemize}
+\item Construction:
+\begin{enumerate}
+\item Start the whole array $A[0\ldots L-1]$ as the first segment
+\item Every time, 如果当前segment的length不为1，则将其对半划分为两个部分，然后对这两个部分继续下一层递归。
+\end{enumerate}
+\begin{itemize}
+\item 由于构建出的tree是full binary tree with $ n $ leaves，因此总共有$ n-1 $ internal nodes。这样total nodes有$ 2\times n -1 $。
+\item Tree的高度为$ \lceil log_2{n}\rceil $。总共需要分配大小为$ 2\times 2^{\lceil log_2{n}\rceil}-1 $的memory。
+\end{itemize}
+\begin{algorithm}[H]
+\caption{Segment Tree Construction}
+\begin{algorithmic}[1]
+\Procedure{Construct}{$ A, n $} \Comment Input array $A$ has size $n$
+\State $\star$ 创建大小为$ 2\times 2^{\lceil log_2{n}\rceil}-1 $的array $T$ 作为 Segment Tree
+\State $\ast$ Call helper function to recursively building segment tree $T$ from $T[0]$ for range $A[0\ldots n-1]$
+\State \Call{ConstructUtil}{$ A, 0, n-1, T, 0 $} 
+\EndProcedure
+\end{algorithmic}
+\end{algorithm}
+
+\begin{algorithm}[H]
+\caption{Construct Helper Function To Recursively Building Segment Tree}
+\begin{algorithmic}[1]
+\Procedure{ConstructUtil}{$ A, l, r, T, x $}
+\State $\ast$ Build leaf node
+\If{$l=r$}
+\State $T[x]\gets A[l]$
+\State \Return $T[x]$
+\EndIf
+\State $m:=(l+r)/2$ \Comment 对半划分$ A[l\ldots r]$
+\State $\ast$ Recursively building left substree for $A[l\ldots m]$
+\State $\ast$ 这时候$T[x]$的left child node is $2\times x+1$
+\algstore{307algo}
+\end{algorithmic}
+\end{algorithm}
+\begin{algorithm}[H]
+\begin{algorithmic}[1]
+\algrestore{307algo}
+\State $s_0:=$\Call{ConstructUtil}{$ A, l, m, T, 2\times x+1 $}
+\State $\ast$ Recursively building right substree for $A[m+1\ldots r]$
+\State $\ast$ 这时候$T[x]$的right child node is $2\times x+2$
+\State $s_1:=$\Call{ConstructUtil}{$ A, m+1, r, T, 2\times x+2 $}
+\State $\ast$ Merge left and right subtree results (Here is the sum)
+\State $T[x]\gets s_0+s_1$
+\State \Return $T[x]$
+\EndProcedure
+\end{algorithmic}
+\end{algorithm}
+\item Query: Suppose we want to query the range sum of $A[l\ldots r]$, and the segment tree is $T$.  Since $T[0]$ contains the range sum of $A[0,n-1]$($n$ is the size of $A$), the recursion starts with $T[0]$ for range $[0,n-1]$.
+\begin{itemize}
+\item Notice: In the algorithm, we don't need $A$.
+\end{itemize}
+\begin{algorithm}[H]
+\caption{Get Range Sum For Segment Tree}
+\begin{algorithmic}[1]
+\Procedure{GetSum}{$T, n, l, r, 0$}
+\If{$l > n-1$ \textbf{or} $r < 0$} \Comment Query range $ [l\ldots r] $ is outside of $[0\ldots n-1]$
+\State \Return An invalid result
+\EndIf
+\State $\ast$ The recursion starts with $T[0]$ for range $[0,n-1]$.
+\State \Return \Call{GetSumUtil}{$ T, 0, n-1, l, r, 0 $}
+\EndProcedure
+\end{algorithmic}
+\end{algorithm}
+\begin{algorithm}[H]
+\caption{Helper Function To Get Range Sum}
+\begin{algorithmic}[1]
+\Procedure{GetSumUtil}{$T, \alpha, \beta ,l, r, x$}
+\State $\ast$ Check if range $ [\alpha,\beta] $ is completely contained by the query range $ [l,r] $
+\If{ $\alpha \geq l$ \textbf{and} $ \beta \leq r $ }
+\State Node $x$ of $T$ has the sum for range $ [l,r] $
+\State \Return $ T[x] $
+\ElsIf{$\beta<l$ \textbf{or} $ \alpha > r $} \Comment Range $ [\alpha,\beta] $ does not overlap with the query range $ [l,r] $
+\State \Return 0 \Comment We must return 0
+\Else \Comment Range $ [\alpha,\beta] $ does not overlap with the query range $ [l,r] $
+\algstore{307algo}
+\end{algorithmic}
+\end{algorithm}
+\begin{algorithm}[H]
+\begin{algorithmic}[1]
+\algrestore{307algo}
+\State $\ast$ 分别对$ T[i] $的left and right child node进行递归。
+\State $m:=(\alpha+\beta)/2$
+\State $\ast$ Recursively process the left child tree of $T[x]$
+\State $s_0:=$\Call{GetSumUtil}{$ T, \alpha, m, l ,r, 2\times x + 1 $}
+\State $\ast$ Recursively process the right child tree of $T[x]$
+\State $s_1:=$\Call{GetSumUtil}{$ T, m+1, \beta, l ,r, 2\times x + 2 $}
+\State $\ast$ Merge the result (here is the sum)
+\State \Return $s_0 + s_1$
+\EndIf
+\EndProcedure
+\end{algorithmic}
+\end{algorithm}
+\item Update:  Suppose we are updating $A[i]$ to V. 
+\begin{enumerate}
+\item Starts from root of the segment tree and add $ \delta:= V-A[i] $ to all nodes which have given index $ i $ in their range.
+\item If a node does not have given index $ i $ in its range, no any change to this node.
+\end{enumerate}
+\begin{algorithm}[H]
+\caption{Update Segment Tree When $A[i]$ is updated to $V$}
+\begin{algorithmic}[1]
+\Procedure{Update}{$ T, A, n, i, V$}
+\State $\star$ Make sure $i$ is inside $[0,n-1]$
+\State $\delta:=V-A[i]$
+\State $\ast$ The recursion starts with $T[0]$ for range $[0,n-1]$.
+\State \Call{UpdateUtil}{$ T, 0, n-1, i, 0, \delta $}
+\EndProcedure
+\end{algorithmic}
+\end{algorithm}
+\begin{algorithm}[H]
+\caption{Helper Function: $A[i]$ is updated to $A[i]+\delta$}
+\begin{algorithmic}[1]
+\Procedure{UpdateUtil}{$ T, \alpha, \beta, i, x, \delta $}
+\State $\ast$ If $i$ lies outside of range $[\alpha, \beta]$, just return
+\If{$i>\beta$ \textbf{or} $ i<\alpha $}
+\State \Return
+\EndIf
+\State $T[x]\gets T[x]+\delta$ \Comment Update node $x$ of segment tree $T$
+\algstore{307algo}
+\end{algorithmic}
+\end{algorithm}
+\begin{algorithm}[H]
+\begin{algorithmic}[1]
+\algrestore{307algo}
+\If{$\alpha \neq \beta$} \Comment \textbf{Important}: the range must have at least two elements
+\State $m:=(\alpha+\beta)/2$
+\State $\ast$ Update left subtree of $T[x]$
+\State \Call{Update}{$ T, \alpha, m, i , 2\times x+1, \delta $} 
+\State $\ast$ Update right subtree of $T[x]$
+\State \Call{Update}{$ T, m+1, \beta, i , 2\times x+2, \delta $} 
+\EndIf
+\EndProcedure
+\end{algorithmic}
+\end{algorithm}
+\end{itemize}
+用Segment Tree作为本题的Solution的代码如下
+\begin{lstlisting}[style=customc, caption={Solution Code With Segment Tree}]
+class NumArray
+{
+public:
+    NumArray( vector<int> nums )
+    {
+        if( nums.empty() )
+        {
+            return;
+        }
+
+        swap( A, nums );
+
+
+        int n = static_cast<int>( A.size() );
+
+        //This is the height of the segment tree
+        int h = static_cast< int >( log2( n ) + 1 );
+        //The size of the segment tree
+        int sz = ( 1 << ( h + 1 ) ) - 1;
+
+        vector<int> tmp( sz, 0 );
+
+        swap( tmp, st );
+
+        //Build Segment Tree
+        buildUtil( 0, n - 1, 0 );
+    }
+
+    int buildUtil( int start, int end, int ti )
+    {
+        if( start == end )
+        {
+            st[ti] = A[start];
+            return st[ti];
+        }
+
+        int mid = ( start + end ) / 2;
+        int l = buildUtil( start, mid, 2 * ti + 1 );
+        int r = buildUtil( mid + 1, end, 2 * ti + 2 );
+
+        st[ti] = l + r;
+        return st[ti];
+    }
+
+
+    void updateUtil( int start, int end, int a_pos, int diff, int t_pos )
+    {
+        if( ( a_pos < start ) || ( a_pos > end ) )
+        {
+            return;
+        }
+
+        st[t_pos] += diff;
+
+        //Very important:
+        //Stop update when start = end
+        if( start != end )
+        {
+            int mid = ( start + end ) / 2;
+
+            updateUtil( start, mid, a_pos, diff, t_pos * 2 + 1 );
+            updateUtil( mid + 1, end, a_pos, diff, t_pos * 2 + 2 );
+        }
+
+    }
+
+    void update( int i, int val )
+    {
+        int n = static_cast<int>( A.size() );
+
+        if( ( i < 0 ) || ( i > n - 1 ) )
+        {
+            return;
+        }
+
+        int diff = val - A[i];
+
+        A[i] = val;
+
+        updateUtil( 0, n - 1, i, diff, 0 );
+    }
+
+    int getSum( int start, int end, int i, int j, int ti )
+    {
+        //if the given range [i,j] include [start, end]
+        //return the number in st[ti]
+        if( ( start >= i ) && ( end <= j ) )
+        {
+            return st[ti];
+        }
+
+        //[i,j] does not overlap with [start, end]
+        if( ( start > j ) || ( end < i ) )
+        {
+            //Return 0 since we cannot get
+            //any value for this range
+            return 0;
+        }
+
+        int mid = ( start + end ) / 2;
+
+        int l = getSum( start, mid, i, j, ti * 2 + 1 );
+        int r = getSum( mid + 1, end, i, j, ti * 2 + 2 );
+
+        return l + r;
+    }
+
+    int sumRange( int i, int j )
+    {
+        int n = static_cast<int>( A.size() );
+
+        if( ( j < 0 ) || ( i > n - 1 ) )
+        {
+            return -1;
+        }
+
+
+        return getSum( 0, n - 1, i, j, 0 );
+    }
+
+    vector<int> st;
+    vector<int> A;
+};
+
+\end{lstlisting}
+\subsection{Iterative Segment Tree}
+上述代码中，Segment Tree的内存空间有很多浪费，实际上可以把Segment Tree的内存压缩的更多，这样就是iterative segment tree的实现方法
+\begin{itemize}
+\item 这种方法中，segment tree的array的大小为$2\times N$，其中$N$是输入数组的大小。
+
+\item The leaf nodes start from index $N$ and go up to index $ 2\times N -1 $。因此，$A[i]$在segment tree array中的index为$ i+N $o
+\item 如果要得到某个element的parents，就要从index $ N-1 $出发，move upward。Now to calculate the parents, we will start from index (N – 1) and move upward. 
+\item For an index $ i $， its left child is at $ 2\times i $ and right child will be at $ 2\times i + 1 $ index。 So the values at nodes $ 2\times i $ and $ 2\times i + 1 $ is combined at $i$th node to construct the tree.
+\end{itemize}
+实现算法伪代码如下，首先是build
+\begin{algorithm}[H]
+\caption{Iterativly Build Segment Tree}
+\begin{algorithmic}[1]
+\Procedure{Build}{$A, n, T$}
+\For{$i:=0$ \textbf{to} $ n-1 $}
+\State $ T[i+n]\gets A[i] $ \Comment Leaf nodes
+\EndFor
+\For{$i:=n-1$ \textbf{to} $ 0 $}
+\State $ T[i]\gets T[i\times 2] + T[i\times 2 +1] $ \Comment Leaf nodes
+\EndFor
+\EndProcedure
+\end{algorithmic}
+\end{algorithm}
+下面的是update，其中$p$为index in $A$ to be updated，$v$为update后的value。
+\begin{algorithm}[H]
+\caption{Iterativly Update Segment Tree}
+\begin{algorithmic}[1]
+\Procedure{Update}{$A, n, p, v, T$}
+\State $\ast$ Set value at position $p$ to $v$
+\State $ T[p+n]\gets v$
+\State $i:=p+n$
+\State $\ast$ Move upwards and update parents
+\State $\star$ 由于$T[0]$是dummy node，因此循环只需要到$i=1$即可
+\While{$i > 1$}
+\State $\ast$ If $i$ is odd, the left child is $ i-1 $ and the right child $ i $
+\State $\ast$ If $i$ is even, the right child is $ i+1 $ and the left child is $ i $
+\State $ T[i/2] = T[i] + T[i \oplus 1] $
+\State $i\gets i /2 $
+\EndWhile
+\EndProcedure
+\end{algorithmic}
+\end{algorithm}
+The idea behind the query function is that whether we should include an element in the sum or we should include its parent.
+\begin{itemize}
+\item Suppose range of query is $ [l, r] $
+\item Check $l$ 是不是其parent $ P $的right child，即$l$是不是odd number。
+\begin{enumerate}
+\item 如果$l$是odd number，显然$l$是其parent $ P $的right child，parent $ P $ 的
+range sum中包含的是$ l $的range sum，和另外一个child的range sum。而这个child 是落在range $ [l,r] $之外的。因此结果中不需要$P$的range sum，而只需要$l$的range sum。然后move $ l $到$P$的下一个node，即$l\gets (l+1)/2$。
+\item 如果$ l $是even number， 它是其parent $ P $的left child。 parent $ P $ 的 range sum就落在 range $[l,r]$中，只需要将 $ l $ move 到 $ P $，即$l\gets l/2$。
+\end{enumerate}
+\item 类似的，Check $r$ 是不是其parent $ P $的left child，即$r$是不是even number。
+\begin{enumerate}
+\item 如果$r$是even number，显然$r$是其parent $ P $的left child，parent $ P $ 的
+range sum中包含的是$ r $的range sum，和另外一个child的range sum。而这个child 是落在range $ [l,r] $之外的。因此结果中不需要$P$的range sum，而只需要$r$的range sum。然后move $ r $到$P$的上一个node，即$r\gets (r-1)/2$。
+\item 如果$ r $是odd number， 它是其parent $ P $的right child。 parent $ P $ 的 range sum就落在 range $[l,r]$中，只需要将 $ r $ move 到 $ P $，即$r\gets r/2$。
+\end{enumerate}
+\end{itemize}
+\begin{algorithm}[H]
+\caption{Iterative Segement Tree Query}
+\begin{algorithmic}[1]
+\Procedure{Query}{A, L, l, r, T}
+\State $x\gets x+n$ \Comment The leaf node of $l$
+\State $y\gets y+n$ \Comment The leaf node of $r$
+\State $z:=0$ \Comment The range sum
+\While{$l \leq r$}
+\If{$l$ is odd number} \Comment $l$ is the right child of its parent
+\State $z\gets z + T[l]$
+\State $l\gets (l+1)/2$ \Comment Move $l$ to its parent's right node
+\Else
+\State $l\gets l/2$
+\EndIf
+\If{$r$ is even number} \Comment $r$ is the left child of its parent
+\State $z\gets z + T[r]$
+\State $r\gets (r-1)/2$ \Comment Move $l$ to the left node of its parent
+\Else
+\State $r\gets r/2$
+\EndIf
+\EndWhile
+\State \Return $ z $
+\EndProcedure
+\end{algorithmic}
+\end{algorithm}
+\begin{lstlisting}[style=customc, caption={Iteratively Segement Tree}]
+class NumArray
+{
+public:
+    NumArray( vector<int> nums )
+    {
+        if( nums.empty() )
+        {
+            return;
+        }
+
+        swap( A, nums );
+
+        vector<int> tmp( A.size() * 2, 0 );
+        swap( tmp, T );
+
+        //build segment tree
+        build();
+    }
+
+    void build()
+    {
+        auto n = static_cast<int>( A.size() );
+
+        //set leaf nodes
+        for( int i = 0; i < n; ++i )
+        {
+            T[n + i] = A[i];
+        }
+
+        //set parent nodes
+        for( int i = n - 1; i > 0; --i )
+        {
+            T[i] = T[i * 2] + T[i * 2 + 1];
+        }
+    }
+
+    void update( int i, int val )
+    {
+        auto n = static_cast<int>( A.size() );
+
+        //update leaf node
+        T[i + n] = val;
+
+        int x = i + n;
+
+        //update parent nodes
+        //since T[0] is dummy node
+        //the loop runs until x=1
+        while( x > 1 )
+        {
+            T[x / 2] = T[x] + T[x ^ 1];
+            x = x / 2;
+        }
+    }
+
+    int sumRange( int i, int j )
+    {
+        auto n = static_cast<int>( A.size() );
+
+        int x = i + n;
+        int y = j + n;
+
+        int sum = 0;
+
+        while( x <= y )
+        {
+            if( x & 1 )
+            {
+                //x is the right child of its parent
+                sum += T[x];
+                //move x to the right of its parent node
+                //through x/=2 outside
+                ++x;
+            }
+
+            if( ( y & 1 ) == 0 )
+            {
+                //y is the left child of its parent
+                sum += T[y];
+                //move y to the left of its parent node
+                //through y/=2 outside
+                --y;
+            }
+
+            x /= 2;
+            y /= 2;
+        }
+
+        return sum;
+    }
+
+    vector<int> A;
+    vector<int> T;
+};
+
+
+\end{lstlisting}

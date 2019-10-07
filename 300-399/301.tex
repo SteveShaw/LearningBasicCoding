@@ -1,0 +1,481 @@
+\section{301 --- Remove Invalid Parentheses}
+Remove the minimum number of invalid parentheses in order to make the input string valid. Return all possible results.
+\par
+\textbf{Note:} The input string may contain letters other than the parentheses ( and ).
+
+\paragraph{Example 1:}
+
+\begin{flushleft}
+\textbf{Input}: $()())()$
+\\
+\textbf{Output}: [$()()()$, $(())()$]
+\\
+\end{flushleft}
+
+\paragraph{Example 2:}
+
+\begin{flushleft}
+\textbf{Input}: $(a)())()$
+\\
+\textbf{Output}: [$(a)()()$, $(a())()$]
+\end{flushleft}
+
+\paragraph{Example 3:}
+
+
+\begin{flushleft}
+\textbf{Input}: )(
+\\
+\textbf{Output}: []
+\end{flushleft}
+\subsection{Backtracking}
+\begin{itemize}
+	\item 对每一个括号，都有两个选择，加入或者不加入最终的expression。
+	\item 由于每个选择都要进行测试，因此可以通过递归的方法生成。
+	\item 递归的状态由当前$S$中的index $p$来确定，同时递归的状态中加入$x$和$y$分别代表已经加入expression的左括号和右括号的个数。同时，递归的状态中还包括从$S$中不加入expression的字符的counter $z$。
+	\item 如果$S[p]$不是左括号或者右括号，直接加入到生成的expresssion。
+	\item 如果$S[p]$是左括号或者右括号，那么如上所述，可以把$S[p]$加入或者不加入到expression中。
+	\begin{enumerate}
+		\item 首先选择不加入，然后继续递归，这时候$x$和$y$都不变，但是记录不加入expression的字符个数的counter $z$ increments。
+		\item 然后选择加入。
+		\begin{itemize}
+			\item 如果$S[p]$是左括号，$x$ increments，其余状态都不变
+			\item 如果$S[p]$是右括号，这时候要判断$y$和$x$的关系，如果$y>x$，即右括号个数大于左括号个数，这时候就不用继续递归了，因为这时候一定不是valid expression。否则，继续递归，$y$ increments，其余状态不变。
+		\end{itemize}
+	\end{enumerate}
+\item 当$p$equal to $S$的length时，如果$x$和$y$相等，表示expression是valid string。但这时候需要比较$z$是否比之前获得的最少的count of characters removed，如果相等，加入最终的结果中，如果$z$还要小，那么$z$最新的global minimum count，这时候要把结果清空，然后加入当前的expression。
+\item 为了避免重复的string，用一个hash set来存放expression。
+\end{itemize}
+\begin{algorithm}[H]
+	\caption{Recursion}
+	\begin{algorithmic}[1]
+		\Procedure{RemoveInvalidParentheses}{$S, L$}
+		\State $\star$ Create an empty hash set $A$ to store the valid expressions
+		\State $\star$ Create an empty string $E$ to store current valid expression
+		\State $z_0:=0$ \Comment Global minimum count of characters removed from $S$
+		\State \Call{DFS}{$S, L, p = 0, x = 0, y = 0, E, A, 0, \hat{z}=z_0$}
+		\EndProcedure
+	\end{algorithmic}
+\end{algorithm}
+Function \texttt{DFS}递归生成所有valid parentheses expressions。递归的状态包括
+\begin{itemize}
+	\item $p$ --- Current index in $S$
+	\item $x$, $y$ --- The count of left parentheses and right parentheses
+	\item $E$ --- 当前生成的valid expression
+	\item $A$ --- 保存所有生成的具有最小count of removed characters的valid expression的hash set
+\end{itemize}
+\begin{algorithm}[H]
+	\caption{Recursion Helper Function}
+	\begin{algorithmic}[1]
+		\Function{DFS}{$S,L,p,x,y,E,A,z,\hat{z}$}
+		\State $\ast$ 递归结束的处理
+		\If{$p=L$}
+		\If{$x=y$} \Comment 只有当前左括号个数与右括号个数相等时，才是合法的expression
+		\If{$z = \hat{z}$} \Comment Removed character个数与当前的global
+		 minimum相等
+		\algstore{301algo}
+		\end{algorithmic}
+	\end{algorithm}
+\begin{algorithm}[H]
+	\begin{algorithmic}[1]
+		\algrestore{301algo}
+				 \State $\star$ 把$E$加入$A$中
+		\ElsIf{$z<\hat{z}$} \Comment Removed character个数比当前的global minmum还要少
+		\State $\star$ Clear $A$ 因为$A$中的所有expression比起$E$来更短
+		\State $\hat{z}\gets z$ \Comment Update Global minimum count
+		\State $\star$ 把$E$加入$A$中
+		\EndIf
+		\EndIf
+		\State \Return 
+		\EndIf
+		
+				\If{$S[p]$既不是左括号也不是右括号}
+		\State $\star$ Add $S[p]$ to $E$
+		\State $\ast$ 继续下一层递归
+		
+				\State \Call{DFS}{$S, L, p+1, x, y, E, A, z, \hat{z}$}
+		\State $\star$ 上述递归结束后，把$S[p]$从$E$中移除
+		
+				\Else
+		\State $\ast$ 首先选择不把$S[p]$加入$E$中，然后继续下一层递归
+		\State \Call{DFS}{$S, L, p+1, x, y, E, A, z+1, \hat{z}$} \Comment 这时候$z$要increments
+		\State $\star$ $S[p]$加入$E$中
+		\If{$S[p]$是左括号}
+		\State $\ast$ 继续下一层递归，这时候$E$中多了一个左括号，因此$x\gets x+1$
+		\State \Call{DFS}{$S, L, p+1, x+1, y, E, A, z, \hat{z}$}
+		\ElsIf{$x>y$} \Comment 右括号情况下，只有左括号的个数大于右括号个数才能加入这个右括号
+		\State $\ast$ 继续下一层递归，这时候$E$中多了一个右括号，因此$y\gets y+1$
+		\State \Call{DFS}{$S, L, p+1, x, y+1, E, A, z, \hat{z}$}
+		\EndIf
+		\State $\star$ 结束后，把$S[p]$从$E$中移除
+		\EndIf
+		\EndFunction
+	\end{algorithmic}
+\end{algorithm}
+\setcounter{lstlisting}{0}
+\begin{lstlisting}[style=customc, caption={Recursive Method 1}]
+vector<string> removeInvalidParentheses( string s )
+{
+
+    //record the expressions generated during recursion
+    unordered_set<string> A;
+
+    string E;
+
+    E.reserve( s.size() );
+
+    int z0 = INT_MAX;
+
+    DFS( s, 0, 0, 0, E, A, 0, z0 );
+
+    return {A.begin(), A.end()};
+}
+
+void DFS( const string& S, size_t p, int x, int y, string& expr, unordered_set<string>& A, int z, int& z0 )
+{
+    if( p == S.size() )
+    {
+        if( x == y )
+        {
+            if( z == z0 )
+            {
+                //current count of removed characters
+                //is equal to the global minimum characters
+                A.emplace( expr );
+            }
+            else if( z < z0 )
+            {
+                //current count of removed characters
+                //is less than the global minimum characters
+                A.clear();
+                A.emplace( expr );
+
+                z0 = z;
+            }
+        }
+
+        return;
+    }
+
+    if( ( S[p] != '(' ) && ( S[p] != ')' ) )
+    {
+        //Other letters
+        //Just add to the expression
+        expr.push_back( S[p] );
+        DFS( S, p + 1, x, y, expr, A, z, z0 );
+        expr.pop_back();
+    }
+    else
+    {
+        //First choosing not to add to the expression
+        DFS( S, p + 1, x, y, expr, A, z + 1, z0 );
+
+        //Then choose adding to the expression
+        expr.push_back( S[p] );
+
+        if( S[p] == '(' )
+        {
+            //add left parenthesis
+            DFS( S, p + 1, x + 1, y, expr, A, z, z0 );
+        }
+        else if( y < x )
+        {
+            //Only add right parenthesis when there are fewer right parenthesis than left parenthesis
+            //in the expression
+            DFS( S, p + 1, x, y + 1, expr, A, z, z0 );
+        }
+
+        expr.pop_back();
+    }
+}
+\end{lstlisting}
+\subsection{Optimized Recursion}
+\begin{itemize}
+\item 上述算法中，可以进行更多的prunning。方法是在上述递归的状态中，加入额外两个状态，即number of left misplaced parentheses and number of misplaced right parenthese removed from $S$ to get a valid expression。分别用$\alpha$和$\beta$表示。
+\item 为了能够得到上述的额外两个状态的初始值，需要preprocess $S$。方法如下
+\begin{itemize}
+\item 从左到右扫描$S$
+\item 如果遇到一个左括号，这个括号可能会包含在一个valid expression中，取决于在其右边是否存在匹配的右括号。但是这时候我们并不知道，因此just increments 左括号的counter $\alpha$。
+\item 如果遇到一个右括号，如果当前左括号个数$\alpha$为零，显然这个右括号不能被匹配，因此increments misplaced的右括号的counter $\beta$。如果$\alpha$不为零，这个右括号可以被之前的一个左括号匹配，而这时候misplaced left parenthese counter $\alpha$就要decrement。
+\end{itemize}
+\item 由于$\alpha$和$\beta$告诉我们需要remove多少parenthesis，算法需要进行修改一边利用这两个状态信息。
+\begin{enumerate}
+\item 当前$p$ equal to $S$的length时， 这时候expression is valid的条件是$\alpha=0$ and $\beta=0$，不再需要判定$x$和$y$是否相等了。
+\item 当选择不加入当前的左括号或者右括号时，需要检查$\alpha$或者$\beta$是否为零，如果是零，表示不能再remove了，因此也就不能继续进行递归了。
+\end{enumerate}
+\end{itemize}
+\begin{algorithm}[H]
+	\caption{Recursion Method 2: More Efficient}
+	\begin{algorithmic}[1]
+		\Procedure{RemoveInvalidParentheses}{$S, L$}
+		\State $\star$ Create an empty hash set $A$ to store the valid expressions
+		\State $\star$ Create an empty string $E$ to store current valid expression
+		\State $\ast$ Preprocess $S$ to get number of misplaced left and right parentheses
+				\algstore{301algo}
+				\end{algorithmic}
+			\end{algorithm}
+		\begin{algorithm}[H]
+			\begin{algorithmic}[1]
+				\algrestore{301algo}
+		\State $\alpha:=0$ and $\beta:=0$
+		\For{Each character $c$ in $S$}
+		\If{$c$ is left parenthesis}
+		\State $\alpha\gets\alpha+1$
+		\ElsIf{$c$ is right parenthesis}
+		\If{$\alpha=0$}
+		\State $\beta\gets\beta+1$ \Comment 不能再找到匹配的左括号
+		\Else
+		\State $\alpha\gets\alpha-1$ \Comment 有匹配的左括号，decrements $\alpha$
+		\EndIf
+		\EndIf
+		\EndFor
+		\State \Call{DFS}{$S, L, p = 0, x = 0, y = 0, \alpha, \beta, E, A$}
+		\EndProcedure
+	\end{algorithmic}
+\end{algorithm}
+Function \texttt{DFS}递归生成所有valid parentheses expressions。递归的状态包括
+\begin{itemize}
+	\item $p$ --- Current index in $S$
+	\item $x$, $y$ --- The count of left parentheses and right parentheses
+	\item $\alpha$, $\beta$ --- The misplaced number of left and right parentheses
+	\item $E$ --- 当前生成的valid expression
+	\item $A$ --- 保存所有生成的具有最小count of removed characters的valid expression的hash set
+\end{itemize}
+\begin{algorithm}[H]
+	\caption{Recursion Helper Function}
+	\begin{algorithmic}[1]
+		\Function{DFS}{$S,L,p,x,y,E,A,z,\hat{z}$}
+		\State $\ast$ 递归结束的处理
+		\If{$p=L$}
+		\If{$\alpha=0$ \textbf{and} $\beta=0$} \Comment No more misplaced parentheses
+		\State $\star$ 把$E$加入$A$中
+		\EndIf
+		\State \Return
+		\EndIf
+		\algstore{301algo}
+		\end{algorithmic}
+	\end{algorithm}
+\begin{algorithm}[H]
+	\begin{algorithmic}[1]
+		\algrestore{301algo}	
+				\If{$S[p]$既不是左括号也不是右括号}
+		\State $\star$ Add $S[p]$ to $E$
+		\State $\ast$ 继续下一层递归
+		
+				\State \Call{DFS}{$S, L, p+1, x, y, \alpha, \beta, E, A$}
+		\State $\star$ 上述递归结束后，把$S[p]$从$E$中移除
+		
+				\Else
+		\State $\ast$ 首先选择不把$S[p]$加入$E$中，然后继续下一层递归
+		\If{$S[p]$ is left parenthesis}
+		\If{$\alpha > 0$}
+		\State $\ast$只有当剩下的misplaced left parenthesis 大于零
+		\State $\ast$才可以忽略当前的左括号进入下一层递归
+		\State  \Call{DFS}{$S, L, p+1, x, y, \alpha-1, \beta, E, A$}
+		\EndIf
+		\State $\star$ $S[p]$加入$E$中
+		\State $\ast$ 继续下一层递归，这时候$E$中多了一个左括号，因此$x\gets x+1$
+		\State \Call{DFS}{$S, L, p+1, x+1, y, \alpha, \beta, E, A$}
+		\State $\star$ 结束后，把$S[p]$从$E$中移除
+		\Else
+				\State $\ast$只有当剩下的misplaced right parenthesis 大于零时，
+				\State $\ast$ 才可以忽略当前的右括号进入下一层递归
+				\State  \Call{DFS}{$S, L, p+1, x, y, \alpha, \beta-1, E, A$}
+				\EndIf
+				\If{$x>y$} \Comment 右括号情况下，只有左括号的个数大于右括号个数才能加入这个右括号
+					\State $\star$ $S[p]$加入$E$中
+					\State $\ast$ 继续下一层递归，这时候$E$中多了一个右括号，因此$y\gets y+1$
+					\State \Call{DFS}{$S, L, p+1, x, y+1, \alpha, \beta, E, A$}
+					\State $\star$ 结束后，把$S[p]$从$E$中移除
+				\EndIf	
+		\EndIf
+		\EndFunction
+	\end{algorithmic}
+\end{algorithm}
+\begin{lstlisting}[style=customc, caption={Recursive Method 1}]
+vector<string> removeInvalidParentheses( string s )
+{
+
+    unordered_set<string> s_expr;
+
+    string expr;
+    expr.reserve( s.size() );
+
+    int alpha = 0;
+    int beta = 0;
+
+    //get misplaced left and right parentheses
+    for( auto c : s )
+    {
+        if( c == '(' )
+        {
+            ++alpha;
+        }
+        else if( c == ')' )
+        {
+            if( alpha == 0 )
+            {
+                ++beta;
+            }
+            else
+            {
+                --alpha;
+            }
+        }
+    }
+
+    dfs( s, 0, 0, 0, alpha, beta, expr, s_expr );
+
+    return {s_expr.begin(), s_expr.end()};
+}
+
+void dfs( const string& S, size_t p, int x, int y, int alpha, int beta, string& expr, unordered_set<string>& ss )
+{
+    if( p == S.size() )
+    {
+        if( ( alpha == 0 ) && ( beta == 0 ) )
+        {
+            ss.emplace( expr );
+        }
+
+        return;
+    }
+
+    if( ( S[p] != '(' ) && ( S[p] != ')' ) )
+    {
+        //Normal letter
+        expr.push_back( S[p] );
+        dfs( S, p + 1, x, y, alpha, beta, expr, ss );
+        expr.pop_back();
+    }
+    else
+    {
+        if( S[p] == '(' )
+        {
+            if( alpha > 0 )
+            {
+                //only when remained misplaced left parentheses
+                //are larger than zero, go to next recursion
+                dfs( S, p + 1, x, y, alpha - 1, beta, expr, ss );
+            }
+
+            expr.push_back( S[p] );
+            dfs( S, p + 1, x + 1, y, alpha, beta, expr, ss );
+            expr.pop_back();
+        }
+        else
+        {
+            if( beta > 0 )
+            {
+                //only when remained misplaced right parentheses
+                //are larger than zero, go to next recursion
+                dfs( S, p + 1, x, y, alpha, beta - 1, expr, ss );
+            }
+
+            if( y < x )
+            {
+                //only when right parentheses is fewer than
+                //left parentheses
+                expr.push_back( S[p] );
+                dfs( S, p + 1, x, y + 1, alpha, beta, expr, ss );
+                expr.pop_back();
+            }
+        }
+    }
+}
+\end{lstlisting}
+\subsection{Recursive Method 3: Most Efficient}
+\begin{itemize}
+\item 每一次递归中，首先检测到哪个位置会出现右括号多于左括号。如果找到了这个位置，就将多余的第一个右括号移除，然后从这个移除的右括号的下一个位置继续下一层递归。
+\item 如果这时候检测到左括号多于右括号，那么需要将多余的第一个左括号移除，然后从这个移除的左括号的下一个位置进行递归。但这个时候需要从右到左扫描找到第一个需要移除的左括号。
+\item 为了避免从左到右和从右到左使用不同的代码，可以用一个小技巧，将$S$进行翻转，这样从右到左的扫描，就变为从左到右扫描了。
+\item 但是这时候有个问题是之前的左括号和右括号的位置发生了变化，为了仍然能够得到valid expression，再得到去除第一个多余的左括号后，把生成的expression再反转一遍。
+\item 为了避免在上述过程中得到duplicate expression，如果不使用hash set，可以在递归状态中包含上一次删除的括号的index。这样下一层递归就从这个index开始。
+\item 可以使用一个key检查示当前是从左到右删除多余的右括号，还是在翻转字符中从左到右删除多余的左括号。前者这个key是$()$，而后者这个key则是$)($。这样通过比较这个key，就知道当前是要搜索左括号还是右括号作删除，以及当前是否需要翻转$S$。
+\end{itemize}
+\begin{lstlisting}[style=customc, caption={Recursive Method 3: Most Efficient}]
+class Solution
+{
+public:
+    vector<string> removeInvalidParentheses( string s )
+    {
+
+        vector<string> ans;
+
+        dfs( s, ans, 0, 0, "()" );
+
+        return ans;
+    }
+
+    //x: Last removed position for key[0]
+    //y: Last removed position for key[1]
+    void dfs( string S, vector<string>& A, size_t x, size_t y, string key )
+    {
+        int t = 0;
+
+        //The target is to remove additional key[1]
+        for( size_t i = x; i < S.size(); ++i )
+        {
+            if( S[i] == key[0] )
+            {
+                ++t;
+            }
+            else if( S[i] == key[1] )
+            {
+                --t;
+            }
+
+            if( t >= 0 )
+            {
+                //number of key[0] is larger than key[1]
+                continue;
+            }
+
+            if( y > i )
+            {
+                //Have not yet reached the last removed position for key[1]
+                //No need to further since before y, parenthesis are balanced
+                return;
+            }
+
+            if( S[y] == key[1] )
+            {
+                //S[y] is the first index of key[1] after last removed position of key[1]
+                dfs( S.substr( 0, y ) + S.substr( y + 1 ), A, i, y, key );
+            }
+
+            for( size_t j = y + 1; j <= i; ++j )
+            {
+                //We found another equal to key[1] candidate to be removed
+                //Notice: In this loop, we are searching for candidates to be removed.
+                //If there is a consequtive letters equal to key[1]
+                //We only need to remove the first one from left to right
+                if( ( S[j] == key[1] ) && ( S[j - 1] != key[1] ) )
+                {
+                    dfs( S.substr( 0, j ) + S.substr( j + 1 ), A, i, j, key );
+                }
+            }
+
+            return;
+        }
+
+        //candidates equal to key[0]
+        //is no less than candidiates equal to key[1]
+        //We need to reverse, and
+        //1. removing right parthesis when now is finding additional right parenthesis
+        //2. add reversed string to output when now is finding additional left parenthesis
+        reverse( S.begin(), S.end() );
+
+        if( key[0] == '(' )
+        {
+            //finished left to right scan
+            dfs( S, A, 0, 0, ")(" );
+        }
+        else
+        {
+            //finished right to left
+            A.emplace_back( S );
+        }
+    }
+};
+\end{lstlisting}

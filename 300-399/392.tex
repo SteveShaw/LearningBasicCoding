@@ -1,0 +1,25 @@
+\section{392 --- Is Subsequence}
+Given a string $ s $ and a string $ t $, check if $ s $ is subsequence of $ t $.
+\par
+You may assume that there is only lower case English letters in both $ s $ and $ t $. $ t $ is potentially a very long ( $\lvert t\rvert \approx 5\times 10^5$) string, and $ s $ is a short string ($\lvert s\rvert\leq 100$).
+\par
+A subsequence of a string is a new string which is formed from the original string by deleting some (can be none) of the characters without disturbing the relative positions of the remaining characters. (ie, \texttt{ace} is a subsequence of \texttt{abcde} while \texttt{aec} is not).
+
+\paragraph{Example 1:}
+\begin{flushleft}
+\textbf{Input}: $s = \texttt{abc}$, $t = \texttt{ahbgdc}$
+\\
+\textbf{Output}: \texttt{true}
+\end{flushleft}
+
+\paragraph{Example 2:}
+\begin{flushleft}
+\textbf{Input}: $s = \texttt{axc}$, $t = \texttt{ahbgdc}$
+\\
+\textbf{Output}: \texttt{false}
+\end{flushleft}
+
+\paragraph{Follow up:}
+\begin{itemize}
+\item If there are lots of incoming $ S $, say $S_1, S_2, \ldots , S_k$ where $k \geq 10^9$, and you want to check one by one to see if $T$ has its subsequence. In this scenario, how would you change your code?
+\end{itemize}

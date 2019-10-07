@@ -1,0 +1,49 @@
+\section{326 --- Power of Three}
+Given an integer $n$, write a function to determine if it is a power of three.
+
+\paragraph{Example 1:}
+
+\begin{flushleft}
+\textbf{Input}: 27
+\\
+\textbf{Output}: \texttt{true}
+\end{flushleft}
+
+\paragraph{Example 2:}
+
+\begin{flushleft}
+\textbf{Input}: 0
+\\
+\textbf{Output}: \texttt{false}
+\end{flushleft}
+
+\paragraph{Example 3:}
+
+\begin{flushleft}
+\textbf{Input}: 9
+\\
+\textbf{Output}: \texttt{true}
+\end{flushleft}
+
+\paragraph{Example 4:}
+
+\begin{flushleft}
+\textbf{Input}: 45
+\\
+\textbf{Output}: \texttt{false}
+\end{flushleft}
+
+\paragraph{Follow up:}
+\begin{itemize}
+\item Could you do it without using any loop / recursion?
+\end{itemize}
+
+\subsection{No Loop}
+由于输入是\texttt{int} type，其正整数范围是$0$---$2^{31}$，在此范围中允许的最大的3的次方数为$ 3^{19}=1162261467 $，那么我们只要看这个数能否被$ n $整除即可。
+\setcounter{lstlisting}{0}
+\begin{lstlisting}[style=customc, caption={No Loop}]
+bool isPowerOfThree( int n )
+{
+    return n > 0 && ( ( 1162261467 % n ) == 0 );
+}
+\end{lstlisting}

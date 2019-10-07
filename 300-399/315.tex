@@ -1,0 +1,114 @@
+\section{315 --- Count of Smaller Numbers After Self}
+You are given an integer array $ A $ and you have to return a new counts array $ Z $. The counts array $ Z $ has the property where $ Z[i] $ is the number of smaller elements to the right of $ A[i] $.
+
+\paragraph{Example:}
+
+\begin{flushleft}
+\textbf{Input}: $ [5,\;2,\;6,\;1] $
+\\
+\textbf{Output}: $ [2,\;1,\;1,\;0] $ 
+\\
+\textbf{Explanation}:
+\\
+To the right of 5 there are 2 smaller elements (2 and 1).
+\\
+To the right of 2 there is only 1 smaller element (1).
+\\
+To the right of 6 there is 1 smaller element (1).
+\\
+To the right of 1 there is 0 smaller element.
+\end{flushleft}
+\subsection{Binary Sort}
+从$ A[L-1] $即$ A $的最后一个number开始，用leftmost binary search的方法插入到一个新的数组，这样新数组就是有序的，那么此时该数字在新数组中的坐标就是原数组中其右边所有较小数字的个数。之所以用leftmost，是因为要考虑到重复数字的情况。如果用\texttt{STL}的map，计算距离的时间复杂度是$ O(n) $，而用数组的时间复杂度为$ O(1) $。
+\setcounter{algorithm}{0}
+\begin{algorithm}[H]
+\caption{Binary Search And Sort}
+\begin{algorithmic}[1]
+\Procedure{CountSmaller}{$A, L$}
+\State $\star$ 创建一个empty array$\hat{A}$作为$A$排序后的结果
+\State $\star$ 创建count数组$ Z $。
+\State $\hat{A}\gets \hat{A} + A[L-1]$ \Comment Insert the last element of $A$ into $ \hat{A} $ 
+\For{$i:=L-2$ \textbf{to} $ L-1 $}
+\State $\ast$ Leftmost binary search to find the correct position to insert $ A[i] $
+\State $l:=0$
+\State $r:=\lvert \hat{A}\rvert$
+\While{$l<r$}
+\State $ m:=(l+r)/2 $
+\If{$\hat{A}[m] < A[i]$}
+\State $l\gets m+1$
+\algstore{315algo}
+\end{algorithmic}
+\end{algorithm}
+\begin{algorithm}[H]
+\begin{algorithmic}[1]
+\algrestore{315algo}
+\Else
+\State $r\gets m$
+\EndIf
+\EndWhile
+\State $\star$ Now $l$ is the correct position in $ \hat{A} $ for $ A[i] $. Insert $A[i]$ to $ \hat{A}[l] $
+\State $Z[i]\gets l$ \Comment $l$ 同时也是 $ A[i] $右边小于$ A[i] $的number的数量
+\EndFor
+\State \Return $ Z $
+\EndProcedure
+\end{algorithmic}
+\end{algorithm}
+\setcounter{lstlisting}{0}
+\begin{lstlisting}[style=customc, caption={Binary Search And Sorting}]
+vector<int> countSmaller( vector<int>& nums )
+{
+    //process edge scenarios
+    if( nums.empty() )
+    {
+        return {};
+    }
+
+    if( nums.size() == 1 )
+    {
+        return {0};
+    }
+
+    vector<int> A; //Sorted nums
+    A.reserve( nums.size() );
+    A.push_back( nums.back() );
+
+    vector<int> ans( nums.size(), 0 );
+
+    auto L = static_cast< int >( nums.size() );
+
+    for( int i = L - 2; i >= 0; --i )
+    {
+        int l = 0;
+        int curSize = static_cast< int >( A.size() );
+        int r = curSize;
+        //leftmost binary search
+        while( l < r )
+        {
+            int mid = ( l + r ) / 2;
+
+            if( A[mid] < nums[i] )
+            {
+                l = mid + 1;
+            }
+            else
+            {
+                r = mid;
+            }
+        }
+
+        ans[i] = l;
+        //l is the position in A for nums[i]
+        if( l == curSize )
+        {
+            //nums[i] is the largest, then push back
+            A.push_back( nums[i] );
+        }
+        else
+        {
+            //otherwise, insert into the correct position
+            A.insert( A.begin() + l, nums[i] );
+        }
+    }
+    return ans;
+}
+\end{lstlisting}

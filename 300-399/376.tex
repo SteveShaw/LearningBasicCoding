@@ -1,0 +1,126 @@
+\section{376 --- Wiggle Subsequence}
+A sequence of numbers is called a wiggle sequence if the differences between successive numbers strictly alternate between positive and negative. The first difference (if one exists) may be either positive or negative. A sequence with fewer than two elements is trivially a wiggle sequence.
+\par
+For example, $ [1,7,4,9,2,5] $ is a wiggle sequence because the differences $ (6,-3,5,-7,3) $ are alternately positive and negative. In contrast, $ [1,4,7,2,5] $ and $ [1,7,4,5,5] $ are not wiggle sequences, the first because its first two differences are positive and the second because its last difference is zero.
+\par
+Given a sequence of integers $A$, return the length of the longest subsequence that is a wiggle sequence. A subsequence is obtained by deleting some number of elements (eventually, also zero) from the original sequence, leaving the remaining elements in their original order.
+
+\paragraph{Example 1:}
+
+\begin{flushleft}
+\textbf{Input}: $ [1,7,4,9,2,5] $
+\\
+\textbf{Output}: 6
+\\
+\textbf{Explanation}: The entire sequence is a wiggle sequence.
+\end{flushleft}
+
+\paragraph{Example 2:}
+
+\begin{flushleft}
+\textbf{Input}: $ [1,17,5,10,13,15,10,5,16,8] $
+\\
+\textbf{Output}: 7
+\\
+\textbf{Explanation}: There are several subsequences that achieve this length. One is $ [1,17,10,13,10,16,8] $.
+\end{flushleft}
+
+\paragraph{Example 3:}
+
+\begin{flushleft}
+\textbf{Input}: $ [1,2,3,4,5,6,7,8,9] $
+\\
+\textbf{Output}: 2
+\end{flushleft}
+
+\paragraph{Follow up:}
+\begin{itemize}
+\item Can you do it in $ O(n) $ time?
+\end{itemize}
+
+\subsection{Linear Dynamic Programming}
+采用Dynamic Programming，利用两个递推数组$U$ and $D$。
+\begin{enumerate}
+\item $U[i]$ is the length of a longest wiggle subsequence of $A[0],\ldots,A[i]$, with a \textbf{positive} difference between its last two numbers. This subsequence may or may not include $A[i]$ and there may be several such subsequences (of the same length). 称这种类型的subsequence为$U$.
+\item $D[i]$ is the length of a longest wiggle subsequence of $A[0],\ldots,A[i]$, with a \textbf{negative} difference between its last two numbers. This subsequence may or may not include $A[i]$ and there may be several such subsequences (of the same length). 称这种类型的subsequence为$D$.
+\end{enumerate}
+然后可以得到如下的递推关系式
+\begin{enumerate}
+%那么可以用$A[i]$构成一个更长的subsequence $U$
+\item 如果$A[i]>A[i-1]$，假设有一个类型为$D$的subsequence $S_d$ from $A[0],\ldots,A[i-1]$，其length为$D[i-1]$，而$A[x]$ is the last element of $S_d$。那么有两种情况
+\begin{enumerate}
+\item If $A[i] > A[x]$，显然可以把$A[i]$加入$S_d$从而构成一个类型为$U$的subsequence。
+\item Otherwise, since $A[x]$ cannot be $A[i-1]$ (because $A[i-1] < A[i]\leq A[x]$), replace $A[x]$ by $A[i-1]$ gives another type $D$ subsequence $\hat{S}_d$ with same length. And then we can also add $A[i]$ to $\hat{S}_d$ to get a subsequence of type $U$.
+\end{enumerate}
+Both cases give $U[i]=D[i-1]+1$，而$D[i]$显然是不变的，所以$D[i] = D[i-1]$
+\item 类似的，如果$A[i] < A[i-1]$，可以得到$D[i] = U[i-1]+1$，$U[i]=U[i-1]$。
+\item 如果$A[i]=A[i-1]$，显然不会改变已有的type $U$和$D$ subsequences，因此$U[i]=U[i-1]$， $D[i]=D[i-1]$
+\end{enumerate}
+
+\setcounter{lstlisting}{0}
+\begin{lstlisting}[style=customc, caption={Dynamic Programming}]
+int wiggleMaxLength( vector<int>& nums )
+{
+    if( nums.empty() )
+    {
+        return 0;
+    }
+
+    vector<int> U( nums.size(), 1 );
+    vector<int> D( nums.size(), 1 );
+
+    for( size_t i = 1; i < nums.size(); ++i )
+    {
+        if( nums[i] > nums[i - 1] )
+        {
+            U[i] = D[i - 1] + 1;
+            D[i] = D[i - 1];
+        }
+        else if( nums[i] < nums[i - 1] )
+        {
+            //D can be longer by adding nums[i]
+            //to subsquence U
+            D[i] = U[i - 1] + 1;
+            U[i] = U[i - 1];
+        }
+        else
+        {
+            //no changes to the lengths of U and D
+            U[i] = U[i - 1];
+            D[i] = D[i - 1];
+        }
+    }
+
+    return ( max )( U.back(), D.back() );
+}
+\end{lstlisting}
+
+\subsection{O(1) Memory Dynamic Programming}
+从上面的递推式可以看到，$U[i]$和$D[i]$仅仅取决于$U[i-1]$和$D[i-1]$，因此可以把数组替换为两个变量$U$和$D$。
+\begin{lstlisting}[style=customc, caption={$O(1)$ Memory Dynamic Programming}]
+int wiggleMaxLength( vector<int>& nums )
+{
+    if( nums.empty() )
+    {
+        return 0;
+    }
+    //the maximum length of type U subsequence so far
+    int U = 1;
+    //the maximum length of type D subsequence so far
+    int D = 1;
+    for( size_t i = 1; i < nums.size(); ++i )
+    {
+        if( nums[i] > nums[i - 1] )
+        {
+            //nums[i] can make a longer U subsequence
+            U = D + 1;
+        }
+        else if( nums[i] < nums[i - 1] )
+        {
+            //nums[i] can make a longer D subsequence
+            D = U + 1;
+        }
+    }
+    return ( max )( U, D );
+}
+\end{lstlisting}

@@ -1,0 +1,47 @@
+\section{383 --- Ransom Note}
+Given an arbitrary ransom note string $S$ and another string containing letters from all the magazines $M$, write a function that will return true if the ransom note can be constructed from the magazines; otherwise, it will return \texttt{false}.
+\par
+Each letter in the magazine string $M$ can only be used once in your ransom note $S$.
+
+\paragraph{Note:}
+\begin{itemize}
+\item You may assume that both strings contain only lowercase letters.
+\end{itemize}
+
+\begin{lstlisting}[style=customc]
+canConstruct("a", "b") // false
+canConstruct("aa", "ab") // false
+canConstruct("aa", "aab") // true
+\end{lstlisting}
+
+\subsection{Counter}
+Very easy problem
+\begin{enumerate}
+\item get counts of each letter in $M$
+\item iterate each letter in $S$, and decrements its counts. When the counts is less than zero, it means some letters in $M$ are not used only once.
+\end{enumerate}
+
+\setcounter{lstlisting}{0}
+\begin{lstlisting}[style=customc, caption={Counter}]
+bool canConstruct( string ransomNote, string magazine )
+{
+    vector<int> counts( 256, 0 );
+
+    for( char c : magazine )
+    {
+        counts[c] += 1;
+    }
+
+    for( char c : ransomNote )
+    {
+        counts[c] -= 1;
+        if( counts[c] < 0 )
+        {
+            //non match is found
+            return false;
+        }
+    }
+
+    return true;
+}
+\end{lstlisting}

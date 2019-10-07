@@ -1,0 +1,103 @@
+\section{316 --- Remove Duplicate Letters}
+Given a string which contains only lowercase letters, remove duplicate letters so that every letter appear once and only once. You must make sure your result is the smallest in lexicographical order among all possible results.
+
+\paragraph{Example 1:}
+
+\begin{flushleft}
+\textbf{Input}: \texttt{bcabc}
+\\
+\textbf{Output}: \texttt{abc}
+\end{flushleft}
+
+\paragraph{Example 2:}
+
+\begin{flushleft}
+\textbf{Input}: \texttt{cbacdcbc}
+\\
+\textbf{Output}: \texttt{acdb}
+\end{flushleft}
+\subsection{Hash Map}
+这道题其实是要build a monotonically increasing result string.
+\par
+如果当前letter比result string的last letter小，remove the last letter if the last letter will still appear in the input string later.
+\par
+算法步骤如下：
+\begin{itemize}
+\item 建立一个hash map来统计每个字母出现的次数。由于都是lowercase letter，用一个数组$A$即可。
+\item 另外，建立一个数组$ x $来纪录每个字母是否被用过，即放入到结果字符串$y$中。
+\item 遍历整个字符串，对于遍历到的字符，先在$ A $中decrements其对应的出现次数，然后看$ x $中的值确定其之前是否已经用过，如对应的值为1，即已经在结果字符串中了，因此跳过处理，继续循环。
+\item 否则，和当前的存储结果的字符串$y$的last letter进行比较，如果当前letter比$y$的最后一个letter小，并且$y$的last letter的count不为零(即这个letter之后还会出现)，那么将$y$的last letter从$ y $中删除，同时将其标记为未用过。
+\item 以此类推直至遍历完整个字符串
+\end{itemize}
+\setcounter{algorithm}{0}
+\begin{algorithm}[H]
+\caption{Hash Map}
+\begin{algorithmic}[1]
+\Procedure{RemoveDuplicateLetters}{$S, L$}
+\State $\star$ Create an array $A$ to store the counts of each letter in $S$
+\State $\star$ Create an array $ x $ to indicate if a letter is contained in the result string
+\State $y:=\emptyset$ \Comment The result string
+\State $\ast$ Count the frequencies of each letter in $S$
+\For{Each $ c $ in $S$}
+\State $A[c]\gets A[c] + 1$
+\EndFor
+\State $\ast$ Process $S$
+\For{Each $c$ in $S$}
+\State $A[c]\gets A[c]-1$ \Comment Decrements the frequencies of letter $ c $
+\If{$x[c]=1$} \Comment letter $ c $ is contained in the result string $ y $
+\State \texttt{continue} \Comment Skip to next letter
+\EndIf
+\While{$y$ is empty \textbf{and} $ y $'s last letter $t$ is larger than $ c $ \textbf{and} $ A[t]>0 $}
+\State $\star$ Remove $t$ from $y$
+\State $x[t]\gets 0$ \Comment indicate letter $t$ is not contained in the result string $ y $
+\EndWhile
+\State $y\gets y+c$ \Comment Append $ c $ to $ y $
+\State $x[c]\gets 1$ \Comment indicate letter $t$ is contained in the result string $ y $
+\EndFor
+\State \Return $ y $
+\EndProcedure
+\end{algorithmic}
+\end{algorithm}
+\setcounter{lstlisting}{0}
+\begin{lstlisting}[style=customc, caption={Hash Map}]
+string removeDuplicateLetters( string s )
+{
+    int L = static_cast<int>( s.size() );
+    //indicate if a letter is contained in the result
+    vector<int> used( 26, 0 );
+    //The frequencies of a letter in s
+    vector<int> counts( 26, 0 );
+    for( auto c :  s )
+    {
+        counts[c - 'a'] += 1;
+    }
+    
+    string ans;
+    
+    for( auto c : s )
+    {
+        //decrements frequencies of c
+        //since we have already visited it
+        --counts[c - 'a'];
+        //since c is contained in ans,
+        //skip to next
+        if( used[c - 'a'] )
+        {
+            continue;
+        }
+
+        while( !ans.empty() && ( ans.back() > c ) && ( counts[ans.back() - 'a'] > 0 ) )
+        {
+            //since ans.back() will be removed
+            //indicate it is not contained in ans
+            used[ans.back() - 'a'] = 0;
+            ans.pop_back();
+        }
+        //indicate c will be added to ans
+        used[c - 'a'] = 1;
+        ans.push_back( c );
+    }
+
+    return ans;
+}
+\end{lstlisting}

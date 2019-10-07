@@ -1,0 +1,176 @@
+\section{355 --- Design Twitter}
+Design a simplified version of Twitter where users can post tweets, follow/unfollow another user and is able to see the 10 most recent tweets in the user's news feed. Your design should support the following methods:
+
+\begin{lstlisting}[style=customc]
+postTweet(userId, tweetId): //Compose a new tweet.
+getNewsFeed(userId): //Retrieve the 10 most recent tweet ids in the user's news feed. Each item in the news feed must be posted by users who the user followed or by the user herself. Tweets must be ordered from most recent to least recent.
+follow(followerId, followeeId): //Follower follows a followee.
+unfollow(followerId, followeeId): //Follower unfollows a followee.
+\end{lstlisting}
+
+
+\paragraph{Example:}
+
+\begin{lstlisting}[style=customc]
+Twitter twitter = new Twitter();
+
+// User 1 posts a new tweet (id = 5).
+twitter.postTweet( 1, 5 );
+
+// User 1's news feed should return a list with 1 tweet id -> [5].
+twitter.getNewsFeed( 1 );
+
+// User 1 follows user 2.
+twitter.follow( 1, 2 );
+
+// User 2 posts a new tweet (id = 6).
+twitter.postTweet( 2, 6 );
+
+// User 1's news feed should return a list with 2 tweet ids -> [6, 5].
+// Tweet id 6 should precede tweet id 5 because it is posted after tweet id 5.
+twitter.getNewsFeed( 1 );
+
+// User 1 unfollows user 2.
+twitter.unfollow( 1, 2 );
+
+// User 1's news feed should return a list with 1 tweet id -> [5],
+// since user 1 is no longer following user 2.
+twitter.getNewsFeed( 1 );
+\end{lstlisting}
+
+\subsection{Priority Queue}
+\begin{enumerate}
+\item 需要一个hash map，其中key为follower的id，而value则是其followees，用一个hash set存放。
+\item 另外还需要一个hash map，其中key为user id，而value则是由这个user id所post的news id。
+\item 为了tracking news的时序，用一个变量记录post news的time id。
+\item 在获取某个user id的news时，遍历其关联的followees，然后用一个prority queue将每个followees的news 都加入到queue中，然后选择最上面的十个加入到返回的输出数组中。
+\end{enumerate}
+
+\setcounter{lstlisting}{0}
+\begin{lstlisting}[style=customc, caption={Priority Queue}]
+class Twitter
+{
+public:
+    /** Initialize your data structure here. */
+    Twitter()
+    {
+        m_time = 0;
+    }
+
+    /** Compose a new tweet. */
+    void postTweet( int userId, int tweetId )
+    {
+        auto it_feeds = m_feeds.find( userId );
+        ++m_time;
+
+        if( it_feeds == m_feeds.end() )
+        {
+            m_feeds.emplace( userId, initializer_list<pair<int, int>> {{m_time, tweetId}} );
+        }
+        else
+        {
+            auto& feeds = it_feeds->second;
+            feeds.emplace_back( m_time, tweetId );
+            if( feeds.size() > 10 )
+            {
+                //only keep ten news for userId
+                feeds.erase( feeds.begin() );
+            }
+        }
+    }
+
+    /** Retrieve the 10 most recent tweet ids in the user's news feed. Each item in the news feed must be posted by users who the user followed or by the user herself. Tweets must be ordered from most recent to least recent. */
+    vector<int> getNewsFeed( int userId )
+    {
+        priority_queue<pair<int, int>> pq;
+
+        auto it_subs = m_subs.find( userId );
+
+        //get news from its followees
+        if( it_subs != m_subs.end() )
+        {
+            for( int n : it_subs->second )
+            {
+                auto it_feeds = m_feeds.find( n );
+                if( it_feeds == m_feeds.end() )
+                {
+                    continue;
+                }
+
+                auto& feeds = it_feeds->second;
+                for( const auto& p : feeds )
+                {
+                    pq.emplace( p.first, p.second );
+                }
+            }
+        }
+
+
+        //get news itself
+        auto it_feeds = m_feeds.find( userId );
+        if( it_feeds != m_feeds.end() )
+        {
+            auto& feeds = it_feeds->second;
+            for( const auto& p : feeds )
+            {
+                pq.emplace( p.first, p.second );
+            }
+        }
+
+        vector<int> ans;
+
+        while( !pq.empty() && ( ans.size() < 10 ) )
+        {
+            auto t = pq.top();
+            pq.pop();
+            ans.emplace_back( t.second );
+        }
+
+        return ans;
+    }
+
+    /** Follower follows a followee. If the operation is invalid, it should be a no-op. */
+    void follow( int followerId, int followeeId )
+    {
+        if( followerId == followeeId )
+        {
+            return;
+        }
+
+        //add followeeId to followerId's subscription list
+        auto it_sub = m_subs.find( followerId );
+        if( it_sub == m_subs.end() )
+        {
+            m_subs.emplace( followerId, initializer_list<int> {followeeId} );
+        }
+        else
+        {
+            it_sub->second.insert( followeeId );
+        }
+    }
+
+    /** Follower unfollows a followee. If the operation is invalid, it should be a no-op. */
+    void unfollow( int followerId, int followeeId )
+    {
+        auto it_sub = m_subs.find( followerId );
+
+        //remove followeeId from followerId's subscription list
+        if( it_sub != m_subs.end() )
+        {
+            auto& subs = it_sub->second;
+
+            auto it_pub = subs.find( followeeId );
+
+            if( it_pub != subs.end() )
+            {
+                subs.erase( it_pub );
+            }
+        }
+    }
+
+    unordered_map<int, unordered_set<int>> m_subs;
+    unordered_map<int, vector<pair<int, int>>> m_feeds;
+
+    int m_time;
+};
+\end{lstlisting}

@@ -1,0 +1,277 @@
+\section{321 --- Create Maximum Number}
+Given two arrays of length $ m $ and $ n $ with digits 0--9 representing two numbers. Create the maximum number of length $ k \leq m + n $ from digits of the two. The relative order of the digits from the same array must be preserved. Return an array of the k digits.
+
+\paragraph{Note:} 
+\begin{itemize}
+\item You should try to optimize your time and space complexity.
+\end{itemize}
+
+\paragraph{Example 1:}
+
+\begin{flushleft}
+\textbf{Input}:
+\\
+$ A  = [3,\;4,\; 6,\; 5]$
+\\
+$ B  = [9,\; 1,\; 2, \;5,\; 8,\;3]$
+\\
+$ k = 5 $
+\\
+\textbf{Output}: $ [9,\; 8,\; 6,\; 5,\; 3] $
+\end{flushleft}
+
+\paragraph{Example 2:}
+
+\begin{flushleft}
+\textbf{Input}:
+\\
+$ A = [6,\; 7] $
+\\
+$ B = [6,\; 0,\; 4] $
+\\
+$ k = 5 $
+\\
+\textbf{Output}: $ [6,\; 7, \;6,\; 0,\; 4] $
+\end{flushleft}
+
+\paragraph{Example 3:}
+
+\begin{flushleft}
+\textbf{Input}:
+\\
+$ A = [3,\; 9] $
+\\
+$ B = [8,\; 9] $
+\\
+$ k = 3 $
+\\
+\textbf{Output}: $ [9, \;8, \;9] $
+\end{flushleft}
+\subsection{Greedy Way}
+\begin{enumerate}
+\item 首先要确定每个数组中要取几个数，这个只能通过循环一个个测试。比如如果$A$选择取$x$个数，那么$B$就只能选择取$y=k-x$个数
+\item For each iteration，对于每个数组，用贪心法得到可能组成的最大数。
+\item 然后merge这两个数组得到的最大数，有点类似于merge sort的合并过程。但是需要定义如何进行两个array的比较，这里需要采用lexically comparison的方法。
+\item 最后选择所有测试中的最大数。这个过程同样要基于对两个array进行lexically compare的方法。
+\item 在对每个数组用贪心的方法取得组成的最大数时，可能最后产生的最大数的长度包含多于给定长度。这是因为在generate的过程中，数组的后面是否还有更大的数，需要不断的放入结果数组中，所以最后需要把多出来的数字去除掉。 \label{step0}
+\item 另外在对每个数组用贪心的方法取得组成的最大数的过程中，需要用一个变量来记录该数组中需要drop掉多少个number，即数组长度减去需要的长度。如果没有这个变量来控制，很可能生成的最大数的长度会小于需要的长度。
+\end{enumerate}
+\setcounter{algorithm}{0}
+\begin{algorithm}[H]
+\caption{Greedy Way}
+\begin{algorithmic}[1]
+\Procedure{MaxNumber}{$A, m, B, n, k$}
+\State $\ast$ Suppose $x$ is the count of numbers selected from $A$.
+\State $\ast$ The minimum for $ x $ is $ \max(k-n, 0) $ and the maximum is $ \min(k, m) $
+\State $N:=\emptyset$ \Comment The generated result 
+\For{$x:=\max(k-n, 0)$ \textbf{to} $ \min(k, m) $}
+\State $ a := $ \Call{Process}{$ A, m, x $} \Comment Generate maximum number array $ a $ from $A$
+\State $ b := $ \Call{Process}{$ B, n, k-x $} \Comment Generate maximum number array $ b $ from $B$
+\State $ Z:= $ \Call{Merge}{$ a, x, b, k-x $} \Comment Merge $a$ and $b$ based on lexical order
+\If{\Call{Compare}{$ N,k,0, Z,k,0 $} is \texttt{true}}
+\State $N\gets Z$ \Comment $ N $ is lexically smaller than $ Z $。
+\EndIf
+\EndFor
+\State \Return $N$
+\EndProcedure
+\end{algorithmic}
+\end{algorithm}
+Function \texttt{Process} 则是对于任意一个大小为$ L $的输入数组$ T $，generate长度为$ n $的最大数字数组。
+\begin{algorithm}[H]
+\caption{Generate Maximum Number Array with size $ n $}
+\begin{algorithmic}[1]
+\Function{Process}{$T, L, n$}
+\State $R:=\emptyset$ \Comment The result maximum number array
+\State $\delta:=L-n$ \Comment The count of numbers to be dropped from the result maximum number array
+\For{Each number $ t $ in $ T $}
+\State $\ast$ If $\delta$ is zero, we cannot drop anymore because $R$ needs $n$ digits
+\While{$\delta > 0$ \textbf{and} $ R\neq \emptyset $ \textbf{and} $ R[-1] < t $ }
+\State $\star$ Drop the last element $R[-1]$ from $R$
+\State $\delta\gets\delta-1$
+\EndWhile
+\State $\star$ Add $n$ to $R$
+\EndFor
+\State $\star$ Because of drop, $R$ may have more than $n$ digits
+\State $\star$ Only keep the first $n$ digits in $R$
+\State \Return $ R $
+\EndFunction
+\end{algorithmic}
+\end{algorithm}
+Function \texttt{Merge} 则按照lexical order将两个array $ A $和$ B $进行merge，以得到这两个array所能做成的最大number array $M$。
+\begin{algorithm}[H]
+\caption{Merge two arrays based on lexical order to get maximum number array}
+\begin{algorithmic}[1]
+\Procedure{Merge}{$A, m, B, n$}
+\State $x:=0$ \Comment Index for $A$
+\State $y:=0$ \Comment Index for $B$
+\State $M:=\emptyset$ \Comment The result string
+\State $p:=0$ \Comment Index for $M$
+\While{$x<m$ \textbf{or} $ y < n $}
+\If{\Call{Compare}{$ A, m, x, B, n, y $} is \texttt{true}}
+\State $M[p]:=B[y]$ \Comment $A$ is lexically smaller than $B$, so add $B[y]$ to $M$
+\Else
+\State $M[p]:=A[x]$ \Comment $A$ is lexically equal or larger than $B$, so add $A[x]$ to $M$
+\EndIf
+\State $p\gets p+1$ \Comment Move to next slot in $M$
+\EndWhile
+\algstore{321algo}
+\end{algorithmic}
+\end{algorithm}
+\begin{algorithm}[H]
+\begin{algorithmic}[1]
+\algrestore{321algo}
+\State \Return $M$
+\EndProcedure
+\end{algorithmic}
+\end{algorithm}
+最后是Function \texttt{Compare}，对两个数组$A$和$B$进行lexically comparison，其中$A$ starts with index $x$ and $ B $ starts with $y$。 如果返回\texttt{true}，则表示$A[x\ldots m-1]$ is less than $B[y\ldots n-1]$。
+\begin{algorithm}[H]
+\caption{Lexically Compare Two Arrays With Different Start Index}
+\begin{algorithmic}[1]
+\Procedure{Compare}{$A,m,x,B,n,y$}
+\While{$x<m$ \textbf{and} $ y<n $}
+\If{$A[x] < B[y]$}
+\State \Return \texttt{true} \Comment $A$ is smaller than B
+\ElsIf{$A[x] > B[x]$}
+\State \Return \texttt{false} \Comment $A$ is larger than B
+\EndIf
+\EndWhile
+\State $\star$ 如果算法能到这里，说明 $A[x\ldots m-1]=B[y\ldots n-1]$
+\State $\ast$ 需要比较$A$和$B$的长度，
+\If{$x=m$ \textbf{and} $ y < n $}
+\State \Return \texttt{true} \Comment $A$ is shorter than $B$, so $A[x\ldots m-1]<B[y\ldots n-1]$
+\EndIf
+\State \Return \texttt{false} \Comment Otherwise, $A[x\ldots m-1]\geq B[y\ldots n-1]$
+\EndProcedure
+\end{algorithmic}
+\end{algorithm}
+\setcounter{lstlisting}{0}
+\begin{lstlisting}[style=customc, caption={Greedy Approach}]
+vector<int> maxNumber( vector<int>& nums1, vector<int>& nums2, int k )
+{
+    int l1 = static_cast<int>( nums1.size() );
+    int l2 = static_cast<int>( nums2.size() );
+
+    //The count of numbers selected from nums1 array
+    int sel1 = ( max )( k - l2, 0 );
+
+    //This is the maximum count of numbers
+    //can be selected from nums1 array
+    int max_sel1 = ( min )( k, l1 );
+
+    vector<int> ans( k, INT_MIN );
+
+    vector<int> merged( k, 0 );
+
+    vector<int> v_maxFrom1;
+    vector<int> v_maxFrom2;
+
+    v_maxFrom1.reserve( ( min )( k, l1 ) );
+    v_maxFrom2.reserve( ( min )( k, l2 ) );
+
+    for( ; sel1 <= max_sel1; ++sel1 )
+    {
+        process( nums1, sel1, v_maxFrom1 );
+        //k-sel1 is the count of numbers selected from nums2 array
+        process( nums2, k - sel1, v_maxFrom2 );
+
+        merge( v_maxFrom1, v_maxFrom2, merged );
+
+        //lexically compare two arrays
+        if( lexical_compare( ans, 0, merged, 0 ) )
+        {
+            swap( ans, merged );
+        }
+
+        v_maxFrom1.clear();
+        v_maxFrom2.clear();
+    }
+
+    return ans;
+}
+
+void process( const vector<int>& A, int sel, vector<int>& out )
+{
+    if( sel == 0 )
+    {
+        return;
+    }
+
+    //drop will control how many numbers
+    //will be kept in out array
+    int drop = static_cast<int>( A.size() ) - sel;
+
+    for( int n : A )
+    {
+        while( drop && !out.empty() && ( out.back() < n ) )
+        {
+            out.pop_back();
+            --drop;
+        }
+
+        out.push_back( n );
+    }
+
+
+    //since we do not increment drop
+    //the final kept numbers will always no less than sel
+    out.resize( sel );
+}
+
+//Use lexically compare function to compare two arrays
+void merge( const vector<int>& v1, const vector<int>& v2, vector<int>& out )
+{
+    int l1 = static_cast< int >( v1.size() );
+    int l2 = static_cast< int >( v2.size() );
+
+    int x = 0;
+    int y = 0;
+
+    int p = 0;
+    while( ( x < l1 ) || ( y < l2 ) )
+    {
+        if( lexical_compare( v1, x, v2, y ) )
+        {
+            out[p] = v2[y];
+            ++p;
+            ++y;
+        }
+        else
+        {
+            out[p] = v1[x];
+            ++p;
+            ++x;
+        }
+    }
+
+
+}
+
+//The routine to compare arrays lexically
+bool lexical_compare( const vector<int>& A, int x, const vector<int>& B, int y )
+{
+    int m = static_cast< int >( A.size() );
+    int n = static_cast< int >( B.size() );
+
+    while( ( x < m ) && ( y < n ) )
+    {
+        if( A[x] < B[y] )
+        {
+            return true;
+        }
+
+        if( A[x] > B[y] )
+        {
+            return false;
+        }
+
+        ++x;
+        ++y;
+    }
+
+    //A's length is smaller than B's length
+    //and all A's numbers equal to previous m numbers in B
+    return ( x == m ) && ( y < n );
+}
+};
+\end{lstlisting}

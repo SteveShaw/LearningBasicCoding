@@ -1,0 +1,98 @@
+\section{372 --- Super Pow}
+Your task is to calculate $ a^b \bmod 1337$ where $ a $ is a positive integer and $ b $ is an extremely large positive integer given in the form of an array.
+
+\paragraph{Example 1:}
+
+\begin{flushleft}
+\textbf{Input}:$  a = 2 $, $ b = [3] $
+\\
+\textbf{Output}: 8
+\end{flushleft}
+
+\paragraph{Example 2:}
+
+\begin{flushleft}
+\textbf{Input}:$  a = 2 $, $ b = [1,0] $
+\\
+\textbf{Output}: 1024
+\end{flushleft}
+
+\subsection{Digital Logarithmic}
+\begin{enumerate}
+\item 首先注意到$(x\times y)\bmod k = (x\bmod k)\times (y\mod k)$ \item 根据1， 还可以得到$(a^b)\bmod k = (a^{b-c}\bmod k)\times (a^c\bmod k)$。例如$(a^{12345}\bmod k) = (a^{12340}\bmod k)\times (a^5\bmod k)$。
+\item 而$a^{12340}\bmod k = (a^{1234}\bmod k)^{10}$。
+\item 依据上述分析，假设$f(a, b) = (a^b)\bmod k$，那么$f(a,b) = f(f(a, b/10), 10)\times f(a, b\bmod 10)$。而由于$b$在题目中是以数组的形式给出，因此只要从数组最后面的数字往前面递推即可。
+\end{enumerate}
+
+\setcounter{algorithm}{0}
+\begin{algorithm}[H]
+\caption{Digital Logarithmic}
+\begin{algorithmic}[1]
+\Procedure{SuperPow}{$a, b, L$}
+\If{$b$ is empty}
+\State \Return 1
+\EndIf
+\State $t:=b[L-1]$
+\State $\star$ Remove the last number from $b$, so $b$'s length decrease to $L-1$
+\State $u:$=\Call{SuperPow}{$a, b, L-1$} \Comment $(a^{b/10}\bmod 1337)$
+\State $x:=$\Call{GetMod}{$ u , 10$} \Comment $ (a^{b/10}\bmod 1337) ^ {10}\bmod 1337 $
+\State $y:=$\Call{GetMod}{$ a, t $} \Comment $a^{(b\bmod 10)}\bmod 1337$
+\State \Return $(x\times y)\bmod 1337$ \Comment Need to modular 1337 again to ensure the result is less than 1337
+\algstore{372algo}
+\end{algorithmic}
+\end{algorithm}
+\begin{algorithm}[H]
+\begin{algorithmic}[1]
+\algrestore{372algo}
+\EndProcedure
+\end{algorithmic}
+\end{algorithm}
+
+Function \texttt{GetMod}则计算$(a^e)\bmod 1337$，其中$e$是个位数。
+
+\begin{algorithm}[H]
+\caption{Get $a^e$ modular}
+\begin{algorithmic}[1]
+\Function{GetMod}{$a, e$}
+\State $c:=1$
+\For{$w:=1$ \textbf{to} $e$}
+\State $c\gets (c\times a)\bmod 1337$
+\EndFor
+\State \Return $c$
+\EndFunction
+\end{algorithmic}
+\end{algorithm}
+
+\setcounter{lstlisting}{0}
+\begin{lstlisting}[style=customc, caption={Digital Modular}]
+int superPow( int a, vector<int>& b )
+{
+    if( b.empty() )
+    {
+        return 1;
+    }
+
+    int t = b.back();
+    b.pop_back();
+
+    int u = superPow( a, b ); //a^(b/10) % 1337
+
+    return ( get_mod( u, 10 ) * get_mod( a, t ) ) % 1337;
+
+}
+
+int get_mod( int a, int b )
+{
+    //get (a^b)%k
+
+    long long c = 1;
+
+    for( int e = 0; e < b; ++e )
+    {
+        c = ( ( c * a ) % 1337 );
+
+    }
+
+    return c;
+}
+\end{lstlisting}

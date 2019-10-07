@@ -1,0 +1,207 @@
+\section{302 -- Smallest Rectangle Enclosing Black Pixels}
+An image is represented by a binary matrix $M$ with 0 as a white pixel and 1 as a black pixel. The black pixels are connected, i.e., there is only one black region. Pixels are connected horizontally and vertically. Given the location $(x, y)$ of one of the black pixels, return the area of the smallest (axis-aligned) rectangle that encloses all black pixels.
+\par
+For example, given the following image:
+\begin{flushleft}
+\begin{table}[H]
+\begin{tabular}{cccc}
+0 & 0 & 1 & 0\\
+0 & 1 & 1 & 0\\
+0 & 1 & 0 & 0
+\end{tabular}
+\end{table}
+and $x = 0$, $y = 2$
+\par
+Return 6.
+\end{flushleft}
+\subsection{Depth First Search}
+\begin{itemize}
+\item DFS 搜索，并在递归中记录black pixel的最大和最小的row和col。
+\item 为了避免重复搜索，对已经访问过的black pixel标记为2。
+\end{itemize}
+\setcounter{lstlisting}{0}
+\begin{lstlisting}[style=customc, caption={Depth First Search}]
+class Solution
+{
+public:
+    int smallestRectangleArea( vector<vector<int>>& image, int x, int y )
+    {
+        m = static_cast< int >( image.size() );
+        n = static_cast< int >( image[0].size() );
+        min_x = m;
+        min_y = n;
+        max_x = -1;
+        max_y = -1;
+
+        dfs( image, x, y );
+		
+        return ( max_x - min_x  + 1 ) * ( max_y - min_y  + 1 );
+    }
+
+    void dfs( vector<vector<int>>& M, int x, int y )
+    {
+        if( ( x < 0 ) || ( x >= m )
+                || ( y < 0 ) || ( y >= n )
+                || ( M[x][y] != 1 ) )
+        {
+            return;
+        }
+
+        //mark as visited
+        M[x][y] = 2;
+
+        min_x = ( min )( x, min_x );
+        min_y = ( min )( y, min_y );
+
+        max_x = ( max )( x, max_x );
+        max_y = ( max )( y, max_y );
+
+
+        dfs( M, x - 1, y );
+        dfs( M, x + 1, y );
+        dfs( M, x, y - 1 );
+        dfs( M, x, y + 1 );
+    }
+
+private:
+
+    int min_x;
+    int max_x;
+    int min_y;
+    int max_y;
+
+    int m;
+    int n;
+};
+\end{lstlisting}
+\subsection{Binary Search}
+\begin{itemize}
+\item ，以给定的black pixel的坐标$ (x, y) $为中心，用binary search快速找到整个黑色区域的上下左右的临界点，然后直接算出面积。
+\item 以寻找黑色连通区域的top为例，因为是top，那么其范围肯定在$ [0, x] $之间。
+\begin{enumerate}
+\item 假设top在第$ i $行，显然这一行中至少有一个点是black pixel。而这个black pixel的column的范围就在$[0, n]$之间(其中$n$是输入image的宽)。
+\item 在进行binary search时，是对row
+进行中点计算，然后column从0开始遍历，直到找到为1的点，或者越界位置。目标是从上到下第一个包含有black pixel的row。
+\end{enumerate}
+\item 寻找bottom与寻找top类似，不同的是，我们是从上到下寻找第一个没有black pixel的行。因此在binary search时，如果middle row包含有black pixel，要将binary search的左边界更新为middle row$  + 1 $。
+\item 对于left和right的寻找，与top和bottom的寻找相类似，只不过寻找的是column。
+\item 由于bottom和right都是从上到下和从左到右第一个没有black pixel的行和列，因此计算面积直接是(bottom $-$ top)$\times$(right $ - $ left)。
+\end{itemize}
+\begin{lstlisting}[style=customc, caption={Binary Search}]
+class Solution
+{
+public:
+    int smallestRectangleArea( vector<vector<int>>& image, int x, int y )
+    {
+        m = static_cast< int >( image.size() );
+        n = static_cast< int >( image[0].size() );
+
+        int top = topmost( image, 0, x, true );
+        int bottom = bottommost( image, y, m, true );
+        int left = topmost( image, 0, y, false );
+        int right = bottommost( image, y, m, false );
+
+        return ( bottom - top ) * ( right - left );
+    }
+
+
+    int topmost( vector<vector<int>>& M, int l, int r, bool row_mode )
+    {
+        //find first row/column that contains black pixel
+        while( l < r )
+        {
+            int mid = ( l + r ) / 2;
+            bool has_black = false;
+
+            if( row_mode )
+            {
+                //Searching row
+                for( int i = 0; i < n; ++i )
+                {
+                    if( M[mid][i] == 1 )
+                    {
+                        has_black = true;
+                        break;
+                    }
+                }
+            }
+            else
+            {
+                //Searching Column
+                for( int i = 0; i < m; ++i )
+                {
+                    if( M[i][mid] == 1 )
+                    {
+                        has_black = true;
+                        break;
+                    }
+                }
+            }
+
+            if( !has_black )
+            {
+                l = mid + 1;
+            }
+            else
+            {
+                r = mid;
+            }
+        }
+
+        return l;
+    }
+
+    int bottommost( vector<vector<int>>& M, int l, int r, bool row_mode )
+    {
+        //find first row/column that does not contain black pixel
+        while( l < r )
+        {
+            int mid = ( l + r ) / 2;
+            bool has_black = false;
+
+            if( row_mode )
+            {
+                //Search for row
+                for( int i = 0; i < n; ++i )
+                {
+                    if( M[mid][i] == 1 )
+                    {
+                        has_black = true;
+                        break;
+                    }
+                }
+            }
+            else
+            {
+                //Search for column
+                for( int i = 0; i < m; ++i )
+                {
+                    if( M[i][mid] == 1 )
+                    {
+                        has_black = true;
+                        break;
+                    }
+                }
+            }
+
+
+            if( has_black )
+            {
+                l = mid + 1;
+            }
+            else
+            {
+                r = mid;
+            }
+        }
+
+        return l;
+    }
+
+
+private:
+
+    int m;
+    int n;
+};
+\end{lstlisting}

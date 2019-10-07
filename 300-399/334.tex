@@ -1,0 +1,80 @@
+\section{334 --- Increasing Triplet Subsequence}
+Given an unsorted array return whether an increasing subsequence of length 3 exists or not in the array.
+\par
+Formally the function should:
+\begin{itemize}
+\item Return \texttt{true} if there exists \texttt{i}, \texttt{j}, \texttt{k} such that $A[i] < A[j] < [k]$ given $0 \leq i < j < k \leq n-1$ else return \texttt{false}.
+
+\end{itemize}
+
+\paragraph{Note:} 
+\begin{itemize}
+\item Your algorithm should run in \texttt{O(n)} time complexity and \texttt{O(1)} space complexity.
+\end{itemize}
+
+\paragraph{Example 1:}
+
+\begin{flushleft}
+\textbf{Input}: $[1,2,3,4,5]$
+\\
+\textbf{Output}: \texttt{true}
+\end{flushleft}
+
+\paragraph{Example 2:}
+
+\begin{flushleft}
+\textbf{Input}: $[5,4,3,2,1]$
+\\
+\textbf{Output}: \texttt{false}
+\end{flushleft}
+
+
+
+\subsection{Find The Minimum Two Numbers}
+\begin{itemize}
+\item 算法类似于寻找最小数和次最小数
+\item 设定两个变量$ x $和$ y $，初始化都设为int type的最大值。
+\item 遍历数组$A$，对于当前数字$ n $
+\begin{itemize}
+\item 如果 $ x\geq n $，将$ x $更新为$n$. 
+\item 否则，如果$ y\geq n $，则将$ y $更新为$n$
+\item 如果$y$被更新，说明之前$x$比当前这个$y$还小，这样就找到了两个数是递增关系。
+\item 最后如果$x<n$， $y<n$，因为$x<y$，我们就找到了符合要求的三个数。
+\end{itemize}
+\end{itemize}
+\setcounter{lstlisting}{0}
+\begin{lstlisting}[style=customc, caption={Find Minimum}]
+bool increasingTriplet( vector<int>& nums )
+{
+    //The minimum
+    int x = INT_MAX;
+    //The one larger than minimum
+    int y = INT_MAX;
+
+    for( int n : nums )
+    {
+        if( n <= x )
+        {
+            x = n;
+        }
+        else if( n <= y )
+        {
+            //If we update y
+            //x <y
+            y = n;
+        }
+        else
+        {
+            //x<n, y<n and x <y
+            //Found the 3 numbers
+            return true;
+        }
+    }
+
+    //No such 3 numbers exist
+    return false;
+}
+\end{lstlisting}
+
+
+

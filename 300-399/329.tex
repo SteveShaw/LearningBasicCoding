@@ -1,0 +1,106 @@
+\section{329 --- Longest Increasing Path in a Matrix}
+Given an integer matrix $M$, find the length of the longest increasing path.
+\par
+From each cell, you can either move to four directions: left, right, up or down. You may \textbf{NOT} move diagonally or move outside of the boundary (i.e. wrap-around is not allowed).
+
+\paragraph{Example 1:}
+
+\begin{flushleft}
+\textbf{Input}: 
+\begin{table}[H]
+\begin{tabular}{ccc}
+\textcolor{red}{9} & 9 & 4 \\
+\textcolor{red}{6} &6 & 8\\
+\textcolor{red}{2}& \textcolor{red}{1} & 1
+\end{tabular}
+\end{table}
+\textbf{Output}: 4
+\\ 
+\textbf{Explanation}: The longest increasing path is $[1,\; 2,\; 6,\; 9]$.
+\end{flushleft}
+
+\paragraph{Example 2:}
+
+\begin{flushleft}
+\textbf{Input}: 
+\begin{table}[H]
+\begin{tabular}{ccc}
+\textcolor{red}{3} & \textcolor{red}{4} & \textcolor{red}{5} \\
+3 &2 & \textcolor{red}{6}\\
+2& 2 & 1
+\end{tabular}
+\end{table}
+\textbf{Output}: 4 
+\\
+\textbf{Explanation}: The longest increasing path is $ [3,\; 4, \;5, \;6] $. Moving diagonally is not allowed.
+\end{flushleft}
+\subsection{Dynamic Programming + DFS}
+\begin{itemize}
+\item 由于每个cell其实都存在一个以这个cell为开始的longest increasing path，因此用一个memo数组来记录这个path的length。
+\item 对每一个cell进行DFS搜索，直至出界或者下一个cell小于等于当前cell的值。
+\end{itemize}
+\setcounter{lstlisting}{0}
+\begin{lstlisting}[style=customc, caption={Dynamic Programming + DFS}]
+int longestIncreasingPath( vector<vector<int>>& matrix )
+{
+    if( matrix.empty() || matrix[0].empty() )
+    {
+        return 0;
+    }
+
+    int m = static_cast<int>( matrix.size() );
+    int n = static_cast<int>( matrix[0].size() );
+
+    vector<vector<int>> memo( m, vector<int>( n, 0 ) );
+
+    int best = 1;
+
+    for( int r = 0; r < m; ++r )
+    {
+        for( int c = 0; c < n; ++c )
+        {
+            //test each cell
+            int len = dfs( matrix, r, c, m, n memo );
+            best = ( max )( best, len );
+        }
+    }
+
+    return best;
+}
+
+int dfs( vector<vector<int>>& matrix, int r, int c, int rows, int cols, vector<vector<int>>& memo )
+{
+    //if we already get the maximum length
+    //starting from this cell
+    //just return
+    if( memo[r][c] )
+    {
+        return memo[r][c];
+    }
+
+    int dr[] = {-1, 0, 1, 0};
+    int dc[] = {0, -1, 0, 1};
+
+    int best = 1;
+
+    for( int i = 0; i < 4; ++i )
+    {
+        int nr = r + dr[i];
+        int nc = c + dc[i];
+
+        if( ( nr < 0 ) || ( nr >= rows ) || ( nc < 0 ) || ( nc >= cols ) || ( matrix[nr][nc] <= matrix[r][c] ) )
+        {
+            //out of bound or
+            //next cell is no larger than current cell
+            continue;
+        }
+
+        int len = 1 + dfs( matrix, nr, nc, memo );
+        best = ( max )( best, len );
+    }
+
+    memo[r][c] = best;
+    return best;
+}
+\end{lstlisting}
+

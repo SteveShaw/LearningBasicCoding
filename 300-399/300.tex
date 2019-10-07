@@ -1,0 +1,177 @@
+\section{300. Longest Increasing Subsequence}
+Given an unsorted array of integers $A$, find the length of longest increasing subsequence.
+
+\paragraph{Example:}
+
+\begin{flushleft}
+\textbf{Input}: [10, 9, 2, 5, 3, 7, 101, 18]
+\\
+\textbf{Output}: 4 
+\\
+\textbf{Explanation}: The longest increasing subsequence is [2, 3, 7, 101], therefore the length is 4.
+\end{flushleft} 
+
+\paragraph{Note:}
+\begin{itemize}
+\item There may be more than one LIS combination, it is only necessary for you to return the length.
+\item Your algorithm should run in $O(n^2)$ complexity.
+\end{itemize}
+
+\paragraph{Follow up:} 
+\begin{itemize}
+\item Could you improve it to $O(n \log n)$ time complexity?
+\end{itemize}
+
+\subsection{Dynamic Programming}
+\begin{itemize}
+\item 这是典型的循环式DP。
+\item Suppose $F[i]$表示以 $A[i]$为结尾的LIS的长度，
+\item 对于每一个$A[i]$，从$A[0]$循环到$A[i-1]$，如果发现其中某个数$A[j] < A[i]$， update $F[i]$ as $F[i]\gets \max(F[i], F[j] + 1)$。
+\item 在上述update $F[i]$时，同时记录current maximum $F[i]$ as $\ell$。
+\item At the end，$\ell$就是global LIS的长度。
+\end{itemize}
+
+\setcounter{algorithm}{0}
+\begin{algorithm}[H]
+\caption{Dynamic Programming}
+\begin{algorithmic}[1]
+\Procedure{LengthOfLIS}{$A, L$}
+\State $\star$ create an array $F$ with size $L$ as DP array
+\State $\star$ Set all elements in $F$ as 1
+\State $\star$ Set result LIS $\ell$ as 1
+\For{$i:=1$ \textbf{to} $L-1$}
+\For{$j:=0$ \textbf{to} $i-1$}
+\algstore{300algo}
+\end{algorithmic}
+\end{algorithm}
+\begin{algorithm}[H]
+\begin{algorithmic}[1]
+\algrestore{300algo}
+\If{$A[j] < A[i]$}
+\State $F[i]\gets \max(F[i], F[j]+1)$
+\State $\ell\gets\max(\ell, F[i])$
+\EndIf
+\EndFor
+\EndFor
+\State \Return $\ell$
+\EndProcedure
+\end{algorithmic}
+\end{algorithm}
+
+\setcounter{lstlisting}{0}
+\begin{lstlisting}[style=customc, caption={Dynamic Programming}]
+int lengthOfLIS( vector<int>& nums )
+{
+    if( nums.empty() )
+    {
+        return 0;
+    }
+
+    vector<int> F( nums.size(), 1 );
+
+    int ans = 1;
+
+    for( size_t i = 1; i < nums.size(); ++i )
+    {
+        for( size_t j = 0; j < i; ++j )
+        {
+            if( nums[j] < nums[i] )
+            {
+                F[i] = ( max )( F[i], F[j] + 1 );
+                //update global maximum LIS
+                ans = ( max )( ans, F[i] );
+            }
+        }
+    }
+
+    return ans;
+}
+\end{lstlisting}
+
+\subsection{Binary Search}
+\begin{enumerate}
+\item 初始化一个array $F$，最初为empty。
+\item 遍历输入数组$A$，对于每个$A[i]$，用leftmost binary search在$F$中查找第一个不小于$A[i]$的值 $F[\omega]$，
+\item 如果这个值不存在，就把$A[i]$加入到$F$
+\item 否则，将$F[\omega]$替换为$A[i]$。
+\item 最后返回$F$的size。
+\item 特别注意的是$F$可能不是一个真实的LIS，只是长度和LIS相等。
+\end{enumerate}
+
+\begin{algorithm}[H]
+\caption{Binary Search}
+\begin{algorithmic}[1]
+\Procedure{LengthOfLIS}{$A, L$}
+\State $\star$ Create an empty array $F$
+\State $\star$ Add $A[0]$ to $F$
+\For{$i:=1$ \textbf{to} $L-1$}
+\State $\star$ leftmost binary search $F$ to find the first index $\omega$ where $F[\omega]\geq A[i]$
+\If{$\omega=\lvert F\vert$} \Comment $A[i]$ is largest for all elements in $F$
+\State  $\star$ Add $A[i]$ to $F$
+\Else
+\State $F[\omega]\gets A[i]$ \Comment Update $F[\omega]$ to $A[i]$
+\EndIf
+\EndFor
+\State \Return $ \lvert F\vert $ \Comment Return the size of $F$
+\EndProcedure
+\end{algorithmic}
+\end{algorithm}
+
+\begin{lstlisting}[style=customc, caption={Binary Search}]
+int lengthOfLIS( vector<int>& nums )
+{
+
+    if( nums.empty() )
+    {
+        return 0;
+    }
+
+    vector<int> F;
+    F.reserve( nums.size() );
+
+    F.push_back( nums[0] );
+
+    for( size_t i = 1; i < nums.size(); ++i )
+    {
+
+        auto p = leftmost( F, nums[i] );
+
+        if( p == F.size() )
+        {
+            //no any number in F is no less than nums[i]
+            F.push_back( nums[i] );
+        }
+        else
+        {
+            //update F[p] as nums[i]
+            F[p] = nums[i];
+        }
+    }
+
+    //The size of F is the length
+    //but F itself maynot be LIS
+    return F.size();
+}
+
+//leftmost binary search
+size_t leftmost( vector<int>& A, int x )
+{
+    size_t l = 0;
+    size_t r = A.size();
+
+    while( l < r )
+    {
+        auto mid = ( l + r ) / 2;
+        if( A[mid] < x )
+        {
+            l = mid + 1;
+        }
+        else
+        {
+            r = mid;
+        }
+    }
+
+    return l;
+}
+\end{lstlisting}

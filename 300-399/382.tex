@@ -1,0 +1,265 @@
+\section{382 --- Linked List Random Node}
+Given a singly linked list, return a random node's value from the linked list. Each node must have the same probability of being chosen.
+
+\paragraph{Follow up:}
+\begin{itemize}
+\item What if the linked list is extremely large and its length is unknown to you? 
+\item Could you solve this efficiently without using extra space?
+\end{itemize}
+
+\paragraph{Example:}
+
+\begin{lstlisting}[style=customc]
+// Init a singly linked list [1,2,3].
+ListNode head = new ListNode( 1 );
+head.next = new ListNode( 2 );
+head.next.next = new ListNode( 3 );
+Solution solution = new Solution( head );
+
+// getRandom() should return either 1, 2, or 3 randomly. Each element should have equal probability of returning.
+solution.getRandom();
+\end{lstlisting}
+
+\subsection{Introduction To Reservoir Sampling}
+
+%\paragraph{Problem:}
+%
+%\begin{flushleft}
+%    Choose $ k $ entries from $ n $ numbers. Make sure each number is selected with the probability of $ k/n $
+%\end{flushleft}
+%
+%\paragraph{Basic idea:}
+%
+%\begin{enumerate}
+%\item Choose $1, 2, 3, \ldots, k$ first and put them into the reservoir.
+%\item For $k+1$, pick it with a probability of $k/(k+1)$, and randomly replace a number in the reservoir.
+%\item For $k+i$, pick it with a probability of $k/(k+i)$, and randomly replace a number in the reservoir.
+%\item Repeat until $  k+i $ reaches $  n $
+%\end{enumerate}
+%
+%\paragraph{Proof:}
+%
+%\begin{enumerate}
+%\item For $ k+i $, the probability that it is selected and will replace a number in the reservoir is $k/(k+i)$
+%\item For a number in the reservoir before (let's say $X$), the probability that it keeps staying in the reservoir is the product of two probabilities
+%\begin{itemize}
+%\item The probability that $X$ was in the reservoir last time, say $P_1$. $P_1 = k/(k+i-1)$
+%\item The probability that $X$ is not replaced by $ k+i $, say $P_2$. $P_2$ is the complement for the probability that $k+i$ is selected and replaces $X$, say $P_3$, i.e. $P_2=1-P_3$. $P_3=k/(k+i)\times 1/k$.
+%\end{itemize}
+%which is 
+%\[
+%P_1\times P_2 = (k/(k+i-1))\times (1-k/(k+i)\times 1/k) = k/(k+i)
+%\]
+%\item When $ k+i $ reaches $ n $, the probability of each number staying in the reservoir is $ k/n $
+%\end{enumerate}
+
+\paragraph{Example: Sample size 10}
+\begin{flushleft}
+Suppose we see a sequence of items, one at a time. We want to keep ten items in memory, and we want them to be selected at random from the sequence. If we know the total number of items $ n $, then the solution is easy: select 10 distinct indices i between 1 and $ n $ with equal probability, and keep the $ i $-th elements. The problem is that we do not always know the exact $ n $ in advance. A possible solution is the following:
+
+\begin{itemize}
+\item Keep the first 10 items in memory.
+\item When the $i$-th item arrives (for i > 10):
+\begin{enumerate}
+\item with probability $ 10 / i $, keep the new item (discard an old one, selecting which to replace at random, each with chance 1/10)
+\item with probability $1 − 10 / i$, keep the old items (ignore the new one)
+\end{enumerate}
+\end{itemize}
+Thus, 
+\begin{itemize}
+\item when there are 10 items or fewer, each is kept with probability 1;
+\item when there are 11 items, each of them is kept with probability 10/11; for the old items, that is $(1)(1/11 + (10/11)(9/10)) = 1/11 + 9/11 = 10/11$. In other words, the 10 old items are kept either if the new one is not selected $ 1/11 $ or the new one is selected to replace one of the other 9 items $10/11 \times 9/10$.
+\item when there are 12 items, the twelfth item is kept with probability $ 10/12 $, and each of the previous 11 items are also kept with probability $(10/11)(2/12 + (10/12)(9/10)) = (10/11)(11/12) = 10/12$;
+\end{itemize}
+
+by induction, it is easy to prove that when there are $ n $ items, each item is kept with probability $ 10 / n $.
+\end{flushleft}
+
+The algorithm is shown as below. $S$ has $n$ items to sample, and $R$ is reservoir array which contains $k$ items.
+\setcounter{algorithm}{0}
+\begin{algorithm}[H]
+\caption{Reservoir Sampling}
+\begin{algorithmic}[1]
+\Procedure{ReservoirSample}{$S, n, R, k$}
+\For{$i:=0$ to $k-1$}
+\State $R[i] = S[i]$ \Comment fill the reservoir array
+\EndFor
+\State $\ast$ replace elements with gradually decreasing probability
+\For{$i:=k$ \textbf{to} $n-1$}
+\State $\star$ generate a random number $j$ in $[0, i]$
+\If{$j< k$}
+\State $R[j]\gets S[i]$
+\EndIf
+\EndFor
+\EndProcedure
+\end{algorithmic}
+\end{algorithm}
+从上述算法可以看出
+\begin{itemize}
+\item The algorithm creates a\textbf{ reservoir} array of size $k$ and populates it with the first $k$ items of $S$. 
+\item It then iterates through the remaining elements of $S$ it is exhausted.
+\item At the $ i $-th element of $S$, the algorithm generates a random number $j$ between 0 and $i-1$. If $j<k$, the $j$-th element of the reservoir array is replaced with the $ i $-th element of $ S $. 
+\item In effect, for all $i$, the $i$-th element of $S$ is chosen to be included in the reservoir with probability $k/i$.
+\item Similarly, at each iteration the $j$-th element of the reservoir array is chosen to be replaced with probability $(1/k)\times (k/i)$, which simplifies to $1/i$.
+\item It can be shown that when the algorithm has finished executing, each item in $ S $ has equal probability (i.e. $k/n$) of being chosen for the reservoir.
+\end{itemize}
+
+\subsection{Weighted Random Sampling using Reservoir}
+In many applications sampling is required to be according to the weights that are assigned to each items available in set. For example, it might be required to sample queries in a search engine with weight as number of times they were performed so that the sample can be analyzed for overall impact on user experience. There are two ways to interpret weights assigned to each item in the set:
+
+\begin{enumerate}
+\item Let the weight of each item be $w_i$ and sum of all weights be $ W $.  We can convert weight to probability of item getting selected in sample as $P_i=w_i/W$.
+\item  Let the weight of two items $ i $ and $ j $ be $w_i$ and $w_j$.  Let the probability of item $ i $ getting selected in sample be $p_i$, then we give $p_j=\min(1, p_i\times \dfrac{w_j}{w_i})$
+\end{enumerate}
+
+对于第一种解释，相应的reservoir sampling算法如下，其中$S$是数据集，事先并不知道大小。$R$ 是大小为$k$的rservoir array。其中用到了一个min prority queue $Q$.
+\begin{algorithm}[H]
+\caption{A-Res}
+\begin{algorithmic}[1]
+\Procedure{ReservoirSample}{$S, R, k$}
+\State $\star$ Create a minimum priority queue $Q$.
+\While{$S$ has data}
+\State $\star$ Get current data $x$ from $S$
+\State $\star$ Get an random number $r$ between $[0,1]$
+\State $\star$ Get the weight $w$ of $x$ in $S$
+\State $r\gets r^{1/w}$
+\algstore{382algo}
+\end{algorithmic}
+\end{algorithm}
+\begin{algorithm}[H]
+\begin{algorithmic}[1]
+\algrestore{382algo}
+\If{size of $Q$ is less than $k$}
+\State $Q\gets Q + (r, x)$ \Comment put $x$ and its related probability into $Q$
+\Else
+\If{the probability of top element in $Q$ is less than $r$}
+\State $\star$ Pop top element from $ Q $
+\State $Q\gets Q + (r, x)$
+\EndIf
+\EndIf
+\EndWhile
+\EndProcedure
+\end{algorithmic}
+\end{algorithm}
+
+对于第二种解释，相应的reservoir sampling算法如下，其中$S$是大小为$n$的数据集，而$R$ 是大小为$k$的rservoir array。
+\begin{algorithm}[H]
+\caption{A-Chao}
+\begin{algorithmic}[1]
+\Procedure{WeightedReservoirChao}{$S, n, R, k$}
+\State $W:=0$
+\State $\ast$ fill the reservoir array $R$
+\For{$i:=0$ \textbf{to} $k-1$}
+\State $R[i]\gets S[i]$
+\State $W\gets W + w_i$ \Comment $w_i$ is the weight of $S[i]$
+\EndFor
+\State $\ast$ Replace sampling
+\For{$i:=k$ \textbf{to} $n-1$}
+\State $ W\gets W+w_i $
+\State $p:=w_i/W$ \Comment probability for $S[i]$
+\State $\star$ generate a random number $j$ in range $[0, 1]$
+\If{$j \leq p$} \Comment select item according to probability
+\State $\star$ generate a random number $x$ in range $[0,k-1]$
+\State $R[x]\gets S[i]$\Comment Uniform selection in reservoir for replacement
+\EndIf
+\EndFor
+\EndProcedure
+\end{algorithmic}
+\end{algorithm}
+In this algorithm, 
+\begin{enumerate}
+\item for each item, its relative weight is calculated and used to randomly decide if the item will be added into the reservoir.
+\item If the item is selected, then one of the existing items of the reservoir is uniformly selected and replaced with the new item.
+\item The trick here is that, if the probabilities of all items in the reservoir are already proportional to their weights, then by selecting uniformly which item to replace, the probabilities of all items remain proportional to their weight after the replacement. 
+\end{enumerate}
+
+\subsection{Relation to Fisher-Yates shuffle}
+Suppose one wanted to draw $ k $ random cards from a deck of playing cards (i.e., $ n=52 $). A natural approach would be to shuffle the deck and then take the top $ k $ cards. In the general case, the shuffle also needs to work even if the number of cards in the deck is not known in advance, a condition which is satisfied by the inside-out version of the \texttt{Fisher-Yates shuffle}: The algorithm shuffles an array $S$ with size $n$ into another array $A$ with same size.
+\begin{algorithm}[H]
+\caption{Normal shuffle}
+\begin{algorithmic}[1]
+\Procedure{Shuffle}{$S, A, n$}
+\State $A[0]\gets S[0]$
+\For{$i:=1$ \textbf{to} $n-1$}
+\State $\star$ generate a random number $r$ in range $[0, i-1]$
+\State $a[i]\gets a[r]$
+\State $a[r]\gets S[i]$
+\EndFor
+\EndProcedure
+\end{algorithmic}
+\end{algorithm}
+
+Note that although the rest of the cards are shuffled, only the top $k$ are important in the present context. Therefore, the array $A$ need only track the cards in the top $k$ positions while performing the shuffle, reducing the amount of memory needed. Truncating a to length $k$, the algorithm is modified accordingly: 
+
+\begin{algorithm}[H]
+\caption{Modified shuffle}
+\begin{algorithmic}[1]
+\Procedure{Shuffle}{$S, A, n$}
+\State $A[0]\gets S[0]$
+\For{$i:=1$ \textbf{to} $k-1$}
+\State $\star$ generate a random number $r$ in range $[0, i-1]$
+\State $a[i]\gets a[r]$
+\State $a[r]\gets S[i]$
+\EndFor
+\For{$i:=k$ \textbf{to} $n-1$}
+\State $\star$ generate a random number $r$ in range $[0, i-1]$
+\If{$r < k$}
+\State $a[r]\gets S[i]$
+\EndIf
+\EndFor
+\EndProcedure
+\end{algorithmic}
+\end{algorithm}
+
+Since the order of the first $ k $ cards is immaterial, the first loop can be removed and $A$ can be initialized to be the first $k$ items of S. This is actually the first algorithm of reservoir sampling.
+
+\subsection{Application Of Reservoir Sampling}
+This problem is the special case where $k=1$ which means the size of reservoir is only \textbf{1}.
+\begin{enumerate}
+\item At first, we put the head's value into the reservoir.
+\item Maintain a integer counter $i$, initially set to $1$
+\item Then iterate from the next node of head. Each time, we get a random number $y$ from $[0,i]$
+\item If $y< 1$, i.e. $y=0$, we replace the number in reservoir as current node's value.
+\end{enumerate}
+
+\setcounter{lstlisting}{0}
+\begin{lstlisting}[style=customc, caption={Reservoir Sampling}]
+class Solution
+{
+public:
+    Solution( ListNode* head )
+    {
+        m_head = head;
+    }
+
+    /** Returns a random node's value. */
+    int getRandom()
+    {
+        int R = -1; //reservoir array R[0]
+
+        auto node = m_head;
+
+        int i = 1;
+
+        while( node )
+        {
+            //generate random number between [0, i-1]
+            int j = ( rand() % i );
+
+            if( j == 0 )
+            {
+                //replace the number in reservoir array
+                //by current node's value
+                R = node->val;
+            }
+
+            ++i;
+            node = node->next;
+        }
+
+        return R;
+    }
+
+    ListNode* m_head;
+};
+\end{lstlisting}

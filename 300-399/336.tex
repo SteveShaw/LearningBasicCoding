@@ -1,0 +1,165 @@
+\section{336 --- Palindrome Pairs}
+Given a list of unique words $ W $, find all pairs of distinct indices $ (i, j) $ in the given list, so that the concatenation of the two words, i.e.$ W[i] + W[j]$ is a palindrome.
+
+\paragraph{Example 1:}
+
+\begin{flushleft}
+\textbf{Input}: [\texttt{abcd}, \texttt{dcba}, \texttt{lls}, \texttt{s}, \texttt{sssll}]
+\\
+\textbf{Output}: [ [0,1], [1,0], [3,2], [2,4] ] 
+\\
+\textbf{Explanation}: The palindromes are [\texttt{dcbaabcd},\texttt{abcddcba},\texttt{slls},\texttt{llssssll}]
+\end{flushleft}
+
+\paragraph{Example 2:}
+
+\begin{flushleft}
+\textbf{Input}: [\texttt{bat}, \texttt{tab}, \texttt{cat}]
+\\
+\textbf{Output}: [ [0,1], [1,0] ] 
+\\
+\textbf{Explanation}: The palindromes are [\texttt{battab}, \texttt{tabbat}]
+\end{flushleft}
+
+\subsection{Hash Map With Tree Set}
+\begin{itemize}
+\item 建立一个hash map $ M $，用来保存每个单词及其index。
+\item 用一个tree set $ S $来保存出现过的单词的长度。
+\item 对于数组中的每一个word $ x $，首先查找与其长度相等的字符串：先reverse $ x $为$ \hat{x} $，然后在map中看$ \hat{x} $是否存在，如果存在且对应的index不相同，就找到了两个长度相等互为reverse的字符串。
+\item 接下来寻找比$ x $长度小的字符串，从保存word长度的tree set $ S $中寻找，对于每一个比$ x $长度 $ L $ 小的长度$ \ell $，首先看$ \hat{x}[\ell\ldots L-1] $是否是palindrome，如果是，并且$ y=\hat{x}[0\ldots\ell-1] $在$ M $中存在，那么在这种情况下，$ y $可以接在$ x $的前面，因此这时候放入结果数组中时，$ y $的index在前，$ x $的index在后。
+\item 相类似，接着看$ \hat{x}[0\ldots L-\ell-1] $是否是palindrome，如果是，并且$ z=\hat{x}[L-\ell\ldots L-1] $在$ M $中存在，这种情况下，$ y $可以接在$ x $的后面，因此放入结果数组时，$ x $的index在前，$ y $的index在后。
+\end{itemize}
+
+\setcounter{algorithm}{0}
+\begin{algorithm}[H]
+\caption{Hash Map Plus Tree Map}
+\begin{algorithmic}[1]
+\Procedure{PalindromePairs}{$W,L$}
+\State $\star$ Create a hash map $M$ and a tree set $S$
+\For{Each word $x$ in $W$}
+\State $\star$ Add $x$ and its index $i$ into $M$
+\State $\star$ Add length of $x$ to $S$
+\EndFor
+\State $\ast$ Find pairs
+\State $\star$ Create an empty array $P$
+\For{Each word $x$ in $W$}
+\State $\star$ Reverse $x$ to $ \hat{x} $
+\If{$ \hat{x}  \in M $ and $\hat[x]$ has different index than $x$}
+\State $\star$ Add index of $x$ and $\hat{x}$ into the result array $P$ 
+\EndIf
+\State $\ast$ Find the words with length less than $L=\lvert x\rvert$
+\For{Each length $\ell < L$ in $S$} \label{336ref1}
+\If{$\hat{x}[\ell\ldots L-1]$ is a palindrome string}\label{336ref2}
+\State $y:=\hat{x}[0\ldots \ell-1]$ \Comment The beginning part of $\hat{x}$
+\If{$y \in M$}
+\State $\star$ Add index of $y$ first and index of $x$ second into $P$ since $y$ matches right of $x$
+\EndIf
+\EndIf \Comment End[\textbf{If} \ref{336ref2}]
+\If{$\hat{x}[0\ldots L-\ell-1]$ is a palindrome string} \label{336ref3}
+\State $z:=\hat{x}[L-\ell\ldots L-1]$ \Comment The latter part of $\hat{x}$
+\If{$z \in M$}
+\State $\star$ Add index of $x$ first and index of $z$ second into $P$ since $z$ matches left of $x$
+\EndIf
+\EndIf \Comment End[\textbf{If} \ref{336ref3}]
+\EndFor \Comment End[\textbf{For} \ref{336ref1}]
+\EndFor
+\State \Return $P$
+\EndProcedure
+\end{algorithmic}
+\end{algorithm}
+
+\setcounter{lstlisting}{0}
+\begin{lstlisting}[style=customc, caption={Hash Map With Tree Set}]
+vector<vector<int>> palindromePairs( vector<string>& words )
+{
+    int L = static_cast< int >( words.size() );
+
+    unordered_map<string, int> m;
+    set<size_t> s_lens;
+
+    for( int i = 0; i < words.size(); ++i )
+    {
+        //add word to hash map
+        m.emplace( words[i], i );
+        //add length to tree map
+        s_lens.insert( words[i].size() );
+    }
+
+    vector<vector<int>> ans;
+
+    for( int i = 0; i < words.size(); ++i )
+    {
+        //reverse current word
+        reverse( words[i].begin(), words[i].end() );
+
+        //check if there is a word with same size and
+        //different index
+        auto wit = m.find( words[i] );
+        if( ( wit != m.end() ) && ( wit->second != i ) )
+        {
+            ans.emplace_back( initializer_list<int> {i, wit->second} );
+        }
+
+        auto l = words[i].size();
+        auto it_len = s_lens.find( words[i].size() );
+
+        //search words with length less than words[i]
+        for( auto it = s_lens.begin(); it != it_len; ++it )
+        {
+            auto sub_len = *it;
+
+            //words[i](reversed) latter part is palindrome
+            //so we can prepend another string to build a palindrome
+            if( is_palindrom( words[i], sub_len, l - 1 ) )
+            {
+                //words[i]'s left part is equal to a word
+                wit = m.find( words[i].substr( 0, sub_len ) );
+                if( wit != m.end() )
+                {
+                    //This word can prepend to current word,
+                    //so its index is added first
+                    ans.emplace_back( initializer_list<int> {wit->second, i} );
+                }
+            }
+
+            //words[i](reversed) beginning part is palindrome
+            //so we can append another string to build a palindrome
+            if( is_palindrom( words[i], 0, l - sub_len - 1 ) )
+            {
+                //words[i]'s right part is equal to word
+                wit = m.find( words[i].substr( l - sub_len, sub_len ) );
+                if( wit != m.end() )
+                {
+                    //This word can append to current word,
+                    //so current word's index is added first
+                    ans.emplace_back( initializer_list<int> {i, wit->second} );
+                }
+            }
+        }
+
+    }
+
+    return ans;
+}
+
+bool is_palindrom( const string& s, size_t start, size_t end )
+{
+    auto l = start;
+    auto r = end;
+
+    while( l < r )
+    {
+        if( s[l] != s[r] )
+        {
+            return false;
+        }
+
+        ++l;
+        --r;
+    }
+
+    return true;
+}
+\end{lstlisting}
+
+

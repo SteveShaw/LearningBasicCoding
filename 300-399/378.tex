@@ -1,0 +1,144 @@
+\section{378 --- Kth Smallest Element in a Sorted Matrix}
+Given a $ n \times n $ matrix $M$ where each of the rows and columns are sorted in ascending order, find the $k$th smallest element in the matrix.
+\par
+Note that it is the $k$th smallest element in the sorted order, not the $k$th distinct element.
+
+\paragraph{Example:}
+\begin{flushleft}
+\textbf{Input}: $k=8$ and $M$ is 
+\begin{table}[H]
+\begin{tabular}{ccc}
+1 & 5 & 9\\
+10 & 11 & 13\\
+12 & 13 & 15
+\end{tabular}
+\end{table}
+\textbf{Output}: 13
+\end{flushleft}
+
+\paragraph{Note: }
+\begin{itemize}
+\item You may assume $ k $ is always valid, $ 1 \leq k \leq n^2 $.
+\end{itemize}
+
+\subsection{Binary Search}
+在binary search中，首先需要定义Search Space。对于数组搜索来说，有两种类型的Search Space: index和range。大部分情况下，当数组是在一个方向上是sorted，就用index作为Search Space。而当数组没有排序，而需要寻找某个特定数时，需要用range作为Search Space。这里的range指的是数组中最小和最大数之间的range。
+\par
+这道题的Search Space只能是用range，这是因为整个matrxi实际上是在row和column两个方向上是sorted，但row与column之间并不是，所以也就找不到一个线性的方式来建立某个数和其index的映射。
+\par
+采用range作为search space，
+\begin{enumerate}
+\item 首先以当前range的中间数作为target，在matrix中寻找不大于这个target的元素的个数$\delta$，如果$\delta$小于$k$，说明target小了，将range的左边界更新为这个中间数加1。
+\item 而如果$\delta$大于或者等于$k$，说明目标数大了，将range的右边界更新为中间数。
+\item 而在matrix中计算$\delta$时，最佳的方法是从$M[C-1][0]$开始，逐行逐列的搜索。假设当前搜索到了位置$(r,c)$，
+\begin{itemize}
+\item 如果$M[r][c]$比目标值小，。由于column $c$中，小于$r$的所有元素都比$M[r][c]$小，因此$\delta$增加$r+1$(因为$r$是从0开始的)，另外，increment column $c$，即$c\gets c+1$，即向右移动。
+\item 反之，则decrement $r$，即向上移动。
+\end{itemize}
+\end{enumerate}
+可以看到上面的过程其实就是leftmost binary search，只不过Search Space是range，不是index。需要在range中找到第一个数，使得range中小于等于这个数的count为$k$。
+
+\setcounter{algorithm}{0}
+\begin{algorithm}[H]
+\caption{Binary Search}
+\begin{algorithmic}[1]
+\Procedure{KthSmallest}{$M, n$}
+\State $l:=M[0][0]$ \Comment The left boundary of the range
+\State $r:=M[n-1][n-1]$ \Comment The right boundary of the range
+\State $\ast$ Find the first number $x$ in range $[l,r]$ that the count of numbers in $M$ no larger than $x$ is $k$
+\While{$l < r$}
+\State $x:=(l+r)/2$ \Comment The middle number in the range $[l, r]$
+\State $\delta:=$\Call{F}{$ M, n, x $} \Comment Get the count of numbers no larger than $x$ in $M$
+\If{$\delta < k$}
+\State $l\gets x+1$
+\Else
+\State $r\gets x$
+\EndIf
+\EndWhile
+\State \Return $l$
+\EndProcedure
+\end{algorithmic}
+\end{algorithm}
+
+Function $F$则在$M$中找到不大于于目标值$T$的元素的个数。
+\begin{algorithm}[H]
+\caption{Find counts of elements no larger than $T$}
+\begin{algorithmic}[1]
+\Procedure{F}{$M, n, T$}
+\State $\ast$ Start from $M[n-1][0]$, i.e the bottom left of $M$
+\State $r:=n-1$
+\State $c:=0$
+\State $\delta:=0$
+\While{$r\geq 0 $ \textbf{and} $c < n$}
+\algstore{378algo}
+\end{algorithmic}
+\end{algorithm}
+\begin{algorithm}[H]
+\begin{algorithmic}[1]
+\algrestore{378algo}
+\If{$M[r][c] \leq T$}
+\State $\delta\gets \delta + (r+1)$ \Comment $r+1$ numbers are no larger than $T$ for sure
+\State $c\gets c+1$ \Comment Move right
+\Else
+\State $l\gets l-1$ \Comment Move up
+\EndIf
+\EndWhile
+\State \Return $\delta$
+\EndProcedure
+\end{algorithmic}
+\end{algorithm}
+
+\setcounter{lstlisting}{0}
+\begin{lstlisting}[style=customc, caption={Binary Search}]
+int kthSmallest( vector<vector<int>>& matrix, int k )
+{
+    int l = matrix[0][0];
+    int r = matrix.back().back();
+
+    //leftmost binary search
+    //search space is range
+    while( l < r )
+    {
+        int mid = l + ( r - l ) / 2;
+        int count = get_numbers( matrix, mid );
+
+        if( count < k )
+        {
+            l = mid + 1;
+        }
+        else
+        {
+            r = mid;
+        }
+    }
+
+    return l;
+
+}
+//Helper function
+//get count of numbers that are no larger than target in matrix
+int get_numbers( vector<vector<int>>& matrix, int target )
+{
+    //matrix size is n x n
+    int n = static_cast<int>( matrix[0].size() );
+
+    int c = 0;
+    int r = n - 1;
+    int count = 0;
+
+    while( ( r >= 0 ) && ( c < n ) )
+    {
+        if( matrix[r][c] <= target )
+        {
+            count += ( r + 1 );
+            ++c;
+        }
+        else
+        {
+            --r;
+        }
+    }
+
+    return count;
+}
+\end{lstlisting}

@@ -1,0 +1,51 @@
+\section{357. Count Numbers with Unique Digits}
+Given a non-negative integer $ n $, count all numbers with unique digits, $ x $, where $0 \leq x < 10^n$.
+
+\paragraph{Example:}
+
+\begin{flushleft}
+\textbf{Input}: 2
+\\
+\textbf{Output}: 91 
+\\
+\textbf{Explanation}: The answer should be the total numbers in the range of $0 \leq x < 100$, excluding 11,22,33,44,55,66,77,88,99
+\end{flushleft}
+
+\subsection{Permutation}
+\begin{enumerate}
+\item 除了个位数外，每个数字的最高位不能为零，因此最高位数字可以从1--9中任选一个，总共有9种方式。
+\item 剩下的数字则可以从 0--9中 选择与最高位不同的数字中，也即从剩下的9个数字中选取$l-1$个进行全排列(l是数字的位数)。
+\item 因此对于长度为$l$的数字，产生的unique digits的个数为$9\times P(9, l-1)$。
+\item 对位数从1到$ n $累加即可得到总数。
+\end{enumerate}
+
+\setcounter{lstlisting}{0}
+\begin{lstlisting}[style=customc, caption={Permutation}]
+int countNumbersWithUniqueDigits( int n )
+{
+    int ans = 1;
+
+    for( int l = 1; l <= n; ++l )
+    {
+        //select one number for the highest position
+        //then permutation for remaining l-1
+        ans += 9 * P( 9, l - 1 );
+    }
+
+    return ans;
+}
+
+//get permutation of P(m,n): select n unique elements
+//from m items for permutation
+int P( int m, int n )
+{
+    int ans = 1;
+
+    for( int i = 0; i < n; ++i )
+    {
+        ans *= ( m - i );
+    }
+
+    return ans;
+}
+\end{lstlisting}

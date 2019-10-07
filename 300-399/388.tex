@@ -1,0 +1,181 @@
+\section{388 --- Longest Absolute File Path}
+Suppose we abstract our file system by a string in the following manner:
+
+The string \path{dir\n\tsubdir1\n\tsubdir2\n\t\tfile.ext} represents:
+\begin{table}[H]
+\begin{tabular}{lll}
+\texttt{dir} & & \\
+& \texttt{subdir1} & \\
+& \texttt{subdir2} & \\
+&  & \texttt{file.ext}\\
+\end{tabular}
+\end{table}
+The directory \texttt{dir} contains an empty sub-directory \texttt{subdir1} and a sub-directory \texttt{subdir2} containing a file \path{file.ext}.
+\par
+The string
+\\
+\path{dir\n\tsubdir1\n\t\tfile1.ext}
+\\
+\path{\n\t\tsubsubdir1}
+\\
+\path{\n\tsubdir2\n\t\tsubsubdir2}
+\\
+\path{\n\t\t\tfile2.ext} represents: 
+\begin{table}[H]
+\begin{tabular}{llll}
+\texttt{dir} & & & \\
+& \texttt{subdir1} & & \\
+&  & \path{file1.ext}& \\
+& \texttt{subdir2} & & \\
+&  & \texttt{subsubdir2} & \\
+&  & & \texttt{file2.ext}
+\end{tabular}
+\end{table}
+The directory \texttt{dir} contains two sub-directories \texttt{subdir1} and \texttt{subdir2}. \texttt{subdir1} contains a file \path{file1.ext} and an empty second-level sub-directory \texttt{subsubdir1}. \texttt{subdir2} contains a second-level sub-directory \texttt{subsubdir2} containing a file \path{file2.ext}.
+\par
+We are interested in finding the longest (number of characters) absolute path to a file within our file system. For example, in the second example above, the longest absolute path is \path{dir/subdir2/subsubdir2/file2.ext}, and its length is 32 (not including the double quotes).
+\par
+Given a string $S$ representing the file system in the above format, return the length of the longest absolute path to file in the abstracted file system. If there is no file in the system, return 0.
+
+\paragraph{Note:}
+
+\begin{itemize}
+\item The name of a file contains at least a . and an extension.
+\item The name of a directory or sub-directory will not contain a double dots (..)
+\item Time complexity required: $O(n)$ where $n$ is the size of the input string.
+\end{itemize}
+
+Notice that 
+\par
+\path{a/aa/aaa/file1.txt} 
+\par
+is not the longest file path, if there is another path
+\par
+\path{aaaaaaaaaaaaaaaaaaaaa/sth.png}.
+
+\subsection{Tree Structure}
+\begin{itemize}
+\item Treat the path like a tree structure
+\item Maintain an array $A$ to record each path element during parsing $S$.
+\item Maintain a variable $l$ to record level of each path element, at start, $l=0$. Then, $l$ will updated to the number of tab symbols when parsing $S$. 
+\item If a end line symbol is found, we know that we have already got a path element, put it to the slot associated with the level in $A$.
+\item We always get level $l$ first and then get the path element.
+\item If a path element is a file (contains dot symbol), check from the start of $A$ the length of the absolute path to this file. Also, update the maximum length so far.
+\end{itemize}
+
+\setcounter{algorithm}{0}
+\begin{algorithm}[H]
+\caption{Tree Structure}
+\begin{algorithmic}[1]
+\Procedure{LengthLongestPath}{$S, L$}
+\State $\star$ Create a empty array $A$.
+\State $l:=0$ \Comment the level for each path element
+\State $x:=0$ \Comment The start index of a path element
+\State $z:=0$ \Comment The maximum length of path
+\For{$i:=0$ \textbf{to} $ L-1 $}
+\If{$S[i]$ is end line symbol \path{\n}}
+\State $\ast$ We know we reach end of a path element
+\algstore{388algo}
+\end{algorithmic}
+\end{algorithm}
+\begin{algorithm}[H]
+\begin{algorithmic}[1]
+\algrestore{388algo}
+\If{$l < \lvert A\rvert$} \Comment the level this path element is less than maximum level
+\State $A[l]\gets S[x,i-1]$ \Comment Put the substring $S[x,i-1]$ into slot $l$ in $A$
+\Else \Comment This path element has maximum level so far
+\State $A\gets A + S[x,i-1]$ \Comment Add the substring $S[x,i-1]$ to end of $A$
+\EndIf 
+\If{$S[x,i-1]$ is a file name}
+\State $\star$ Get total size $\omega$ of all path elements from $0$ to $l$ in $A$ with the number of slashes.
+\State $z\gets \max(z,\omega)$ \Comment Update $z$ to maximum size
+\EndIf
+\State $j:=i+1$
+\State $\ast$ skip tab symbols (\path{\t})
+\While{$j < L$ \textbf{and} $S[j] $ is \path{\t}}
+\State $j\gets j+1$
+\EndWhile
+\State $\ast$ Now we are at a letter which is the start of a new path element
+\State $l\gets j-i-1$ \Comment The number of tab symbols is the level
+\State $x\gets j$ \Comment Update the first index of next path element
+\State $i\gets j-1$ \Comment Since $i$ will be incremented next round, decrement it first.
+\EndIf
+\EndFor
+\State \Return $z$
+\EndProcedure
+\end{algorithmic}
+\end{algorithm}
+
+\setcounter{lstlisting}{0}
+\begin{lstlisting}[style=customc, caption={Tree}]
+int lengthLongestPath( string input )
+{
+    //add one more \n
+    //to trigger the parsing final path element
+    input.push_back( '\n' );
+
+    vector<string> v_path;
+
+    //the start of a path element
+    size_t start = 0;
+
+    //the level of a path element
+    size_t level = 0;
+
+    size_t best = 0;
+
+    for( size_t i = 0; i < input.size(); ++i )
+    {
+        if( input[i] == '\n' )
+        {
+            if( level < v_path.size() )
+            {
+                //we have already build a higher level
+                v_path[level] = input.substr( start, i - start );
+            }
+            else
+            {
+                //this is a new level
+                v_path.emplace_back( input.substr( start, i - start ) );
+            }
+
+
+            if( v_path.back().find( '.' ) != string::npos )
+            {
+                //found a file path
+                //get the total length of path
+                size_t len = 0;
+
+                for( size_t i = 0; i <= level; ++i )
+                {
+                    len += v_path[i].size();
+                    //increments because added slash
+                    ++len;
+                }
+
+                //len-1 because we add a unnecessary slash
+                //at the end
+                best = ( max )( best, len - 1 );
+            }
+
+
+            auto j = i + 1;
+
+            while( ( j < input.size() ) && ( input[j] == '\t' ) )
+            {
+                ++j;
+            }
+
+
+            //update the start of next path element
+            start = j;
+            //update level
+            level = ( j - i - 1 );
+            //update i
+            i = j - 1;
+        }
+    }
+
+    return static_cast<int>( best );
+}
+\end{lstlisting}

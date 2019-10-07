@@ -1,0 +1,147 @@
+\section{332 --- Reconstruct Itinerary}
+Given a list of airline tickets represented by pairs of departure and arrival airports $[d, a]$, reconstruct the itinerary in order. All of the tickets belong to a man who departs from JFK. Thus, the itinerary must begin with JFK.
+
+\paragraph{Note:}
+\begin{itemize}
+\item If there are multiple valid itineraries, you should return the itinerary that has the smallest lexical order when read as a single string. For example, the itinerary [\texttt{JFK}, \texttt{LGA}] has a smaller lexical order than [\texttt{JFK}, \texttt{LGB}].
+\item All airports are represented by three capital letters (IATA code).
+\item You may assume all tickets form at least one valid itinerary.
+\end{itemize}
+
+\paragraph{Example 1:}
+
+\begin{flushleft}
+\textbf{Input}: ( [\texttt{MUC}, \texttt{LHR}], [\texttt{JFK}, \texttt{MUC}], [\texttt{SFO}, \texttt{SJC}], [\texttt{LHR}, \texttt{SFO}] )
+\\
+\textbf{Output}: [\texttt{JFK}, \texttt{MUC}, \texttt{LHR}, \texttt{SFO}, \texttt{SJC}]
+
+\end{flushleft}
+
+\paragraph{Example 2:}
+
+\begin{flushleft}
+\textbf{Input}: ( [\texttt{JFK},\texttt{SFO}],[\texttt{JFK},\texttt{ATL}],[\texttt{SFO},\texttt{ATL}],[\texttt{ATL},\texttt{JFK}],[\texttt{ATL},\texttt{SFO}] )
+\\
+\textbf{Output}: [\texttt{JFK},\texttt{ATL},\texttt{JFK},\texttt{SFO},\texttt{ATL},\texttt{SFO}]
+\\
+\textbf{Explanation}: 
+\\
+Another possible reconstruction is: \texttt{JFK},\texttt{SFO},\texttt{ATL},\texttt{JFK},\texttt{ATL},\texttt{SFO}]. But it is larger in lexical order.
+\end{flushleft}
+\subsection{Depth First Search}
+\begin{itemize}
+\item 首先建立邻接表，用一个hash map，key为出发的城市string，value则为该出发城市的目的地集合。因为题目要求按字母顺序的，同时考虑到重复情况，实际实现的时候用\texttt{multiset}。
+\item 接着从\texttt{JFK}开始\texttt{DFS}，如果当前string对应的目的地集合不为空，将目的地集合中的第一个节点也是当前字母顺序最小的目的地取出来，并将其在集合中删掉，然后继续递归遍历这个节点。
+\item 当该出发城市的目的地集合变为空了，表示我们已经递归遍历了其所有目的地，这时候将该出发城市代码string加入到结果中。
+\item 注意，结果中的顺序其实是相反的，最后返回的时候reverse得到的结果。
+\end{itemize}
+\setcounter{lstlisting}{0}
+\begin{lstlisting}[style=customc, caption={Depth First Search}]
+vector<string> findItinerary( vector<pair<string, string>> tickets )
+{
+    unordered_map<string, multiset<string>> g;
+
+    //create adjacent list
+    for( const auto& p : tickets )
+    {
+        auto it = g.find( p.first );
+
+        if( it == g.end() )
+        {
+            g.emplace( p.first, initializer_list<string> {p.second} );
+        }
+        else
+        {
+            it->second.emplace( p.second );
+        }
+    }
+
+    vector<string> ans;
+    dfs( g, "JFK", ans );
+
+    //Reverse ans to get final result
+    return {ans.rbegin(), ans.rend()};
+}
+
+void dfs( unordered_map<string, multiset<string>>& g, string start, vector<string>& ans )
+{
+    while( !g[start].empty() )
+    {
+        //iterate over all destinations for start
+        auto it = g[start].begin();
+        string next = *it;
+        //remove the first one from the destinations
+        g[start].erase( it );
+
+        //continue DSF on this destination
+        dfs( g, next, ans );
+
+    }
+
+    //Finally, we have processed all destinations
+    //Add the start to the answer
+    ans.emplace_back( start );
+
+}
+\end{lstlisting}
+\subsection{Stack Based Iterative Way}
+\begin{itemize}
+\item 同样是建立邻近表图。
+\item 用一个栈而不是队列来进行。因为我们需要将所有的目的地访问完，才能回到出发点。
+\item 开始时将\texttt{JFK}入栈
+\item 然后每次从检查栈顶元素，看于其相连的节点，即目的地集合是否为空，如果为空，则将该元素加入结果中，并将栈顶元素弹出。否则从相连的节点中取出第一个即当前字母顺序最小的那个目的地，放入栈中，同时从相连的节点set中删除该节点。
+\item 注意我们不能每次就弹出栈顶元素，因为目的地集合还没有empty的情况下，我们仍旧需要访问该栈顶元素。
+\item 最后返回的时候还是需要reverse得到的结果。
+\end{itemize}
+\begin{lstlisting}[style=customc, caption={Stack}]
+vector<string> findItinerary( vector<pair<string, string>> tickets )
+{
+    unordered_map<string, multiset<string>> g;
+
+    //create adjacent list
+    for( const auto& p : tickets )
+    {
+        auto it = g.find( p.first );
+
+        if( it == g.end() )
+        {
+            g.emplace( p.first, initializer_list<string> {p.second} );
+        }
+        else
+        {
+            it->second.emplace( p.second );
+        }
+    }
+
+    stack<string> stk;
+    stk.emplace( "JFK" );
+
+    vector<string> ans;
+    while( !stk.empty() )
+    {
+        auto t = stk.top();
+        if( g[t].empty() )
+        {
+            //add t to ans
+            ans.emplace_back( t );
+            //we only pop t at there
+            stk.pop();
+        }
+        else
+        {
+            //get the first destinatino
+            //from t's adjacent list
+            auto next = *( g[t].begin() );
+            stk.emplace( next );
+            //remove this destination from
+            //t's adjacent list
+            g[t].erase( g[t].begin() );
+        }
+    }
+
+    //Reverse ans to get the result
+    return {ans.rbegin(), ans.rend()};
+}
+
+\end{lstlisting}
+

@@ -1,0 +1,257 @@
+\section{306 --- Additive Number}
+Additive number is a string whose digits can form additive sequence.
+\par
+A valid additive sequence should contain at least three numbers. Except for the first two numbers, each subsequent number in the sequence must be the sum of the preceding two.
+\par
+Given a string containing only digits $0$---$9$, write a function to determine if it's an additive number.
+\par
+\paragraph{Note: }
+\begin{itemize}
+\item Numbers in the additive sequence cannot have leading zeros, so sequence 1, 2, 03 or 1, 02, 3 is invalid.
+\end{itemize}
+
+\paragraph{Example 1:}
+
+\begin{flushleft}
+\textbf{Input}: $112358$
+\\
+\textbf{Output}: \texttt{true} 
+\\
+\textbf{Explanation}: 
+\\The digits can form an additive sequence: $1$, $1$, $ 2 $, $ 3 $, $ 5 $, $ 8 $.
+\\ 
+$ 1 + 1 = 2 $, $ 1 + 2 = 3 $, $ 2 + 3 = 5 $, $ 3 + 5 = 8 $
+\end{flushleft}
+
+\paragraph{Example 2:}
+
+\begin{flushleft}
+\textbf{Input}: $ 199100199 $
+\\
+\textbf{Output}: \texttt{true}
+\\ 
+\textbf{Explanation}: The additive sequence is: $ 1 $, $ 99 $, $ 100 $, $ 199 $.
+\\ 
+$ 1 + 99 = 100 $, $ 99 + 100 = 199 $
+\end{flushleft}
+
+\paragraph{Follow up:}
+\begin{itemize}
+\item How would you handle overflow for very large input integers?
+\end{itemize}
+\subsection{Recursion}
+\begin{itemize}
+\item 前两个数的长度都不能能大于输入字符串$S$的长度$L$的一半。
+\item 所以开始需要两重循环生成前两个数字。
+\item 第一个循环的index $i$最多到$L/2-1$，这样第一个数字就是$S[0\ldots i]$，长度就限制在$L/2$。
+\item 第二个循环的index $j$则从$i+1$开始，由于其长度必须也不能大于$L$的一半，即$j-(i+1)+1\leq L/2$，即$j\leq i+L/2$
+\end{itemize}
+\setcounter{algorithm}{0}
+\begin{algorithm}[H]
+\caption{Recursion}
+\begin{algorithmic}[1]
+\Procedure{IsAdditiveNumber}{$S, L$}
+\If{$S$ is empty}
+\State \Return \texttt{false}
+\EndIf
+\State $\ast$ Generate first two numbers
+\State $\ast$ Each length of the two numbers cannot be larger than $L/2$
+\For{$i:=0$ \textbf{to} $L/2-1$}
+\For{$j:=i+1$ \textbf{to} $j\leq i+L/2$}
+\State $\ast$ Check the first two numbers $S[0\ldots i]$ and $S[i+1\ldots j]$
+\If{\Call{Check}{$S, 0, i, j$} is \texttt{true}}
+\State \Return \texttt{true}
+\EndIf
+\EndFor
+\EndFor
+\State $\ast$ 如果算法运行到这里，表明不可能形成连续的additive numbers
+\State \Return \texttt{false}
+\EndProcedure
+\end{algorithmic}
+\end{algorithm}
+Function \texttt{Check} 测试当前两个number $ S[p_1\ldots p_2] $ 和$ S[p_2+1\ldots p_3] $是否能够得到仍旧属于$S$的sum。
+\setcounter{algorithm}{0}
+\begin{algorithm}[H]
+\caption{Helper Function: Check}
+\begin{algorithmic}[1]
+\Procedure{Check}{$S, L, p_1, p_2, p_3$}
+\State $\ast$ 处理边界情况
+\If{$S[p_1\ldots p_2]$ starts with zero and length is larger than 1}
+\State \Return \texttt{false}
+\EndIf
+\If{$S[p_2+1\ldots p_3]$ starts with zero and length is larger than 1}
+\State \Return \texttt{false}
+\EndIf
+\algstore{306algo}
+\end{algorithmic}
+\end{algorithm}
+\begin{algorithm}[H]
+\begin{algorithmic}[1]
+\algrestore{306algo}
+\State $\star$ Compute sum of $S[p_1\ldots p_2]$ and $S[p_2+1\ldots p_3]$ as $X$
+\State $\star$ 如果$p_3$加上$X$的长度已经超过了$S$的总长度，显然这是不成功的测试，直接返回\texttt{false}
+\State $\star$ 比较$X$与$S[p_3+1\ldots\ell+p_3]$，其中$\ell$是$X$的长度，看这两个string是否相等。
+\State $\star$ 如果不相等，也是不成功的测试，直接返回\texttt{false}
+\State $\star$ 如果上述两个string相等，并且$p_3+\ell$刚好等于$L-1$，说明$S$已经测试完毕，返回\texttt{true}。
+\State $\ast$ 如果上述两个string相等，并且$p_3+\ell$小于$L-1$，继续下一层递归测试
+\State \Return \Call{Check}{$S, L, p_2+1, p_3, p_3+\ell$}
+\EndProcedure
+\end{algorithmic}
+\end{algorithm}
+\setcounter{lstlisting}{0}
+\begin{lstlisting}[style=customc, caption={Recursion}]
+bool isAdditiveNumber( string num )
+{
+
+    if( num.empty() )
+    {
+        return false;
+    }
+
+    int L = static_cast< int >( num.size() );
+
+    //The length of the first two numbers
+    //cannot be larger than L/2
+    for( int i = 0; i < L / 2; ++i )
+    {
+        for( int j = i + 1; j <= L / 2 + i; ++j )
+        {
+            if( check( num, 0, i, j ) )
+            {
+                return true;
+            }
+        }
+    }
+
+    return false;
+}
+
+//check if sum of s[start...e1] and s[e1+1...e2]
+//can be found in s
+bool check( const string& s, int start, int e1, int e2 )
+{
+    int L = static_cast< int >( s.size() );
+
+
+    //skip the numbers that starting with zero
+    //and length is larger than 1
+    if( ( s[start] == '0' ) && ( e1 - start >= 1 ) )
+    {
+        return false;
+    }
+
+
+    //skip the numbers that starting with zero
+    //and length is larger than 1
+
+    if( ( s[e1 + 1] == '0' ) && ( e2 - e1 >= 2 ) )
+    {
+        return false;
+    }
+
+
+    string sum;
+
+    findSum( s, start, e1, e2, sum );
+
+    int Ls = static_cast< int >( sum.size() );
+
+    //The sum will overflow the length of s
+    if( e2 + Ls >= L )
+    {
+        return false;
+    }
+
+    //check if the sum is in s
+    for( int u = e2 + 1; u <= e2 + Ls; ++u )
+    {
+        if( s[u] != sum[u - e2 - 1] )
+        {
+            return false;
+        }
+    }
+
+    //The sum reaches the end of s
+    //so the whole string s is scanned properly
+    if( e2 + Ls == L - 1 )
+    {
+        return true;
+    }
+
+    //check s[e1+1...e2] and s[e2+1...e2+Ls]
+    return check( s, e1 + 1, e2, e2 + Ls );
+}
+
+//get the sum for S[p...x] + S[x+1...y]
+void findSum( const string& s, int p, int x, int y, string &sum )
+{
+    auto i = x;
+    auto j = y;
+
+    int carry = 0;
+
+    while( ( i >= p ) && ( j >= x + 1 ) )
+    {
+        int a1 = s[i] - '0';
+        int a2 = s[j] - '0';
+
+        int t = a1 + a2 + carry;
+        if( t >= 10 )
+        {
+            carry = 1;
+            t -= 10;
+        }
+        else
+        {
+            carry = 0;
+        }
+
+        sum.push_back( t + '0' );
+
+        --i;
+        --j;
+    }
+
+    while( i >= p )
+    {
+        int t = s[i] - '0' + carry;
+        if( t >= 10 )
+        {
+            carry = 1;
+            t -= 10;
+        }
+        else
+        {
+            carry = 0;
+        }
+
+        sum.push_back( t + '0' );
+        --i;
+    }
+
+    while( j >= x + 1 )
+    {
+        int t = s[j] - '0' + carry;
+        if( t >= 10 )
+        {
+            carry = 1;
+            t -= 10;
+        }
+        else
+        {
+            carry = 0;
+        }
+
+        sum.push_back( t + '0' );
+        --j;
+    }
+
+    if( carry == 1 )
+    {
+        sum.push_back( '1' );
+    }
+
+    reverse( sum.begin(), sum.end() );
+}
+
+\end{lstlisting}

@@ -1,0 +1,88 @@
+\section{367 --- Valid Perfect Square}
+Given a positive integer $ n $, write a function which returns \texttt{true} if $ n $ is a perfect square else \texttt{false}.
+
+\paragraph{Note:} 
+\begin{itemize}
+\item Do not use any built-in library function such as \texttt{sqrt}.
+\end{itemize}
+
+\paragraph{Example 1:}
+
+\begin{flushleft}
+\textbf{Input}: 16
+\\
+\textbf{Output}: \texttt{true}
+\end{flushleft}
+
+\paragraph{Example 2:}
+
+\begin{flushleft}
+\textbf{Input}: 14
+\\
+\textbf{Output}: \texttt{false}
+\end{flushleft}
+
+\subsection{Newton}
+我们需要查找$x^2=n$，即找到函数$f(x)=x^2-n$的root。根据Newton插值法，迭代关系如下
+\[
+x_{+1} = x_k - \frac{f(x_k)}{f^{'}(x_k)}
+\]
+将$f(x)$代入上式，可以得到
+\begin{align*}
+x_{k+1} &= x_k - \frac{x_{k}^2-n}{2x_k}\\
+&=\frac{x_k}{2} + \frac{n}{2x_k}
+\end{align*}
+因此我们从初始值$n$带入上式进行递推测试，直到$x_k^2\leq n$。
+\par
+另外需要注意的是，由于在计算过程中都是用整数类型，为了避免上述除以2产生误差，因此将除以2放到最后进行，即按照
+\[
+x_{k+1} = \dfrac{x_k + \dfrac{n}{x_k}}{2}
+\]
+
+\setcounter{lstlisting}{0}
+\begin{lstlisting}[style=customc, caption={Newton Interpolation}]
+bool isPerfectSquare( int num )
+{
+    //to avoid overflow for int type
+    //convert to long long
+    auto x = static_cast<long long>( num );
+    auto lln = x;
+
+    //newton interpolation
+    while( x * x > lln )
+    {
+        x = ( x + lln / x ) / 2;
+    }
+
+    return ( x * x == lln );
+}
+\end{lstlisting}
+
+\subsection{Binary Search}
+这个其实也可以用leftmost binary search来获得。
+
+\begin{lstlisting}[style=customc, caption={Binary Search}]
+bool isPerfectSquare( int num )
+{
+    long long l = 0;
+    auto r = static_cast<int>( num );
+    auto lln = r;
+
+    //binary search
+    while( l < r )
+    {
+        auto mid = ( l + r ) / 2;
+
+        if( mid * mid < lln )
+        {
+            l = mid + 1;
+        }
+        else
+        {
+            r = mid;
+        }
+    }
+
+    return l * l == lln;
+}
+\end{lstlisting}

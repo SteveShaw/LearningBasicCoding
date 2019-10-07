@@ -1,0 +1,77 @@
+\section{365 --- Water and Jug Problem}
+You are given two jugs with capacities $ x $ and $ y $ litres. There is an infinite amount of water supply available. You need to determine whether it is possible to measure exactly $ z $ litres using these two jugs.
+\par
+If $ z $ liters of water is measurable, you must have $ z $ liters of water contained within one or both buckets by the end.
+\par
+
+Operations allowed:
+
+\begin{itemize}
+\item Fill any of the jugs completely with water.
+\item Empty any of the jugs.
+\item Pour water from one jug into another till the other jug is  completely full or the first jug itself is empty.
+\end{itemize}
+
+\paragraph{Example 1: }
+
+\begin{flushleft}
+\textbf{Input}: $ x = 3 $, $ y = 5 $, $ z = 4 $
+\\
+\textbf{Output}: \texttt{True}
+\end{flushleft}
+
+\paragraph{Example 2:}
+
+\begin{flushleft}
+\textbf{Input}: $ x = 2 $, $  y = 6 $,$  z = 5 $
+\\
+\textbf{Output}: \texttt{False}
+\end{flushleft}
+
+\subsection{Number Theory}
+The basic idea is to use the property of B\'{e}zout's identity and check if $ z $ is a multiple of greatest common divisor of $ x $ and $ y $。  B\'{e}zout's identity (also called  B\'{e}zout's lemma) is a theorem in the elementary theory of numbers:
+\par
+let $ a $ and $ b $ be \textbf{nonzero} integers and let $ d $ be their greatest common divisor. Then there exist integers $ x $ and $ y $ such that $ ax+by=d $
+\par
+In addition, the greatest common divisor $ d $ is the smallest positive integer that can be written as $ ax + by $
+\par
+every integer of the form $ ax + by $ is a multiple of the greatest common divisor $ d $.
+\begin{enumerate}
+\item 注意，上述定理中$ a $和$ b $都是非零整数。
+\item 因此，需要注意边界条件 $ x $，$ y $或者$ z $为零的时候。
+\item 另外，题目中还提到，如果能得到$z$升水，那么最后这$z$升水是在两个jugs中的一个或者两个中。因此如果$x+y<z$，那么无论如何也不能满足这个条件。
+\end{enumerate}
+
+\setcounter{lstlisting}{0}
+\begin{lstlisting}[style=customc, caption={GCD}]
+bool canMeasureWater( int x, int y, int z )
+{
+    //one or two jugs
+    //must hold z liter water
+    if( x + y < z )
+    {
+        return false;
+    }
+
+    //edge case especially for z=0
+    if( x == z || y == z || ( x + y ) == z )
+    {
+        return true;
+    }
+
+    //get gcd
+    int d = gcd( x, y );
+
+    return ( z % d == 0 );
+}
+
+int gcd( int a, int b )
+{
+    if( b == 0 )
+    {
+        return a;
+    }
+
+    return gcd( b, a % b );
+}
+\end{lstlisting}

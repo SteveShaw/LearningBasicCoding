@@ -1,0 +1,152 @@
+\section{390 --- Elimination Game}
+There is a list of sorted integers from 1 to $ n $. Starting from left to right, remove the first number and every other number afterward until you reach the end of the list.
+\par
+Repeat the previous step again, but this time from right to left, remove the right most number and every other number from the remaining numbers.
+\par
+We keep repeating the steps again, alternating left to right and right to left, until a single number remains.
+\par
+Find the last number that remains starting with a list of length $ n $.
+
+\paragraph{Example:}
+
+\begin{flushleft}
+\textbf{Input}: $n = 9$,
+\begin{table}[H]
+\begin{tabular}{*{9}{l}}
+1&  2&  3&  4&  5&  6&  7&  8&  9\\
+2 & 4& 6& 8 & & & & & \\
+2 & 6 &  &  &  &  &  &  & \\
+6  &  &  &  &  &  &  &  & 
+\end{tabular}
+\end{table}
+\textbf{Output}: 6
+\end{flushleft}
+
+\subsection{Recursion}
+\begin{itemize}
+\item 第一轮过后，所有剩下的数字都是偶数。除以2后，得到一个新的sequence，从1到$n/2$。
+\item 对这个新的sequence，其第一轮是从右到左。返回的结果应该是调用递归的结果\texttt{lastRemaining}($n / 2$)在数组1到$n/2$之间的镜像。何为镜像，比如1, 2, 3, 4这个数字，2的镜像就是3, 1的镜像是4。
+\item 因此将这个新的sequence消除剩下的数字乘以2即为原数组进行第二轮消除的结果。依此类推。
+\end{itemize}
+
+\setcounter{lstlisting}{0}
+\begin{lstlisting}[style=customc, caption={Recursion}]
+int lastRemaining( int n )
+{
+    if( n == 1 )
+    {
+        return 1;
+    }
+
+    return 2 * ( 1 + n / 2 - lastRemaining( n / 2 ) );
+}
+\end{lstlisting}
+
+下面的是比较清晰的写法
+\begin{lstlisting}[style=customc, caption={Recursion Break Down}]
+int lastRemaining( int n )
+{
+    return fromLeft( n );
+}
+
+int fromLeft( int n )
+{
+    if( n <= 2 )
+    {
+        return n;
+    }
+
+    //from left, the first element is even number
+    //after elimination
+    return 2 * fromRight( n / 2 );
+}
+
+int fromRight( int n )
+{
+    if( n <= 2 )
+    {
+        return 1;
+    }
+
+    if( n & 1 )
+    {
+        //when n is odd number
+        //the first element after elimination is even number
+        return 2 * fromLeft( n / 2 );
+    }
+
+    //when n is even number
+    //the first element after elimination is odd number
+    return 2 * fromLeft( n / 2 ) - 1;
+}
+\end{lstlisting}
+
+\subsection{Iterative}
+\begin{itemize}
+\item The idea is to update and record first item after elimination in each turn. when the total number becomes 1, head is the only number left.
+\item The first item will be updated 
+\begin{enumerate}
+\item If current round is starting from left.
+\item If current round is starting from right and current count of remaining numbers is odd number. Why? For example, suppose current sequence is $[2, 4, 6, 8, 10]$, and now eliminating numbers from right. As a result, we will remove 10, 6 and 2. The first item is changed from 2 to 4. Now, suppose current sequence is $[2, 4, 6, 8, 10, 12]$. After elimination, the remaining numbers are $[2,6,10]$. The first item is still 2.
+\end{enumerate}
+\item We also maintain a variable $\delta$ as the elimination step. $\delta$ will be double each time since we eliminate every other number. Initially, $\delta=1$.
+\end{itemize}
+
+
+\begin{algorithm}[H]
+\caption{Iterative}
+\begin{algorithmic}[1]
+\Procedure{LastRemaining}{$n$}
+\State $x:=1$ \Comment The first number after each round
+\State $\delta:=1$ \Comment The step by which the first number will move
+\State $b:=0$ \Comment Indicate if current round is from left (0=left, 1=right)
+\algstore{390algo}
+\end{algorithmic}
+\end{algorithm}
+\begin{algorithm}[H]
+\begin{algorithmic}[1]
+\algrestore{390algo}
+\While{$n>1$}
+\If{$b=0$ \textbf{or} $n\bmod 2=1$}
+\State $x\gets x+\delta$ \Comment The first number will be changed
+\EndIf
+\State $\delta\gets \delta * 2$ \Comment Double the step
+\State $y\gets y/2$ \Comment Half the count of remaining numbers
+\State $b=1-b$ \Comment Change to another direction
+\EndWhile
+\State \Return $x$
+\EndProcedure
+\end{algorithmic}
+\end{algorithm}
+
+\begin{lstlisting}[style=customc, caption={Iterative}]
+int lastRemaining( int n )
+{
+    // The first number after each round
+    int x = 1;
+    // the jump that x will take
+    int delta = 1;
+
+    int y = n;
+
+    bool from_left = true;
+
+    while( y > 1 )
+    {
+        if( from_left || ( y & 1 ) )
+        {
+            //The first number is changed
+            x += delta;
+        }
+
+        //double the jump
+        delta *= 2;
+        //change to another direction
+        from_left = !from_left;
+        //The count of remainings become half
+        y /= 2;
+    }
+
+    return x;
+}
+\end{lstlisting}

@@ -1,0 +1,77 @@
+\section{396 --- Rotate Function}
+Given an array of integers $ A $ and let $ n $ to be its length.
+\par
+Assume $ B_k $ to be an array obtained by rotating the array $ A $ $k$ positions clock-wise, we define a \texttt{rotation function} $ F $ on $ A $ as follow:
+\[
+F(k) = 0 \times B_k[0] + 1 * B_k[1] + \ldots + (n-1) \times Bk[n-1].
+\]
+Calculate the maximum value of $F(0)$, $F(1)$, $\ldots$, $F(n-1)$.
+
+\paragraph{Note:}
+\begin{itemize}
+\item $ n $ is guaranteed to be less than 105.
+\end{itemize}
+
+\paragraph{Example}:
+\begin{flushleft}
+\textbf{Input}: $A=[4,3,2,6]$
+\\
+\textbf{Output}: 26
+\\
+\textbf{Explanation}:
+\\
+$F(0) = (0 \times 4) + (1 \times 3) + (2 \times 2) + (3 \times 6) = 0 + 3 + 4 + 18 = 25$
+\\
+$F(1) = (0 \times 6) + (1 \times 4) + (2 \times 3) + (3 \times 2) = 0 + 4 + 6 + 6 = 16$
+\\
+$F(2) = (0 \times 2) + (1 \times 6) + (2 \times 4) + (3 \times 3) = 0 + 6 + 8 + 9 = 23$
+\\
+$F(3) = (0 \times 3) + (1 \times 2) + (2 \times 6) + (3 \times 4) = 0 + 2 + 12 + 12 = 26$
+\\
+So the maximum value of $ F(0) $, $ F(1) $, $ F(2) $, $ F(3) $ is $ F(3) = 26 $.
+\end{flushleft}
+
+\subsection{Dynamic Programming}
+First, find the formula for $F[i] - F[i-1]$. 
+\begin{itemize}
+\item Starting from $F[0]$. $F[0] = 0\times A[0] + 1\times A[1] + \ldots + (n-1)\times A[n-1]$
+\item $F[1] = (n-1)\times A[0] + 0\times A[1] + \ldots + (n-2)\times A[n-1]$.
+\item $F[1] - F[0] = (n-1)\times A[0] - A[1] - A[2] - \ldots - A[n-1] = n\times A[0] - \sum\limits_{i=0}^{n-1}A[i]$. 
+\item $F[2] = (n-2)\times A[0] + (n-1)\times A[1] + \ldots + (n-3)\times A[n-1]$.
+\item $F[2] - F[1] = -A[0] + (n-1)\times A[1] - A[2] - \ldots - A[n-1] = n\times A[1] - \sum\limits_{i=0}^{n-1}A[i]$
+\item $\ldots$
+\item $F[i] = (n-i) \times A[0] + (n-i+1) \times A[1] + \ldots + (n-i-1)\times A[n-1]$
+\item $F[i] - F[i-1] = n\times A[i] - \sum\limits_{i=0}^{n-1}A[i]$
+\end{itemize}
+From the recursive formula, we only needs to calculate the sum of $A$ and $F[0]$ first, and then get $F[i]$ by adding $n\times A[i] - \sum(A)$ to $F[i-1]$. Update the global maximum in each iteration.
+
+\setcounter{lstlisting}{0}
+\begin{lstlisting}[style=customc, caption={Dynamic Programming}]
+int maxRotateFunction( vector<int>& A )
+{
+    //need long long type to avoid overflow for int type
+    auto L = static_cast<long long>( A.size() );
+
+    long long sum = 0;
+    //Get F[0]
+    long long last = 0;
+
+    for( int i = 0; i < L; ++i )
+    {
+        sum += A[i];
+        last += i * A[i];
+    }
+
+    long long ans = last;
+
+    for( int i = 1; i < L; ++i )
+    {
+        //Get F[i]
+        last += L * static_cast<long long>( A[i - 1] ) - sum;
+        //update the global maximum
+        ans = ( max )( ans, last );
+    }
+
+    return ans;
+}
+\end{lstlisting}

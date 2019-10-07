@@ -1,0 +1,140 @@
+\section{381 --- Insert Delete GetRandom O(1) - Duplicates allowed}
+Design a data structure that supports all following operations in average $ O(1) $ time.
+
+\paragraph{Note:} 
+\begin{itemize}
+\item Duplicate elements are allowed.
+\end{itemize}
+
+
+\begin{lstlisting}[style=customc]
+insert(val): //Inserts an item val to the collection.
+remove(val): //Removes an item val from the collection if present.
+getRandom: //Returns a random element from current collection of elements. The probability of each element being returned is linearly related to the number of same value the collection contains.
+\end{lstlisting}
+
+\paragraph{Example:}
+
+\begin{lstlisting}[style=customc]
+// Init an empty collection.
+RandomizedCollection collection = new RandomizedCollection();
+
+// Inserts 1 to the collection. Returns true as the collection did not contain 1.
+collection.insert( 1 );
+
+// Inserts another 1 to the collection. Returns false as the collection contained 1. Collection now contains [1,1].
+collection.insert( 1 );
+
+// Inserts 2 to the collection, returns true. Collection now contains [1,1,2].
+collection.insert( 2 );
+
+// getRandom should return 1 with the probability 2/3, and returns 2 with the probability 1/3.
+collection.getRandom();
+
+// Removes 1 from the collection, returns true. Collection now contains [1,2].
+collection.remove( 1 );
+
+// getRandom should return 1 and 2 both equally likely.
+collection.getRandom();
+\end{lstlisting}
+
+\subsection{Hash Map}
+\begin{itemize}
+\item Similar to problem 380. To deal with duplicate, we change the value type of hash map to hash set.
+\item When remove a value $v$
+\begin{enumerate}
+\item Find if one of $v$ is at the end of the array $X$. If it is, remove the end index from $v$'s positions.
+\item Otherwise, put the last element of $X$ into a position of $v$. We choose the first element in $v$'s hash set as this position, and then remove the end index for last element's positions after inserting the new position.
+\end{enumerate}
+\end{itemize}
+
+\setcounter{lstlisting}{0}
+\begin{lstlisting}[style=customc, caption={Similar to 380}]
+class RandomizedCollection
+{
+public:
+    /** Initialize your data structure here. */
+    RandomizedCollection()
+    {
+    }
+
+    /** Inserts a value to the collection. Returns true if the collection did not already contain the specified element. */
+    bool insert( int val )
+    {
+        X.push_back( val );
+
+        auto it = M.find( val );
+
+        if( it == M.end() )
+        {
+            //insert new val
+            M.emplace( val, initializer_list<size_t> {X.size() - 1} );
+            return true;
+        }
+
+        //val exists, just insert to its positions
+        it->second.insert( X.size() - 1 );
+
+        return false;
+    }
+
+    /** Removes a value from the collection. Returns true if the collection contained the specified element. */
+    bool remove( int val )
+    {
+        auto it_val = M.find( val );
+        if( it_val == M.end() )
+        {
+            return false;
+        }
+
+        //find if val has position equal to last index of X
+        auto it_val_idx = it_val->second.find( X.size() - 1 );
+        if( it_val_idx == it_val->second.end() )
+        {
+            //find the last element of X in M
+            int last = X.back();
+            auto it_last = M.find( last );
+            size_t i_val = *( it_val->second.begin() );
+
+            //put last at index i_val
+            X[i_val] = last;
+            //add the new position into the positions
+            it_last->second.insert( i_val );
+
+            //remove the end index from last's positions
+            it_last->second.erase( X.size() - 1 );
+
+            //remove begin element from val's positions
+            it_val->second.erase( it_val->second.begin() );
+        }
+        else
+        {
+            //we just only remove the end index from val's positions
+            it_val->second.erase( it_val_idx );
+        }
+
+        if( it_val->second.empty() )
+        {
+            //val does not exist in X
+            //remove from M
+            M.erase( it_val );
+        }
+
+
+        X.pop_back();
+
+        return true;
+    }
+
+    /** Get a random element from the collection. */
+    int getRandom()
+    {
+        return X[rand() % X.size()];
+    }
+
+    unordered_map<int, unordered_set<size_t>> M;
+    vector<int> X;
+};
+
+\end{lstlisting}
+

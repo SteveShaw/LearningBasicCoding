@@ -1,0 +1,114 @@
+\section{387 --- First Unique Character in a String}
+Given a string $S$, find the first non-repeating character in it and return it's index. If it doesn't exist, return $-1$.
+
+\paragraph{Examples:}
+\begin{flushleft}
+\textbf{Input}: $S = $ \texttt{leetcode}
+\\
+\textbf{Output}: 0
+\end{flushleft}
+
+\begin{flushleft}
+\textbf{Input}: $S = $ \texttt{loveleetcode}
+\\
+\textbf{Output}: 2
+\end{flushleft}
+
+
+\paragraph{Note:} 
+\begin{itemize}
+\item You may assume the string contain only lowercase letters. 
+\end{itemize}
+
+\subsection{Counter}
+\begin{itemize}
+\item Maintain a counter array $M$ with size 26 for lowercase letters, and initialize all elements to $-1$.
+\item Iterate over $S$, for each letter, first check its slot in $M$
+\begin{enumerate}
+\item If the slot is $-1$, it means we have not met this letter before, assign current index to the slot.
+\item Otherwise, this letter appear before, assign a unique value like $-2$ to the slot.
+\end{enumerate}
+\item After $S$ is completely scanned, iterate over $M$. Check the smallest slot which has value no less than zero.
+\end{itemize}
+
+\begin{algorithm}[H]
+\caption{Counter}
+\begin{algorithmic}[1]
+\Procedure{FirstUniqChar}{$S, L$}
+\State $\star$ Create a counter array $M$ with size 26 and all elements are $-1$
+\For{$i:=0$ \textbf{to} $L-1$}
+\State $\ast$ Process $S$
+\State $c:=S[i]$
+\algstore{387algo}
+\end{algorithmic}
+\end{algorithm}
+\begin{algorithm}[H]
+\begin{algorithmic}[1]
+\algrestore{387algo}
+\If{$M[c] = -1$}
+\State $M[c]\gets i$ \Comment We have not met $c$
+\Else
+\State $M[c]\gets -2$ \Comment $c$ appear before
+\EndIf
+\EndFor
+\State $\ast$ Check $M$
+\State $x:=-1$ \Comment The index of first unique letter
+\For{$c:=a$ \textbf{to} $z$}
+\If{$M[c]\geq 0$} \Comment $c$ is a unique letter
+\If{$x<0$}
+\State $x\gets M[c]$ \Comment First time to assign value to $x$
+\Else
+\State $x\gets\min(x, M[c])$ \Comment Get minimum for $x$
+\EndIf
+\EndIf
+\EndFor
+\State \Return $x$
+\EndProcedure
+\end{algorithmic}
+\end{algorithm}
+
+\setcounter{lstlisting}{0}
+\begin{lstlisting}[style=customc, caption={Counter}]
+int firstUniqChar( string s )
+{
+    vector<int> m( 26, -1 );
+
+    int l = static_cast<int>( s.size() );
+
+    for( int i = 0; i < l; ++i )
+    {
+        if( m[s[i] - 'a'] == -1 )
+        {
+            m[s[i] - 'a'] = i;
+        }
+        else
+        {
+            //s[i] appear before
+            //assign the slot to -2
+            m[s[i] - 'a'] = -2;
+        }
+    }
+
+    int ans = -1;
+
+    for( int i = 0; i < 26; ++i )
+    {
+        if( m[i] >= 0 )
+        {
+            //letter 'a'+i only appear once
+            if( ans < 0 )
+            {
+                ans = m[i];
+            }
+            else
+            {
+                //get the minimum value
+                ans = ( min )( m[i], ans );
+            }
+        }
+    }
+
+    return ans;
+
+}
+\end{lstlisting}

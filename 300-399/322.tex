@@ -1,0 +1,89 @@
+\section{322 --- Coin Change}
+You are given coins of different denominations $C$ and a total amount of money amount $T$. Write a function to compute the fewest number of coins that you need to make up that amount. If that amount of money cannot be made up by any combination of the coins, return $-1$.
+
+\paragraph{Example 1:}
+
+\begin{flushleft}
+\textbf{Input}: $C = [1, 2, 5]$,\quad $T = 11$
+\\
+\textbf{Output}: 3 
+\\
+\textbf{Explanation}: $ 11 = 5 + 5 + 1 $
+\end{flushleft}
+
+\paragraph{Example 2:}
+
+\begin{flushleft}
+\textbf{Input}: $C = [2]$, \quad $T = 3$
+\\
+\textbf{Output}: $ -1 $
+\end{flushleft}
+
+\paragraph{Note:}
+\begin{itemize}
+\item You may assume that you have an infinite number of each kind of coin.
+\end{itemize}
+\subsection{Kapspack Problem}
+典型的kapspack problem，dynamic programming的经典题目。递推公式为
+
+\[
+F[i] = \underbrace{\min}_{i \geq C[j]\forall j}(1+F[i-C[j]])
+\]
+需要建立size为$ 1+T $的递推数组$F$
+\setcounter{algorithm}{0}
+\begin{algorithm}[H]
+\caption{Dynamic Programming}
+\begin{algorithmic}[1]
+\Procedure{CoinChange}{$C, n, T$}
+\State $\star$ Create an array $F$ with size $T+1$.
+\State $\star$ All elements in $F$ are initialized with $+\infty$
+\State $\ast$ Set the initial state
+\State $F[0]\gets 0$
+\algstore{753algo}
+\end{algorithmic}
+\end{algorithm}
+\begin{algorithm}[H]
+\begin{algorithmic}[1]
+\algrestore{753algo}
+\For{$i:=1$ \textbf{to} $T$}
+\For{$k:=0$ \textbf{to} $ n-1 $}
+\State $t:=C[k]$
+\If{$i \geq t$ \textbf{and} $F[i-t] < +\infty$}
+\State $F[i]\gets \min(F[i], 1+F[i-t])$
+\EndIf
+\EndFor
+\EndFor
+\If{$F[T]=+\infty$}
+\State \Return $ -1 $ \Comment We cannot make changes
+\Else
+\State \Return $F[T]$
+\EndIf
+\EndProcedure
+\end{algorithmic}
+\end{algorithm}
+\setcounter{lstlisting}{0}
+\begin{lstlisting}[style=customc, caption={Dynamic Programming}]
+int coinChange( vector<int>& coins, int amount )
+{
+    vector<int> F( amount + 1, amount );
+
+	//initial state
+    F[0] = 0;
+    
+    for( int i = 1; i <= amount; ++i )
+    {
+        for( int coin : coins )
+        {
+            if( i >= coin )
+            {
+                if( F[i - coin] < amount )
+                {
+                    F[i] = ( min )( F[i], 1 + F[i - coin] );
+                }
+            }
+        }
+    }
+
+    return F[amount] == amount ? -1 : F[amount];
+}
+\end{lstlisting}

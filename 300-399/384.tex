@@ -1,0 +1,73 @@
+\section{384 --- Shuffle an Array}
+Shuffle a set of numbers without duplicates.
+
+\paragraph{Example:}
+
+\begin{lstlisting}[style=customc]
+// Init an array with set 1, 2, and 3.
+int[] nums = {1, 2, 3};
+Solution solution = new Solution( nums );
+
+// Shuffle the array [1,2,3] and return its result. Any permutation of [1,2,3] must equally likely to be returned.
+solution.shuffle();
+
+// Resets the array back to its original configuration [1,2,3].
+solution.reset();
+
+// Returns the random shuffling of array [1,2,3].
+solution.shuffle();
+
+\end{lstlisting}
+
+\subsection{Fisher–Yates shuffle}
+算法描述如下
+\setcounter{algorithm}{0}
+\begin{algorithm}[H]
+\caption{Fisher–Yates shuffle}
+\begin{algorithmic}[1]
+\Procedure{Shuffle}{$A, L$}
+\For{$i:=L-1$ \textbf{to} 1}
+\State $\star$ generate a random number $r$ in $[0, i]$
+\State $\star$ Swap $A[i]$ and $A[j]$
+\EndFor
+\EndProcedure
+\end{algorithmic}
+\end{algorithm}
+
+\setcounter{lstlisting}{0}
+\begin{lstlisting}[style=customc, caption={Fisher–Yates shuffle}]
+class Solution
+{
+public:
+    Solution( vector<int>& nums ): X( nums.begin(), nums.end() )
+    {
+    }
+
+    /** Resets the array to its original configuration and return it. */
+    vector<int> reset()
+    {
+        return X;
+    }
+
+    /** Returns a random shuffling of the array. */
+    vector<int> shuffle()
+    {
+        vector<int> Y( X.begin(), X.end() );
+
+        int n = static_cast<int>( X.size() );
+
+        for( int i = n - 1; i >= 1; --i )
+        {
+            //generate random number in [0, i]
+            //so the size is (i+1)
+            int r = ( rand() % ( i + 1 ) );
+            swap( Y[r], Y[i] );
+        }
+
+        return Y;
+    }
+
+    vector<int> X;
+};
+
+\end{lstlisting}

@@ -1,0 +1,119 @@
+\section{363 --- Max Sum of Rectangle No Larger Than K}
+Given a non-empty 2D matrix matrix $ M $ and an integer $ k $, find the max sum of a rectangle in the matrix such that its sum is no larger than $ k $.
+
+\paragraph{Example:}
+
+\begin{flushleft}
+\textbf{Input}: 
+\begin{table}[H]
+\begin{tabular}{ccc}
+1 & 0 & 1\\
+0 & -2 & 3
+\end{tabular}
+\end{table}
+and $ k=2 $
+\\
+\textbf{Output}: 2 
+\\
+\textbf{Explanation}: Because the sum of rectangle 
+\begin{table}[H]
+\begin{tabular}{cc}
+0 & 1\\
+-2 & 3
+\end{tabular}
+\end{table}
+is 2, and 2 is the max number no larger than $ k $ ($ k = 2 $).
+\end{flushleft}
+
+\paragraph{Note:}
+
+\begin{itemize}
+\item The rectangle inside the matrix must have an area larger than 0.
+\item What if the number of rows is much larger than the number of columns?
+\end{itemize}
+
+\subsection{2D kadane}
+\begin{enumerate}
+\item 将$ M $按照行拆成多个一维数组，然后利用一维数组的累加和来找符合要求的数字。具体做法是iterate over columns。对于current column $ x $，从$x$遍历到$n-1$($ n $ is the number of columns)，然后在$[x,n-1]$中的每一个column $y$，计算每一行的累加和，放入一个大小为$m$的数组$z$中($ m $ is the number of rows)。即对于current row $ r $， $z[r]=\sum\limits_{i=x}^{y}M[r][i]$。
+\item 然后在$z$中计算prefix sum，并寻找两个row $u$和$v$使得$z[u]-z[v]\leq k$ 并且$z[u]-z[v]$又是目前最大的difference。这样在column $y$就找到了一个具有最大sum的rectange区域，左上角位$(u, x)$，右下角index为$(v, y)$。
+\item 为了能够快速定位，将$z$的prefix sum放入一个tree set $s$中，然后对于对于当前的prefix sum $t$，在$s$中binary search到$p$，使得$t\leq k+p$，即leftmost binary search。
+\item 最开始$s$需要放入一个零，这样，当然prefix sum和$k$相等时，即得到以第一行开始的prefix sum。而这也是符合条件的。
+\end{enumerate}
+
+\setcounter{algorithm}{0}
+\begin{algorithm}[H]
+\caption{2D Kadane}
+\begin{algorithmic}[1]
+\Procedure{MaxSumSubmatrix}{$M, m, n$}
+\State $\sigma:=-\infty$ \Comment $\sigma$ is the maximum sum
+\For{$c:=0$ \textbf{to} $n-1$}
+\State $ \ast $ 得到每行的的累加和
+\State $\star$ Create an array $z$ with size $m$ and all elements are zero initially
+\For{$x:=c$ \textbf{to} $n-1$} \label{363note1}
+\For{$r:=0$ \textbf{to} $m-1$} \label{363note2}
+\State $z[r]\gets z[r] + M[r][x]$
+\EndFor \Comment End for[\ref{363note2}]
+\State $\star$ Create an empty tree set $s$, and insert 0 into $s$
+\State $t:=0$ \Comment $t$ is the prefix sum for $z$
+\For{$r:=0$ \textbf{to} $m-1$}
+\State $t\gets t+z[r]$
+\State $\star$ leftmost binary search the first item $g$ in $z$ such that $g\geq t-k$
+\State $\sigma\gets\max(\sigma, t-g)$
+\State $\star$ insert $t$ into $s$
+\EndFor
+\EndFor \Comment End for[\ref{363note1}]
+\EndFor
+\State \Return $\sigma$
+\EndProcedure
+\end{algorithmic}
+\end{algorithm}
+
+\setcounter{lstlisting}{0}
+\begin{lstlisting}[style=customc, caption={2D Kadane}]
+int maxSumSubmatrix( vector<vector<int>>& matrix, int k )
+{
+    int m = static_cast<int>( matrix.size() );
+    int n = static_cast<int>( matrix[0].size() );
+
+    int ans = INT_MIN;
+
+    for( int c = 0; c < n; ++c )
+    {
+        //postfix sum
+        vector<int> z( m, 0 );
+
+        for( int x = c; x < n; ++x )
+        {
+            for( int r = 0; r < m; ++r )
+            {
+                z[r] += matrix[r][x];
+            }
+
+            set<int> s;
+
+            s.insert( 0 );
+
+            //prefix sum in z
+            int t = 0;
+
+            for( int y : z )
+            {
+                t += y;
+
+                //find the first item such that
+                //t-*it <= k
+                auto it = s.lower_bound( t - k );
+
+                if( it != s.end() )
+                {
+                    ans = ( max )( ans, t - *it );
+                }
+
+                s.insert( t );
+            }
+        }
+    }
+
+    return ans;
+}
+\end{lstlisting}

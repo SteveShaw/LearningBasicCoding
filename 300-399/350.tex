@@ -1,0 +1,132 @@
+\section{350 --- Intersection of Two Arrays II}
+Given two arrays $ A $ and $ B $, write a function to compute their intersection.
+
+\paragraph{Example 1:}
+
+\begin{flushleft}
+\textbf{Input}:$  A = [1,2,2,1] $,$  B = [2,2] $
+\\
+\textbf{Output}: [2]
+\end{flushleft}
+
+
+\paragraph{Example 2:}
+
+\begin{flushleft}
+\textbf{Input}: $ A = [4,9,5] $, $ B = [9,4,9,8,4] $
+\\
+\textbf{Output}: [9,4]
+\end{flushleft}
+
+\paragraph{Note:}
+
+\begin{itemize}
+\item Each element in the result should appear as many times as it shows in both arrays.
+\item The result can be in any order.
+\end{itemize}
+
+\paragraph{Follow up:}
+
+\begin{itemize}
+\item What if the given array is already sorted? How would you optimize your algorithm?
+\item What if $ A $'s size is small compared to $ B $'s size? Which algorithm is better?
+\item What if elements of $ B $ are stored on disk, and the memory is limited such that you cannot load all elements into the memory at once?
+\end{itemize}
+
+\subsection{Hash Map}
+\begin{itemize}
+\item 这道题是 349 --- Intersection of Two Arrays的拓展，不同之处在于这道题允许我们在intersection中加入重复的数字，而且是尽可能多的加入，而349只允许重复的数字在intersection中只有一个。
+\item 用一个hash map来建立$A$中字符和其出现个数之间的映射, 然后遍历$B$。如果当前字符在哈希表中的个数大于0，则将此字符加入结果中，然后将其在map中的对应值减1。
+\end{itemize}
+
+\setcounter{lstlisting}{0}
+\begin{lstlisting}[style=customc, caption={Hash Set}]
+vector<int> intersect( vector<int>& nums1, vector<int>& nums2 )
+{
+    unordered_map<int, int> m;
+
+    //create the map between
+    //the number and its counts
+    for( int n :  nums1 )
+    {
+        auto it = m.find( n );
+        if( it == m.end() )
+        {
+            m.emplace( n, 1 );
+        }
+        else
+        {
+            ++it->second;
+        }
+    }
+
+    vector<int> ans;
+
+    for( int n :  nums2 )
+    {
+        auto it = m.find( n );
+
+        if( it != m.end() )
+        {
+            //only add n
+            //if the counts still larger than zero
+            if( it->second > 0 )
+            {
+                ans.push_back( n );
+                --it->second;
+            }
+        }
+    }
+
+    return ans;
+}
+\end{lstlisting}
+
+\subsection{Sorted Arrays}
+\begin{itemize}
+\item 如果两个数组是sorted，那么可以用类似double pointer的方法。
+\item 用$ x $和$ y $两个变量分别指向A和B的起始位置，如果$A[x]=B[y]$，那么将这个数字放入输出数组中。然后$ x $和$ y $都increments。
+\item 如果$A[x]>B[y]$，则increment $ y $。反之，则increments $ x $。
+\end{itemize}
+
+\setcounter{lstlisting}{0}
+\begin{lstlisting}[style=customc, caption={Sorting}]
+vector<int> intersect( vector<int>& nums1, vector<int>& nums2 )
+{
+    size_t x = 0;
+    size_t y = 0;
+
+    sort( nums1.begin(), nums1.end() );
+    sort( nums2.begin(), nums2.end() );
+
+    vector<int> ans;
+
+    while( ( x < nums1.size() ) && ( y < nums2.size() ) )
+    {
+        if( nums1[x] == nums2[y] )
+        {
+            ans.push_back( nums1[x] );
+            ++x;
+            ++y;
+        }
+        else if( nums1[x] > nums2[y] )
+        {
+            ++y;
+        }
+        else
+        {
+            ++x;
+        }
+    }
+
+    return ans;
+}
+\end{lstlisting}
+
+\subsection{Follow Up}
+\begin{enumerate}
+\item What if elements of $B$ are stored on disk, and the memory is
+limited such that you cannot load all elements into the memory at
+once? --- If only $B$ cannot fit in memory, put all elements of $A$ into a hash map, read chunks from $B$ that fit into the memory, and record the intersections.
+\item If both $ A $ and $ B $ are so huge that neither fit into the memory, sort them individually (external sort), then read 2 elements from each array at a time in memory, record intersections.
+\end{enumerate}

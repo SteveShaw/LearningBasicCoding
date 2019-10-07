@@ -1,0 +1,70 @@
+\section{345. Reverse Vowels of a String}
+Write a function that takes a string $S$ as input and reverse only the vowels of a string.
+
+\paragraph{Example 1:}
+
+\begin{flushleft}
+\textbf{Input}: \texttt{hello}
+\\
+\textbf{Output}: \texttt{holle}
+\end{flushleft}
+
+
+\paragraph{Example 2:}
+
+\begin{flushleft}
+\textbf{Input}: \texttt{leetcode}
+\\
+\textbf{Output}: \texttt{leotcede}
+\end{flushleft}
+
+\paragraph{Note:}
+\begin{itemize}
+\item The vowels does not include the letter $y$.
+\end{itemize}
+
+\subsection{Two Pointers}
+\begin{itemize}
+\item Use two indexes $l$ and $r$ to point to the beginning and end of $S$
+\item Inside the loop, loop until the next vowel
+\item Whenever $l\geq r$, jump out of the loop and return the updated string $S$
+\end{itemize}
+
+\setcounter{lstlisting}{0}
+\begin{lstlisting}[style=customc, caption={Two Pointers}]
+string reverseVowels( string s )
+{
+    int l = 0;
+    int r = static_cast<int>( s.size() ) - 1;
+
+    unordered_set<char> vowels{'a', 'A', 'e', 'E', 'i', 'I', 'o', 'O', 'u', 'U'};
+
+    while( l < r )
+    {
+        while( ( l < r ) && ( vowels.find( s[l] ) == vowels.end() ) )
+        {
+            ++l;
+            continue;
+        }
+
+        while( ( l < r ) && ( vowels.find( s[r] ) == vowels.end() ) )
+        {
+            --r;
+            continue;
+        }
+
+        if( l >= r )
+        {
+            //no longer to search
+            return s;
+        }
+
+        swap( s[l], s[r] );
+        ++l;
+        --r;
+    }
+
+    return s;
+}
+
+\end{lstlisting}

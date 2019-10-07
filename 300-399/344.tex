@@ -1,0 +1,43 @@
+\section{344 --- Reverse String}
+Write a function that reverses a string. The input string is given as an array of characters $A$.
+\par
+Do not allocate extra space for another array, you must do this by modifying the input array in-place with $O(1)$ extra memory.
+\par
+You may assume all the characters consist of printable \texttt{ascii} characters.
+
+ 
+
+\paragraph{Example 1:}
+
+\begin{flushleft}
+\textbf{Input}: [h,\quad e,\quad l,\quad l,\quad o]
+\\
+\textbf{Output}: [o,\quad l,\quad l,\quad e,\quad h]
+\end{flushleft}
+
+\paragraph{Example 2:}
+
+\begin{flushleft}
+\textbf{Input}: [H,\quad a,\quad n,\quad n,\quad a,\quad h]
+\\
+\textbf{Output}: [h,\quad a,\quad n,\quad n,\quad a,\quad H]
+\end{flushleft}
+
+\subsection{In-place Swap}
+Too easy problem
+
+\setcounter{lstlisting}{0}
+\begin{lstlisting}[style=customc, caption={In-place Swap}]
+void reverseString( vector<char>& s )
+{
+    int l  = 0;
+    int r = static_cast<int>( s.size() ) - 1;
+
+    while( l < r )
+    {
+        swap( s[l], s[r] );
+        ++l;
+        --r;
+    }
+}
+\end{lstlisting}

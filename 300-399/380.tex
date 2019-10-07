@@ -1,0 +1,115 @@
+\section{380 --- Insert Delete GetRandom O(1)}
+Design a data structure that supports all following operations in average O(1) time.
+
+\begin{lstlisting}[style=customc]
+insert(val) //Inserts an item val to the set if not already present.
+remove(val) //Removes an item val from the set if present.
+getRandom // Returns a random element from current set of elements. Each element must have the same probability of being returned.
+\end{lstlisting}
+
+\paragraph{Example:}
+
+\begin{lstlisting}[style=customc]
+// Init an empty set.
+RandomizedSet randomSet = new RandomizedSet();
+
+// Inserts 1 to the set. Returns true as 1 was inserted successfully.
+randomSet.insert(1);
+
+// Returns false as 2 does not exist in the set.
+randomSet.remove(2);
+
+// Inserts 2 to the set, returns true. Set now contains [1,2].
+randomSet.insert(2);
+
+// getRandom should return either 1 or 2 randomly.
+randomSet.getRandom();
+
+// Removes 1 from the set, returns true. Set now contains [2].
+randomSet.remove(1);
+
+// 2 was already in the set, so return false.
+randomSet.insert(2);
+
+// Since 2 is the only number in the set, getRandom always return 2.
+randomSet.getRandom();
+\end{lstlisting}
+
+\subsection{Hash Map}
+\begin{itemize}
+\item Maintain one array $X$ and one hash map $M$.
+\item Use $X$ to store numbers and $M$ to map the number and its index in $X$
+\item \texttt{Insert} operation: 
+\begin{enumerate}
+\item Check if the number exists in $M$. If Yes, then return \texttt{false}。Otherwise, we insert the number into the end of $X$, and insert to $M$ with its index in $X$.
+\end{enumerate}
+\item \texttt{Delete} operation:
+\begin{enumerate}
+\item To delete the number from the array $X$ in $O(1)$ time, swap the number with the last number. 
+\item Since the number's index is changed, we also need to modify its mapping in $M$.
+\item Then, we just only delete the last number in $X$.
+\end{enumerate}
+\item \texttt{getRandom} operation: Generate a random integer $i$ between $[0, \lvert X\rvert-1]$, and returns the number at index $i$.
+\end{itemize}
+
+\setcounter{lstlisting}{0}
+\begin{lstlisting}[style=customc, caption={Hash Map}]
+class RandomizedSet
+{
+public:
+    /** Initialize your data structure here. */
+    RandomizedSet()
+    {
+    }
+
+    /** Inserts a value to the set. Returns true if the set did not already contain the specified element. */
+    bool insert( int val )
+    {
+        auto it = M.find( val );
+        if( it != M.end() )
+        {
+            return false;
+        }
+
+        X.push_back( val );
+        M.emplace( val, X.size() - 1 );
+
+        return true;
+    }
+
+    /** Removes a value from the set. Returns true if the set contained the specified element. */
+    bool remove( int val )
+    {
+        auto it = M.find( val );
+        if( it == M.end() )
+        {
+            return false;
+        }
+
+        auto pos = it->second;
+        if( pos != X.size() - 1 )
+        {
+            //Copy the last element
+            //to the position of val
+            X[pos] = X.back();
+            auto it_back = M.find( X.back() );
+            it_back->second = pos;
+        }
+
+        //remove the last element
+        X.pop_back();
+        M.erase( it );
+
+        return true;
+    }
+
+    /** Get a random element from the set. */
+    int getRandom()
+    {
+        return X[rand() % X.size()];
+    }
+
+    vector<int> X;
+    unordered_map<int, size_t> M;
+};
+\end{lstlisting}
