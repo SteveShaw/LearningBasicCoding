@@ -25,10 +25,7 @@ Return the following binary tree:
 \end{tikzpicture}
 \end{figure}
 \subsection{Recursion}
-\begin{CJK*}{UTF8}{gbsn}
 和\ref{105algo}基本一样，唯一不同的是root是postorder数组的最后一个元素。递归函数其他部分都是一样的，即求出左子树长度和右子树长度，然后递归构建左子树和右子树。
-\end{CJK*}
-\subsubsection{Algorithm}
 \setcounter{algorithm}{0}
 \begin{algorithm}[H]
 \caption{Recursion}
@@ -39,9 +36,7 @@ Return the following binary tree:
 \EndProcedure
 \end{algorithmic}
 \end{algorithm}
-\begin{CJK*}{UTF8}{gbsn}
 \texttt{CreateTree}根据给定的\textbf{postorder}数组$A$和其范围$[p_0, p_1)$以及\textbf{inorder}数组$B$和其范围$[i_0, i_1)$构建出符合要求的binary tree
-\end{CJK*}
 \begin{algorithm}[H]
 \caption{Recursively Building Binary Tree}
 \begin{algorithmic}[1]

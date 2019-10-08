@@ -47,10 +47,7 @@ For this problem, a height-balanced binary tree is defined as: a binary tree in 
 \textbf{Output}: \texttt{false}
  \end{flushleft}
  \subsection{Recursion}
- \begin{CJK*}{UTF8}{gbsn}
 根据题目中的定义，高度平衡二叉树是每一个结点的两个子树的深度差不能超过1，那么肯定需要一个求各个点深度的函数，然后对每个节点的两个子树来比较深度差，但是这种方法效率差，因为每一个点都会被上面的点计算深度时访问一次，优化后的方法是如果我们发现子树不平衡，则不计算具体的深度，而是直接返回-1。那么优化后的方法为：对于每一个节点，递归获得左右子树的深度，如果子树是平衡的，则返回真实的深度，若不平衡，直接返回$-1$
-\end{CJK*}
-\subsubsection{Algorithm}
 \setcounter{algorithm}{0}
 \begin{algorithm}[H]
 \caption{Recursion}

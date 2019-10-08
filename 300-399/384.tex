@@ -20,6 +20,8 @@ solution.shuffle();
 \end{lstlisting}
 
 \subsection{Fisher–Yates shuffle}
+On each iteration of the algorithm, we generate a random integer between the current index and the last index of the array. Then, we swap the elements at the current index and the chosen index -- this simulates drawing (and removing) the element from the hat, as the next range from which we select a random index will not include the most recently processed one. One small, yet important detail is that it is possible to swap an element with itself -- otherwise, some array permutations would be more likely than others. 
+
 算法描述如下
 \setcounter{algorithm}{0}
 \begin{algorithm}[H]

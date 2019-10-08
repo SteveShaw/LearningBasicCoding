@@ -62,44 +62,302 @@ Two elements of a binary search tree (BST) are swapped by mistake. Recover the t
 \begin{flushleft}
 A solution using $O(n)$ space is pretty straight forward. Could you devise a constant space solution?
 \end{flushleft}
-\subsection{Inorder Traverse}
-用中序遍历树，并将所有nodes存到一个array $A$中，把所有节点值存到另一个array $B$中，然后对存节点值的$B$排序，然后将$A$中保存的node的value按照排序好的$B$的顺序进行赋值。这种最一般的解法可针对任意个数目的节点错乱的情况
-%\subsubsection{Algorithm}
-%\setcounter{algorithm}{0}
-%\begin{algorithm}[H]
-%\caption{Inorder Traverse}
-%\begin{algorithmic}[1]
-%\Procedure{RecoverTree}{$T$}
-%\State Initialize $A$ and $B$ as two 1-d array
-%\State $A:=\emptyset,\ B:=\emptyset$
-%\State $\texttt{Inorder}(T, A, B)$ \Comment Call inorder function to save nodes and related values into $A$ and $B$
-%\State $\texttt{Sort}(B)$ \Comment Sort the values saved in $B$
-%\For{$i:=0\to |A|-1$}
-%\State $\texttt{Value}(A[i])\gets B[i]$ \Comment Assign the values in $B$ to nodes in $A$
-%\EndFor
-%\EndProcedure
-%\end{algorithmic}
-%\end{algorithm}
-%\begin{CJK*}{UTF8}{gbsn}
-%下面的函数\texttt{Inorder}中序遍历$T$，然后按照顺序把访问到的node及其value存入$A$和$B$中。
-%\end{CJK*}
-%\begin{algorithm}[H]
-%\caption{Inorder Traverse Function}
-%\begin{algorithmic}[1]
-%\Function{Inorder}{$T, A, B$}
-%\If{$T=\text{NULL}$}
-%\State \Return
-%\EndIf
-%\algstore{99algo}
-%\end{algorithmic}
-%\end{algorithm}
-%\begin{algorithm}[H]
-%\begin{algorithmic}[1]
-%\algrestore{99algo}
-%\State $\texttt{Inorder}(\text{LEFT}(T), A, B)$ \Comment Visit left child tree of $T$
-%\State $A\gets A + T$ \Comment Save node to $A$
-%\State $B\gets B + \text{Value}(T)$ \Comment Save node's value to $B$
-%\State  $\texttt{Inorder}(\text{RIGHT}(T), A, B)$ \Comment Visit left child tree of $T$
-%\EndFunction
-%\end{algorithmic}
-%\end{algorithm}
+
+\subsection{Sort an Almost Sorted Array Where Two Elements Are Swapped}
+Inorder traversal of BST is an array sorted in the ascending order. Here two nodes are swapped, and hence inorder traversal is an almost sorted array where only two elements are swapped. To identify these two elements in a sorted array is a classical problem that could be solved in linear time.
+
+Here is the algorithm:
+
+\begin{enumerate}
+\item Construct inorder traversal of the tree. It should be an almost sorted list where only two elements are swapped.
+
+\item Identify two swapped elements $x$ and $y$ in an almost sorted array in linear time.
+
+\item Traverse the tree again. Change value $x$ to $y$ an value $y$ to $x$.
+\end{enumerate}
+
+\setcounter{lstlisting}{0}
+\begin{lstlisting}[style=customc, caption={Sort an Almost Sorted Array}]
+void recoverTree( TreeNode* root )
+{
+    vector<int> A;
+    inorder( root, A );
+    int x = -1;
+    int y = -1;
+    tie( x, y ) = find_swapped( A );
+    recover( root, 2, x, y );
+
+}
+//inorder traverse
+void inorder( TreeNode* root, vector<int>& A )
+{
+    if( !root )
+    {
+        return;
+    }
+
+    inorder( root->left, A );
+    A.push_back( root->val );
+    inorder( root->right, A );
+}
+//find the swapped items in the almost sorted array
+tuple<int, int> find_swapped( vector<int>& A )
+{
+    int x = -1;
+    int y = -1;
+    bool flag = false;
+
+    for( size_t i = 0; i < A.size() - 1; ++i )
+    {
+        if( A[i] > A[i + 1] )
+        {
+            y = A[i + 1];
+
+            if( !flag )
+            {
+                //this the first swap occurred
+                x = A[i];
+                flag = true;
+            }
+            else
+            {
+                //this is the second swap occurred
+                break;
+            }
+
+        }
+    }
+
+    return {x, y};
+}
+//recover the swapped nodes helper function
+void recover( TreeNode* root, int count, int x, int y )
+{
+    if( !root )
+    {
+        return;
+    }
+    if( root->val == x )
+    {
+        //change it to y
+        root->val = y;
+        //decrement count
+        --count;
+        if( count == 0 )
+        {
+            //we have changed two nodes
+            //complete
+            return;
+        }
+    }
+    else if( root->val == y )
+    {
+        //change it to x
+        root->val = x;
+        //decrement count
+        --count;
+
+        if( count == 0 )
+        {
+            //we have changed two nodes
+            //complete
+            return;
+        }
+    }
+
+    //recursively process left child
+    recover( root->left, count, x, y );
+    //recursively process right child
+    recover( root->right, count, x, y );
+}
+\end{lstlisting}
+
+\subsection{Iterative Inorder Traversal}
+In this approach, we construct inorder traversal by iterations and identify swapped nodes at the same time, in one pass. 
+
+\textbf{Iterative inorder traversal} is simple: go left as far as you can, then one step right. Repeat till the end of nodes in the tree.
+
+To identify swapped nodes, track the last node \fcj{pre} in the inorder traversal (i.e. the predecessor of the current node) and compare it with current node value. If the current node value is smaller than its predecessor \fcj{pre} value, the swapped node is here.
+
+There are only two swapped nodes here, and hence one could break after having the second node identified.
+
+Doing so, one could get directly nodes (and not only their values), and hence swap node values in $O(1)$ time.
+
+\begin{lstlisting}[style=customc, caption={Iterative Inorder Traversal}]
+void recoverTree( TreeNode* root )
+{
+    TreeNode* x = nullptr;
+    TreeNode* y = nullptr;
+    TreeNode* pre = nullptr;
+    vector<TreeNode*> stk;
+    auto node = root;
+    while( !stk.empty() || node )
+    {
+        while( node )
+        {
+            stk.push_back( node );
+            node = node->left;
+        }
+        node = stk.back();
+        stk.pop_back();
+        if( pre && ( node->val < pre->val ) )
+        {
+            y = node;
+            if( !x )
+            {
+                //in this case, we only find one
+                //node is out of order
+                //we have to find another one
+                x = pre;
+            }
+            else
+            {
+                //we have found the swapped nodes
+                break;
+            }
+        }
+        pre = node;
+        //move to right child
+        node = node->right;
+    }
+    if( x && y )
+    {
+        //only swap the values
+        swap( x->val, y->val );
+    }
+}
+\end{lstlisting}
+
+\subsection{Recursive Inorder Traversal}
+This approach is the recursive version of last approach
+
+\begin{lstlisting}[style=customc, caption={Recursive Way}]
+void recoverTree( TreeNode* root )
+{
+    //The swapped nodes
+    TreeNode* x = nullptr;
+    TreeNode* y = nullptr;
+    //last visited node
+    TreeNode* pre = nullptr;
+    inorder( root, x, y, pre );
+    //swap the values
+    swap( x->val, y->val );
+}
+//helper recursive function
+void inorder( TreeNode* root, TreeNode*& x, TreeNode*& y, TreeNode*& pre )
+{
+    if( !root )
+    {
+        return;
+    }
+
+    inorder( root->left, x, y, pre );
+    if( pre && ( root->val < pre->val ) )
+    {
+        y = root;
+        if( !x )
+        {
+            //first time find out of order item
+            x = pre;
+        }
+        else
+        {
+            //second time find out of item
+            //x and y have been found
+            return;
+        }
+    }
+    pre = root;
+    inorder( root->right, x, y, pre );
+}
+\end{lstlisting}
+
+\subsection{Morris Inorder Traversal}
+The idea of Morris algorithm is to set the \textit{temporary link} between the node and its \fcj{predecessor}: 
+
+\fcj{predecessor.right = root}. 
+
+So one starts from the node, computes its predecessor and verifies if the link is present.
+
+\begin{itemize}
+\item There is no link? Set it and go to the left subtree.
+\item There is a link? Break it and go to the right subtree.
+\end{itemize}
+
+There is one small issue to deal with : what if there is no left child, i.e. there is no left subtree? Then go straightforward to the right subtree.
+
+
+\setcounter{lstlisting}{0}
+\begin{lstlisting}[style=customc, caption={Morris Travel}]
+void recoverTree( TreeNode* root )
+{
+    //the swapped nodes
+    TreeNode* x = nullptr;
+    TreeNode* y = nullptr;
+    //the previous node of current visited one
+    TreeNode* pre = nullptr;
+    //morris node
+    TreeNode* morris = nullptr;
+    auto node = root;
+    while( node )
+    {
+        if( node->left )
+        {
+            morris = node->left;
+            while( morris->right && ( morris->right != node ) )
+            {
+                morris = morris->right;
+            }
+            if( !morris->right )
+            {
+                //we have not set morris node
+                //link it to current node
+                morris->right = node;
+                //go to current node's left subtree again
+                node = node->left;
+            }
+            else
+            {
+                //we have already explored node's left
+                //break the link
+                morris->right = nullptr;
+                //now we check the swapped nodes
+                if( pre && ( pre->val > node->val ) )
+                {
+                    y = node;
+                    if( !x )
+                    {
+                        x = pre;
+                    }
+                }
+                //set previous node
+                pre = node;
+                //move to right subtree
+                node = node->right;
+            }
+        }//end if(node)
+        else
+        {
+            //current node has no left child
+            //check the swapped nodes first
+            if( pre && ( pre->val > node->val ) )
+            {
+                y = node;
+                if( !x )
+                {
+                    x = pre;
+                }
+            }
+            //set previous node
+            pre = node;
+            //move to right subtree
+            node = node->right;
+        }//end else
+    }//end while
+    //swap the values of the two nodes
+    if( x && y )
+    {
+        swap( x->val, y->val );
+    }
+}
+\end{lstlisting}

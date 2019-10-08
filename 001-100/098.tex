@@ -46,39 +46,47 @@ Assume a BST is defined as follows:
 \end{flushleft}
 \subsection{Recursion}
 验证二叉搜索树有很多种解法，可以利用它本身的性质来做，即$\text{left} < \text{root} < \text{right}$，也可以通过利用中序遍历结果为有序数列来做，在Recursive方法中，初始化时带入系统最大值和最小值，在递归过程中换成它们自己的节点值，具体实现时为了避免出现节点值出现\fcj{int}的最大值和最小值的情况，用\fcj{long long} 代替\fcj{int}
-%\subsubsection{Algorithm}
-%\setcounter{algorithm}{0}
-%\begin{algorithm}[H]
-%\caption{The Main Procedure}
-%\begin{algorithmic}[1]
-%\Procedure{IsValidBST}{$T$}
-%\State $\texttt{ans}:=\texttt{CheckBST}(T, -\infty, +\infty)$
-%\State \Return \texttt{ans}
-%\EndProcedure
-%\end{algorithmic}
-%\end{algorithm}
-%Function \texttt{CheckBST} recursively check a tree with root $T$ is a valid BST by checking if the root's value is between $\alpha$ and $\beta$
-%\begin{algorithm}[H]
-%\caption{The Recursive Part}
-%\begin{algorithmic}[1]
-%\Function{ChecKBST}{$T, \alpha, \beta$}
-%\If{$T=\texttt{Null}$}
-%\State \Return \texttt{true}
-%\EndIf
-%\State $v:=\texttt{Value}(T)$ \Comment The node's value
-%\If{$v < \alpha$ \textbf{and} $v > \beta$} \Comment The value is outside the range $[\alpha, \beta]$
-%\State \Return \texttt{false}
-%\EndIf
-%\State $b_0:=\texttt{CheckBST}(\texttt{LEFT}(T), \alpha, v)$ \Comment Check left child tree of $T$
-%\If{$b_0:=\texttt{true}$} \Comment The left child tree is a valid BST
-%\State $b_1:=\texttt{CheckBST}(\texttt{RIGHT}(T), v, \beta)$ \Comment Check right child tree of $T$
-%\State \Return $b_1$
-%\Else
-%\State \Return \texttt{false} \Comment The left child tree is not a valid BST
-%\EndIf
-%\EndFunction
-%\end{algorithmic}
-%\end{algorithm}
+
+\setcounter{lstlisting}{0}
+\begin{lstlisting}[style=customc, caption={Recurision}]
+bool isValidBST( TreeNode* root )
+{
+    return dfs( root, false, -1, false, -1 );
+}
+//flagl: indicate if low limit is set
+//flagh: indicate if high limit is set
+bool dfs( TreeNode* node, bool flagl, int lo, bool flagh, int hi )
+{
+    if( !node )
+    {
+        return true;
+    }
+    if( flagl && ( lo >= node->val ) )
+    {
+        //value <= lower
+        return false;
+    }
+    if( flagh && ( hi <= node->val ) )
+    {
+        //value >= higher
+        return false;
+    }
+    //set flagh to true
+    //flagl is still same
+    if( !dfs( node->left, flagl, lo, true, node->val ) )
+    {
+        return false;
+    }
+    //set flagl to true
+    //flagh is still same
+    if( !dfs( node->right, true, node->val, flagh, hi ) )
+    {
+        return false;
+    }
+    return true;
+}
+\end{lstlisting}
+
 \subsection{In--order Traverse}
 一般的二叉搜索树是$\text{LEFT}\leq\text{ROOT}\leq\text{RIGHT}$，而这道题设定为$\text{LEFT}<\text{ROOT}<\text{RIGHT}$，那么就可以用中序遍历来做。如果不去掉$\text{LEFT}=\text{ROOT}$这个条件的话，那么下边两个数用中序遍历无法区分：
 \begin{figure}[H]

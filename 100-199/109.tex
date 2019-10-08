@@ -24,10 +24,7 @@ One possible answer is:
 \end{figure}
  \end{flushleft}
  \subsection{Recursion}
- \begin{CJK*}{UTF8}{gbsn}
  链表的查找中间点可以通过快慢指针来操。找到中点后，要以中点的值建立一个根节点，然后需要把原链表断开，分为前后两个链表，都不能包含原中点，然后再分别对这两个链表递归调用原函数，分别连上左右子节点即可。因此，仍然需要一个辅助函数来进行递归操作，这个辅助函数有两个输入参数，即起始节点和尾部节点后的第一个节点。
-\end{CJK*}
-\subsubsection{Algorithm}
 \setcounter{algorithm}{0}
 \begin{algorithm}[H]
 \caption{Recursion}
@@ -40,9 +37,7 @@ One possible answer is:
 \EndProcedure
 \end{algorithmic}
 \end{algorithm}
- \begin{CJK*}{UTF8}{gbsn}
  \texttt{CreateTree}根据输入的起始节点$\alpha$和尾部节点后的第一个节点$\beta$构建二叉搜索树
-\end{CJK*}
 \begin{algorithm}[H]
 \caption{Recursively Build Binary Search Tree}
 \begin{algorithmic}[1]
