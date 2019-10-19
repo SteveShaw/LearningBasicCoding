@@ -52,7 +52,7 @@
 \mdfdefinestyle{mymdf}{leftmargin=1cm,rightmargin=2cm,%
 innerleftmargin=1cm,innerrightmargin=1cm,roundcorner=10pt,backgroundcolor=lg}
 \definecolor{lg}{RGB}{247,249,250}
-\title{Algorithm Problem Set \\ \large No. 1100 --- 1199}
+\title{Algorithm Problem Set (Selected)}
 %\title{Functional Programming In C++}
 \author{SS}
 \date{November 2018}
@@ -61,8 +61,14 @@ innerleftmargin=1cm,innerrightmargin=1cm,roundcorner=10pt,backgroundcolor=lg}
 \def\bottom#1#2{\hbox{\vbox to #1{\vfill\hbox{#2}}}}
 %\fontfamily{phv}\selectfont
 \renewcommand{\thelstlisting}{\thesection.\arabic{lstlisting}}
-\sloppy
+\newcommand{\fcc}[1]{\lstinline[language=C++, basicstyle=\small\ttfamily, keywordstyle=\bfseries\color{green!40!black}]|#1|}
+\newcommand{\fcj}[1]{\lstinline[language=Java, basicstyle=\small\ttfamily, keywordstyle=\bfseries\color{green!40!black}]|#1|}
+%\sloppy
 \maketitle
+\include{007}
+\include{009}
+\include{041}
+\include{287}
 \include{1114}
 \include{1115}
 \end{document}

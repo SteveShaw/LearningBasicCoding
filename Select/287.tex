@@ -1,0 +1,210 @@
+\section{287 --- Find the Duplicate Number}
+Given an array $A$ containing $n + 1$ integers where each integer is between 1 and $n$ (inclusive), prove that at least one duplicate number must exist. Assume that there is only one duplicate number, find the duplicate one.
+
+\paragraph{Example 1:}
+\begin{flushleft}
+\textbf{Input}: $[1,3,4,2,2]$
+\\
+\textbf{Output}: 2
+\end{flushleft}
+
+\paragraph{Example 2:}
+\begin{flushleft}
+\textbf{Input}: $[3,1,3,4,2]$
+\\
+\textbf{Output}: 3
+\end{flushleft}
+
+\paragraph{Note:}
+\begin{itemize}
+\item You must not modify the array (assume the array is read only).
+\item You must use only constant, $O(1)$ extra space.
+\item Your runtime complexity should be less than $O(n^2)$.
+\item There is only one duplicate number in the array, but it could be repeated more than once.
+\end{itemize}
+\subsection{Detect Cycle And Find The Cycle Start}
+\begin{itemize}
+\item 与检测链表是否有cycle并找到cycle的起始点类似。
+\item 由于存在重复元素，并且$A$中每个值的大小都是1到$n$，而长度又是$n+1$，因此如果将$A[i]$看作index，那么根据$A[i]$的值访问下个元素$A[A[i]]$到最后就会形成cycle。
+\item 另外由于0不属于1到$n$，因此$A[0]$肯定不在cycle内，这就相当于有cycle的链表里，链表的头指针不在cycle中。
+\item 借用链表中的快慢指针，这里用两个index$x$和$y$分别代表快慢两个index，其中$x\gets A[A[x]]$ 而$y\gets A[y]$。如果遇到相等，就终止循环，
+\item 然后$x$和$y$分别从0和刚才循环中断的地方开始按照$i\gets A[i]$的方式前进，直到相等，这个相等的位置处即为重复的number。
+\end{itemize}
+\setcounter{algorithm}{0}
+\begin{algorithm}[H]
+\caption{Detect Cycle And Find Cycle Start}
+\begin{algorithmic}[1]
+\Procedure{FindDuplicate}{$A$}
+\State $\ast$ 初始化两个index $x$和$y$为0
+\State $\ast$ 检测Cycle，找到快慢两个index的相遇点
+\Repeat
+\State $x\gets A[A[x]]$
+\State $y\gets A[y]$
+\Until{$x=y$}
+\State $\ast$ 寻找Cycle的起始点
+\State $z:=0$ \Comment 找起始点也需要两个index，其中一个是0，另外一个就是刚才找到的相遇点
+\Repeat
+\State $x\gets A[x]$
+\State $z\gets A[z]$
+\Until{$x=z$}
+\State \Return $x$
+\EndProcedure
+\end{algorithmic}
+\end{algorithm}
+\setcounter{lstlisting}{0}
+\begin{lstlisting}[style=customc, caption={Detect Cycle And Find Cycle Start}]
+int findDuplicate( vector<int>& nums )
+{
+    //x is the fast index
+    //y is the slow index
+    int x = 0;
+    int y = 0;
+
+    //detect cycle and
+    //find the meet point of x and y
+    do
+    {
+        x = nums[nums[x]];
+        y = nums[y];
+    }
+    while( x != y );
+
+    //find the start of the cycle
+    //one index will start from 0
+    //since nums[0] is not inside cycle
+    int z = 0;
+
+    while( x != z )
+    {
+        x = nums[x];
+        z = nums[z];
+    }
+
+    return x;
+}
+\end{lstlisting}
+\subsection{Binary Search}
+\paragraph{Why Binary Search Can Work}
+\begin{enumerate}
+\item 由于所有数字的范围都是$1$到$n$，那么如果$A$中没有重复数字，那么对于一个数$x$，在$A$小于或者等于$x$的数字个数就为$x$个。
+\item 但由于$A$中有重复的数字，假设这个数字是$m$，那么$A$中小于或者等于这个重复数字$m$的至少有$m+1$个。由于$A$的长度为$n+1$，因此对$A$中其他数，小于或者等于这个数的个数都不会大于这个数本身。
+\item 因此binary search是要在$1$到$n$这$n$个数中找到第一个数$\alpha$使得在$A$中小于等于$\alpha$的数的个数$z$要大于$\alpha$。典型的\textbf{rightmost} binary search。
+\item 注意binary search不是作用于数组$A$。
+\end{enumerate}
+\paragraph{Algorithm Steps}
+\begin{itemize}
+\item 初始化左右两端的index $l$和$r$分别为1和$n$。
+\item 得到当前的middle value $x=(l+r)/2$，遍历$A$，得到小于等于$x$的数的count $z$，
+\begin{enumerate}
+\item 如果$z\leq x$，$l\gets x+1$
+\item 如果$z > x$，$r\gets x$
+\item 循环结束后 $l$就是那个duplicate number。
+\end{enumerate}
+\end{itemize}
+\begin{algorithm}[H]
+\caption{Binary Search}
+\begin{algorithmic}[1]
+\Procedure{FindDuplicate}{$A,L$}
+\State $l:=1$, $r:=L-1$ \Comment Binary Search on $[1,n]$ not on $A$ and $L=n+1$
+\State $\ast$ Rightmost Binary Search
+\While{$l < r$}
+\State $x:=(l+r)/2$ \Comment Mid-point
+\State $z:=0$
+\For{Each number $t$ in $A$}
+\If{$t \leq x$}
+\State $z\gets z+1$
+\EndIf
+\EndFor
+\If{$z\leq x$}
+\State $l\gets x+1$
+\Else
+\State $r\gets x$
+\EndIf
+\EndWhile
+\State \Return $l$
+\EndProcedure
+\end{algorithmic}
+\end{algorithm}
+\begin{lstlisting}[style=customc, caption={Binary Search}]
+int findDuplicate( vector<int>& nums )
+{
+    int l = 1;
+    //r=n
+    int r = static_cast<int>( nums.size() ) - 1;
+
+    //binary search on $[1...n]$
+    //not on nums
+    while( l < r )
+    {
+        int x = ( l + r ) / 2;
+
+        int count = 0;
+        for( int n : nums )
+        {
+            if( n <= x )
+            {
+                ++count;
+            }
+        }
+
+        if( count <= x )
+        {
+            l = x + 1;
+        }
+        else
+        {
+            r = x;
+        }
+    }
+
+    return l;
+}
+\end{lstlisting}
+\subsection{Bit Manipulation}
+\begin{itemize}
+\item 在总共32个bit位上，分别统计出1到$n$上在每个比特位上的1的个数，记为$x$
+\item 同样的在总共32个bit位上，分别统计出$A$中所有数字在每个比特位上的1的个数，记为$y$。
+\item 如果在某个bit位上，$y>x$，表明该位上肯定有重复数字的贡献，因此将结果中的对应的bit位也设为1。
+\item 这样32个bit位上设置好相应的bit 1后，就能得到那个重复数字。
+\end{itemize}
+\setcounter{lstlisting}{0}
+\begin{lstlisting}[style=customc, caption={Bit Manipulation}]
+int findDuplicate( vector<int>& nums )
+{
+    int mask = 1;
+
+    int L = static_cast<int>( nums.size() );
+
+    int ans = 0;
+
+    for( int i = 0; i < 32; ++i )
+    {
+        //in fact, x counts for [0...n]
+        //but 0 has no any effect
+        mask = 1 << i;
+
+        int x = 0;
+        int y = 0;
+
+        for( int i = 0; i < L; ++i )
+        {
+            if( i & mask )
+            {
+                ++x;
+            }
+
+            if( nums[i] & mask )
+            {
+                ++y;
+            }
+        }
+
+        if( y > x )
+        {
+            ans |= mask;
+        }
+    }
+
+    return ans;
+}
+\end{lstlisting}

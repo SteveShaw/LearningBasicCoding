@@ -1,0 +1,98 @@
+\section{7 --- Reverse Integer}
+Given a 32-bit signed integer $x$, reverse digits of an integer.
+
+\paragraph{Example 1:}
+
+\begin{flushleft}
+	\textbf{Input}: 123
+	\\
+\textbf{Output}: 321
+\end{flushleft}
+
+\paragraph{Example 2:}
+
+\begin{flushleft}
+	\textbf{Input}: $-123$
+	\\
+\textbf{Output}: $-321$
+\end{flushleft}
+
+\paragraph{Example 3:}
+
+\begin{flushleft}
+	\textbf{Input}: 120
+	\\
+\textbf{Output}: 21
+\end{flushleft}
+
+\paragraph{Note:}
+\begin{itemize}
+	\item Assume we are dealing with an environment which could only store integers within the 32-bit signed integer range: $[−2^{31},  2^{31} − 1]$. 
+	\item For the purpose of this problem, assume that your function returns 0 when the reversed integer overflows.
+\end{itemize}
+
+\subsection{Pop and Push Digits And Check before Overflow}
+We can build up the reverse integer one digit at a time. While doing so, we can check beforehand whether or not appending another digit would cause overflow.
+
+
+\setcounter{lstlisting}{0}
+\begin{lstlisting}[style=customc, caption={Check before over/underflow}]
+int reverse( int x )
+{
+    int n = x;
+    int res = 0;
+    //helper function to check if
+    //k is larger than INT_MAX
+    auto is_overflow = []( int k, int r, int thr ) -> bool
+    {
+        return ( k > thr ) || ( ( k == thr ) && ( r > 7 ) );
+    };
+    //helper function to check if
+    //k is smaller than INT_MIN
+    auto is_underflow = []( int k, int r, int thr ) -> bool
+    {
+        return ( k < thr ) || ( ( k == thr ) && ( r < -8 ) );
+    };
+    if( x > 0 )
+    {
+        //process positive number
+        //threshold
+        int thr = INT_MAX / 10;
+        while( n != 0 )
+        {
+            //get quotient q
+            //and remainder r
+            int q = n / 10;
+            int r = n - q * 10;
+            n = q;
+            //check if res will be larger than INT_MIN
+            if( is_overflow( res, r, thr ) )
+            {
+                return 0;
+            }
+            res = res * 10 + r;
+        }
+    }
+    else
+    {
+        //process negative number
+        //the threshold
+        int thr = INT_MIN / 10;
+        while( n != 0 )
+        {
+            //get quotient q
+            //and remainder r
+            int q = n / 10;
+            int r = n - q * 10;
+            n = q;
+            //check if res will be less than INT_MIN
+            if( is_underflow( res, r, thr ) )
+            {
+                return 0;
+            }
+            res = res * 10 + r;
+        }
+    }
+    return res;
+}
+\end{lstlisting}
