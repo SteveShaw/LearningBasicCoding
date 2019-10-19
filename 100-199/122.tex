@@ -35,9 +35,7 @@ Buy on day 1 (price = 1) and sell on day 5 (price = 5), profit $= 5-1 = 4$. Note
 In this case, no transaction is done, i.e. max profit $= 0$.
 \end{flushleft}
 \subsection{Simple One Pass}
-\begin{CJK*}{UTF8}{gbsn}
 这里条件放宽了，可以无限次买入和卖出。因此只需要从第二天开始，如果当前价格比之前价格高，则把差值加入利润中，因为我们可以昨天买入，今日卖出，若明日价更高的话，还可以今日买入，明日再抛出。以此类推，遍历完整个数组后即可求得最大利润
-\end{CJK*}
 \setcounter{algorithm}{0}
 \begin{algorithm}[H]
 \caption{One Pass}

@@ -1,8 +1,8 @@
 \section{126 --- Word Ladder II}
-Given two words (begin word $\alpha$ and end word $\beta$), and a dictionary's word list $A$, find all shortest transformation sequence(s) from $\alpha$ to $\beta$, such that:
+Given two words (\fcj{beginWord} and \fcj{endWord}), and a dictionary's word list, find all shortest transformation sequence(s) from \fcj{beginWord} to \fcj{endWord}, such that:
 \begin{itemize}
 \item Only one letter can be changed at a time
-\item Each transformed word must exist in the word list. Note that begin word $\alpha$ is not a transformed word.
+\item Each transformed word must exist in the word list. Note that \fcj{beginWord} is not a transformed word.
 \end{itemize}
 \paragraph{Note:}
 \begin{itemize}
@@ -10,28 +10,45 @@ Given two words (begin word $\alpha$ and end word $\beta$), and a dictionary's w
 \item All words have the same length.
 \item All words contain only lowercase alphabetic characters.
 \item You may assume no duplicates in the word list.
-\item You may assume begin word $\alpha$ and end word $\beta$ are non-empty and are not the same.
+\item You may assume \fcj{beginWord} and \fcj{endWord} are non-empty and are not the same.
 \end{itemize}
 \paragraph{Example 1:}
 \begin{flushleft}
-\textbf{Input}: $\alpha = \text{hit}$, $\beta = \text{cog}$, $A = [\text{hot},\;\text{dot},\;\text{dog},\;\text{lot},\;\text{log},\;\text{cog}]$
-\\
+\textbf{Input}: 
+
+\fcj{beginWord = "hit"}
+
+\fcj{endWord = "cog"}
+
+\fcj{wordList = ["hot","dot","dog","lot","log","cog"]}
+
 \textbf{Output}:
-\\
-$[[\text{hit},\;\text{hot},\;\text{dot},\;\text{dog},\;\text{cog}], [\text{hit},\;\text{hot},\;\text{lot},\;\text{log},\;\text{cog}]]$
+
+\fcj{["hit","hot","dot","dog","cog"]}
+
+\fcj{["hit","hot","lot","log","cog"]}
+
 \end{flushleft}
+
 \paragraph{Example 2:}
 \begin{flushleft}
-\textbf{Input}: $\alpha = \text{hit}$, $\beta = \text{cog}$, $A = [\text{hot}, \text{dot}, \text{dog}, \text{lot}, \text{log}]$
-\\
-\textbf{Output}: $\emptyset$
-\\
-\textbf{Explanation}: The end word \textit{cog} is not in word list, therefore no possible transformation.
+\textbf{Input}: 
+
+\fcj{beginWord = "hit"}
+
+\fcj{endWord = "cog"}
+
+\fcj{wordList = ["hot","dot","dog","lot","log"]}
+
+\textbf{Output}: 
+
+\fcj{[]}
+
+
+\textbf{Explanation}: The endWord \fcj{"cog"} is not in wordList, therefore no possible transformation.
 \end{flushleft}
 \subsection{Bidirectional BFS}
-\begin{CJK*}{UTF8}{gbsn}
 假设同时从$\alpha$和$\beta$出发进行宽度优先扩展，如果可以在两个树的某一层找到相同的word，这时候就能确定最短距离了，即最早产生相同word的层数。以给出的例子说明，从begin word \textbf{hot}出发，其扩展出的BFS tree前三层如下所示
-\end{CJK*}
 \begin{figure}[H]
 \begin{tikzpicture}
 [mynode/.style={draw,circle,minimum size=10mm, fill=gray!20!}]
@@ -45,9 +62,7 @@ $[[\text{hit},\;\text{hot},\;\text{dot},\;\text{dog},\;\text{cog}], [\text{hit},
 \draw[>=stealth,->] (2) -- (4);
 \end{tikzpicture}
 \end{figure}
-\begin{CJK*}{UTF8}{gbsn}
 而从end word \textbf{cog}出发，其扩展出的BFS tree 前三层如下所示。
-\end{CJK*}
 \begin{figure}[H]
 \begin{tikzpicture}
 [mynode/.style={draw,circle,minimum size=10mm, fill=gray!20!}]
@@ -63,13 +78,11 @@ $[[\text{hit},\;\text{hot},\;\text{dot},\;\text{dog},\;\text{cog}], [\text{hit},
 \draw[>=stealth,->] (3) -- (5);
 \end{tikzpicture}
 \end{figure}
-\begin{CJK*}{UTF8}{gbsn}
 注意在上图中虽然\textbf{dog}也能transform到\textbf{log}，但是由于\textbf{log}也同样能从\textit{cog}中得到，而我们是为了得到最短的路径，所以\textbf{log}选择从\textit{cog}变换得到。同理，\textbf{dog}也由\textit{cog}转换得到，而不是从\textbf{log}。这样在具体实现时，我们需要将已经transform得到的word从保存的可transform的word list $A$中删除。这时候可以看到两个word扩展出的树的第三层有相同的word，因此这一层就是最短的路径。
-\par
+
 在实现时，用一个hash map记录每个word所transform出的单词，可能是一个也可能是多个，因此这个hash map的value就是一个array。由于我们是从两个方向同时进行DFS，因此每次选择DFS的开始层时，总是选择node最少的层开始，另外就是注意由于是两个方向，而hash map所记录的转换关系是单向的，即是从$\alpha$到$\beta$，所以如果当前处理的方向是从$\beta$到$\alpha$，那么在更新hash map时，要把tranform出的word作为key，而作为transform源头的word放入key对应的array中。
-\par
+
 有了最短路径后，我们就得到了每个word及其transform出的word，接下来就可以用递归即DFS的方式构建出path了。
-\end{CJK*}
 \setcounter{algorithm}{0}
 \begin{algorithm}[H]
 \caption{Bidirectional BFS Search + DFS Path Building}
@@ -111,13 +124,11 @@ $[[\text{hit},\;\text{hot},\;\text{dot},\;\text{dog},\;\text{cog}], [\text{hit},
 \EndProcedure
 \end{algorithmic}
 \end{algorithm}
-\begin{CJK*}{UTF8}{gbsn}
 \texttt{Process}将BFS的tree当前level $L_0$ transform到$A$中允许的words，同时比较另外一个tree的当前Level $L_1$，看是否有相同的word，如果有相同的word，就表示已经找到最短路径的transform path了。如果没有，但是是$A$中的word，就把transform出的word加入到下一层level $L_n$中，最后swap $L_n$和$L$，使得$L$变为下一个level。
-\par
+
 两种情况下，都要根据是forward还是barward将word和transform出的word加入到parent--children map $C$中。
-\par
+
 最后，如果在$L_0$和$L_1$中找到相同的word，\text{Process}会修改$b$为\texttt{true}。
-\end{CJK*}
 \begin{algorithm}[H]
 \caption{Helper Function To Process BFS Tree}
 \begin{algorithmic}[1]
@@ -154,9 +165,7 @@ $[[\text{hit},\;\text{hot},\;\text{dot},\;\text{dog},\;\text{cog}], [\text{hit},
 \EndFunction
 \end{algorithmic}
 \end{algorithm}
-\begin{CJK*}{UTF8}{gbsn}
 \texttt{BuildPath}则根据parent--children map $C$ 以及给定的begin word $w$和end word $\beta$，构建出所有可能的path，并将生成的path加入到最终结果$\pi$中。初始时，$w=\alpha$
-\end{CJK*}
 \begin{algorithm}[H]
 \caption{DFS Build Path}
 \begin{algorithmic}[1]

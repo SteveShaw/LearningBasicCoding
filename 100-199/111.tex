@@ -25,29 +25,47 @@ Given binary tree
 return its minimum depth: 2.
 \end{flushleft}
 \subsection{Depth First Search}
-\begin{CJK*}{UTF8}{gbsn}
-如果当前节点是叶子节点，返回1，如果是空节点，返回0。如果有左节点，则递归计算左子树的最小深度，如果有右节点，递归计算右子树的最小深度。然后如果左节点和右节点都为非空节点，则取左右子树两个深度中最少的那个。
-\end{CJK*}
-\subsubsection{Algorithm}
-\setcounter{algorithm}{0}
-\begin{algorithm}[H]
-\caption{Depth First Search}
-\begin{algorithmic}[1]
-\Procedure{MinDepth}{$T$}
-\If{$T=\texttt{null}$}
-\State \Return 0
-\EndIf
-\If{$\texttt{LEFT}(T)=\texttt{null}$ \textbf{and} $\texttt{RIGHT}(T)=\texttt{null}$}
-\State \Return 1
-\EndIf
-\State $\texttt{ans}:=+\infty$
-\If{$\texttt{LEFT}(T)\neq \texttt{null}$}
-\State $\texttt{ans}\gets \min(\texttt{ans}, \texttt{MinDepth}(\texttt{LEFT}(T))$
-\EndIf
-\If{$\texttt{RIGHT}(T)\neq \texttt{null}$}
-\State $\texttt{ans}\gets \min(\texttt{ans}, \texttt{MinDepth}(\texttt{RIGHT}(T))$
-\EndIf
-\State \Return $1+\texttt{ans}$
-\EndProcedure
-\end{algorithmic}
-\end{algorithm}
+We incorporate find balance into calculate depth. If we find each node has unbalanced left and right child tree, we return a negative number.
+
+\setcounter{lstlisting}{0}
+\begin{lstlisting}[style=customc, caption={DFS}]
+bool isBalanced( TreeNode* root )
+{
+    auto res = depth( root );
+    return res >= 0;
+}
+//helper function to find depth of a node
+//we incorprate into comparing depth of left and right
+//child tree
+//when it is not balance,
+//return -1
+int depth( TreeNode* node )
+{
+    if( !node )
+    {
+        return 0;
+    }
+    int l_dep = depth( node->left );
+    if( l_dep < 0 )
+    {
+        return -1;
+    }
+
+    int r_dep = depth( node->right );
+    if( r_dep < 0 )
+    {
+        return -1;
+    }
+    //check if left and right child tree
+    //are balanced
+    int diff = abs( l_dep - r_dep );
+    if( diff > 1 )
+    {
+        //unbalanced
+        return -1;
+    }
+    //balanced
+    //return the depth
+    return ( max )( l_dep, r_dep ) + 1;
+}
+\end{lstlisting}

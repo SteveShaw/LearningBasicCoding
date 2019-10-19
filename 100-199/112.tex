@@ -31,34 +31,32 @@ Note: A leaf is a node with no children.
 \textbf{Output}: \texttt{true}, as there exist a root-to-leaf path $5\to4\to11\to2$ which sum is 22.
 \end{flushleft}
 \subsection{Recursive}
-\begin{CJK*}{UTF8}{gbsn}
 递归方法是最直接想到的方法：如果当前节点是空节点，显然是\texttt{false}。
 \begin{itemize}
     \item 如果当前node是leaf，看其值是否与$S$相等，相等返回\texttt{true}，否则\texttt{false}。
     \item 如果不是leaf，首先递归处理left subtree，如果结果找到，返回\texttt{true}，否则递归处理right subtree，返回处理结果。
 \end{itemize}
-\end{CJK*}
-\subsubsection{Algorithm}
-\setcounter{algorithm}{0}
-\begin{algorithm}[H]
-\caption{Recursion}
-\begin{algorithmic}[1]
-\Procedure{HasPathSum}{$T, S$}
-\If{$T=\texttt{null}$}
-\State \Return \texttt{false}
-\EndIf
-\If{$\texttt{Left}(T)=\texttt{null}$ \textbf{and} $\texttt{Right}(T)=\texttt{null}$}
-\If{$\texttt{Value}(T)=S$}
-\State \Return \texttt{true}
-\Else
-\State \Return \texttt{false}
-\EndIf
-\EndIf
-\State $b:=\texttt{HasPathSum}(\texttt{Left}(T), S - \texttt{Value}(T))$ \Comment Recursive on left subtree
-\If{$b=\texttt{false}$}
-\State $b:=\texttt{HasPathSum}(\texttt{Right}(T), S - \texttt{Value}(T))$ \Comment Recursive on right subtree
-\EndIf
-\State \Return $b$
-\EndProcedure
-\end{algorithmic}
-\end{algorithm}
+
+\setcounter{lstlisting}{0}
+\begin{lstlisting}[style=customc, caption={Recursion}]
+bool hasPathSum( TreeNode* root, int sum )
+{
+    if( !root )
+    {
+        //empty node
+        return false;
+    }
+    if( !root->left && !root->right )
+    {
+        //leaf node
+        return root->val == sum;
+    }
+    //check if the path exists in left child tree
+    if( !hasPathSum( root->left, sum - root->val ) )
+    {
+        //check if the path exists in right child tree
+        return hasPathSum( root->right, sum - root->val );
+    }
+    return true;
+}
+\end{lstlisting}

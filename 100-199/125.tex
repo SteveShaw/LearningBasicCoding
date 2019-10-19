@@ -4,17 +4,15 @@ Given a string $S$, determine if it is a palindrome, considering only alphanumer
 Note: For the purpose of this problem, we define empty string as valid palindrome.
 \paragraph{Example 1:}
 \begin{flushleft}
-\textbf{Input}: $S=\text{A man, a plan, a canal: Panama}$
+\textbf{Input}: \fcj{"A man, a plan, a canal: Panama"}
 \\
-\textbf{Output}: \textit{true}
+\textbf{Output}: \fcj{true}
 \end{flushleft}
 \paragraph{Example 2:}
 \begin{flushleft}
-\textbf{Input}: $S=\text{race a car}$
-\\
-\textbf{Output}: \textit{false}
+\textbf{Input}: \fcj{"race a car"}
+
+\textbf{Output}: \fcj{false}
 \end{flushleft}
 \subsection{Analysis}
-\begin{CJK*}{UTF8}{gbsn}
-很简单的题目，用$\alpha$，$\beta$分别代表指向字符串左边和右边的两个index, 分别从字符的开头和结尾处开始遍历整个字符串，如果遇到非字母数字的字符就跳过，继续往下找，直到找到下一个字母数字或者结束遍历，如果遇到小写字母，就将其转为大写。等左右指针都找到字母数字时，比较这两个字符，若相等，则继续比较下面两个分别找到的字母数字，若不相等，直接返回\textit{false}
-\end{CJK*}
+很简单的题目，用$\alpha$，$\beta$分别代表指向字符串左边和右边的两个index, 分别从字符的开头和结尾处开始遍历整个字符串，如果遇到非字母数字的字符就跳过，继续往下找，直到找到下一个字母数字或者结束遍历，如果遇到小写字母，就将其转为大写。等左右指针都找到字母数字时，比较这两个字符，若相等，则继续比较下面两个分别找到的字母数字，若不相等，直接返回\fcj{false}

@@ -18,13 +18,13 @@ Your algorithm should have a linear runtime complexity. Could you implement it w
 \end{flushleft}
 \subsection{Bitwise Operation}
 首先问题可以推广到如下形式，给定一个array $A$，其中除了一个数字重复了$p$次，其余的都重复了$k$次，找出这个重复$p$次的数字。
-\par
+
 首先从简单的例子开始，假定有一组1-bit数字构成的array $A$， 用一个counter记录array中数字1的出现次数，当这个counter到达某个值$k$时，就重置为0，然后继续。
-\par
+
 很明显，如果这个counter能够计数到$k$，假设其有$m$个bits，那么就有$2^m\geq k$，变换一下也就是$m\geq \log_{2}(k)$。
-\par
+
 现在来看当遍历数组$A$时，counter的每个bit是如何变化的，假设counter的$m$个bits从最高位到最低位分别为$b_{m-1}, \ldots, b_0$，由于当遇到数字0时，counter是保持不变的，那么具有如此性质的bitwise操作只有\textbf{OR}或者是\textbf{XOR}。接下来看这两种操作哪一种最佳。
-\par
+
 最开始，counter中的所有bit都是0。 直到遇到数字1，这些bits才开始发生改变。当遇到第一个1时，这时候$b_{m-1}=0,\ldots, b_0=1$。当遇到第二个1时，则变化为$b_{m-1}=0,\ldots, b_1=1, b_0=0$。注意到，$b_0$变成了0。如果用OR操作，那么$b_0\gets b_0\;\texttt{or}\; i$，这时候$b_0$仍然是1。因此，只能选择异或操作。对于$b_1,\ldots,b_{m-1}$，需要找到在什么样的情况下这些bits会发生改变。比如以$b_1$为例，当遇到数字1，这时候$b_0$必须是1才会使得我们必须改变$b_1$的值。因为如果是0，只需要把$b_0$从0变为1即可，并不需要改变$b_1$的值。因此$b_1$只有在$b_0$和$i$都是1的情况下才会改变其值，写成bitwise的形式就是$b_1\gets b_1\;\texttt{XOR}\;(b_0\;\texttt{AND}\;i)$。以此类推，$b_{m-1}$只有当$b_{m-2},\ldots,b_1,b_0$和$i$都是1的情况下才会需要改变，即$b_{m-1}\gets b_{m-1}\;\texttt{XOR}\;(b_{m-2}\;\texttt{AND}\;\ldots\;\texttt{AND}\;b_0\;\texttt{AND}\;i)$。这就是所需要的bitwise operation。
 \par
 上述bitwise operation是从0一直到$2^{m}-1$，而不是$k$。如果$k<2^m-1$，则需要在counter等于$k$时，将counter重置为0。要做到这一点，需要用一个mask $M$ 来和$b_{m-1},\ldots, b_0$做\texttt{AND} operation，即
@@ -40,41 +40,47 @@ b_0&\gets b_0\;\texttt{AND}\;M
 \]
 其中$y_i=b_i$ when $x_j=1$，$y_i=\texttt{NOT}(b_i)$ when $x_i=0$。这里$i\in[0,m-1]$。
 \par
-例如$k=3$，写成二进制形式为$11$，即$x_{1}=1,x_0=1$。那么mask就是$\texttt{NOT}(b_1\;\texttt{AND}\;b_0)$。因此算法的框架就像下面所示的那样
-\setcounter{algorithm}{0}
-\begin{algorithm}[H]
-\caption{Overall Description}
-\begin{algorithmic}[1]
-\Procedure{F}{$A, L$}
-\For{$i:=0\to L-1$}
-\State $n:=A[i]$
-\State $b_{m-1}\gets b_{m-1}\;\texttt{XOR}\;(b_{m-2}\;\texttt{AND}\ldots\texttt{AND}\;b_0\;\texttt{AND}\;n)$
-\State $b_{m-2}\gets b_{m-2}\;\texttt{XOR}\;(b_{m-3}\;\texttt{AND}\ldots\texttt{AND}\;b_0\;\texttt{AND}\;n)$
-\State $\ldots$
-\State $b_{0}\gets b_{0}\;\texttt{XOR}\;n$
-\State $M:=\texttt{NOT}(y_0\;\texttt{AND}\ldots\texttt{AND}\;y_{m-1})$ \Comment The mask
-\State $x_{m-1}\gets x_{m-1}\;\texttt{AND}\;M$
-\State $x_{m-2}\gets x_{m-2}\;\texttt{AND}\;M$
-\State $\ldots$
-\State $x_{0}\gets x_{0}\;\texttt{AND}\;M$
-\EndFor
-\EndProcedure
-\end{algorithmic}
-\end{algorithm}
-假设$A$中的number都是32bit整数。最直接的方法当然是对于整数中的32个bit分别创建1个counter，也就是有32个counters。不过更好的方法用$m$个32位整数而不是32个$m$位整数，这里$m$是满足$m\geq\log_2{k}$的最小整数。也就是说可以把32个counter的同一个bit分别单独拿出来构成一个整数，这样就只需要$m$个32位整数了，如下图所示
-\begin{figure}[H]
-\includegraphics[width=15cm]{137.png}
-\end{figure}
-有了这$m$个32位整数$m_0, m_1,\ldots, m_{31}$，以$m_0$为例，它是一个32bit整数。当遍历完整个array时，$m_0$中的第$z$个bit将由array中所有number的第$z$个bit位确定。如果一个number的第$z$个bit位在array中出现了$k$的倍数次，那么当计数到$k$时，由于我们要将counter重置为0，这个number在第$z$个bit也会重置为0。因此只有那个重复了$p$次的number在第$z$个bit位出现次数才最终决定了这个位上的值。由于这个number的出现次数是$p$，那么$p\bmod k\neq0$。当$p>k$时，只有$p\bmod k$次才最终决定在$z$处的值。也就是说在这个number对于第$z$个bit位而言其有效的重复次数是$\hat{p}:=p\bmod k$。
-\par
+例如$k=3$，写成二进制形式为$11$，即$x_{1}=1,x_0=1$。那么mask就是$\texttt{NOT}(b_1\;\texttt{AND}\;b_0)$。
+
+%因此算法的框架就像下面所示的那样
+%\setcounter{algorithm}{0}
+%\begin{algorithm}[H]
+%\caption{Overall Description}
+%\begin{algorithmic}[1]
+%\Procedure{F}{$A, L$}
+%\For{$i:=0\to L-1$}
+%\State $n:=A[i]$
+%\State $b_{m-1}\gets b_{m-1}\;\texttt{XOR}\;(b_{m-2}\;\texttt{AND}\ldots\texttt{AND}\;b_0\;\texttt{AND}\;n)$
+%\State $b_{m-2}\gets b_{m-2}\;\texttt{XOR}\;(b_{m-3}\;\texttt{AND}\ldots\texttt{AND}\;b_0\;\texttt{AND}\;n)$
+%\State $\ldots$
+%\State $b_{0}\gets b_{0}\;\texttt{XOR}\;n$
+%\State $M:=\texttt{NOT}(y_0\;\texttt{AND}\ldots\texttt{AND}\;y_{m-1})$ \Comment The mask
+%\State $x_{m-1}\gets x_{m-1}\;\texttt{AND}\;M$
+%\State $x_{m-2}\gets x_{m-2}\;\texttt{AND}\;M$
+%\State $\ldots$
+%\State $x_{0}\gets x_{0}\;\texttt{AND}\;M$
+%\EndFor
+%\EndProcedure
+%\end{algorithmic}
+%\end{algorithm}
+假设$A$中的number都是32bit整数。最直接的方法当然是对于整数中的32个bit分别创建1个counter，也就是有32个counters。不过更好的方法用$m$个32位整数而不是32个$m$位整数，这里$m$是满足$m\geq\log_2{k}$的最小整数。也就是说可以把32个counter的同一个bit分别单独拿出来构成一个整数，这样就只需要$m$个32位整数了.
+%%\begin{figure}[H]
+%%\includegraphics[width=15cm]{137.png}
+%%\end{figure}
+
+
+以$m_0$为例，它是一个32bit整数。当遍历完整个array时，$m_0$中的第$z$个bit将由array中所有number的第$z$个bit位确定。如果一个number的第$z$个bit位在array中出现了$k$的倍数次，那么当计数到$k$时，由于我们要将counter重置为0，这个number在第$z$个bit也会重置为0。因此只有那个重复了$p$次的number在第$z$个bit位出现次数才最终决定了这个位上的值。由于这个number的出现次数是$p$，那么$p\bmod k\neq0$。当$p>k$时，只有$p\bmod k$次才最终决定在$z$处的值。也就是说在这个number对于第$z$个bit位而言其有效的重复次数是$\hat{p}:=p\bmod k$。
+
 假设这个有效次数$\hat{p}$写成二进制形式位$\hat{p}_{m-1}\hat{p}_{m-2}\ldots\hat{p}_0$，那么如果$m_i$也就是第$i$个counter的第$z$个bit是1，很显然那个重复了$p$的number的有效次数$\hat{p}$的第$z$个bit也为1。而如果$m_i$的第$z$个bit位是0，那么重复了$p$次的数字的有效次数$\hat{p}$的第$z$个bit只能是0。如果是1，那么因为在遍历完整个数组后，这个位上的1出现了$\hat{p}$次，最终结果还是1，就不是我们假设的0了。而这个$z$是从0到32的，因此结论就是如果$\hat{p}_i=1$，那么$m_i$就是那个重复了$p$次的数字。
-\par
+
 因此算法首先计算出$\hat{p}:=p\bmod k$，然后只要$\hat{p}$的第$z$个bit位为1， 就返回$m_z$，如果有多个这样的bit位，返回其中任意一个即可。
-\par
+
 \begin{itemize}
 \item 当$k=2$, $p=1$时， 只需要$m=1$个32位整数作为counter，因为$2^1\geq2$，而因为$2^m=k$，甚至都不要mask。因此算法其实就是每个数进行\texttt{XOR}。
-\item 当$k=3$, $p=1$时，由于$2^2>3$，因此$m=2$，即两个32位整数的counter$m_0$ and $m_1$。而$2^m=2^2=4>k=3$，因此需要mask $M$。$k$的二进制形式为$k=b(11)$，因此$M = \texttt{NOT}(m_0\;\texttt{AND}\;m_1)$。算法如下所示：
+\item 当$k=3$, $p=1$时，由于$2^2>3$，因此$m=2$，即两个32位整数的counter $m_0$ and $m_1$。而$2^m=2^2=4>k=3$，因此需要mask $M$。$k$的二进制形式为$k=b(11)$，因此$M = \texttt{NOT}(m_0\;\texttt{AND}\;m_1)$。算法如下所示：
 \end{itemize}
+
+
 \setcounter{algorithm}{0}
 \begin{algorithm}[H]
 \caption{K=3 AND P=1}
@@ -98,3 +104,26 @@ b_0&\gets b_0\;\texttt{AND}\;M
 \item 当$k=5$, $p=3$时， $m=\lfloor\log_25\rfloor=3$。因此需要3个counter，$m_0$,$m_1$ and $m_2$。而$p\bmod k=3$，二进制形式为$b(011)$，因此返回$m_0$或者$m_1$都可以。而$k$的二进制是$b(101)$，因此$M:=\texttt{NOT}(m_2\;\texttt{AND}\;\texttt{NOT}(m_1)\;\texttt{AND}\;m_0)$
 \end{itemize}
 
+\setcounter{lstlisting}{0}
+\begin{lstlisting}[style=customc, caption={Bitwise}]
+int singleNumber( vector<int>& nums )
+{
+    int m0 = 0;
+    int m1 = 0;
+    int mask = 0;
+    for( int n : nums )
+    {
+        //set/unset bit 1 of counter
+        m1 = m1 ^ ( m0 & n );
+        //set/unset bit 0 of counter
+        m0 = m0 ^ n;
+        //get the mask
+        mask = ~( m1 & m0 );
+        //set/unset bit 1 and bit 0
+        //through mask
+        m1 = mask & m1;
+        m0 = mask & m0;
+    }
+    return m0;
+}
+\end{lstlisting}

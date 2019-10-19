@@ -22,39 +22,99 @@ One possible answer is:
 \draw[>=stealth,->] (9) -- (5);
 \end{tikzpicture}
 \end{figure}
- \end{flushleft}
- \subsection{Recursion}
- 链表的查找中间点可以通过快慢指针来操。找到中点后，要以中点的值建立一个根节点，然后需要把原链表断开，分为前后两个链表，都不能包含原中点，然后再分别对这两个链表递归调用原函数，分别连上左右子节点即可。因此，仍然需要一个辅助函数来进行递归操作，这个辅助函数有两个输入参数，即起始节点和尾部节点后的第一个节点。
-\setcounter{algorithm}{0}
-\begin{algorithm}[H]
-\caption{Recursion}
-\begin{algorithmic}[1]
-\Procedure{SortedListToBST}{$L$}
-\If{$L=\texttt{null}$}
-\State \Return \texttt{null}
-\EndIf
-\State $T:=\texttt{CreateTree}(L, \texttt{null})$
-\EndProcedure
-\end{algorithmic}
-\end{algorithm}
- \texttt{CreateTree}根据输入的起始节点$\alpha$和尾部节点后的第一个节点$\beta$构建二叉搜索树
-\begin{algorithm}[H]
-\caption{Recursively Build Binary Search Tree}
-\begin{algorithmic}[1]
-\Function{CreateTree}{$\alpha, \beta$}
-\If{$\alpha=\beta$} \Comment Cannot compare larger/smaller for linked list nodes
-\State \Return \texttt{null}
-\EndIf
-\State $F:=\alpha$ \Comment Fast pointer
-\State $S:=\alpha$ \Comment Slow pointer
-\While{$\texttt{Next}(F)\neq \beta$ \textbf{and} $\texttt{Next}(\texttt{Next}(F))\neq \beta$ }
-\State $F\gets \texttt{Next}(\texttt{Next}(F))$ \Comment Forward fast pointer by 2 nodes
-\State $S\gets \texttt{Next}(S)$ \Comment Forward slow pointer by 1 node
-\EndWhile
-\State Create a tree node $T$ with value equal to $\texttt{Value}(S)$ 
-\State $\texttt{LEFT}(T)\gets \texttt{CreateTree}(\alpha, S)$ \Comment Create left subtree
-\State $\texttt{RIGHT}(T)\gets \texttt{CreateTree}(\texttt{Next}(S), \beta)$ \Comment Create right subtree
-\State \Return $T$
-\EndFunction
-\end{algorithmic}
-\end{algorithm} 
+\end{flushleft}
+\subsection{Recursion}
+链表的查找中间点可以通过快慢指针来操。找到中点后，要以中点的值建立一个根节点，然后需要把原链表断开，分为前后两个链表，都不能包含原中点，
+
+然后再分别对这两个链表递归调用原函数，分别连上左右子节点即可。
+\setcounter{lstlisting}{0}
+\begin{lstlisting}[style=customc, caption={Recursion}]
+TreeNode* sortedListToBST( ListNode* head )
+{
+    if( head == nullptr )
+    {
+        return nullptr;
+    }
+    //find middle node
+    ListNode* prev = nullptr;
+    auto slow = head;
+    auto fast = head;
+    while( fast && fast->next )
+    {
+        prev = slow;
+        slow = slow->next;
+        fast = fast->next->next;
+    }
+    //break the linked list
+    if( prev )
+    {
+        prev->next = nullptr;
+    }
+    //create tree node with the value of slow poiner
+    auto node = new TreeNode( slow->val );
+    //Base case when there is only one node in the linked list
+    if( head == slow )
+    {
+        return node;
+    }
+    //left child tree is left half of slow
+    node->left = sortedListToBST( head );
+    //right child tree is right half of slow
+    node->right = sortedListToBST( slow->next );
+    return node;
+}
+\end{lstlisting}
+
+\subsection{Inorder Simulation}
+The critical idea based on the inorder traversal is:
+
+\begin{itemize}
+\item The leftmost element in the inorder traversal has to be the head of the given linked list.
+\item Similarly, the next element in the inorder traversal will be the second element in the linked list and so on.
+\end{itemize}
+
+The above shows the relationship between the inorder traversal of a binary search tree and the linked list nodes.
+
+\begin{enumerate}
+\item Iterate over the linked list to find out it's length $L$. We will make use of two variables $S$ and $E$ to mark the beginning and the end of the list. They are set to 0 and $L - 1$ respectively.
+\item We have to simulate the inorder traversal here. We can find out the middle element $M$ by using $(S + E) / 2$. Note that we don't really find out the middle node of the linked list. We just have a variable telling us the index of the middle element. We simply need this to make recursive calls on the two halves.
+\item Recurse on the left half by using $S$, $M- 1$ as the starting and ending points.
+\item The invariance maintained in this algorithm is that whenever the left half of the BST is completely built, the head pointer in the linked list will point to the root node or the middle node (which becomes the root). So, we simply use the current value pointed to by head as the root node and move the head to its next node.
+\item We recurse on the right hand side using $M + 1$, $E$ as the starting and ending points.
+\end{enumerate}
+
+\begin{lstlisting}[style=customc, caption={Inorder Simulation}]
+TreeNode* sortedListToBST( ListNode* head )
+{
+    auto node = head;
+    //find the size of linked list
+    int count = 0;
+    while( node )
+    {
+        node = node->next;
+        ++count;
+    }
+    //create binary search tree
+    return create( 0, count - 1, head );
+}
+TreeNode* create( int l, int r, ListNode*& node )
+{
+    if( l > r )
+    {
+        return nullptr;
+    }
+    //find middle
+    int mid = ( l + r ) / 2;
+    //First step of simulated inorder traversal.
+    auto left = create( l, mid - 1, node );
+    //since node will be updated during the process
+    //we put creating tree node after the above
+    //traversel is completed
+    auto t = new TreeNode( node->val );
+    t->left = left;
+    node = node->next;
+    //recurse on the right hand side and form BST out of them
+    t->right = create( mid + 1, r, node );
+    return t;
+}
+\end{lstlisting}

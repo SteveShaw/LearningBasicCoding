@@ -99,3 +99,36 @@ int longestConsecutive( vector<int>& nums )
     return ans;
 }
 \end{lstlisting}
+
+\subsection{Hash Set And Intelligent Sequence Building}
+The numbers are stored in a hash set to allow $O(1)$ lookup, and we only attempt to build sequences from numbers that are not part of a longer sequence. This is accomplished by 
+\begin{enumerate}
+\item ensuring that the number that would immediately precede the current number in a sequence is not present, as that number would necessarily be part of a longer sequence.
+\end{enumerate}
+
+\begin{lstlisting}[style=customc, caption={Hash Set}]
+int longestConsecutive( vector<int>& nums )
+{
+    unordered_set<int> seen( begin( nums ), end( nums ) );
+    //the longest consecutive numbers
+    int best_seq = 0;
+    for( int n : nums )
+    {
+        if( seen.find( n - 1 ) == seen.end() )
+        {
+            //a new sequence starting from n
+            int cur = n;
+            int cur_seq = 1;
+            //continue build the sequence
+            while( seen.find( cur + 1 ) != seen.end() )
+            {
+                ++cur;
+                ++cur_seq;
+            }
+            //update the global longest sequence length
+            best_seq = ( max )( best_seq, cur_seq );
+        }
+    }
+    return best_seq;
+}
+\end{lstlisting}

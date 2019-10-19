@@ -23,33 +23,34 @@ Buy on day 2 (price = 1) and sell on day 5 (price = 6), profit = $6-1 = 5$. Not 
 \textbf{Explanation}: In this case, no transaction is done, i.e. max profit is 0.
 \end{flushleft}
 \subsection{Minimum Price}
-\begin{CJK*}{UTF8}{gbsn}
-遍历数组，用$x$是代表目前遇到的price中的最小值，那么当前的price与$x$的差值即为可能的最大profit
-\end{CJK*}
-\setcounter{algorithm}{0}
-\begin{algorithm}[H]
-\caption{Minimum Price So Far}
-\begin{algorithmic}[1]
-\Procedure{MaxProfit}{$P,\;L_P$}
-\If{$L_P=0$}
-\State \Return 0
-\EndIf
-\State $x:=P[0]$ \Comment The minimum price so far
-\State $\texttt{ans}:=0$ \Comment The maximum profit
-\For{$i:=1 \to L_P-1$}
-\State $x\gets \min(x, P[i])$ \Comment Update minimum price so far
-\State $\texttt{ans}\gets \max(\texttt{ans}, P[i] - x)$ \Comment Update maximum profit
-\algstore{121algo}
-\end{algorithmic}
-\end{algorithm}
-\begin{algorithm}[H]
-\begin{algorithmic}[1]
-\algrestore{121algo}
-\EndFor
-\State \Return \texttt{ans}
-\EndProcedure
-\end{algorithmic}
-\end{algorithm}
+
+Suppose $x$ is the minimum price so far, then the possible maximum profit will be the difference between current price and $x$.
+
+\setcounter{lstlisting}{0}
+\begin{lstlisting}[style=customc, caption={One Pass}]
+int maxProfit( vector<int>& prices )
+{
+    if( prices.empty() == 0 )
+    {
+        return 0;
+    }
+    int min_prc = prices[0];
+    int max_profit = 0;
+    for( size_t i = 1; i < prices.size(); ++i )
+    {
+        if( min_prc < prices[i] )
+        {
+            min_prc = prices[i];
+        }
+        else if( prices[i] - min_prc > max_profit )
+        {
+            max_profit = prices[i] - min_prc;
+        }
+    }
+    return max_profit;
+}
+\end{lstlisting}
+
 \subsection{Kadane Algorithm}
 The logic to solve this problem is same as \textit{maximum subarray problem} using \textbf{Kadane Algorithm}. If the question is changed slightly by giving the difference array of prices, For example: for a given array $[1,\;7,\;4,\;11]$, the problem could give the difference as $[0,\;6,\;-3,\;7]$. Here, the logic is to calculate the difference $( D = D + P[i] - P[i-1])$ of the original array, and find a contiguous subarray giving maximum profit. If the difference falls below 0, reset it to zero.
 \begin{algorithm}[H]

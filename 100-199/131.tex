@@ -4,54 +4,70 @@ Given a string $s$, partition $s$ such that every substring of the partition is 
 Return all possible palindrome partitioning of $s$.
 \paragraph{Example:}
 \begin{flushleft}
-\textbf{Input}: \texttt{aab}
-\\
-\textbf{Output}:
-\\
-((\texttt{aa}, \texttt{b}), (\texttt{a}, \texttt{a}, \texttt{b}))
-\end{flushleft}
-因为需要找到所有的palindrome字符串，因此DFS是最自然的选择。在递归函数中，从给定的起始位置出发，然后逐个搜寻以这个起始位置为开始的string在后面哪个位置可以找到palindrome，如果找到了这个位置，把当前的substring加入当前的选择中，然后从找到的位置继续进行递归。
+\textbf{Input}: \fcj{"aab"}
 
-\setcounter{algorithm}{0}
-\begin{algorithm}[H]
-\caption{DFS}
-\begin{algorithmic}[1]
-\Procedure{Partition}{$S, L_S$}
-\If{$L_s = 0$}
-\State \Return \Comment Empty string
-\EndIf
-\State $P:=\emptyset$ \Comment The array to save all palindrome strings found in one pass
-\State $\texttt{ans} := \emptyset$ \Comment The final result
-\State $\texttt{DFS}(S, L_S, 0, P, \texttt{ans})$ \Comment The recursive helper function
-\State \Return $\texttt{ans}$
-\EndProcedure
-\end{algorithmic}
-\end{algorithm}
-\texttt{DFS}从给定的位置$\alpha$出发，往后搜寻palindrome string。每找到一个，放入$P$中，然后从找到的string的末尾的下一个字符开始继续进行递归，递归结束后，将刚才加入的string从$P$中移除。当$\alpha=L_S$时，递归过程结束，将$P$插入到最终结果$A$中。
-\begin{algorithm}[H]
-\caption{DFS Helper Function}
-\begin{algorithmic}[1]
-\Function{DFS}{$S, L_S, \alpha, P, A$}
-\If{$\alpha=L_S$}
-\State $A\gets A+P$ 
-\EndIf
-\For{$i:=\alpha \to L_S-1$}
-\State $l:=\alpha,\ r:=i+1$
-\State $b:=\texttt{true}$ \Comment Indicate if $S[\alpha,\;i]$ is a palindrome or not
-\While{$l < r$}
-\If{$S[l]\neq S[r]$}
-\State $b\gets \texttt{false}$ \Comment Not a palindrome string
-\State \texttt{break}
-\EndIf
-\State $l\gets l+1$
-\State $r\gets r-1$
-\EndWhile
-\If{$b=\texttt{true}$} \Comment $S[\alpha,\;i]$ is a palindrome
-\State $P\gets P+S[\alpha,\;i]$ \Comment Add $S[\alpha,\;i]$ to current partition $P$
-\State $\texttt{DFS}(S, L_S, i+1, P, A)$ \Comment Recursive on next character
-\State $P\gets P-S[\alpha,\;i]$ \Comment Remove $S[\alpha,\;i]$ from current partition $P$
-\EndIf
-\EndFor
-\EndFunction
-\end{algorithmic}
-\end{algorithm}
+\textbf{Output}:
+
+\fcj{["aa","b"]}
+
+\fcj{[a","a","b"]}
+\end{flushleft}
+
+\subsection{DFS}
+
+因为需要找到所有的palindrome字符串，因此\textit{DFS}是最自然的选择。在递归函数中，从给定的起始位置出发，然后逐个搜寻以这个起始位置为开始的\textit{substring}在后面哪个位置可以找到palindrome，如果找到了这个位置，把当前的substring加入当前的选择中，然后从找到的位置继续进行递归。
+
+\setcounter{lstlisting}{0}
+\begin{lstlisting}[style=customc, caption={DFS}]
+vector<vector<string>> partition( string s )
+{
+    if( s.empty() )
+    {
+        return {};
+    }
+    vector<vector<string>> ans;
+    //save the result in one pass scan
+    vector<string_view> pals;
+    dfs( s, 0, pals, ans );
+    return ans;
+}
+//helper function for backtracking
+void dfs( string_view s, size_t start, vector<string_view>& pals, vector<vector<string>>& ans )
+{
+    if( start == s.size() )
+    {
+        //add current palindromes to the result
+        ans.emplace_back( pals.begin(), pals.end() );
+        return;
+    }
+    //check if each substring [start, i]
+    for( size_t i = start; i < s.size(); ++i )
+    {
+        auto l = start;
+        auto r = i;
+        bool flag = true;
+        //check if substring [start,i] is a
+        //palindrome or not
+        while( l < r )
+        {
+            if( s[l] != s[r] )
+            {
+                flag = false;
+                break;
+            }
+            l = l + 1;
+            r = r - 1;
+        }
+        if( flag )
+        {
+            //s[start, i] is a palindrome
+            //add to current array
+            pals.push_back( s.substr( start, i - start + 1 ) );
+            //deep into s[i+1, ...]
+            dfs( s, i + 1, pals, ans );
+            //backtracking
+            pals.pop_back();
+        }
+    }
+}
+\end{lstlisting}

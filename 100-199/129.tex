@@ -63,3 +63,37 @@ The root-to-leaf path $4\longrightarrow 0$ represents the number $ 40 $.
 
 Therefore, sum is $495 + 491 + 40 = 1026$.
 \end{flushleft}
+
+\subsection{Depth First Search}
+We apply \textit{DFS} from root. When a leaf node is met, we add the built number in the path to the final result.
+
+\setcounter{lstlisting}{0}
+\begin{lstlisting}[style=customc, caption={DFS}]
+int sumNumbers( TreeNode* root )
+{
+    int sum = 0;
+    dfs( root, 0, sum );
+    return sum;
+}
+//helper function for DFS
+//n is the number built in the depth first search path
+void dfs( TreeNode* node, int n, int& sum )
+{
+    if( !node )
+    {
+        return;
+    }
+    if( !node->left && !node->right )
+    {
+        //this is a leaf node
+        sum += ( n * 10 + node->val );
+        return;
+    }
+    //notice n is changed to n* 10+node->val
+    //this is the built number
+    //DFS on left child
+    dfs( node->left, n * 10 + node->val, sum );
+    //DFS on right child
+    dfs( node->right, n * 10 + node->val, sum );
+}
+\end{lstlisting}

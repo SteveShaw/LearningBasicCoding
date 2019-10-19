@@ -1,5 +1,5 @@
 \section{139 --- Word Break}
-Given a non-empty string $S$ and a dictionary $A$ containing a list of non-empty words, determine if $S$ can be segmented into a space-separated sequence of one or more dictionary words.
+Given a \textbf{non-empty} string $S$ and a dictionary $A$ containing a list of \textbf{non-empty} words, determine if $S$ can be segmented into a space-separated sequence of one or more dictionary words.
 \par
 \paragraph{Note:}
 \begin{itemize}
@@ -8,25 +8,39 @@ Given a non-empty string $S$ and a dictionary $A$ containing a list of non-empty
 \end{itemize}
 \paragraph{Example 1:}
 \begin{flushleft}
-\textbf{Input}: $S$ = leetcode, $A = [\text{leet}, \text{code}]$
-\\
-\textbf{Output}: true
-\\
-\textbf{Explanation}: Return \textbf{true} because \textit{leetcode} can be segmented as ``leet code''.
+\textbf{Input}:
+
+\fcj{s = "leetcode"}
+
+\fcj{wordDict = ["leet", "code"]}
+
+\textbf{Output}: \fcj{true}
+
+\textbf{Explanation}: Return \fcj{true} because \fcj{"leetcode"} can be segmented as \fcj{"leet code"}.
 \end{flushleft}
 \paragraph{Example 2:}
 \begin{flushleft}
-\textbf{Input}: $S$ = applepenapple, $A = [\text{apple}, \text{pen}]$
-\\
-\textbf{Output}: true
-\\
-\textbf{Explanation}: Return \textbf{true} because ``applepenapple'' can be segmented as ``apple pen apple''. Note that you are allowed to reuse a dictionary word.
+\textbf{Input}:
+
+\fcj{s = "applepenapple"}
+
+\fcj{wordDict = ["apple", "pen"]}
+
+\textbf{Output}: \fcj{true}
+
+\textbf{Explanation}: Return \fcj{true} because \fcj{"applepenapple"} can be segmented as \fcj{"apple pen apple"}. Note that you are allowed to reuse a dictionary word.
 \end{flushleft}
+
 \paragraph{Example 3:}
 \begin{flushleft}
-\textbf{Input}: $S$ = catsandog, $A = [\text{cats}, \text{dog}, \text{sand}, \text{and}, \text{cat}]$
-\\
-\textbf{Output}: false
+\textbf{Input}: 
+
+\fcj{s = "catsandog"}
+
+\fcj{wordDict = ["cats", "dog", "sand", "and", "cat"]}
+
+\textbf{Output}: \fcj{false}
+
 \end{flushleft}
 \subsection{Dynamic Programming}
 本题重要的是如何构建DP函数。假设$F[i]$表示$S[0,i-1]$可以拆分成给定字典中的单词。由于需要考虑空字符串的情况，因此$F$的长度是$S$的长度加1。
@@ -41,24 +55,80 @@ Given a non-empty string $S$ and a dictionary $A$ containing a list of non-empty
     \end{itemize}
     \item 最后$F$的最后一个值就是需要返回的结果了。
 \end{enumerate}
-\setcounter{algorithm}{0}
-\begin{algorithm}[H]
-\caption{Dynamic Programming}
-\begin{algorithmic}[1]
-\Procedure{WordBreak}{$S, L, W$}
-\State Initialize array $F$ as $F[0]=\texttt{true}, F[1]=\ldots=F[L]=\texttt{false}$
-\For{$i:=1\to L$}
-\For{$j:=0\to i-1$} \label{139loop1}
-\If{$F[j]=\texttt{true}$} 
-\State $\omega:=S[j, i-1]$ \Comment The substring $S[j,i-1]$
-\If{$\omega \in W$} \Comment $\omega$ is found in the dictionary $W$
-\State $F[i]\gets \texttt{true}$
-\State \texttt{break} \Comment Exit the inner loop [\ref{139loop1}]
-\EndIf
-\EndIf
-\EndFor
-\EndFor
-\State \Return $F[L]$
-\EndProcedure
-\end{algorithmic}
-\end{algorithm}
+
+
+\setcounter{lstlisting}{0}
+\begin{lstlisting}[style=customc, caption={DP}]
+bool wordBreak( string s, vector<string>& wordDict )
+{
+    unordered_set<string_view> words( begin( wordDict ), end( wordDict ) );
+    //F[i] means if we can break s[0,i-1] into the words
+    //found in wordDict
+    vector<bool> F( s.size() + 1, false );
+    //F[0] corresponds to an empty string
+    F[0] = true;
+    //use string_view to minimize memory usage
+    string_view sv( s );
+    for( size_t i = 1; i <= s.size(); ++i )
+    {
+        //test each separation index j from 0 to (i-1)
+        for( size_t j = 0; j < i; ++j )
+        {
+            if( F[j] )
+            {
+                //we can break S[0, j-1] into words
+                //found in wordDict
+                //check if we S[j, i-1] can be found in wordDict
+                auto sub = sv.substr( j, i - j );
+                if( words.find( sub ) != words.end() )
+                {
+                    F[i] = true;
+                    break;
+                }
+            }//end if
+        }//end for(j)
+    }//end for(i)
+    return F.back();
+}
+\end{lstlisting}
+
+\subsection{Breadth-First-Search}
+In \textit{BFS} approach, we start by adding index 0 into a queue, say $q$. Each time, we pop an index $x$ from the queue. Then we find from index $x$ to $L-1$ ($L$ is the size of input string) to see if there is a index $y$ such that substring $s[x,y]$ can be found in the dictionary. If $y$ is $L_1$, we know we can break $s$ into words in the dictionary. Otherwise, we add $y$ into $q$.
+
+\begin{lstlisting}[style=customc, caption={BFS}]
+bool wordBreak( string s, vector<string>& wordDict )
+{
+    //queue used for BFS
+    queue<size_t> q;
+    //a flag vector indicate if an index
+    vector<bool> seen( s.size(), false );
+    q.push( 0 );
+    unordered_set<string_view> words( wordDict.begin(), wordDict.end() );
+    string_view sv( s );
+    while( !q.empty() )
+    {
+        auto start = q.front();
+        q.pop();
+        if( !seen[start] )
+        {
+            //start has not been processed
+            //check each index from start to L-1
+            //to see if s[start, end] is in the dictionary
+            for( size_t end = start; end < s.size(); ++end )
+            {
+                auto sub = sv.substr( start, end - start + 1 );
+                if( words.find( sub ) != words.end() )
+                {
+                    if( end == s.size() - 1 )
+                    {
+                        return true;
+                    }
+                    q.push( end + 1 );
+                }
+            }
+            seen[start] = true;
+        }
+    }
+    return false;
+}
+\end{lstlisting}

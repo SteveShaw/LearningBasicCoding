@@ -47,29 +47,40 @@ $G  = [2,3,4]$, $C = [3,4,3]$
 \end{itemize}
 Therefore, you cannot travel around the circuit once no matter where you start.
 \end{flushleft}
-\subsection{Analysis}
+\subsection{One Pass}
 首先能走完整个环的前提是gas的总量要大于cost的总量，这样才会有起点的存在。假设开始设置起点$s = 0$, 并从这里出发，如果当前的gas值大于cost值，就可以继续前进，此时到下一个station，剩余的gas加上当前的gas再减去cost，看是否大于0，若大于0，则继续前进。当到达某一个station时，若这个值小于0了，则说明从起点到这个点中间的任何一个点都不能作为起点，则把起点设为下一个点，继续遍历。当遍历完整个环时，当前保存的起点即为所求。
-\setcounter{algorithm}{0}
-\begin{algorithm}[H]
-\caption{One Pass}
-\begin{algorithmic}[1]
-\Procedure{CanCompleteCircuit}{$G,C,L$}
-\State $t:=0$ \Comment Total sum of difference between gas and cost at each station
-\State $s:=0$ \Comment The start station
-\State $z:=0$ \Comment Current sum of difference between gas and cost at each station
-\For{$i:=0\to L$} \Comment $G$ and $C$ lengths are equal to $L$
-\State $t\gets t + G[i] - C[i]$
-\State $z\gets z + G[i] - C[i]$
-\If{$z<0$} 
-\State $z\gets 0$ \Comment Reset to zero
-\State $s\gets i+1$ \Comment Move start station to next
-\EndIf
-\EndFor
-\If{$t<0$} \Comment Total gass are less than total costs
-\State \Return $-1$ \Comment Cannot complete the circuit
-\Else
-\State \Return $z$
-\EndIf
-\EndProcedure
-\end{algorithmic}
-\end{algorithm}
+
+
+\setcounter{lstlisting}{0}
+\begin{lstlisting}[style=customc, caption={One Pass}]
+int canCompleteCircuit( vector<int>& gas, vector<int>& cost )
+{
+    //Total sum of difference between gas and cost at each station
+    int total_tank = 0;
+    //The start station
+    int starting = 0;
+    //Current tank
+    int cur_tank = 0;
+    auto L = static_cast<int>( gas.size() );
+    for( int i = 0; i < L; ++i )
+    {
+        total_tank += gas[i] - cost[i];
+        cur_tank += gas[i] - cost[i];
+        if( cur_tank < 0 )
+        {
+            //cannot get here
+            //starting with empty tank
+            cur_tank = 0;
+            // Pick up the next station as the starting one.
+            starting = i + 1;
+        }
+    }
+    //check if we can complete circuit
+    if( total_tank < 0 )
+    {
+        //we cannot complete circuit
+        return -1;
+    }
+    return starting;
+}
+\end{lstlisting}

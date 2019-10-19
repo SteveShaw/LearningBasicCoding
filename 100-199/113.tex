@@ -38,44 +38,47 @@ $(5,4,11,2)$
 $(5,8,4,5)$
 \end{flushleft}
 \subsection{Recursion}
-\begin{CJK*}{UTF8}{gbsn}
 由于需要保存路径，因此每次进入到递归函数时，将当前node的值插入到当前path的末尾，然后在递归结束时，将末尾的node从path中移除。
-\end{CJK*}
-\subsubsection{Algorithm}
-\setcounter{algorithm}{0}
-\begin{algorithm}[H]
-\caption{Depth First Search}
-\begin{algorithmic}[1]
-\Procedure{PathSum}{$T, S$}
-\State $\texttt{ans}:=\emptyset$ \Comment The path collections
-\State $P:=\emptyset$ \Comment The path array
-\State $\texttt{DFS}(T, S, P, \texttt{ans})$
-\State \Return \texttt{ans}
-\EndProcedure
-\end{algorithmic}
-\end{algorithm}
-\begin{CJK*}{UTF8}{gbsn}
-\texttt{DFS}从给定的二叉树$T$中找到所有的路径和等于$S$的path。
-\end{CJK*}
-\begin{algorithm}[H]
-\caption{Help Function To Do Depth First Search}
-\begin{algorithmic}[1]
-\Function{DFS}{$T, S, P, A$}
-\If{$T=\texttt{null}$}
-\State \Return
-\EndIf
-\If{$\texttt{Left}(T)=\texttt{null}$ \textbf{and} $\texttt{Right}(T)=\texttt{null}$}
-\If{$S=\texttt{Value}(T)$}
-\State $P\gets P + \texttt{Value}(T)$ \Comment Add to current path
-\State $A\gets A +  P$ \Comment Add this path to the path collection
-\State $P\gets P\setminus P[-1]$ \Comment Remove end element from $P$
-\EndIf
-\State \Return  \Comment Exit current recursion
-\EndIf
-\State $P\gets P + \texttt{Value}(T)$ \Comment Add to current path
-\State $\texttt{DFS}(\texttt{Left}(T), S - \texttt{Value}(T), P, A)$ \Comment Recursive on left subtree
-\State $\texttt{DFS}(\texttt{Right}(T), S - \texttt{Value}(T), P, A)$ \Comment Recursive on right subtree
-\State $P\gets P\setminus P[-1]$ \Comment Remove end element from $P$
-\EndFunction
-\end{algorithmic}
-\end{algorithm}
+
+\setcounter{lstlisting}{0}
+\begin{lstlisting}[style=customc, caption={Backtrace}]
+vector<vector<int>> pathSum( TreeNode* root, int sum )
+{
+    vector<int> path;
+    vector<vector<int>> paths;
+    dfs( root, sum, path, paths );
+    return paths;
+}
+//helper function for recursive processing
+void dfs( TreeNode* node, int sum, vector<int>& path, vector<vector<int>>& paths )
+{
+    if( !node )
+    {
+        return;
+    }
+    if( !node->left && !node->right )
+    {
+        if( node->val == sum )
+        {
+            //this is the path
+            path.push_back( node->val );
+            paths.emplace_back( path.begin(), path.end() );
+            //we have to remove for backtrace
+            path.pop_back();
+        }
+        return;
+    }
+    if( node->left )
+    {
+        path.push_back( node->val );
+        dfs( node->left, sum - node->val, path, paths );
+        path.pop_back();
+    }
+    if( node->right )
+    {
+        path.push_back( node->val );
+        dfs( node->right, sum - node->val, path, paths );
+        path.pop_back();
+    }
+}
+\end{lstlisting}

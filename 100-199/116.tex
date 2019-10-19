@@ -2,32 +2,10 @@
 \definecolor{mygray}{rgb}{0.5,0.5,0.5}
 \definecolor{mymauve}{rgb}{0.58,0,0.82}
 
-\lstset{ 
-  backgroundcolor=\color{gray!20!white},   % choose the background color; you must add \usepackage{color} or \usepackage{xcolor}; should come as last argument
-  basicstyle=\footnotesize,        % the size of the fonts that are used for the code
-  breaklines=true,                 % sets automatic line breaking
-  commentstyle=\color{mygreen},    % comment style
-  deletekeywords={...},            % if you want to delete keywords from the given language
-  escapeinside={\%*}{*)},          % if you want to add LaTeX within your code
-  extendedchars=true,              % lets you use non-ASCII characters; for 8-bits encodings only, does not work with UTF-8
-  keepspaces=true,                 % keeps spaces in text, useful for keeping indentation of code (possibly needs columns=flexible)
-  keywordstyle=\color{blue},       % keyword style
-  language=C++,                 % the language of the code
-  numbers=left,                    % where to put the line-numbers; possible values are (none, left, right)
-  numbersep=5pt,                   % how far the line-numbers are from the code
-  numberstyle=\tiny\color{mygray}, % the style that is used for the line-numbers
-  showspaces=false,                % show spaces everywhere adding particular underscores; it overrides 'showstringspaces'
-  showstringspaces=false,          % underline spaces within strings only
-  showtabs=false,                  % show tabs within strings adding particular underscores
-  stepnumber=2,                    % the step between two line-numbers. If it's 1, each line will be numbered
-  stringstyle=\color{mymauve},     % string literal style
-  tabsize=2,	                   % sets default tabsize to 2 spaces
-  title=\lstname                   % show the filename of files included with \lstinputlisting; also try caption instead of title
-}
-
 \section{116 --- Populating Next Right Pointers in Each Node}
 Given a binary tree $T$
-\begin{lstlisting}
+
+\begin{lstlisting}[style=customc]
 struct TreeLinkNode {
   TreeLinkNode *left;
   TreeLinkNode *right;
@@ -97,29 +75,35 @@ Initially, all next pointers are set to \texttt{null}.
 \end{figure}
 \end{flushleft}
 \subsection{Analysis}
-\begin{CJK*}{UTF8}{gbsn}
 由于要求只能用$O(1)$的存储空间，因此需要有效利用$\texttt{next}$指针来联系左右节点。由于是否存在左右节点只能由父节点来判断，因此需要根据parent node的next来判断是否旁边还有node。由于已经明确了是完全二叉树，因此每个节点除了根节点之外都会有兄弟节点。而循环只需要走到叶子节点上层即可。
-\end{CJK*}
-\setcounter{algorithm}{0}
-\begin{algorithm}[H]
-\caption{Tricky Approach}
-\begin{algorithmic}[1]
-\Procedure{Connect}{$T$}
-\If{$T=\texttt{null}$}
-\State \Return
-\EndIf
-\State $x:=T$
-\While{$\texttt{Left}(x)\neq \texttt{null}$} \Comment If the child is not leaf
-\State $y:=x$ 
-\While{$y\neq \texttt{null}$} \Comment Connect siblings in current level
-\State $\texttt{Next}(\texttt{Left}(y))\gets \texttt{Right}(y)$
-\If{$\texttt{Next}(y)\neq \texttt{null}$}
-\State $\texttt{Next}(\texttt{Right}(y))\gets\texttt{Left}(\texttt{Next}(y))$ \Comment Connect right to right sibling's left
-\EndIf
-\State $y\gets \texttt{Next}(y)$ \Comment Move to right sibling
-\EndWhile
-\State $x\gets \texttt{Left}(x)$ \Comment Move to the leftmost child node 
-\EndWhile
-\EndProcedure
-\end{algorithmic}
-\end{algorithm}
+
+\setcounter{lstlisting}{0}
+\begin{lstlisting}[style=customc, caption={Iterative}]
+Node* connect( Node* root )
+{
+    if( !root )
+    {
+        return root;
+    }
+    auto node = root;
+    while( node->left )
+    {
+        auto t = node;
+        while( t )
+        {
+            //connect left and right
+            t->left->next = t->right;
+            if( t->next )
+            {
+                //connect right to right sibling's left
+                t->right->next = t->next->left;
+            }
+            //move to its sibling
+            t = t->next;
+        }
+        //move to its child node
+        node = node->left;
+    }
+    return root;
+}
+\end{lstlisting}

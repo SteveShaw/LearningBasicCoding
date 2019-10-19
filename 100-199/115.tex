@@ -35,29 +35,71 @@ As shown below, there are 5 ways you can generate \texttt{bag} from $S$.
     \end{itemize}
 \end{flushleft}
 \subsection{Dynamic Programming}
-\begin{CJK*}{UTF8}{gbsn}
 这种问题一般依靠Dynamic Programming来解决，假设$F[i][j]$表示$S[0,i-1]$中能够表示$T[0,j-1]$的subsequence的个数，$i=0$或者$j=0$则表示$S[0,-1]$或者$T[0,-1]$是空字符串。很显然$F[i][0]=1$因为对于$T$为空字符串，$S$中只有一个subsequence也就是空字符串能表示空字符串。对于$i>0$ and $j>0$，首先$F[i][j] = 0 + F[i-1][j]$即首先要加上$S[0,i-2]$中能够表示$T[0,j-1]$的subsequence的个数，接着看$S[i-1]$是否和$T[j-1]$相等，如果相等，$F[i][j]$还要加上$F[i-1][j-1]$，即$S[0,i-2]$中能够表示$T[0,j-2]$的subsequence的个数。不相等就不用加了。
-\end{CJK*}
-\setcounter{algorithm}{0}
-\begin{algorithm}[H]
-\caption{Dynamic Programming}
-\begin{algorithmic}[1]
-\Procedure{NumDistinct}{$S,\;L_S,\;T,\;L_T$}
-\State Initialize DP array $F[i][j]$
-\State $F[0][0]=\ldots=F[L_S+1][L_T+1]:=0$
-\For{$x:=0 \to L_S$}
-\State $F[x][0]\gets 1$ \Comment Empty string only has one way to represent
-\EndFor
-\For{$x:=1 \to L_S$}
-\For{$y:=1 \to L_T$}
-\State $F[x][y]\gets F[x-1][y]$ 
-\If{$S[x-1]=T[y-1]$}
-\State $F[x][y]\gets F[x][y] + F[x-1][y-1]$
-\EndIf
-\EndFor
-\EndFor
-\State \Return $F[L_S][L_T]$
-\EndProcedure
-\end{algorithmic}
-\end{algorithm}
+
+\setcounter{lstlisting}{0}
+\begin{lstlisting}[style=customc, caption={DP With 2D Array}]
+int numDistinct( string s, string t )
+{
+    using ll_t = long long;
+    vector<vector<ll_t>> F( s.size() + 1, vector<ll_t>( t.size() + 1, 0 ) );
+    //fill the base case
+    //for any substring of s
+    //only one way to represent empty string
+    for( size_t i = 0; i < s.size(); ++i )
+    {
+        F[i][0] = 1;
+    }
+    for( size_t x = 1; x <= s.size(); ++x )
+    {
+        for( size_t y = 1; y <= t.size(); ++y )
+        {
+            //for current letter s[x-1]
+            //we can choose use it or not use it
+            //if we do not use it
+            //we add the way of substring S[0,x-2] to represent t[0,y-1]
+            F[x][y] = F[x - 1][y];
+            if( s[x - 1] == t[y - 1] )
+            {
+                //only when s[x-1]=t[y-1]
+                //we can use s[x-1]
+                //add the way of substring S[0,x-2] to represent t[0, y-2]
+                F[x][y] += F[x - 1][y - 1];
+            }
+        }
+    }
+    return F[s.size()][t.size()];
+}
+\end{lstlisting}
+
+Since $F[x][y]$ only depend on $F[x-1][y-1]$ and $F[x][y-1]$, we can reduce 2D to 1D array.
+
+\begin{lstlisting}[style=customc, caption={DP With 1D Array}]
+
+int numDistinct( string s, string t )
+{
+    //F is updated for each S[0,i]
+    vector<int> F( t.size() + 1, 0 );
+    F[0] = 1;
+    for( size_t x = 1; x <= s.size(); ++x )
+    {
+        //each time we start from empty string of t
+        //so the first element in F is 1
+        size_t last = 1;
+        for( size_t y = 1; y <= t.size(); ++y )
+        {
+            auto temp = F[y];
+            if( s[x - 1] == t[y - 1] )
+            {
+                //we have to add the way
+                //when add s[x-1] to the subsequence
+                F[y] += last;
+            }
+            //update last value
+            last = temp;
+        }
+    }
+    return F.back();
+}
+\end{lstlisting}
 

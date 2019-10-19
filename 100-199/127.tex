@@ -28,9 +28,9 @@ Given two words ($\alpha$ and $\beta$), and a dictionary's word list $A$, find t
 \\
 \textbf{Explanation}: The end word \textit{cog} is not in $A$, therefore no possible transformation.
 \end{flushleft}
-\begin{CJK*}{UTF8}{gbsn}
+
 这道题和上一题类似，但是相对简单，因为只需要求出最短路径的长度。同样是用一个hash set代表当前层的所有string，然后根据给定的规则进行变换，得到下一层的hash set，然后交换这两个hash set，使得算法能够前进到下一层，如果在变换中找到目标string即$\beta$，则返回找到的层数，也就是最短路径的长度。
-\end{CJK*}
+
 \setcounter{algorithm}{0}
 \begin{algorithm}[H]
 \caption{BFS}

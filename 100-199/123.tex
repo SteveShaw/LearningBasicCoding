@@ -29,60 +29,68 @@ Note: You may not engage in multiple transactions at the same time (i.e., you mu
 \textbf{Explanation}: In this case, no transaction is done, i.e. max profit $= 0$.
 \end{flushleft}
 \subsection{General Approach}
-\begin{CJK*}{UTF8}{gbsn}
 解决类似的问题有一个一般性的方法可以处理。基本思想是创建两个table $H$ and $U$。其中
 \begin{itemize}
 \item $H[i][j]$表示当持有股票时，从0到$i$th天最多发生$j$次transaction所能获得的最大profit。而
 \item $U[i][j]$表示当不持有股票时，从0到$i$th天最多发生$j$次transaction所能获得的最大profit。
 \end{itemize}
 对应的递推公式为
-\end{CJK*}
 \begin{align*}
 H[i][j] &= \max(U[i-1][j]-P[i], H[i-1][j]) \\
 U[i][j] &= \max(H[i-1][j-1] + P[i], U[i-1][j])
 \end{align*}
-\begin{CJK*}{UTF8}{gbsn}
 公式1的意义表示，如果在第$i$天手头持有股票，那么要么是第$i$天买入股票或者在第$i$天前已经买入了股票，
 \begin{enumerate}
 \item 如果在第$i$天买入股票，由于只是买入，并没有卖出，因此不算一个transaction，而这时候购买股票需要花费$P[i]$，而第$i-1$天手头没有股票，因此相应的利润就是$U[i-1][j] - P[i]$。
 \item 如果第$i$天没有买入股票，这时候第$i-1$天肯定持有股票了，因此这时候的利润就和第$i-1$天持有股票的利润相等，即$H[i-1][j]$
 \end{enumerate}
 公式2也是基于类似的理由，唯一不同的是，如果在$i$天卖出股票，由于手头持有股票才能卖，所以这算一个transaction，因此在$i-1$天的利润就是$H[i-1][j-1]$。
-\end{CJK*}
-\par
-\begin{CJK*}{UTF8}{gbsn}
+
 最后就是初始化时，
 \begin{itemize}
 \item $U[0][i]=U[i][0]:=0$，$U[0][i]$即在第0天手头没有股票的利润很显然是0，$U[i][0]$即没有发生transaction时手头没有股票的利润，很显然也是0。
 \item 对于$H[0][0]$，即在第0天买入股票并持有，其利润即为$-P[0]$，对于$i>0$，$H[0][i]$即在第0天买入股票并持有并发生$i>1$次transaction，因为只有一天而且是持有股票，这个利润必须就是$-P[0]$。而$H[i][0]$即状态变成手头持有股票从第0天到第$i$天发生0次transaction所能产生的最大利润，由于是第$i$天状态仍然是持有股票，并且是0交易，所以要么在$i-1$天前已经是持有股票的状态，要么只是在$i$天才持有股票，因此$H[i][0]=\max(H[i-1][0], -P[i])$。
 \end{itemize}
-\end{CJK*}
-\setcounter{algorithm}{0}
-\begin{algorithm}[H]
-\caption{Dynamic Programming}
-\begin{algorithmic}[1]
-\Procedure{MaxProfit}{$P,\;L_P$}
-\State $H_{L_P\times 3}$ as $H[0][0]:=-P[0]$  \Comment Hold status
-\State $U_{L_P\times 3}$ as $U[0][0]=\ldots=U[L_P-1][2]:=0$ \Comment Hold none status
-\For{$i:=1\to L_P-1$}
-\State $H[i][0]\gets\max(H[i-1][0], -P[i])$
-\EndFor 
-\For{$k:=1\to 2$}
-\State $H[0][k]\gets -P[0]$
-\EndFor
-\algstore{123algo}
-\end{algorithmic}
-\end{algorithm}
-\begin{algorithm}[H]
-\begin{algorithmic}[1]
-\algrestore{123algo}
-\For{$i:=1\to L_P-1$}
-\For{$k:=1\to 2$}
-\State $H[i][k]\gets \max(U[i-1][k]-P[i], H[i-1][k])$ \Comment Update hold status
-\State $U[i][k]\gets \max(H[i-1][k-1] + P[i], U[i-1][k])$ \Comment Update hold none status
-\EndFor
-\EndFor
-\State \Return $\max(H[L_P-1][2], U[L_P-1][2])$ \Comment The maximum of hold and none-hold status
-\EndProcedure
-\end{algorithmic}
-\end{algorithm}
+
+\setcounter{lstlisting}{0}
+\begin{lstlisting}[style=customc, caption={DP}]
+int maxProfit( vector<int>& prices )
+{
+    if( prices.empty() )
+    {
+        return 0;
+    }
+    //the maximum profit when hold a stock at day i with transaction j
+    vector<array<int, 3>> stock( prices.size(), {0, 0, 0} );
+    //the maximum profit when not holding a stock at day i with transaction j
+    vector<array<int, 3>> cash( prices.size(), {0, 0, 0} );
+    stock[0][0] = -prices[0];
+    for( size_t i = 1; i < prices.size(); ++i )
+    {
+        //at day i without any transaction
+        //we either hold stock at day (i - 1)
+        //or we bought a stock at day (i)
+        //only buy without sell is not one transaction
+        stock[i][0] = ( max )( stock[i - 1][0], -prices[i] );
+    }
+    stock[0][1] = -prices[0];
+    stock[0][2] = -prices[0];
+    for( size_t i = 1; i < prices.size(); ++i )
+    {
+        //stock[i][k]: either we have stock at day (i-1) with k transaction
+        //or we bought a stock at day (i-1) with k transaction
+        //notice: only buy without sell is not one transaction
+        stock[i][1] = ( max )( cash[i - 1][1] - prices[i], stock[i - 1][1] );
+        stock[i][2] = ( max )( cash[i - 1][2] - prices[i], stock[i - 1][2] );
+        //cash[i][k]: either we have stock at day (i-1) with (k-1) transactions
+        //and sell it on day i
+        //or we doesn't have stock at day (i-1) with (k) transactions
+        cash[i][1] = ( max )( stock[i - 1][0] + prices[i], cash[i - 1][1] );
+        cash[i][2] = ( max )( stock[i - 1][1] + prices[i], cash[i - 1][2] );
+    }
+    //we can do maximum 2 transactions
+    return ( max )( stock.back()[2], cash.back()[2] );
+}
+\end{lstlisting}
+
+

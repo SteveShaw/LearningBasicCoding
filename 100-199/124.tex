@@ -54,46 +54,77 @@ For this problem, a path is defined as any sequence of nodes from some starting 
 \draw[>=stealth,->] (2) -- (5);
 \end{tikzpicture}
 \end{figure}
-\begin{CJK*}{UTF8}{gbsn}
+
+%\setcounter{algorithm}{0}
+%\begin{algorithm}[H]
+%\caption{DFS}
+%\begin{algorithmic}[1]
+%\Procedure{MaxPathSum}{$T$}
+%\State $\texttt{ans}:=-\infty$
+%\State $\texttt{DFS}(T,\;\texttt{ans})$ \Comment Call helper function \texttt{DFS}
+%\State \Return \texttt{ans}
+%\EndProcedure
+%\end{algorithmic}
+%\end{algorithm}
+%Function \texttt{DFS}递归遍历二叉树$T$，并更新最大的path sum $S$。
+%\begin{algorithm}[H]
+%\caption{Helper Function}
+%\begin{algorithmic}[1]
+%\Function{DFS}{$T,\;S$}
+%\If{$T=\texttt{null}$}
+%\State \Return 0
+%\EndIf
+%\State $x:=\texttt{DFS}(\texttt{Left}(T),\;S)$ \Comment Recursive on left subtree
+%\State $y:=\texttt{DFS}(\texttt{Right}(T),\;S)$ \Comment Recursive on right subtree
+%\State $x\gets \max(0, x)$ \Comment Negative value is neglected
+%\State $y\gets \max(0, y)$ \Comment Negative value is neglected
+%\State $S\gets \max(S, x+y+\texttt{Value}(T))$ \Comment Update max path sum so far
+%\State \Return $\max(x,y) + \texttt{Value}(T)$ \Comment Returns the max path sum starting with $T$
+%\algstore{124algo}
+%\end{algorithmic}
+%\end{algorithm}
+%\begin{algorithm}[H]
+%\begin{algorithmic}[1]
+%\algrestore{124algo}
+%\EndFunction
+%\end{algorithmic}
+%\end{algorithm}
+
+\subsection{Recursion}
+To simplify the problem, we first try to find a way to compute a maximum sum path that goes though one node and/or one of its subtrees. Since this path may not go through root node, we have to check at each step what is better: to continue the current path or to start a new path with the current node as a highest node in this new path
+
 以图中所示的树为例子，很容易就能找到最长路径为$7\to11\to4\to13$，由于树的递归解法一般都是递归到叶节点，然后开始处理并回溯到根节点。假设此时已经递归到结点7了，那么其没有左右子节点，所以以结点7为根结点的子树最大路径和就是7。然后回溯到结点11。而以结点11为根结点的子树的最大路径和为$7+11+2=20$。但是当回溯到结点4的时候，对于结点11来说，就不能同时取两条路径了，只能取左路径，或者是右路径，所以当根结点是4的时候，那么结点11只能取其左子结点7，因为7大于2。所以，对于每个结点来说，需要比较经过其left child的path sum以及经过right child的path sum，看这两个值哪个大。因此递归函数返回值就可以定义为以当前结点为根结点，到叶子节点的最大路径之和，然后全局路径最大值放在函数的输入参数中。
-\end{CJK*}
-\par
-\begin{CJK*}{UTF8}{gbsn}
+
 在递归函数中，如果当前结点不存在，那么直接返回0。否则就分别对其左右子节点调用递归函数，由于path sum有可能为负数，加上负数只会让结果更小，因此需要和零比较，取较大的那个。然后更新全局最大值，而这个值就是以left child为起点的最大path sum加上以right child为起点的最大path sum，再加上当前结点值，这样就组成了一条完整的路径。而返回值是取左右两个path sum中的较大值加上当前结点值，因为返回值的定义是以当前结点为起点的path sum，所以只能取左右两个path sum中的一个。
-\end{CJK*}
-\setcounter{algorithm}{0}
-\begin{algorithm}[H]
-\caption{DFS}
-\begin{algorithmic}[1]
-\Procedure{MaxPathSum}{$T$}
-\State $\texttt{ans}:=-\infty$
-\State $\texttt{DFS}(T,\;\texttt{ans})$ \Comment Call helper function \texttt{DFS}
-\State \Return \texttt{ans}
-\EndProcedure
-\end{algorithmic}
-\end{algorithm}
-\begin{CJK*}{UTF8}{gbsn}
-Function \texttt{DFS}递归遍历二叉树$T$，并更新最大的path sum $S$。
-\end{CJK*}
-\begin{algorithm}[H]
-\caption{Helper Function}
-\begin{algorithmic}[1]
-\Function{DFS}{$T,\;S$}
-\If{$T=\texttt{null}$}
-\State \Return 0
-\EndIf
-\State $x:=\texttt{DFS}(\texttt{Left}(T),\;S)$ \Comment Recursive on left subtree
-\State $y:=\texttt{DFS}(\texttt{Right}(T),\;S)$ \Comment Recursive on right subtree
-\State $x\gets \max(0, x)$ \Comment Negative value is neglected
-\State $y\gets \max(0, y)$ \Comment Negative value is neglected
-\State $S\gets \max(S, x+y+\texttt{Value}(T))$ \Comment Update max path sum so far
-\State \Return $\max(x,y) + \texttt{Value}(T)$ \Comment Returns the max path sum starting with $T$
-\algstore{124algo}
-\end{algorithmic}
-\end{algorithm}
-\begin{algorithm}[H]
-\begin{algorithmic}[1]
-\algrestore{124algo}
-\EndFunction
-\end{algorithmic}
-\end{algorithm}
+
+\setcounter{lstlisting}{0}
+\begin{lstlisting}[style=customc, caption={Recursion}]
+int maxPathSum( TreeNode* root )
+{
+    int best = INT_MIN;
+    dfs( root, best );
+    return best;
+}
+int dfs( TreeNode* node, int& best )
+{
+    if( !node )
+    {
+        return 0;
+    }
+    //maximum sum on the left child
+    int left_sum = ( max )( dfs( node->left, best ), 0 );
+    //maximum sum on the right child
+    int right_sum = ( max )( dfs( node->right, best ), 0 );
+    //the sum we can obtain by starting a new path
+    //where node is the highest one
+    int newpath_sum = node->val + left_sum + right_sum;
+    //update global maximum sum
+    //if new path can bring a greater one
+    best = ( max )( best, newpath_sum );
+    //for recursion:
+    //we have to return the maximum sum
+    //if we continue the path from other node
+    //which go through current one
+    return node->val + ( max )( left_sum, right_sum );
+}
+\end{lstlisting}
