@@ -22,5 +22,78 @@ Given a binary tree $R$, return the \textit{postorder} traversal of its nodes' v
 \end{itemize}
 \subsection{Stack}
 和preorder一样，也有两种iterative的方法: stack和morris traversal。stack 的 output 过程和 preorder 类似，唯一不同的是需要先把left child放入stack中，另外最后要把得到的数组进行reverse。因为插入的过程中，当前节点的值都放在最前面了。
-\subsection{Morris Traversal}
-和Preorder方法类似，但是需要做改动，即，这时候需要看其right child是否存在，如果存在，则一直向左，然后建立link。如果不存在，则进入left child，并输出当前节点。
+
+\setcounter{lstlisting}{0}
+\begin{lstlisting}[style=customc, caption={Iteraive Apporach 1}]
+vector<int> postorderTraversal( TreeNode* root )
+{
+    if( !root )
+    {
+        return {};
+    }
+    stack<TreeNode*> stk;
+    stk.push( root );
+    vector<int> ans;
+    while( !stk.empty() )
+    {
+        auto t = stk.top();
+        stk.pop();
+        //we push left child first
+        if( t->left )
+        {
+            stk.push( t->left );
+        }
+        //push right child second
+        if( t->right )
+        {
+            stk.push( t->right );
+        }
+        //add current node's value
+        ans.push_back( t->val );
+    }
+    //the sequence in the adding is root, right, left
+    //thus after reverse, the sequence is left, right, root
+    reverse( begin( ans ), end( ans ) );
+    return ans;
+}
+\end{lstlisting}
+
+The second approach using stack is with an auxiliary node $p$.
+
+\begin{lstlisting}[style=customc, caption={Stack With Auxiliary Node}]
+vector<int> postorderTraversal( TreeNode* root )
+{
+    if( !root )
+    {
+        return {};
+    }
+    stack<TreeNode*> stk;
+    auto p = root;
+    vector<int> ans;
+    while( !stk.empty() || p )
+    {
+        if( p )
+        {
+            stk.push( p );
+            //add current node's value to the output
+            ans.push_back( p->val );
+            //we visit right child tree first
+            p = p->right;
+        }
+        else
+        {
+            auto t = stk.top();
+            stk.pop();
+            //visit left child tree
+            p = t->left;
+        }
+    }
+    //we need to reverse the output
+    //since the sequence is root,right,left
+    reverse( begin( ans ), end( ans ) );
+    return ans;
+}
+\end{lstlisting} 
+
+%\subsection{Morris Traversal}
+%和Preorder方法类似，但是需要做改动，即，这时候需要看其right child是否存在，如果存在，则一直向左，然后建立link。如果不存在，则进入left child，并输出当前节点。

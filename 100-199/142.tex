@@ -62,35 +62,39 @@ To represent a cycle in the given linked list, we use an integer $P$ which repre
 \end{itemize}
 \subsection{Two Pointers}
 首先还是用快慢指针确定是否是存在circle的linked list。如果是，则在两个指针相遇处，将另外一个指针重新指向list的header，然后两个指针每次都只前进一步，直至相遇，这时候的相遇处就是cycle begin的位置。
-\setcounter{algorithm}{0}
-\begin{algorithm}[H]
-\caption{Two Pointers}
-\begin{algorithmic}[1]
-\Procedure{DetectCycle}{$H$}
-\If{$H=\texttt{null}$}
-\State \Return \texttt{false} \Comment Empty list
-\EndIf
-\State $F:=H$ \Comment The fast pointer
-\State $S:=H$ \Comment The slow pointer
-\State $b:=\texttt{false}$ \Comment The boolean variable indicate if there is a cycle
-\While{$F\neq \texttt{null}$ \textbf{and} $F.\texttt{next}\neq \texttt{null}$} \label{142while}
-\State $F\gets F.\texttt{next}$
-\State $F\gets F.\texttt{next}$ \Comment $F$ move forward two steps
-\State $S\gets S.\texttt{next}$ \Comment $S$ move forward one step
-\If{$F=S$}
-\State $b\gets \texttt{true}$
-\State \texttt{break} \Comment End[\ref{142while}]
-\EndIf
-\EndWhile
-\If{$b=\texttt{false}$}
-\State \Return \texttt{null} \Comment No cicle in the list
-\EndIf
-\State $F\gets H$ \Comment Reset $F$ to header node
-\While{$F\neq S$}
-\State $F\gets F.\texttt{next}$ \Comment $F$ move forward one step
-\State $S\gets S.\texttt{next}$ \Comment $S$ move forward one step
-\EndWhile
-\State \Return $S$ or $F$ \Comment $S$ and $F$ are met at the start of circle
-\EndProcedure
-\end{algorithmic}
-\end{algorithm}
+
+因为快指针每次走2，慢指针每次走1，快指针走的距离是慢指针的两倍。而快指针又比慢指针多走了一圈。所以 \fcj{head} 到loop的起点以及loop的起点到他们相遇的点的距离 与loop的长度相等。
+
+当重新开始时，head移动到loop起点与相遇点到loop起点的距离也是相等的，相当于他们同时减掉了loop的起点到他们相遇的点的距离
+
+\setcounter{lstlisting}{0}
+\begin{lstlisting}[style=customc, caption={Two Pointers}]
+ListNode *detectCycle( ListNode *head )
+{
+    //detect cycle
+    auto slow = head;
+    auto fast = head;
+    while( fast && fast->next )
+    {
+        slow = slow->next;
+        fast = fast->next->next;
+        if( slow == fast )
+        {
+            break;
+        }
+    }
+    //no cycle
+    if( !fast || !fast->next )
+    {
+        return nullptr;
+    }
+    //find the meeting point
+    slow = head;
+    while( slow != fast )
+    {
+        slow = slow->next;
+        fast = fast->next;
+    }
+    return fast;
+}
+\end{lstlisting}

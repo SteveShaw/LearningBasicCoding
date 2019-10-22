@@ -66,25 +66,22 @@ If there is no cycle in the list, the fast pointer will eventually reach the end
 Now consider a cyclic list and imagine the slow and fast pointers are two runners racing around a circle track. The fast runner will eventually meet the slow runner. Why? Consider this case --- The fast runner is just one step behind the slow runner. In the next iteration, they both increment one and two steps respectively and meet each other.
 \par
 How about other cases? For example, we have not considered cases where the fast runner is two or three steps behind the slow runner yet. This is simple, because in the next or next's next iteration, this case will be reduced to case mentioned above.
-\setcounter{algorithm}{0}
-\begin{algorithm}[H]
-\caption{Two Pointers}
-\begin{algorithmic}[1]
-\Procedure{HasCycle}{$H$}
-\If{$H=\texttt{null}$}
-\State \Return \texttt{false} \Comment Empty list
-\EndIf
-\State $F:=H$ \Comment The fast pointer
-\State $S:=H$ \Comment The slow pointer
-\While{$F\neq \texttt{null}$ \textbf{and} $F.\texttt{next}\neq \texttt{null}$}
-\State $F\gets F.\texttt{next}$
-\State $F\gets F.\texttt{next}$ \Comment $F$ move forward two steps
-\State $S\gets S.\texttt{next}$ \Comment $S$ move forward one step
-\If{$F=S$}
-\State \Return \texttt{true}
-\EndIf
-\EndWhile
-\State \Return \texttt{false}
-\EndProcedure
-\end{algorithmic}
-\end{algorithm}
+
+\setcounter{lstlisting}{0}
+\begin{lstlisting}[style=customc, caption={Two Pointers}]
+bool hasCycle( ListNode *head )
+{
+	auto slow = head;
+	auto fast = head;
+    while( fast && fast->next )
+    {
+        slow = slow->next;
+        fast = fast->next->next;
+        if( slow == fast ) 
+		{
+			return true;
+		}
+    }
+    return false;
+}
+\end{lstlisting}
