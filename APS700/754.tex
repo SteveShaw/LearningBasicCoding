@@ -1,0 +1,102 @@
+\section{754 --- Reach a Number}
+You are standing at position 0 on an infinite number line. There is a goal at position \fcj{target}.
+
+On each move, you can either go left or right. During the $n$--th move (starting from 1), you take $n$ steps.
+
+Return the minimum number of steps required to reach the destination.
+
+Example 1:
+
+\begin{flushleft}
+\textbf{Input}: \fcj{target = 3}
+
+\textbf{Output}: 2
+
+\textbf{Explanation}:
+
+On the first move we step from 0 to 1.
+
+On the second step we step from 1 to 3.
+\end{flushleft}
+
+\paragraph{Example 2:}
+
+\begin{flushleft}
+\textbf{Input}: \fcj{target = 2}
+
+\textbf{Output}: 3
+
+\textbf{Explanation}:
+
+On the first move we step from 0 to 1.
+
+On the second move we step  from 1 to $-1$.
+
+On the third move we step from $-1$ to 2.
+\end{flushleft}
+
+\paragraph{Note:}
+
+\begin{itemize}
+\item \fcj{target} will be a non-zero integer in the range $[-10^9, 10^9]$.
+\end{itemize}
+
+\subsection{Mathematical}
+The problem is equivalent to put \fcj{+} and \fcj{-} signs on the numbers 1, 2, 3, $\ldots$, $k$ so that the sum is \fcj{target}.
+
+When \fcj{target < 0}, we can switch the signs of all the numbers to make sure the sum is \fcj{-target}. Thus, the answer for \fcj{target} is the same as \fcj{-target}, and so without loss of generality, we can consider only \fcj{target > 0}.
+
+Suppose $k$ is the smallest number with \fcj{S = 1 + 2 + ... + k >= target}. If \fcj{S == target}, the answer is clearly $k$.
+
+If \fcj{S > target}, we need to change some number signs. If \fcj{delta = S - target} is even, we can always find a subset of \fcj{[1, 2, ..., k]} equal to \fcj{delta / 2} and switch the signs. Thus $S$ will change to \fcj{S - delta/2 - delta/2}, i.e. \fcj{S - delta = target}. so the answer is $k$. (This depends on \fcj{q = delta / 2} being at most $S$.) 
+
+The proof is simple: either $q \leq k$ and we choose it, or we choose $k$ in our subset and try to solve the same instance of the problem for $q = q - k$ and the set \fcj{[1, 2, ..., k-1]}
+
+Otherwise, if \fcj{delta} is \textbf{odd}, we can't do it, as every sign change from positive to negative changes the sum by an \textit{even} number. So let's consider a candidate answer of $k+1$, which change \fcj{delta} to \fcj{delta + k + 1}. If $k$ is odd, then \fcj{delta} is still be odd and we can have an answer of $k+2$. Otherwise, \fcj{delta} will be \textbf{even}, and we will have an answer of $k+1$.
+
+Thus, we subtract \fcj{++k} from \fcj{target} until it goes non-positive. Then $k$ will be as described, and \fcj{target} will be \fcj{delta} as described. We can output the four cases above: 
+
+\begin{enumerate}
+\item if \fcj{delta} is \textit{even} then the answer is $k$, 
+
+\item if \fcj{delta} is \textit{odd} then the answer is $k+1$ or $k+2$ depending on $k$ is \textit{even} or \textit{odd}.
+\end{enumerate}
+
+\setcounter{lstlisting}{0}
+\begin{lstlisting}[style=customc, caption={Mathematical}]
+int reachNumber( int target )
+{
+    int k = 0;
+    int S = 0;
+    //change target to positive number
+    if( target < 0 )
+    {
+        target = - target;
+    }
+    //find smallest k such that
+    //S=1+2+...+k >= target
+    while( S < target )
+    {
+        ++k;
+        S += k;
+    }
+    int delta = S - target;
+    if( delta & 1 )
+    {
+        //odd
+        if( k & 1 )
+        {
+            //delta+k+2 is even
+            return k + 2;
+        }
+        //delta+k+1 is even
+        return k + 1;
+    }
+    //we can find subset in [1,2,..,k]
+    //whose sum is delta/2
+    //and change their sign so that the sum
+    //is -delta/2. so S is changed to S-delta/2-delta/2
+    //=S-delta=target
+    return k;
+}
+\end{lstlisting}
