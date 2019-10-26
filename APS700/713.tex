@@ -1,0 +1,125 @@
+\section{713 --- Subarray Product Less Than K}
+Your are given an array of positive integers $A$.
+
+Count and print the number of (contiguous) subarrays where the product of all the elements in the subarray is less than $k$.
+
+\paragraph{Example 1:}
+
+\begin{flushleft}
+\textbf{Input}: $A$: \fcj{[10, 5, 2, 6]}, $k = 100$
+
+\textbf{Output}: 8
+
+\textbf{Explanation}: The 8 subarrays that have product less than 100 are: \fcj{[10], [5], [2], [6], [10, 5], [5, 2], [2, 6], [5, 2, 6]}.
+
+Note that \fcj{[10, 5, 2]} is not included as the product of 100 is not strictly less than k.
+\end{flushleft}
+
+\paragraph{Note:}
+
+\begin{itemize}
+\item $0 < \lvert A\rvert \leq 50000$.
+\item $0 < A[i] < 1000$.
+\item $0 \leq k < 10^6$.
+\end{itemize}
+
+\subsection{Sliding Window}
+For each index $i$, suppose $f(i)$ is the smallest left, say $l$ such that the product of the sub-array $A[l] \times A[l + 1] \times \ldots \times A[i] < k$. Apparently, $f$ is a monotone increasing function, so we can use a sliding window.
+
+For every index $i$, we find $l$ and the product $p=A[l] \times A[l + 1] \times \ldots \times A[i] < k$.
+
+Then, the number of intervals with $p$ less than $k$ and with right-most index $i$, is $i - l + 1$. We will count all of these for each value of index.
+
+
+\setcounter{lstlisting}{0}
+\begin{lstlisting}[style=customc, caption={Sliding Window}]
+int numSubarrayProductLessThanK( vector<int>& nums, int k )
+{
+    //edge case:
+    if( k <= 1 )
+    {
+        return 0;
+    }
+
+    int x_l = static_cast<int>( nums.size() );
+    //the product of sliding window
+    int p = 1;
+
+    int ans = 0;
+
+    //the left index of the sliding window
+    int left = 0;
+    for( int right = 0; right < x_l; ++right )
+    {
+        //multiple the product by current element
+        p *= nums[right];
+
+        while( p >= k )
+        {
+            //move left index of the sliding window
+            p /= nums[left];
+            ++left;
+        }
+        //add up the number elements inside sliding window
+        ans += ( right - left + 1 );
+    }
+    return ans;
+}
+\end{lstlisting}
+
+\subsection{Prefix Sum}
+\subsection{Binary Search With Prefix Sum}
+Because $\log\left(\prod\limits_i X_i\right)$ = $\sum\limits_i \log\left(X_i\right)$, we can reduce the problem to subarray sums instead of subarray products. The motivation for this is that the product of some arbitrary subarray may be way too large, and also dealing with sums gives us some more familiarity as it becomes similar to other problems we may have solved before.
+
+After this transformation where every value $x$ becomes $\log(x)$, When we take prefix sum $S[i+1] = A[0]+\ldots+A[i]$, we will search the smallest $S[j]$ such that $S[i] - S[j] < \log(k)$. This leads to a rightmost binary search.
+
+Since logarithm is real number, when comparing $S[j]$ to $S[i] - log(k)$, we will tolerate some error. Thus either $S[j] - (S[i]-log(k)) < 0$ or  $S[j] - (S[i]-log(k)) < 10^{-7}$.
+
+\begin{lstlisting}[style=customc, caption={Prefix Sum}]
+int numSubarrayProductLessThanK( vector<int>& nums, int k )
+{
+    if( k <= 1 )
+    {
+        return 0;
+    }
+
+    vector<double> x_sums( nums.size() + 1, 0 );
+
+    int x_l = static_cast< int >( nums.size() );
+
+    int ans = 0;
+
+    for( int i = 0; i < x_l; ++i )
+    {
+        x_sums[i + 1] = x_sums[i] + log( nums[i] );
+
+        //binary search
+        int l = 0;
+        int r = i + 1;
+
+        while( l < r )
+        {
+            int mid = ( l + r ) / 2;
+
+            //find smallest index l which satisfy
+            //x_nums[l] > x_nums[i+1] - log(k)
+            double diff = x_sums[mid] - x_sums[i + 1] + log( k );
+
+            //we will torelate some error
+            //since this is double precision comparison
+            if( ( diff < 0 ) || ( diff < 1e-7 ) )
+            {
+                l = mid + 1;
+            }
+            else
+            {
+                r = mid;
+            }
+        }
+
+        ans += i + 1 - l;
+    }
+
+    return ans;
+}
+\end{lstlisting}

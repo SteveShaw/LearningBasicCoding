@@ -1,0 +1,67 @@
+\section{718 --- Maximum Length of Repeated Subarray}
+Given two integer arrays $A$ and $B$, return the maximum length of an subarray that appears in both arrays.
+
+\paragraph{Example 1:}
+
+\textbf{Input}:
+
+\begin{flushleft}
+$A$: \fcj{[1,2,3,2,1]}
+
+$B$: \fcj{[3,2,1,4,7]}
+
+\textbf{Output}: 3
+
+\textbf{Explanation}: 
+
+The repeated subarray with maximum length is \fcj{[3, 2, 1]}.
+
+\end{flushleft}
+ 
+
+\paragraph{Note:}
+
+\begin{enumerate}
+\item $1 \leq \lvert A\rvert, \lvert B\rvert \leq 1000$
+\item $0 \leq A[i], B[i] < 100$
+\end{enumerate}
+
+\subsection{Dynamic Programming}
+
+Suppose $F(i, j)$ is the length of common subarray ending at $A[i-1]$ and $B[j-1]$. The recursive relationship is simple: Only when $A[i] = B[j]$, $F(i, j) = F(i-1, j-1) +1 $. Otherwise, $F(i, j) = 0$
+
+The reason is: if $A[i] = B[j] $ and $A[i+1]=B[j+1]$, the common length increments. Otherwise, this relationship is broken.
+
+All we need to do, is record the continue increment common subarray length and update the maximum length accordingly.
+
+\setcounter{lstlisting}{0}
+\begin{lstlisting}[style=customc, caption={DP}]
+int findLength( vector<int>& A, vector<int>& B )
+{
+    //note F[0][0]=0 because empty array length is zero
+    vector<vector<int>> F( A.size() + 1, vector<int>( B.size() + 1, 0 ) );
+
+    int ans = 0;
+
+    for( size_t i = 1; i <= A.size(); ++i )
+    {
+        for( size_t j = 1; j <= B.size(); ++j )
+        {
+            if( A[i - 1] == B[j - 1] )
+            {
+                //increment the common length
+                //ending at A[i-1] and B[j-1]
+                F[i][j] = 1 + F[i - 1][j - 1];
+                ans = ( max )( ans, F[i][j] );
+            }
+            else
+            {
+                //no common subarray
+                //ending at A[i-1] and B[j-1]
+                F[i][j] = 0;
+            }
+        }
+    }
+    return ans;
+}
+\end{lstlisting}

@@ -1,0 +1,119 @@
+\section{753 --- Cracking the Safe}
+There is a box protected by a password. The password is a sequence of $n$ digits where each digit can be one of the first $k$ digits 0, 1, $\ldots$, $k-1$.
+
+While entering a password, the last $n$ digits entered will automatically be matched against the correct password.
+
+For example, assuming the correct password is \fcj{"345"}, if you type \fcj{"012345"}, the box will open because the correct password matches the suffix of the entered password.
+
+Return any password of minimum length that is guaranteed to open the box at some point of entering it.
+ 
+
+\paragraph{Example 1:}
+
+\begin{flushleft}
+\textbf{Input}: 
+
+$n = 1$, $k = 2$
+
+\textbf{Output}: 
+
+\fcj{"01"}
+
+\textbf{Note}: 
+
+\fcj{"10"} will be accepted too.
+\end{flushleft}
+
+\paragraph{Example 2:}
+
+\begin{flushleft}
+\textbf{Input}: $n = 2$, $k = 2$
+
+\textbf{Output}: \fcj{"00110"}
+
+\textbf{Note}: \fcj{"01100"}, \fcj{"10011"}, \fcj{"11001"} will be accepted too.
+
+\end{flushleft}
+ 
+
+\paragraph{Note:}
+
+\begin{itemize}
+\item $n$ will be in the range \fcj{[1, 4]}.
+\item $k$ will be in the range \fcj{[1, 10]}.
+\item $k^n$ will be at most 4096.
+\end{itemize}
+
+\subsection{Hierholzer's Algorithm}
+
+In order to guarantee to open the box at last, the input password must contain all $n$--length combinations on digits $[0\ldots k-1]$ --- there should be $k^n$ combinations in total.
+
+To make the input password as short as possible, we'd better make each possible $n$--length combination on digits $[0\ldots k-1]$ occurs exactly once as a substring of the password. The existence of such a password is proved by \textit{De Bruijn sequence}:
+
+In combinatorial mathematics, a \textit{de Bruijn sequence} of order $n$ on a size-$k$ alphabet $A$ is a cyclic sequence in which every possible $n$--length string on $A$ occurs exactly once as a substring (i.e., as a contiguous subsequence). 
+
+The \textit{de Bruijn sequences} can be constructed by taking a \textit{Hamiltonian} path of an $n$--dimensional \textit{de Bruijn graph} over $k$ symbols (or equivalently, an \textit{Eulerian cycle} of an $(n − 1)$--dimensional \textit{de Bruijn graph}).
+
+Thus, we can think of this problem as the problem of finding an \textit{Euler} path (a path visiting every edge exactly once) on the following graph: there are $k^{n-1}$ nodes with each node having $k$ edges.
+
+For example, when $k = 4$, $n = 3$, the nodes are \fcj{'00'}, \fcj{'01'}, \fcj{'02'}, $\ldots$, \fcj{'32'}, \fcj{'33'} and each node has 4 edges \fcj{'0'}, \fcj{'1'}, \fcj{'2'}, \fcj{'3'}. A node plus edge represents a complete edge which is a sub-string in our answer.
+
+Any connected directed graph where all nodes have equal in-degree and out-degree has an \textit{Euler circuit} (an \textit{Euler} path ending where it started.) Because our graph is highly connected and symmetric, we should expect intuitively that taking any path greedily in some order will probably result in an Euler path.
+
+This intuition is called \textit{Hierholzer}'s algorithm: whenever there is an \textit{Euler} cycle, we can construct it greedily. The algorithm goes as follows:
+
+\begin{itemize}
+\item Choose any starting vertex $v$, and follow a trail of edges from that vertex until returning to $v$. It is not possible to get stuck at any vertex other than $v$, because in-degree and out-degree of every vertex must be same, when the trail enters another vertex $w$ there must be an unused edge leaving $w$.
+
+\item As long as there exists a vertex $u$ that belongs to the current tour but that has adjacent edges not part of the tour, start another trail from $u$, following unused edges until returning to $u$, and join the tour formed in this way to the previous tour.
+\end{itemize}
+
+Thus the idea is to keep following unused edges and removing them until we get stuck. Once we get stuck, we back-track to the nearest vertex in our current path that has unused edges, and we repeat the process until all the edges have been used.
+
+For the implementation, We will modify the standard \textit{DFS}: instead of keeping track of nodes, we keep track of (complete) edges: \fcj{seen} records if an edge has been visited.
+
+Also, we need to visit in a way kind of \fcj{"post-order"}, recording the answer after visiting the edge. This is to prevent getting stuck. For example, with $k = 2$, $n = 2$, we have the nodes \fcj{'0'}, \fcj{'1'}. If we greedily visit complete edges \fcj{'00'}, \fcj{'01'}, \fcj{'10'}, we will be stuck at the node \fcj{'0'} prematurely. However, if we visit in post-order, we'll end up visiting \fcj{'00'}, \fcj{'01'}, \fcj{'11'}, \fcj{'10'} correctly.
+
+In general, during the \textit{Hierholzer} walk, we will record the results of other sub-cycles first, before recording the \textit{main} cycle we started from. Technically, we are recording backwards, as we exit the nodes.
+
+\setcounter{lstlisting}{0}
+\begin{lstlisting}[style=customc, caption={Hierholzer Algorithm}]
+string crackSafe( int n, int k )
+{
+    //generate start vertex
+    string v( n - 1, '0' );
+    string ans;
+    //this hash set contains all used edges
+    unordered_set<string> edges;
+    dfs( v, k, edges, ans );
+    //add the starting vertex to the path
+    ans.append( v.c_str() );
+    return ans;
+}
+//helper function to recursively build Euler path
+void dfs( string_view v, int k, unordered_set<string>& edges, string& ans )
+{
+    for( int ci = 0; ci < k; ++ci )
+    {
+        //generate one edge from v
+        string edge( v.data(), v.size() );
+        edge.push_back( '0' + ci );
+
+        if( edges.find( edge ) == edges.end() )
+        {
+            //this edge is not used
+            //add to the set
+            edges.emplace( edge );
+            //go to next node, which is current edge
+            //by removing first letter
+            string_view sv_edge( edge );
+            dfs( sv_edge.substr( 1 ), k, edges, ans );
+            //add current node to the path
+            ans.push_back( '0' + ci );
+        }
+    }
+}
+\end{lstlisting}
+
+\subsection{Inverse Burrows—Wheeler Transform}
+An alternative construction involves concatenating together, in lexicographic order, all the \textit{Lyndon} words whose length divides $n$. An \textit{inverse Burrows—Wheeler transform} can be used to generate the required \textit{Lyndon} words in lexicographic order

@@ -1,0 +1,134 @@
+\section{739 --- Daily Temperatures}
+Given a list of daily temperatures $T$, return a list such that, for each day in the input, tells you how many days you would have to wait until a warmer temperature. If there is no future day for which this is possible, put 0 instead.
+
+For example, given the list of temperatures 
+
+\begin{flushleft}
+$T$: \fcj{[73, 74, 75, 71, 69, 72, 76, 73]}, 
+
+your output should be 
+
+\fcj{[1, 1, 4, 2, 1, 1, 0, 0]}.
+\end{flushleft}
+
+\paragraph{Note:} 
+
+\begin{itemize}
+\item The length of temperatures will be in the range \fcj{[1, 30000]}. 
+\item Each temperature will be an integer in the range \fcj{[30, 100]}.
+\end{itemize} 
+
+\subsection{Stack}
+In this approach, we reversely iterate over $T$. We also make use of a stack $S$ to record indexes. 
+
+During the traversing
+\begin{itemize}
+\item As long as current temperature $t$ is no less than the temperature at top index of $S$, we will keep popping index from $S$. For each temperature at popped index, $t$ is the first one on its right side, thus, the distance to the index of $t$ is the number of days to get warmer.
+\item Then, push current index into $S$.
+\end{itemize}
+
+\setcounter{lstlisting}{0}
+\begin{lstlisting}[style=customc, caption={Stack}]
+vector<int> dailyTemperatures( vector<int>& T )
+{
+    //base case: empty array
+    if( T.empty() )
+    {
+        return {};
+    }
+    stack<int> stk;
+    vector<int> ans;
+    ans.reserve( T.size() );
+    int n = static_cast<int>( T.size() );
+    //The last temperature has no any day associated
+    //thus is zero
+    ans.push_back( 0 );
+    //push the last index into the stack
+    stk.push( n - 1 );
+    //reversely traversing T
+    for( int i = n - 2; i >= 0; --i )
+    {
+        while( !stk.empty() && ( T[stk.top()] <= T[i] ) )
+        {
+            //now T[i] is the first temperature
+            //on the right side of T[stk.top()]
+            //which is larger than T[stk.top()]
+            stk.pop();
+        }
+        if( stk.empty() )
+        {
+            //no any temperature is larger than T[i] on
+            //its right side
+            ans.push_back( 0 );
+        }
+        else
+        {
+            //otherwise
+            //the difference of indexes is the
+            //answer: the number of days
+            ans.push_back( stk.top() - i );
+        }
+        //push current index of temperature into the stack
+        stk.push( i );
+    }
+    //reverse the array since it added from end
+    reverse( begin( ans ), end( ans ) );
+    return ans;
+}
+\end{lstlisting}
+
+\subsection{Constant Memory}
+Actually, we can make use of result array to solve this problem. Thus we don't need the auxiliary stack. 
+
+We still reversely traverse $T$. Suppose we are at index $i$ and we have filled the result array, say $R$, from $i+1$ to $n-1$ ($n$ is the length of $T$). 
+
+Now to find the most recent day after $i$ which is warmer than $T[i]$, we start searching from $i+1$. If $T[k] \leq T[i]$ for a $k >i$, we don't just move to $k+1$, we can use the result of $R[k]$ to move $k$. Since $T[k]\leq T[i]$, the most recent day that could be warmer than $T[i]$ will be at index $k+R[k]$. After updating $k$ to $k+R[k]$, we repeat the above process. 
+
+If $R[k]=0$, this means $T[k]$ is the highest temperature from $k$. Since $T[k]\leq T[i]$, it is obvious that $R[i]=0$.
+
+\setcounter{lstlisting}{0}
+\begin{lstlisting}[style=customc, caption={Constant Memory}]
+vector<int> dailyTemperatures( vector<int>& T )
+{
+    vector<int> ans( T.size(), 0 );
+    int n = static_cast<int>( T.size() );
+    for( int i = n - 2; i >= 0; --i )
+    {
+        //search the most recent day after i
+        //which is warmer than i
+        int j = i + 1;
+        while( ( j < n ) && ( T[j] <= T[i] ) )
+        {
+            if( ans[j] > 0 )
+            {
+                //we move to j+ans[j]
+                //since ans[j] is the most recent day
+                //warmer than j
+                j = j + ans[j];
+            }
+            else
+            {
+                //j has the highest temperature
+                //from j
+                //thus we break the loop
+                j = n;
+            }
+        }
+
+        if( j == n )
+        {
+            //since T[j] <=T[i]
+            //thus T[i] is the highest temperature
+            //from i
+            ans[i] = 0;
+        }
+        else
+        {
+            //the days will be j-i
+            ans[i] = j - i;
+        }
+    }
+    return ans;
+}
+\end{lstlisting} 
+

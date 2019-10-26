@@ -1,0 +1,91 @@
+\section{729 --- My Calendar I}
+Implement a \fcj{MyCalendar} class to store your events. A new event can be added if adding the event will not cause a double booking.
+
+Your class will have the method, \fcj{book(int start, int end)}. Formally, this represents a booking on the half open interval \fcj{[start, end)}, the range of real numbers $x$ such that \fcj{start <= x < end}.
+
+A double booking happens when two events have some non-empty intersection (ie., there is some time that is common to both events.)
+
+For each call to the method \fcj{MyCalendar.book}, return \fcj{true} if the event can be added to the calendar successfully without causing a double booking. Otherwise, return \fcj{false} and do not add the event to the calendar.
+
+Your class will be called like this: 
+
+\fcj{MyCalendar cal = new MyCalendar(); MyCalendar.book(start, end)}
+
+\paragraph{Example 1:}
+\begin{flushleft}
+
+
+\fcj{MyCalendar();}
+
+\fcj{MyCalendar.book(10, 20); // returns true}
+
+\fcj{MyCalendar.book(15, 25); // returns false}
+
+\fcj{MyCalendar.book(20, 30); // returns true}
+
+
+\textbf{Explanation}:
+ 
+The first event can be booked.  The second can't because time 15 is already booked by another event.
+
+The third event can be booked, as the first event takes every time less than 20, but not including 20.
+
+\end{flushleft}
+
+\paragraph{Note:}
+
+\begin{itemize}
+\item The number of calls to \fcj{MyCalendar.book} per test case will be at most 1000.
+\item In calls to \fcj{MyCalendar.book(start, end)}, start and end are integers in the range $[0, 10^9]$.
+\end{itemize}
+
+\subsection{Binary Search}
+If we maintained all events in sorted order, we could check whether an event could be booked in $O(\log N)$ time (where $N$ is the number of events already booked) by binary searching for where the event should be placed. We would also have to insert the event in our sorted structure.
+
+\setcounter{lstlisting}{0}
+\begin{lstlisting}[style=customc, caption={Binary Search}]
+class MyCalendar
+{
+public:
+    MyCalendar() {}
+
+    bool book( int start, int end )
+    {
+        if( x_events.empty() )
+        {
+            x_events.emplace( start, end );
+            return true;
+        }
+        //find the first event
+        //lies right of [start,end]
+        auto x_low = x_events.lower_bound( start );
+
+        if( x_low != x_events.end() )
+        {
+            if( x_low->first < end )
+            {
+                //overlap
+                return false;
+            }
+        }
+
+        if( x_low != x_events.begin() )
+        {
+            //check the last event
+            //lies left of [start,end]
+            --x_low;
+
+            if( start < x_low->second )
+            {
+                //overlap
+                return false;
+            }
+        }
+
+        x_events.emplace( start, end );
+        return true;
+    }
+
+    map<int, int> x_events;
+};
+\end{lstlisting}

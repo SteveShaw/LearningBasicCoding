@@ -1,0 +1,34 @@
+\section{737 --- Sentence Similarity II}
+Given two sentences \fcj{words1}, \fcj{words2} (each represented as an array of strings), and a list of similar word pairs \fcj{pairs}, determine if two sentences are similar.
+
+For example, 
+
+\fcj{words1 = ["great", "acting", "skills"]} 
+
+and 
+
+\fcj{words2 = ["fine", "drama", "talent"]} 
+
+are similar, if the similar word pairs are 
+
+\fcj{[["great", "good"], ["fine", "good"], ["acting","drama"], ["skills","talent"]]}.
+
+Note that the similarity relation is transitive. For example, if \fcj{"great"} and \fcj{"good"} are similar, and \fcj{"fine"} and \fcj{"good"} are similar, then \fcj{"great"} and \fcj{"fine"} are similar.
+
+Similarity is also symmetric. For example, \fcj{"great"} and \fcj{"fine"} being similar is the same as \fcj{"fine"} and \fcj{"great"} being similar.
+
+Also, a word is always similar with itself. For example, the sentences 
+
+\fcj{words1 = ["great"]}, \fcj{words2 = ["great"]}, \fcj{pairs = []} are similar, even though there are no specified similar word pairs.
+
+Finally, sentences can only be similar if they have the same number of words. So a sentence like \fcj{words1 = ["great"]} can never be similar to \fcj{words2 = ["doubleplus","good"]}.
+
+\paragraph{Note:}
+
+\begin{itemize}
+\item The length of \fcj{words1} and \fcj{words2} will not exceed 1000.
+\item The length of \fcj{pairs} will not exceed 2000.
+\item The length of each \fcj{pairs[i]} will be 2.
+\item The length of each \fcj{words[i]} and \fcj{pairs[i][j]} will be in the range \fcj{[1, 20]}.
+
+\end{itemize}

@@ -1,0 +1,75 @@
+\section{717 --- 1-bit and 2-bit Characters}
+We have two special characters. The first character can be represented by one bit \fcj{0}. The second character can be represented by two bits (\fcj{10} or \fcj{11}).
+
+Now given a string represented by several bits. Return whether the last character must be a one-bit character or not. The given string will always end with a zero.
+
+\paragraph{Example 1:}
+
+\begin{flushleft}
+\textbf{Input}: \fcj{bits = [1, 0, 0]}
+
+\textbf{Output}: \fcj{True}
+
+\textbf{Explanation}: 
+
+The only way to decode it is two-bit character and one-bit character. So the last character is one-bit character.
+\end{flushleft}
+
+\paragraph{Example 2:}
+\begin{flushleft}
+
+
+\textbf{Input}: \fcj{bits = [1, 1, 1, 0]}
+
+\textbf{Output}: \fcj{False}
+
+\textbf{Explanation}: 
+
+The only way to decode it is two-bit character and two-bit character. So the last character is \textbf{NOT} one-bit character.
+
+\end{flushleft}
+
+
+\paragraph{Note:}
+
+\begin{itemize}
+\item \fcj{1 <= len(bits) <= 1000.}
+\item \fcj{bits[i]} is always 0 or 1.
+\end{itemize}
+
+\subsection{Increment Index}
+When reading from the index $i$, 
+
+\begin{itemize}
+\item if \fcj{bits[i] == 0}, the next character must have 1 bit; 
+\item else \fcj{if bits[i] == 1}, the next character must have 2 bits.
+\end{itemize} 
+
+Thus, We increment read-index $i$ to the start of the next character appropriately. At the end, if $i$ is at \fcj{bits.length - 1}, the last character must have a size of 1 bit.
+
+\setcounter{lstlisting}{0}
+\begin{lstlisting}[style=customc, caption={Increment Index}]
+bool isOneBitCharacter( vector<int>& bits )
+{
+    int n_bits = static_cast<int>( bits.size() );
+
+    int i = 0;
+
+    for( ; i < n_bits - 1; )
+    {
+        if( bits[i] == 0 )
+        {
+            //forward one bit
+            ++i;
+        }
+        else
+        {
+            //forward two bits
+            i += 2;
+        }
+    }
+    //check if we finally at
+    //last bit
+    return i == ( n_bits - 1 );
+}
+\end{lstlisting}

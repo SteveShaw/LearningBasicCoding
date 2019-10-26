@@ -1,0 +1,174 @@
+\section{752 --- Open the Lock}
+You have a lock in front of you with 4 circular wheels. Each wheel has 10 slots: \fcj{'0'}, \fcj{'1'}, \fcj{'2'}, \fcj{'3'}, \fcj{'4'}, \fcj{'5'}, \fcj{'6'}, \fcj{'7'}, \fcj{'8'}, \fcj{'9'}. The wheels can rotate freely and wrap around: for example we can turn \fcj{'9'} to be \fcj{'0'}, or \fcj{'0'} to be \fcj{'9'}. Each move consists of turning one wheel one slot.
+
+The lock initially starts at \fcj{'0000'}, a string representing the state of the 4 wheels.
+
+You are given a list of \fcj{deadends} dead ends, meaning if the lock displays any of these codes, the wheels of the lock will stop turning and you will be unable to open it.
+
+Given a \fcj{target} representing the value of the wheels that will unlock the lock, return the minimum total number of turns required to open the lock, or $-1$ if it is impossible.
+
+\paragraph{Example 1:}
+\begin{flushleft}
+
+
+\textbf{Input}: 
+
+\fcj{deadends = ["0201","0101","0102","1212","2002"]}, \fcj{target = "0202"}
+
+\textbf{Output}: 6
+
+\textbf{Explanation}:
+
+A sequence of valid moves would be 
+
+\fcj{"0000" -> "1000" -> "1100" -> "1200" -> "1201" -> "1202" -> "0202"}.
+
+Note that a sequence like \fcj{"0000" -> "0001" -> "0002" -> "0102" -> "0202"} would be invalid, because the wheels of the lock become stuck after the display becomes the dead end \fcj{"0102"}.
+
+\end{flushleft}
+
+\paragraph{Example 2:}
+
+\begin{flushleft}
+\textbf{Input}: 
+
+\fcj{deadends = ["8888"]}, \fcj{target = "0009"}
+
+\textbf{Output}: 1
+
+\textbf{Explanation}:
+
+We can turn the last wheel in reverse to move from \fcj{"0000" -> "0009"}.
+\end{flushleft}
+
+\paragraph{Example 3:}
+
+\begin{flushleft}
+\textbf{Input}: 
+
+\fcj{deadends = ["8887","8889","8878","8898","8788","8988","7888","9888"]}, \fcj{target = "8888"}
+
+\textbf{Output}: $-1$
+
+\textbf{Explanation}:
+
+We can't reach the target without getting stuck.
+\end{flushleft}
+
+\paragraph{Example 4:}
+
+\begin{flushleft}
+\textbf{Input}: 
+
+\fcj{deadends = ["0000"]}, \fcj{target = "8888"}
+
+\textbf{Output}: $-1$
+
+\end{flushleft}
+
+\paragraph{Note:}
+
+\begin{itemize}
+\item The length of \fcj{deadends} will be in the range \fcj{[1, 500]}.
+\item \fcj{target} will not be in the list \fcj{deadends}.
+\item Every string in \fcj{deadends} and the string \fcj{target} will be a string of 4 digits from the 10,000 possibilities \fcj{'0000'} to \fcj{'9999'}.
+
+\end{itemize}
+
+\subsection{BFS}
+The problem is asking for the minimum steps, thus \textit{BFS} can ge the answer quickly. \textit{DFS} would have to traverse all depths to get the answer.
+
+Since the problem has confined the string has four digits, thus we can transform between \fcj{string} and \fcj{integer} to get the memory consumption lower.
+\setcounter{lstlisting}{0}
+\begin{lstlisting}[style=customc, caption={BFS}]
+int openLock( vector<string>& deadends, string target )
+{
+    //routine to convert to integer
+    auto to_int = []( const char* pstr )
+    {
+        int res = 0;
+        for( int i = 0; i < 4; ++i )
+        {
+            res = res * 10 + ( pstr[i] - '0' );
+        }
+        return res;
+    };
+    //record seen integers
+    unordered_set<int> dict;
+    for( const auto& deadend : deadends )
+    {
+        int x = to_int( deadend.c_str() );
+        if( x == 0 )
+        {
+            return -1;
+        }
+        dict.insert( to_int( deadend.c_str() ) );
+    }
+    queue<int> q;
+    q.push( 0 );
+    //convert to string with four digits
+    auto to_str = []( int i )
+    {
+        string s = "0000";
+        int si = 0;
+        while( i )
+        {
+            int q = i / 10;
+            int r = i - 10 * q;
+            s[si++] = '0' + r;
+            i = q;
+        }
+        reverse( begin( s ), end( s ) );
+        return s;
+    };
+    int level = 0;
+    while( !q.empty() )
+    {
+        auto sz = q.size();
+        for( size_t i = 0; i < sz; ++i )
+        {
+            auto n = q.front();
+            q.pop();
+            auto s = to_str( n );
+            if( s == target )
+            {
+                //found target
+                //level is the minimum steps
+                return level;
+            }
+            //change each letter in s
+            for( int i = 0; i < 4; ++i )
+            {
+                //increment
+                int ci = s[i] - '0';
+                int next = ( ci + 1 ) % 10;
+                s[i] = '0' + next;
+                n = to_int( s.c_str() );
+                if( dict.find( n ) == dict.end() )
+                {
+                    //we have to add now
+                    //avoid adding same into the
+                    //dict
+                    dict.insert( n );
+                    q.push( n );
+                }
+                //decrement
+                next = ( ci + 9 ) % 10;
+                s[i] = '0' + next;
+                n = to_int( s.c_str() );
+                if( dict.find( n ) == dict.end() )
+                {
+                    dict.insert( n );
+                    q.push( n );
+                }
+                //restore s[i]
+                s[i] = '0' + ci;
+            }
+        }
+        //increments the steps
+        ++level;
+    }
+    //cannot reach target
+    return -1;
+}
+\end{lstlisting}

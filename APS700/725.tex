@@ -1,0 +1,166 @@
+\section{725 --- Split Linked List in Parts}
+Given a (singly) linked list with head node \fcj{root}, write a function to split the linked list into $k$ consecutive linked list \fcj{"parts"}.
+
+The length of each part should be as equal as possible: no two parts should have a size differing by more than 1. This may lead to some parts being null.
+
+The parts should be in order of occurrence in the input list, and parts occurring earlier should always have a size greater than or equal parts occurring later.
+
+Return a List of \fcj{ListNode} to represent the linked list parts that are formed.
+
+\paragraph{Example 1} 
+\begin{flushleft}
+\textbf{Input}:
+
+\begin{figure}[H]
+\begin{tikzpicture}
+[start chain, every node/.style={draw, circle,minimum size=6mm, fill=gray!20!},
+  node distance=8mm, every join/.style={>=stealth,->},
+ thick]
+\node [draw,on chain,join] {1};
+\node [draw,on chain,join] {2};
+\node [draw,on chain,join] {3};
+\node [draw,on chain,join] {4};
+\end{tikzpicture}
+
+$k = 5$
+
+\textbf{Output}:
+
+5 equal parts: \fcj{[[1], [2], [3], [4], null]}
+
+\end{figure}
+\end{flushleft}
+
+\paragraph{Example 2:}
+\begin{flushleft}
+
+
+\textbf{Input}:
+
+\fcj{root = [1, 2, 3]}, $k = 5$
+
+\textbf{Output}: \fcj{[[1],[2],[3],[],[]]}
+
+\textbf{Explanation}:
+
+The input and each element of the output are \fcj{ListNodes}, not arrays.
+
+For example, the input root has 
+
+\fcj{root.val = 1}, 
+
+\fcj{root.next.val = 2}, 
+
+\fcj{root.next.next.val = 3}, and 
+
+\fcj{root.next.next.next = null}.
+
+The first element \fcj{output[0]} has \fcj{output[0].val = 1}, \fcj{output[0].next = null}.
+
+The last element \fcj{output[4] is null}, but it's string representation as a ListNode is [].
+
+\end{flushleft}
+
+\paragraph{Example 2:}
+
+\begin{flushleft}
+
+\textbf{Input}: 
+
+
+\fcj{root = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]}, $k = 3$
+
+\textbf{Output}: \fcj{[[1, 2, 3, 4], [5, 6, 7], [8, 9, 10]]}
+
+\textbf{Explanation}:
+
+The input has been split into consecutive parts with size difference at most 1, and earlier parts are a larger size than the later parts.
+
+\end{flushleft}
+
+\paragraph{Note:}
+
+\begin{itemize}
+\item The length of \fcj{root} will be in the range \fcj{[0, 1000]}.
+\item Each value of a node in the input will be an integer in the range \fcj{[0, 999]}.
+\item $k$ will be an integer in the range $[1, 50]$.
+\end{itemize}
+
+\subsection{Split Input List}
+If there are $N$ nodes in the linked list root, then there are $N / k$ items in each part, plus the first $\bmod(N, k)$ parts have an extra item. We can count $N$ with a simple loop.
+
+Now for each part, we will try to set the first $r$ parts has length $N/k + 1$ and remaining with $N/k$. We can directly split the input list.
+
+\setcounter{lstlisting}{0}
+\begin{lstlisting}[style=customc, caption={Split Input List}]
+vector<ListNode*> splitListToParts( ListNode* root, int k )
+{
+    auto node = root;
+    //get total nodes in the list
+    int len = 0;
+    while( node )
+    {
+        ++len;
+        node = node->next;
+    }
+
+    //q will be number of nodes each part at least have
+    int q = len / k;
+    //first r parts will have (q+1) nodes
+    int r = len - k * q;
+
+    auto start = root;
+
+    vector<ListNode*> ans;
+    ans.reserve( k );
+
+    while( k )
+    {
+        if( start == nullptr )
+        {
+            break;
+        }
+        auto partEnd = start;
+
+        int count = q;
+        //set first (r) parts
+        //have (q+1) nodes
+        if( r > 0 )
+        {
+            ++count;
+            --r;
+        }
+        //the last node of this part
+        auto last = partEnd;
+        //split the part
+        //from start to (start+count-1)
+        for( int x = 0; x < count; ++x )
+        {
+            if( !partEnd )
+            {
+                //make sure we are not
+                //at the end of the list
+                break;
+            }
+            last = partEnd;
+            partEnd = partEnd->next;
+        }
+        //set the part's end node
+        //to null pointer
+        last->next = nullptr;
+        ans.push_back( start );
+        //the start of next part
+        start = partEnd;
+        --k;
+    }
+
+    //we have consumed all nodes
+    //now add null list
+    while( k )
+    {
+        ans.push_back( nullptr );
+        --k;
+    }
+    return ans;
+}
+\end{lstlisting}

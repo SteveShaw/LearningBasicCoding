@@ -1,0 +1,126 @@
+\section{735 --- Asteroid Collision}
+We are given an array \fcj{asteroids} of integers representing asteroids in a row.
+
+For each asteroid, the absolute value represents its size, and the sign represents its direction (positive meaning right, negative meaning left). Each asteroid moves at the same speed.
+
+Find out the state of the asteroids after all collisions. If two asteroids meet, the smaller one will explode. If both are the same size, both will explode. Two asteroids moving in the same direction will never meet.
+
+\paragraph{Example 1:}
+\begin{flushleft}
+
+\textbf{Input}: 
+
+\fcj{asteroids}: \fcj{[5, 10, -5]}
+
+\textbf{Output}: \fcj{[5, 10]}
+
+\textbf{Explanation}: 
+
+The 10 and $-5$ collide resulting in 10.  The 5 and 10 never collide.
+\end{flushleft}
+\paragraph{Example 2:}
+\begin{flushleft}
+
+\textbf{Input}: 
+
+\fcj{asteroids}: \fcj{[8, -8]}
+
+\textbf{Output}: \fcj{[]}
+
+\textbf{Explanation}: 
+
+The 8 and $-8$ collide exploding each other.
+\end{flushleft}
+\paragraph{Example 3:}
+\begin{flushleft}
+
+\textbf{Input}: \fcj{asteroids = [10, 2, -5]}
+
+\textbf{Output}: \fcj{[10]}
+
+\textbf{Explanation}:
+ 
+The 2 and $-5$ collide resulting in $-5$.  The 10 and $-5$ collide resulting in 10.
+\end{flushleft}
+\paragraph{Example 4:}
+\begin{flushleft}
+
+
+\textbf{Input}: \fcj{asteroids = [-2, -1, 1, 2]}
+
+\textbf{Output}: \fcj{[-2, -1, 1, 2]}
+
+\textbf{Explanation}:
+ 
+The $-2$ and $-1$ are moving left, while the 1 and 2 are moving right.
+
+Asteroids moving the same direction never meet, so no asteroids will meet each other.
+\end{flushleft}
+
+\paragraph{Note:}
+\begin{itemize}
+\item The length of asteroids will be at most 10000.
+\item Each asteroid will be a non-zero integer in the range \fcj{[-1000, 1000]}.
+\end{itemize}
+
+\subsection{Stack}
+We make use of a stack to track the elements. We notice that only when top of stack is moving right and current element is moving left, the two can meet. Otherwise, they just remain as they are. Thus, we only compare stack elements with current element when current element is negative (moving left).
+
+Finally, we insert all elements in the stack into the output, and then reverse it.
+
+\setcounter{lstlisting}{0}
+\begin{lstlisting}[style=customc, caption={Stack}]
+vector<int> asteroidCollision( vector<int>& asteroids )
+{
+    stack<int> stk;
+    for( int n : asteroids )
+    {
+        if( n < 0 )
+        {
+            //only when n is moving left
+            //we may have two asteroids collison
+            while( !stk.empty() && ( stk.top() > 0 ) )
+            {
+                //only when the top is moving right (>0)
+                //the collison will happen
+                if( stk.top() < abs( n ) )
+                {
+                    //top is exploded
+                    stk.pop();
+                }
+                else if( stk.top() > abs( n ) )
+                {
+                    //n is exploded
+                    n = 0;
+                    break;
+                }
+                else
+                {
+                    //both are exploded
+                    n = 0;
+                    stk.pop();
+                    break;
+                }
+            }
+        }
+        if( n != 0 )
+        {
+            //n is not exploded
+            //add it to the stack
+            stk.push( n );
+        }
+    }
+    //put all remaining asteroids
+    //into the output
+    vector<int> ans;
+    ans.reserve( stk.size() );
+    while( !stk.empty() )
+    {
+        ans.push_back( stk.top() );
+        stk.pop();
+    }
+    //reverse the output
+    reverse( begin( ans ), end( ans ) );
+    return ans;
+}
+\end{lstlisting}

@@ -1,0 +1,268 @@
+\section{741 --- Cherry Pickup}
+In a $N \times N$ \fcj{grid} representing a field of cherries, each cell is one of three possible integers.
+
+\begin{itemize}
+\item 0 means the cell is empty, so you can pass through;
+\item 1 means the cell contains a cherry, that you can pick up and pass through;
+\item $-1$ means the cell contains a thorn that blocks your way.
+\end{itemize}
+
+Your task is to collect maximum number of cherries possible by following the rules below:
+\begin{itemize}
+\item Starting at the position (0, 0) and reaching $(N-1, N-1)$ by moving right or down through valid path cells (cells with value 0 or 1);
+\item After reaching $(N-1, N-1)$, returning to (0, 0) by moving left or up through valid path cells;
+\item When passing through a path cell containing a cherry, you pick it up and the cell becomes an empty cell (0); 
+\item If there is no valid path between (0, 0) and $(N-1, N-1)$, then no cherries can be collected.
+\end{itemize} 
+
+
+\paragraph{Example 1:}
+\begin{flushleft}
+
+
+\textbf{Input}: 
+
+\fcj{grid}:
+
+\[
+\begin{bmatrix}
+0 & 1 & -1 \\
+1 & 0 & -1 \\
+1 & 1 &  1 
+\end{bmatrix}
+\]
+
+\textbf{Output}: 5
+
+\textbf{Explanation}: 
+
+The player started at $ (0, 0) $ and went down, down, right right to reach $ (2, 2) $.
+
+4 cherries were picked up during this single trip, and the matrix becomes \fcj{[[0,1,-1],[0,0,-1],[0,0,0]]}.
+
+Then, the player went left, up, up, left to return home, picking up one more cherry.
+
+The total number of cherries picked up is 5, and this is the maximum possible.
+\end{flushleft}
+
+\paragraph{Note:}
+
+\begin{itemize}
+\item \fcj{grid} is an $N$ by $N$ 2D array, with $1 \leq N \leq 50$.
+\item Each \fcj{grid[i][j]} is an integer in the set \fcj{[-1, 0, 1]}.
+\item It is guaranteed that \fcj{grid[0][0]} and \fcj{grid[N-1][N-1]} are not $-1$.
+\end{itemize}
+
+\subsection{Dynamic Programming Top Down}
+First of all, greedy method does not work here. The reason is that maximizing the first one-way does \textbf{NOT} guarantee that we can get overall maximum number of cherries for round-trip. In the first one-way picking, we are following only the shortest path. Therefore, we may neglect some positions that would give more cherries when going back.
+\par
+For example, in the following grid
+\begin{figure}[H]
+\centering
+\begin{tikzpicture}
+\matrix (m) [matrix of nodes]
+{
+0 & 1 & -1 \\
+1 & 1 & -1 \\
+1 & 1 & 0 \\
+};
+\draw [color=red](m-1-1.north west)--(m-2-1.south west)--(m-2-2.south west)--(m-3-2.south west)--(m-3-3.south east)--(m-3-3.north east)--(m-3-2.north east)--(m-2-2.north east)--(m-1-1.south east)--(m-1-1.north east)--cycle;
+\end{tikzpicture}
+\end{figure}
+If the first round one-way shortest path goes along the red path for getting maximum 3 cherries, it splits the remaining 2 cherries into opposite sides of the diagonal which is impossible for round trip to pick up all cherries. 
+
+Therefore, we have to plan the round trip altogether. Note that the path direction is irrelevant to the problem and we are forced to move only on shortest paths.
+
+We can imagine two persons $p_1$ and $p_2$ are at $(0,0)$ during start. Then they both move by taking different path to $(N-1, N-1)$. After $t$ steps, $p_1$ is in position $(r_1,c_1)$ and $p_2$ in $(r_2, c_2)$. Both positions will have $r_1+c_1=r_2+c_2=t$. Then, $r_2 = r_1 + c_1 - c_2$, which means $r_1,c_1,c_2$ uniquely determine $p_1, p_2$ who have walked the same $t = r_1+c_1$ number of steps. This is suitable for dynamic programming quite nicely.
+
+Suppose $F[r_1][c_1][c_2]$ be the maximum number of cherries obtained by two persons $p_1$ and $p_2$ who are starting at $(r_1, c_1)$ and $(r_2, c_2)$ respectively, and are walking towards $(N-1, N-1)$ by picking up cherries, where $r_2 = r_1+c_1-c_2$.
+\par
+If $G[r_1][c_1] \neq -1$ and $G[r_2][c_2] \neq -1$, then $F[r_1][c_1][c_2]$ is $(G[r_1][c_1] + G[r_2][c_2])$, plus the maximum of $F[r_1+1][c_1][c_2]$, $F[r_1][c_1+1][c_2]$, $F[r_1+1][c_1][c_2+1]$ and $F[r_1][c_1+1][c_2+1]$. We should also be careful to not double count in case when $p_1$ and $p_2$ are in the same position, i.e., $(r_1, c_1) = (r_2, c_2)$.
+\par
+Why do we need to plus the 
+\[
+\max(F[r_1+1][c_1][c_2], F[r_1][c_1+1][c_2], F[r_1+1][c_1][c_2+1], F[r_1][c_1+1][c_2+1])
+\]
+The reason is these four values corresponds to the 4 possibilities for $p_1$ and $p_2$ moving down and right:
+\begin{enumerate}
+\item $p_1$ go \textbf{down} and $p_2$ go \textbf{down}: $F[r_1+1][c_1][c_2]$ since $r_2 \gets r_1 + 1 +c_1 -c_2 = (r_1+c_1-c_2) + 1 = r_2+1$
+\item $p_1$ go \textbf{right} and $p_2$ go \textbf{down}: $F[r_1][c_1+1][c_2]$ since $r_2 \gets r_1 + c_1 + 1 -c_2 = (r_1+c_1-c_2) + 1 = r_2+1$
+\item $p_1$ go \textbf{down} and $p_2$ go \textbf{right}: $F[r_1+1][c_1][c_2+1]$ since $r_2$ is unchanged because $r_2= r_1 + c_1 + 1 -c_2 - 1 = (r_1+c_1-c_2) = r_2$
+\item $p_1$ go \textbf{right} and $p_2$ go \textbf{right}: $F[r_1][c_1+1][c_2+1]$ since $r_2$ is unchanged because $r_2= r_1 + c_1 + 1 -c_2 - 1 = (r_1+c_1-c_2) = r_2$
+\end{enumerate}
+
+\setcounter{lstlisting}{0}
+\begin{lstlisting}[style=customc, caption={Dynamic Programming Top Down}]
+int cherryPickup( vector<vector<int>>& grid )
+{
+    auto N = grid.size();
+    vector<vector<vector<int>>> F( N, vector<vector<int>>( N, vector<int>( N, -1 ) ) );
+    return ( max )( 0, dfs( grid, F, 0, 0, 0 ) );
+}
+int dfs( vector<vector<int>>& G, vector<vector<vector<int>>>& memo, size_t r1, size_t c1, size_t c2 )
+{
+    //r1+c1=r2+c2
+    auto r2 = r1 + c1 - c2;
+    if( !isValid( G, r1, c1, r2, c2 ) )
+    {
+        //invalid cell, just return a very small number
+        return -99999999;
+    }
+    //we have value from memo
+    if( memo[r1][c1][c2] != -1 )
+    {
+        return memo[r1][c1][c2];
+    }
+    auto N = G.size();
+    //if person 1 is in the destination cell
+    if( ( r1 == N - 1 ) && ( c1 == N - 1 ) )
+    {
+        return G[N - 1][N - 1];
+    }
+    //the cherries at (r1,c1)
+    int pick = G[r1][c1];
+
+    if( c1 != c2 )
+    {
+        //(r1,c1) and (r2,c2) are not same cell
+        pick += G[r2][c2];
+    }
+    //get cherries picked from four possible movements
+    //combinaton of two players
+    //pickFromRR: both persons move right
+    int pickFromRR = dfs( G, memo, r1 + 1, c1, c2 );
+    //person 1 move right, person 2 move down
+    int pickFromRD = dfs( G, memo, r1 + 1, c1, c2 + 1 );
+    //person 1 move down, person 2 move right
+    int pickFromDR = dfs( G, memo, r1, c1 + 1, c2 );
+    //person 1 move down, person 2 move down
+    int pickFromDD = dfs( G, memo, r1, c1 + 1, c2 + 1 );
+    //get the maximum one from these four movement combinatons
+    int pickFromNextMove = ( max )( pickFromRR, pickFromRD );
+    pickFromNextMove = ( max )( pickFromDR, pickFromNextMove );
+    pickFromNextMove = ( max )( pickFromDD, pickFromNextMove );
+    //add to current picked cherries
+    pick += pickFromNextMove;
+    //save to the memo array
+    memo[r1][c1][c2] = pick;
+    //return the result
+    return pick;
+}
+//helper function to check if (r1,c1) and (r2,c2) are valid cell or
+//they are not throns (-1)
+bool isValid( vector<vector<int>>& G, size_t r1, size_t c1, size_t r2, size_t c2 )
+{
+    auto N = G.size();
+    if( ( r1 >= N ) || ( r2 >= N ) || ( c1 >= N ) || ( c2 >= N ) )
+    {
+        return false;
+    }
+    if( ( G[r1][c1] == -1 ) || ( G[r2][c2] == -1 ) )
+    {
+        return false;
+    }
+    return true;
+}
+\end{lstlisting}
+
+\subsection{Dynamic Programming Bottom Up}
+Like in Top Down approach, Say $r_1 + c_1 = t$ is the $t$-th layer. Since the recursion only references the next layer, we only need to keep two layers in memory at a time.
+
+At time $t$, let $F[r_1][r_2]$ be the most cherries that we can pick up for two people going from $(0, 0)$ to $(r_1, c_1)$ and $(0, 0)$ to $(r_2, c_2)$, where $c_1 = t-r_1$, $c_2 = t-r_2$. 
+
+Since we are evaluating time $t$ from 0 to $N-1+N-1=2N-2$, we will fill $F$ starting from cell $(0,0)$. At time 0, $F[0][0]=G[0][0]$. Next, we loop $t$ from 1 to $2N-2$. Then we will get maximum pickups from four possible positions combinations of the two persons
+\begin{itemize}
+\item left--left: $p_1$ at $(r_1,c_1-1)$ and $p_2$ at $(r_2, c_2-1)$ which is $F[r_1][r_2]$
+\item left--up: $p_1$ at $(r_1,c_1-1)$ and $p_2$ at $(r_2-1, c_2)$ which is $F[r_1][r_2-1]$
+\item up--left: $p_1$ at $(r_1-1,c_1)$ and $p_2$ at $(r_2, c_2-1)$ which is $F[r_1-1][r_2]$
+\item up--up: $p_1$ at $(r_1-1,c_1)$ and $p_2$ at $(r_2-1, c_2)$ which is $F[r_1-1][r_2-1]$
+\end{itemize}
+
+We will use another 2D array as the evaluation result at time $t$ and overwrite to $F$ before moving to next time $t+1$.
+
+\begin{lstlisting}[style=customc, caption={DP Bottom Up}]
+int cherryPickup( vector<vector<int>>& grid )
+{
+    auto N = grid.size();
+    //array for DP
+    //F[r1][r2] means the maximum cherries picked up
+    //when person 1 at (r1,c1) and person 2 at (r2,c2)
+    vector<vector<int>> F( N, vector<int>( N, -1 ) );
+    //since we iterating time from 0 to 2*N-2
+    //we will fill F from (0,0)
+    F[0][0] = grid[0][0];
+    //The next dp array after evaluating current dp array
+    //at time t
+    vector<vector<int>> next( N, vector<int>( N, -1 ) );
+    for( size_t t = 1; t <= 2 * N - 2; ++t )
+    {
+        //the range for r1 and r2 could be
+        //at time t
+        size_t start = 0;
+        size_t end = t;
+        if( t > N - 1 )
+        {
+            start = t - ( N - 1 );
+            end = N - 1;
+        }
+        for( size_t r1 = start; r1 <= end; ++r1 )
+        {
+            for( size_t r2 = start; r2 <= end; ++r2 )
+            {
+                //get c1 and c2 for two persons
+                auto c1 = t - r1;
+                auto c2 = t - r2;
+                //get cherry amount at (r1,c1) and (r2,c2)
+                auto pick1 = grid[r1][c1];
+                auto pick2 = grid[r2][c2];
+                //reset dp value at these two positions to -1
+                next[r1][r2] = -1;
+                if( ( pick1 == -1 ) || ( pick2 == -1 ) )
+                {
+                    //if any person cannot get to the cell, skip
+                    continue;
+                }
+                int cherry = pick1;
+                if( r1 != r2 )
+                {
+                    //two persons are at different cells
+                    cherry += pick2;
+                }
+
+                //get max picked cherries from last move
+                //which could be
+                //up-up: (r1-1, c1) and (r2-1, c2)
+                //left-up: (r1, c1-1) and (r2-1, c2)
+                //up-left: (r1-1, c1) and (r2, c2-1)
+                //left-left: (r1, c1-1) and (r2, c2-1)
+                //notice F is defined for r1 and r2
+                //c1 and c2 are determined from r1 and r2
+                int last_pick = F[r1][r2]; //left-left
+                if( r1 > 0 )
+                {
+                    last_pick = ( max )( last_pick, F[r1 - 1][r2] ); // up-left
+
+                }
+                if( r2 > 0 )
+                {
+                    last_pick = ( max )( last_pick, F[r1][r2 - 1] ); // left-up
+
+                }
+                if( ( r1 > 0 ) && ( r2 > 0 ) )
+                {
+                    last_pick = ( max )( last_pick, F[r1 - 1][r2 - 1] ); // up-up
+                }
+                if( last_pick != -1 )
+                {
+                    //we can go through last cell to current cell
+                    next[r1][r2] = ( max )( next[r1][r2], last_pick + cherry );
+                }
+            }//end(r2)
+        }//end(r1)
+        //overwrite F by evaluated dp for current t
+        swap( F, next );
+    } //end(t)
+    return ( max )( 0, F[N - 1][N - 1] );
+}
+\end{lstlisting}
+

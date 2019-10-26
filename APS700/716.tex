@@ -1,0 +1,130 @@
+\section{716 --- Max Stack}
+Design a max stack that supports \fcj{push}, \fcj{pop}, \fcj{top}, \fcj{peekMax} and \fcj{popMax}.
+
+\begin{itemize}
+\item \fcj{push(x)} -- Push element x onto stack.
+\item \fcj{pop()} -- Remove the element on top of the stack and return it.
+\item \fcj{top()} -- Get the element on the top.
+\item \fcj{peekMax()} -- Retrieve the maximum element in the stack.
+\item \fcj{popMax()} -- Retrieve the maximum element in the stack, and remove it. If you find more than one maximum elements, only remove the top-most one.
+\end{itemize}
+
+\paragraph{Example 1:}
+\begin{flushleft}
+
+\fcj{MaxStack stack = new MaxStack();}
+
+\fcj{stack.push(5); }
+
+\fcj{stack.push(1);}
+
+\fcj{stack.push(5);}
+
+\fcj{stack.top(); -> 5 }
+
+\fcj{stack.popMax(); -> 5}
+
+\fcj{stack.top(); -> 1}
+
+\fcj{stack.peekMax(); -> 5}
+
+\fcj{stack.pop(); -> 1}
+
+\fcj{stack.top(); -> 5}
+\end{flushleft}
+
+\paragraph{Note:}
+\begin{enumerate}
+\item $-10^7 \leq x \leq 10^7$
+\item Number of operations won't exceed 10000.
+\item The last four operations won't be called when stack is empty.
+\end{enumerate}
+
+\subsection{Two Stacks}
+
+A regular stack already supports the first 3 operations, so we focus on the last two.
+
+For \fcj{peekMax}, we make use of another stack to track the largest value we've seen on the side. For example if we add \fcj{[2, 1, 5, 3, 9]}, we'll remember \fcj{[2, 2, 5, 5, 9]}. 
+
+For \fcj{popMax}, we know what the current maximum (\fcj{peekMax}) is. We can use a buffer to save all numbers pop from the regular stack until we find that maximum, then push the popped elements int buffer back on the stack.
+
+In the implementation, we use \fcc{vector} to replace \fcc{stack}.
+
+\setcounter{lstlisting}{0}
+\begin{lstlisting}[style=customc, caption={Two Stacks}]
+class MaxStack
+{
+public:
+    /** initialize your data structure here. */
+    MaxStack()
+    {
+    }
+
+    void push( int x )
+    {
+        //push x and max so far
+        xs.push_back( x );
+        if( x_max.empty() )
+        {
+            x_max.push_back( x );
+        }
+        else
+        {
+            int y = ( max )( x_max.back(), x );
+            x_max.push_back( y );
+        }
+    }
+
+    int pop()
+    {
+        int y = xs.back();
+        xs.pop_back();
+
+        x_max.pop_back();
+
+        return y;
+    }
+
+    int top()
+    {
+        return xs.back();
+    }
+
+    int peekMax()
+    {
+        return x_max.back();
+    }
+
+    int popMax()
+    {
+        int y = peekMax();
+
+        //remove the first one in xs
+        //that is equal to y
+
+        //all popped elements are saved in buffer
+        stack<int> buffer;
+
+        while( top() != y )
+        {
+            buffer.push( pop() );
+        }
+
+        //now top()=y, we need to pop it
+        pop();
+
+        //push back all popped elements
+        //during the process
+        while( !buffer.empty() )
+        {
+            push( buffer.top() );
+            buffer.pop();
+        }
+
+        return y;
+    }
+
+    vector<int> xs;
+    vector<int> x_max;
+};
+\end{lstlisting}

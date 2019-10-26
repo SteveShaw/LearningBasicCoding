@@ -1,0 +1,126 @@
+\section{712 --- Minimum ASCII Delete Sum for Two Strings}
+Given two strings $s_1$, $s_2$, find the lowest ASCII sum of deleted characters to make two strings equal.
+
+\paragraph{Example 1:}
+\begin{flushleft}
+
+
+\textbf{Input}: $s_1$: \fcj{"sea"}, $s_2$: \fcj{"eat"}
+
+\textbf{Output}: 231
+
+\textbf{Explanation}: 
+
+Deleting \fcj{"s"} from \fcj{"sea"} adds the ASCII value of \fcj{"s"} (115) to the sum.
+
+Deleting \fcj{"t"} from \fcj{"eat"} adds 116 to the sum.
+
+At the end, both strings are equal, and $115 + 116 = 231$ is the minimum sum possible to achieve this.
+\end{flushleft}
+
+\paragraph{Example 2:}
+
+\begin{flushleft}
+\textbf{Input}: $s_1$: \fcj{"delete"}, $s_2$: \fcj{"leet"}
+
+\textbf{Output}: 403
+
+\textbf{Explanation}: 
+
+Deleting \fcj{"dee"} from \fcj{"delete"} to turn the string into \fcj{"let"},
+
+adds 100\fcj{[d]}+101\fcj{[e]}+101\fcj{[e]} to the sum.  Deleting \fcj{"e"} from \fcj{"leet"} adds 101\fcj{[e]} to the sum.
+
+At the end, both strings are equal to \fcj{"let"}, and the answer is $100+101+101+101 = 403$.
+
+If instead we turned both strings into \fcj{"lee"} or \fcj{"eet"}, we would get answers of 433 or 417, which are higher.
+
+\end{flushleft}
+
+\paragraph{Note:}
+
+\begin{itemize}
+\item $0 < \lvert s_1\rvert|, \lvert s_2\rvert \leq 1000$.
+\item All elements of each string will have an ASCII value in $[97, 122]$.
+\end{itemize}
+
+\subsection{Dynamic Programming}
+This problem is similar to \textbf{Edit Distance}.
+
+Suppose $f(i,j)$ is the minimum sum of deleted letters to make $s1(0, i-1)$ and $s-2(0, j-1)$ equal/
+
+There are three cases when comparing the letters from left to right
+\begin{itemize}
+\item $s_1[i] = s_2[j]$，there is nothing to delete from $s_1$ and $s_2$, thus $f(i,j) = f(i-1,j-1)$.
+
+\item Otherwise, we can
+\begin{enumerate}
+\item Delete $s_1[i]$, the corresponding sum of deleted letters are $f(i-1,j) + x$ where $x$ is the ASCII code of $s_1[i]$.
+
+\item Delete $s_2[j]$, similarly, the sum is $f(i, j-1) + y$, where $y$ is the ASCII code of $s_2[j]$.
+\end{enumerate}
+
+Then $f(i, j)=\min(f(i-1,j)+x, f(i,j-1)+y)$.
+
+\item We need to fill the case where either $s_1$ or $s_2$ is empty.
+
+\begin{enumerate}
+\item if $s_1$ is empty, then $f(0,j) = y_0+y_1+\ldots+y_{j-1}$ where $y_{k}$ is the ASCII code of $s_2[k]$ because we need to delete all letters from $s_2[0,j-1]$ to become empty $s_2$.
+
+\item Similarly, if $s_2$ is empty, $f(i,0)=x_0+x_1+\ldots+x_{i-1}$ where $x_{k}$ is the ASCII code of $s_1[k]$ because we need to delete all letters from $s_1[0,i-1]$ to become empty $s_1$.
+\end{enumerate}
+
+\end{itemize}
+
+\setcounter{lstlisting}{0}
+\begin{lstlisting}[style=customc, caption={Dynamic Programming}]
+int minimumDeleteSum( string s1, string s2 )
+{
+    //The dp array
+    vector<vector<int>> F( s1.size() + 1, vector<int>( s2.size() + 1, 1000000000 ) );
+    //two empty string
+    //nothing to delete
+    F[0][0] = 0;
+    //fill the first column
+    for( size_t r = 1; r <= s1.size(); ++r )
+    {
+        //to match the empty string
+        //we need to delete all letters from
+        //any substring of s1
+        F[r][0] = F[r - 1][0] + int( s1[r - 1] );
+    }
+    //fill the first row
+    for( size_t c = 1; c <= s2.size(); ++c )
+    {
+        //to match the empty string
+        //we need to delete all letters from
+        //any substring of s2
+        F[0][c] = F[0][c - 1] + int( s2[c - 1] );
+    }
+    //the dp process
+    for( size_t r = 1; r <= s1.size(); ++r )
+    {
+        for( size_t c = 1; c <= s2.size(); ++c )
+        {
+            if( s1[r - 1] == s2[c - 1] )
+            {
+                //nothing to delete from both strings
+                F[r][c] = F[r - 1][c - 1];
+            }
+            else
+            {
+                // we can delete s1[r-1]
+                int k1 = F[r - 1][c] + int( s1[r - 1] );
+                // or we can delete s2[c-1]
+                int k2 = F[r][c - 1] + int( s2[c - 1] );
+
+                //we get minimum of these 2 values
+                F[r][c] = ( min )( k1, k2 );
+            }
+        }
+    }
+    return F[s1.size()][s2.size()];
+}
+\end{lstlisting}
+
+

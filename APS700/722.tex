@@ -1,0 +1,201 @@
+\section{722. Remove Comments}
+Given a \fcc{C++} program, remove comments from it. The program source is an array where \fcc{source[i]} is the $i$--th line of the source code. This represents the result of splitting the original source code string by the newline character \fcc{\n}.
+
+In \fcc{C++}, there are two types of comments, line comments, and block comments.
+
+The string \fcc{//} denotes a line comment, which represents that it and rest of the characters to the right of it in the same line should be ignored.
+
+The string \fcc{/*} denotes a block comment, which represents that all characters until the next occurrence of \fcc{*/} should be ignored. (Here, occurrences happen in reading order: line by line from left to right.) To be clear, the string \fcc{/*/} does not yet end the block comment, as the ending would be overlapping the beginning.
+
+The first effective comment takes precedence over others: if the string \fcc{//} occurs in a block comment, it is ignored. Similarly, if the string \fcc{/*} occurs in a line or block comment, it is also ignored.
+
+If a certain line of code is empty after removing comments, you must not output that line: each string in the answer list will be non-empty.
+
+There will be no control characters, single quote, or double quote characters. For example, source = "string s = "/* Not a comment. */";" will not be a test case. (Also, nothing else such as defines or macros will interfere with the comments.)
+
+It is guaranteed that every open block comment will eventually be closed, so \fcc{/*} outside of a line or block comment always starts a new comment.
+
+Finally, implicit newline characters can be deleted by block comments. Please see the examples below for details.
+
+After removing the comments from the source code, return the source code in the same format.
+
+\paragraph{Example 1:}
+\begin{flushleft}
+
+
+\textbf{Input}: 
+
+\begin{lstlisting}[style=customc]
+source = [
+"/*Test program */", 
+"int main()", 
+"{ ", 
+"  // variable declaration ", 
+"int a, b, c;",
+ "/* This is a test", 
+ "   multiline  ", 
+ "   comment for ", 
+ "   testing */", 
+ "a = b + c;", 
+ "}" ]
+\end{lstlisting}
+
+The line by line code is visualized as below:
+
+
+\textbf{Output}: 
+
+[\fcc{"int main()","{ ","  ","int a, b, c;","a = b + c;","}"]}
+
+The line by line code is visualized as below:
+
+\begin{lstlisting}[style=customc]
+/*Test program */
+int main()
+{
+    // variable declaration
+    int a, b, c;
+    /* This is a test
+       multiline
+       comment for
+       testing */
+    a = b + c;
+}
+\end{lstlisting}
+
+\textbf{Explanation}:
+ 
+The string \fcc{/*} denotes a block comment, including line 1 and lines 6-9. The string \fcc{//} denotes line 4 as comments.
+\end{flushleft}
+
+\paragraph{Example 2:}
+\begin{flushleft}
+
+
+
+\textbf{Input}: 
+
+\fcc{source = ["a/*comment", "line", "more_comment*/b"]}
+
+\textbf{Output}: \fcc{["ab"]}
+
+\textbf{Explanation}: 
+
+The original source string is \fcc{"a/*comment\nline\nmore_comment*/b"}, where we have bolded the newline characters.  After deletion, the implicit newline characters are deleted, leaving the string "ab", which when delimited by newline characters becomes \fcc{["ab"}].
+\end{flushleft}
+
+\paragraph{Note:}
+\begin{itemize}
+\item The length of source is in the range \fcc{[1, 100]}.
+\item The length of source[i] is in the range \fcc{[0, 80]}.
+\item Every open block comment is eventually closed.
+\item There are no single-quote, double-quote, or control characters in the source code.
+\end{itemize}
+
+\subsection{Parse}
+We need to parse the source line by line. Our state is that we either are in a block comment or not.
+
+\begin{itemize}
+\item If we start a block comment and we aren't in a block, then we will skip over the next two characters and change our state to be \textbf{in a block}.
+\item If we end a block comment and we are in a block, then we will skip over the next two characters and change our state to be not in a block.
+\item If we start a line comment and we aren't in a block, then we will ignore the rest of the line.
+\item If we aren't in a block comment (and it wasn't the start of a comment), we will record the character we are at.
+\item At the end of each line, if we aren't in a block, we will record the line.
+\end{itemize}
+
+\setcounter{lstlisting}{0}
+\begin{lstlisting}[style=customc, caption={Parse}]
+vector<string> removeComments( vector<string>& source )
+{
+    vector<string> ans;
+
+    bool inBlockComment = false;
+
+    vector<vector<string_view>> codeSegs;
+    for( const auto& s : source )
+    {
+        string_view svCode( s.c_str(), s.size() );
+
+        if( !inBlockComment )
+        {
+            //we not in a block
+            //create a new array
+            //to save possible code segs
+            //for current line
+            codeSegs.push_back( vector<string_view> {} );
+        }
+
+        while( !svCode.empty() )
+        {
+            if( !inBlockComment )
+            {
+                auto lineStart = svCode.find( "//" );
+                auto blockStart = svCode.find( "/*" );
+
+                if( lineStart < blockStart )
+                {
+                    //line comment take effect
+                    //remaining parts are ignored
+                    codeSegs.back().push_back( svCode.substr( 0, lineStart ) );
+                    break;
+                }
+
+                if( blockStart < svCode.size() )
+                {
+                    //there is a block comment start
+                    codeSegs.back().push_back( svCode.substr( 0, blockStart ) );
+                    inBlockComment = true;
+                    //shrink the string view
+                    //ignore the part before the comment start
+                    svCode.remove_prefix( blockStart + 2 );
+                }
+                else
+                {
+                    //the remaing parts of current line are all codes
+                    codeSegs.back().push_back( svCode );
+                    break;
+                }
+            }
+            else
+            {
+                //we will find end of block comment
+                auto blockEnd = svCode.find( "*/" );
+                if( blockEnd < svCode.size() )
+                {
+                    //end block comment
+                    inBlockComment = false;
+                    //but we still need to stay in current line
+                    //remove the parts before the comment end
+                    svCode.remove_prefix( blockEnd + 2 );
+                }
+                else
+                {
+                    //whole line can be ignored
+                    break;
+                }
+            }//end else
+        } //end while(!svCode.empty)
+
+        if( !inBlockComment )
+        {
+            string s;
+
+            for( auto seg : codeSegs.back() )
+            {
+                s += seg;
+            }
+
+            codeSegs.pop_back();
+
+            if( !s.empty() )
+            {
+                ans.push_back( move( s ) );
+            }
+
+        }
+
+    }//end for(s:source)
+
+    return ans;
+}
+\end{lstlisting}

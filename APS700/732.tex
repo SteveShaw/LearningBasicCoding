@@ -1,0 +1,452 @@
+\section{732 --- My Calendar III}
+Implement a \fcj{MyCalendarThree} class to store your events. A new event can \textbf{always} be added.
+
+Your class will have one method, \fcj{book(int start, int end)}. Formally, this represents a booking on the half open interval \fcj{[start, end)}, the range of real numbers $x$ such that \fcj{start <= x < end}.
+
+A $K$--booking happens when $K$ events have some non-empty intersection (i.e., there is some time that is common to all K events.)
+
+For each call to the method \fcj{MyCalendar.book}, return an integer $K$ representing the largest integer such that there exists a $K$-booking in the calendar.
+
+Your class will be called like this: 
+
+\fcj{MyCalendarThree cal = new MyCalendarThree();}
+
+\fcj{MyCalendarThree.book(start, end)}
+
+\paragraph{Example 1:}
+\begin{flushleft}
+
+
+\fcj{MyCalendarThree();}
+
+\fcj{MyCalendarThree.book(10, 20); // returns 1}
+
+\fcj{MyCalendarThree.book(50, 60); // returns 1}
+
+\fcj{MyCalendarThree.book(10, 40); // returns 2}
+
+\fcj{MyCalendarThree.book(5, 15); // returns 3}
+
+\fcj{MyCalendarThree.book(5, 10); // returns 3}
+
+\fcj{MyCalendarThree.book(25, 55); // returns 3}
+
+
+\textbf{Explanation}: 
+
+The first two events can be booked and are disjoint, so the maximum $K$--booking is a 1--booking.
+
+The third event [10, 40) intersects the first event, and the maximum $ K $--booking is a 2--booking.
+
+The remaining events cause the maximum $K$--booking to be only a 3--booking.
+
+Note that the last event locally causes a 2--booking, but the answer is still 3 because
+
+eg. \fcj{[10, 20)}, \fcj{[10, 40)}, and \fcj{[5, 15)} are still triple booked.
+\end{flushleft}
+ 
+
+\paragraph{Note:}
+
+\begin{itemize}
+\item The number of calls to \fcj{MyCalendarThree.book} per test case will be at most 400.
+\item In calls to \fcj{MyCalendarThree.book(start, end)}, start and end are integers in the range $[0, 10^9]$.
+
+\end{itemize}
+
+\subsection{Boundary Count}
+When booking a new event \fcj{[start, end)}, count \fcj{delta[start]++} and \fcj{delta[end]--}. When processing the values of \fcj{delta} in sorted order of their keys, the largest such value is the answer.
+
+\setcounter{lstlisting}{0}
+\begin{lstlisting}[style=customc, caption={Boundary Count}]
+class MyCalendarThree
+{
+public:
+    int book( int start, int end );
+private:
+    map<int, int> delta;
+};
+//book(int start,int end) implementation
+int MyCalendarThree::book( int start, int end )
+{
+    //increments the count for <start>
+    delta[start] += 1;
+    //decrements the count for <end>
+    delta[end] -= 1;
+    //for any start, active_ranges plus 1
+    //for any end, active_ranges minus 1
+    int active_ranges = 0;
+    //the maximum number of overlapped ranges
+    int ans = 0;
+    //go over the whole end-points
+    //maximum number of overlapped ranges
+    for( auto it = delta.begin(); it != delta.end(); ++it )
+    {
+        active_ranges += it->second;
+        ans = ( max )( active_ranges, ans );
+    }
+    return ans;
+}
+\end{lstlisting}
+
+\subsection{Dynamic Segment Tree By Lazy Propagation}
+First, we need to define tree node: A segment tree node typically contains four pieces of information:
+
+\begin{enumerate}
+\item The range of a node represents: $[l, r]$ (both inclusive)
+
+\item The properties associated with this segment: for this problem, we define two properties:
+
+\begin{enumerate}
+\item $K$: Maximum of overlapped bookings within range $[l, r]$.
+\item \fcj{lazy}: this is used for efficient updating.
+\end{enumerate}
+\item The pointer to the left and right subtrees: \fcj{left} and \fcj{right}.
+\end{enumerate}
+
+Here is what a typical segment tree type declaration looks like
+
+\begin{lstlisting}[style=customc]
+struct SegTree
+{
+    int tl;
+    int tr;
+    int K = 0;
+    int lazy = 0;
+    SegTree* left = nullptr;
+    SegTree* right = nullptr;
+
+    SegTree( int tl_, int tr_ )
+        : tl( tl_ ), tr( tr_ )
+    {}
+};
+\end{lstlisting}
+
+Next, we will provide \fcj{update} and \fcj{query} functions.
+
+For this problem, Given a range $[i, j]$, corresponding to an booking of range $[i, j+1)$, the \fcj{query} function should return the maximum number of overlapped bookings, $K$.
+
+The \fcj{update} function will update all segments within the given booking range $[i, j]$ (in this problem, increase the $K$ value of all segments within the range $[i, j]$ by 1).
+
+For \fcj{query} function, we first apply possible lazy propagation. Then, check the query range $[s,e]$ relation to the segment of current node $[l,r]$.
+
+\begin{enumerate}
+\item If $[s,e]$ and $[l,r]$ are not intersected, does nothing.
+\item If $[l,r]$ is completed inside $[s,e]$, return current node's property (such as $K$ in this problem).
+\item Otherwise, $[l,r]$ and $[s,e]$ are partially overlapped, we will recursively calling \fcj{query} on two child nodes of current node for the same query range $[s,e]$
+\end{enumerate}
+
+Here is an example of \fcj{query}
+
+\begin{lstlisting}[style=customc]
+int query( SegTree* node, int s, int e )
+{
+    node->propgateLazy();
+
+    if( node->tl > node->tr )
+    {
+        return 0;
+    }
+
+    if( ( node->tl > e ) || ( node->tr < s ) )
+    {
+        return 0;
+    }
+
+    if( ( node->tl >= s ) && ( node->tr <= e ) )
+    {
+        return node->K;
+    }
+
+    //overlap
+    int q_left = query( node->getLeft(), s, e );
+    int q_right = query( node->getRight(), s, e );
+
+    return ( max )( q_left, q_right );
+}
+\end{lstlisting}
+
+Function \fcj{update} is very similar to \fcj{query}. Started by propagate lazy, and then we check the segment $[l,r]$ of current node against the query range $[s,e]$.
+
+\begin{enumerate}
+\item If both are not intersected, do nothing.
+\item If $[l,r]$ is completed inside $[s,e]$, update current segment node and mark its child nodes as lazy.
+\item Otherwise, recursively update the child nodes of current node. Then, update current node's property from its child nodes (such as get maximum $K$ from child nodes).
+\end{enumerate}
+
+Here is an example of \fcj{update}
+
+\begin{lstlisting}[style=customc]
+void update( SegTree* node, int s, int e, int val )
+{
+    node->propgateLazy();
+
+    if( node->tl > node->tr )
+    {
+        return;
+    }
+    if( ( node->tl > e ) || ( node->tr < s ) )
+    {
+        return;
+    }
+
+    //segment inside query range [s,e]
+    if( ( node->tl >= s ) && ( node->tr <= e ) )
+    {
+        node->K += val;
+
+        //mark child nodes as lazy
+        if( node->tl != node->tr )
+        {
+            node->getLeft()->lazy += val;
+            node->getRight()->lazy +=  val;
+        }
+        return;
+    }
+
+    auto left_tree = node->getLeft();
+    auto right_tree = node->getRight();
+
+    update( left_tree, s, e, val );
+    update( right_tree, s, e, val );
+
+    node->K = ( max )( left_tree->K, right_tree->K );
+}
+\end{lstlisting}
+
+For the lazy propagation, the general steps are listed as following
+\begin{enumerate}
+\item Update current segment node if it is marked lazy. (In this problem, a node is considered lazy if its \fcj{lazy} property is greater than 0), and the updating is done by adding the \fcj{lazy} to $K$.
+
+\item Push the laziness down to the child nodes: first make sure current segment node is not a leaf node (a leaf node has $l = r$), then update the child nodes' \fcj{lazy}.
+
+\item Reset the laziness of current segment node (In this problem, we reset \fcj{lazy} to 0).
+\end{enumerate}
+
+\begin{lstlisting}[style=customc]
+void propgateLazy( SegTree* node )
+{
+    if( node->lazy != 0 )
+    {
+        //1. update current node
+        node->K += node->lazy;
+
+        //2. check if it is a leaf
+        if( tl != tr )
+        {
+            //push down the laziness
+            //to the child nodes
+            node->getLeft()->lazy += lazy;
+            node->getRight()->lazy += lazy;
+        }
+        //3. reset lazy of current node
+        node->lazy = 0;
+    }
+}
+\end{lstlisting}
+
+Finally, we initialize the root node: The root node should at least cover the maximum range allowed for all events. In this problem, this is $[0, 10^9]$. The root node's $K$ and \fcj{lazy} are set to 0.
+
+\begin{lstlisting}[style=customc, caption={Segment Tree}]
+class MyCalendarThree
+{
+public:
+    MyCalendarThree()
+    {
+        d_root = new SegTree( 0, 1000000100 );
+    }
+
+    int book( int start, int end )
+    {
+        //update segment tree by this new range
+        update( d_root, start, end - 1, 1 );
+        //then query the maximum K in the whole range
+        return query( d_root, 0, 1000000100 );
+    }
+private:
+    struct SegTree
+    {
+        int tl;
+        int tr;
+        int K = 0;
+        int lazy = 0;
+        SegTree* left = nullptr;
+        SegTree* right = nullptr;
+
+        SegTree( int tl_, int tr_ )
+            : tl( tl_ ), tr( tr_ )
+        {}
+
+        int mid()
+        {
+            return ( tl + tr ) / 2;
+        }
+
+        SegTree* getLeft()
+        {
+            if( !left )
+            {
+                left = new SegTree( tl, mid() );
+            }
+
+            return left;
+        }
+
+        SegTree* getRight()
+        {
+            if( !right )
+            {
+                right = new SegTree( mid() + 1, tr );
+            }
+
+            return right;
+        }
+
+        void propgateLazy()
+        {
+            if( lazy )
+            {
+                K += lazy;
+                if( tl != tr )
+                {
+                    getLeft()->lazy += lazy;
+                    getRight()->lazy += lazy;
+                }
+                lazy = 0;
+            }
+        }
+    };
+
+    void update( SegTree* node, int s, int e, int val )
+    {
+        node->propgateLazy();
+
+        if( node->tl > node->tr )
+        {
+            //current node's segment
+            //does not intersect with query range
+            return;
+        }
+        if( ( node->tl > e ) || ( node->tr < s ) )
+        {
+            //current node's segment
+            //is completely inside query range
+            return;
+        }
+
+        if( ( node->tl >= s ) && ( node->tr <= e ) )
+        {
+            node->K += val;
+
+            //for non-leaf node
+            if( node->tl != node->tr )
+            {
+                //makr its child nodes as lazy
+                node->getLeft()->lazy += val;
+                node->getRight()->lazy +=  val;
+            }
+            return;
+        }
+
+        auto left_tree = node->getLeft();
+        auto right_tree = node->getRight();
+
+        update( left_tree, s, e, val );
+        update( right_tree, s, e, val );
+
+        node->K = ( max )( left_tree->K, right_tree->K );
+    }
+
+    int query( SegTree* node, int s, int e )
+    {
+        node->propgateLazy();
+
+        if( node->tl > node->tr )
+        {
+            return 0;
+        }
+
+        if( ( node->tl > e ) || ( node->tr < s ) )
+        {
+            //current node's segment
+            //does not intersect with query range
+            return 0;
+        }
+
+        if( ( node->tl >= s ) && ( node->tr <= e ) )
+        {
+            //current node's segment
+            //is completely inside query range
+            return node->K;
+        }
+
+        //overlap
+        int q_left = query( node->getLeft(), s, e );
+        int q_right = query( node->getRight(), s, e );
+
+        return ( max )( q_left, q_right );
+    }
+
+    SegTree* d_root;
+};
+\end{lstlisting}
+
+\subsection{Count Time Points}
+In this approach, we find the affected ranges by counting each booked start and end time with a tree map $M$.
+
+For a current booking time $[s,e]$, locate the smallest time point $x$ which is no less than the \fcj{start}. We go to the previous node of $x$: $x_0$. Then insert $s$ into $M$ with $x_0$'s count, and get the position of $s$ in $M$, say $l$. If $s$ is already in $M$, the function \fcc{emplace} just return the position of the current $s$. 
+
+Using the same manner to insert $e$ into $M$, and get the position of $e$ in $M$.
+
+Then, we iterate from $l$ to previous position of $r$ and increments the count of each associated time point. In this way, we always ignore $e$ when updating. By taking the previous one's count as current time point's count, we don't need to go over from the whole time points again since later inserted time point has the count of its closest one remembered.
+
+To help the location of smallest time point that is no less than the one we are querying, we can pre-insert $(-1,0)$ into $M$. Thus, we can always get this smallest time point.
+
+Also, $K$ is a global variable and updated for each call to \fcj{book}
+
+\begin{lstlisting}[style=customc, caption={Counting Time Points}]
+class MyCalendarThree
+{
+public:
+    MyCalendarThree()
+    {
+        //(-1,0) help us
+        //free of checking if it is the begin node
+        delta.emplace( -1, 0 );
+    }
+
+    int book( int start, int end )
+    {
+        //find the largest time point
+        //which is less than start
+        auto x = delta.lower_bound( start );
+        auto prev_x = prev( x );
+        //insert start into map and taking prev_x's count
+        //as its count. In this way, we remembered the count
+        //of passing time point prev_x->first
+        //no need to count again after
+        auto left = delta.emplace( start, prev_x->second ).first;
+        //same manner as insert start
+        auto y = delta.lower_bound( end );
+        auto prev_y = prev( y );
+
+        auto right = delta.emplace( end, prev_y->second ).first;
+        //we iterate from left to previous one of right
+        //thus we don't counter end
+        for( auto it = left; it != right; ++it )
+        {
+            //since we remembered the count of passing time point
+            //prev_x->first, increments each time point's count
+            //represents it is affected by current booking time range
+            ++it->second;
+            //update K accordingly.
+            //here K is a global state
+            K = ( max )( K, it->second );
+        }
+        return K;
+    }
+
+    map<int, int> delta;
+    int K;
+};
+\end{lstlisting}

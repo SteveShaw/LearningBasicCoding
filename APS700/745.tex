@@ -1,0 +1,167 @@
+\section{745 --- Prefix and Suffix Search}
+Given many \fcj{words}, \fcj{words[i]} has weight $i$.
+
+Design a class \fcj{WordFilter} that supports one function, 
+
+\fcj{WordFilter.f(String prefix, String suffix)}. 
+
+It will return the word with given \fcj{prefix} and \fcj{suffix} with maximum weight. If no word exists, return $-1$.
+
+\paragraph{Examples:}
+
+\textbf{Input}:
+
+\begin{flushleft}
+\fcj{WordFilter(["apple"])}
+
+\fcj{WordFilter.f("a", "e") // returns 0}
+
+\fcj{WordFilter.f("b", "") // returns -1}
+
+\end{flushleft}
+ 
+
+\paragraph{Note:}
+
+\begin{itemize}
+\item \fcj{words} has length in range \fcj{[1, 15000]}.
+\item For each test case, up to \fcj{words.length} queries \fcj{WordFilter.f} may be made.
+\item \fcj{words[i]} has length in range \fcj{[1, 10]}.
+\item \fcj{prefix}, \fcj{suffix} have lengths in range \fcj{[0, 10]}.
+\item \fcj{words[i]} and \fcj{prefix}, \fcj{suffix} queries consist of lowercase letters only.
+\end{itemize}
+
+\subsection{Trie of Suffix Wrapped Words}
+Consider the word \fcj{'apple'}. For each suffix of the word, we could insert that suffix, followed by \fcj{'#'}, followed by the word, all into the trie.
+
+For example, we will insert \fcj{'#apple'}, \fcj{'e#apple'}, \fcj{'le#apple'}, \fcj{'ple#apple'}, \fcj{'pple#apple'}, \fcj{'apple#apple'} into the trie. Then for a query like \fcj{prefix = "ap"}, \fcj{suffix = "le"}, we can find it by querying the trie tree for \fcj{le#ap}.
+
+We can add each word from the start. Thus, the word with large index will have large weight and it will overwrite corresponding trie nodes' weight correctly. In the end, we just return the recorded weight in the trie node.
+
+\setcounter{lstlisting}{0}
+\begin{lstlisting}[style=customc, caption={Suffix Wrapped Words Trie}]
+class WordFilter
+{
+public:
+    WordFilter( vector<string>& words )
+    {
+        m_root = new Trie;
+        auto node = m_root;
+        int weight = 0;
+        for( const auto& word : words )
+        {
+            //build trie tree
+            build_tries( m_root, word, weight );
+            ++weight;
+        }
+    }
+    int f( string prefix, string suffix )
+    {
+        return search( suffix, prefix );
+    }
+
+private:
+    struct Trie
+    {
+		//we have 26 lowercase letters
+		//and one special letter '#'
+        array<Trie*, 27> t_children;
+        int t_w;
+
+        Trie()
+        {
+            t_children.fill( nullptr );
+        }
+    };
+	//build trie tree nodes
+	//by appending suffix to the word,
+	//spearate by '#'
+    void build_tries( Trie* root, string_view word, int weight )
+    {
+        auto node = root;
+		//build '#'+word
+        build( root, string_view{}, word, weight );
+        for( size_t l = 1; l <= word.size(); ++l )
+        {
+			//build each suffix of word
+			//with ('#' + word)
+            build( root, word.substr( word.size() - l, l ), word, weight );
+        }
+
+    }
+    void build( Trie* root, string_view suffix, string_view word, int weight )
+    {
+        auto node = root;
+
+        if( !suffix.empty() )
+        {
+            node = build_helper( node, suffix, weight );
+        }
+        if( !node->t_children.back() )
+        {
+            node->t_children.back() = new Trie;
+        }
+        node = node->t_children.back();
+		//larger weight will overwrite smaller weight
+        node->t_w = weight;
+        build_helper( node, word, weight );
+    }
+	//build trie helper function
+    Trie* build_helper( Trie* node, string_view word, int weight )
+    {
+        for( auto c :  word )
+        {
+            auto ci = c - 'a';
+            if( !node->t_children[ci] )
+            {
+                node->t_children[ci] = new Trie;
+            }
+            node = node->t_children[ci];
+            node->t_w = weight;
+        }
+		//return currently the position of traversing the tree
+        return node;
+    }
+	//search in the trie tree
+    int search( string_view suffix, string_view prefix )
+    {
+        auto node = m_root;
+        if( !suffix.empty() )
+        {
+            node = search_helper( node, suffix );
+            if( !node )
+            {
+                return -1;
+            }
+        }
+		//this is to search node for '#'
+        node = node->t_children.back();
+        if( !node )
+        {
+            return -1;
+        }
+        node = search_helper( node, prefix );
+        if( !node )
+        {
+            return -1;
+        }
+        return node->t_w;
+    }
+
+    Trie* search_helper( Trie* node, string_view word )
+    {
+        for( auto c : word )
+        {
+            auto ci = c - 'a';
+            if( !node->t_children[ci] )
+            {
+                return nullptr;
+            }
+
+            node = node->t_children[ci];
+        }
+        return node;
+    }
+    Trie* m_root;
+};
+\end{lstlisting}

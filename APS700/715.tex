@@ -1,0 +1,230 @@
+\section{715 --- Range Module}
+A Range Module is a module that tracks ranges of numbers. Your task is to design and implement the following interfaces in an efficient manner.
+
+\begin{itemize}
+\item \fcj{addRange(int left, int right)}: Adds the half-open interval \fcj{[left, right)}, tracking every real number in that interval. Adding an interval that partially overlaps with currently tracked numbers should add any numbers in the interval \fcj{[left, right)} that are not already tracked.
+
+\item \fcj{queryRange(int left, int right)}: Returns \fcc{true} if and only if every real number in the interval \fcj{[left, right)} is currently being tracked.
+
+\item \fcj{removeRange(int left, int right)}: Stops tracking every real number currently being tracked in the interval \fcj{[left, right)}.
+
+\end{itemize}
+
+\paragraph{Example 1:}
+
+\begin{flushleft}
+\fcj{addRange(10, 20)}: \fcj{null}
+
+\fcj{removeRange(14, 16):} \fcj{null}
+
+\fcj{queryRange(10, 14)}: \fcc{true} (Every number in \fcj{[10, 14)} is being tracked)
+
+\fcj{queryRange(13, 15)}: \fcc{false} (Numbers like 14, 14.03, 14.17 in \fcj{[13, 15)} are not being tracked)
+
+\fcj{queryRange(16, 17)}: \fcc{true} (The number 16 in \fcj{[16, 17)} is still being tracked, despite the remove operation)
+\end{flushleft}
+
+\paragraph{Note:}
+\begin{itemize}
+\item A half open interval \fcj{[left, right)} denotes all real numbers \fcj{left <= x < right}.
+\item left and right are in $[0, 10^9]$ in all calls to \fcj{addRange}, \fcj{queryRange}, \fcj{removeRange}.
+\item The total number of calls to \fcj{addRange} in a single test case is at most 1000.
+\item The total number of calls to \fcj{queryRange} in a single test case is at most 5000.
+\item The total number of calls to \fcj{removeRange} in a single test case is at most 1000.
+\end{itemize}
+
+\subsection{Disjoint Interval Set}
+We need a tree map, say $M$,  to store the ranges. The key of the map is  \texttt{left} and the value is \texttt{right} of the ranges.
+
+The basic structure of \textbf{adding} and \textbf{removing} a range is the same. First, we must iterate over the relevant subset of ranges. This is done using iterators so that we can remove on the fly, and breaking when the intervals go too far to the right.
+
+The critical logic of \fcj{addRange} is simply to make \textbf{left}, \textbf{right} the smallest and largest seen coordinates. After, we add one giant interval representing the union of all intervals seen that touched \fcj{[left, right]}.
+
+The logic of \fcj{removeRange} is to save in an array, say $A$, the intervals we wanted to replace the removed interval with. After, we can add them all back in.
+
+For querying a Range, As the intervals are sorted, we search to find the single interval that could intersect \fcj{[left, right)}, then verify that it does.
+
+In real implementation, we only use left binary search (\fcj{lower_bound}) to find the first range whose left is no less than given range's left.
+
+\setcounter{lstlisting}{0}
+\begin{lstlisting}[style=customc, caption={Disjoint Sorted Intervals}]
+class RangeModule
+{
+public:
+    void addRange();
+    void removeRange();
+    bool queryRange();
+private:
+    map<int, int> x_ranges;
+    //check if two range [l0, r0] and [l1,r1]
+    //are overlap
+    bool is_overlap( int l0, int r0, int l1, int r1 );
+};
+
+bool RangeModule::is_overlap( int l0, int r0, int l1, int r1 )
+{
+    if( l0 <= l1 )
+    {
+        return l1 <= r0;
+    }
+
+    return l0 <= r1;
+}
+
+void RangeModule::addRange( int left, int right )
+{
+    if( x_ranges.empty() )
+    {
+        //empty set
+        //directly add
+        x_ranges.emplace( left, right );
+        return;
+    }
+
+    auto x0 = x_ranges.lower_bound( left );
+
+    if( x0 != x_ranges.begin() )
+    {
+        //we start from the previous range
+        --x0;
+    }
+
+    auto x_it = x0;
+
+    while( x_it != x_ranges.end() )
+    {
+        if( right < x_it->first )
+        {
+            //current range is far too right
+            //to given range
+            //stop
+            break;
+        }
+
+        if( is_overlap( x_it->first, x_it->second, left, right ) )
+        {
+            //current range is overlap with
+            //given range
+            //merge both
+            left = ( min )( x_it->first, left );
+            right = ( max )( x_it->second, right );
+
+            //erase current range
+            x_it =  x_ranges.erase( x_it );
+        }
+        else
+        {
+            //if no overlap
+            //we test next range
+            ++x_it;
+        }
+    }
+    //now, [left,right] is the result of
+    //all merged intervals
+    x_ranges.emplace( left, right );
+}
+
+bool RangeModule::queryRange( int left, int right )
+{
+    if( x_ranges.empty() )
+    {
+        return false;
+    }
+
+    auto x_it = x_ranges.lower_bound( left );
+
+    if( x_it == x_ranges.end() )
+    {
+        //given range's left is
+        //the biggest.
+        //check the last range
+        //because it may cover given range
+        --x_it;
+    }
+
+    if( ( x_it->first <= left ) && ( right <= x_it->second ) )
+    {
+        //given range is fully covered
+        //by the first range whose left is no less than
+        //given range's left
+        return true;
+    }
+
+    //otherwise
+    //we need to check previous range
+    if( x_it != x_ranges.begin() )
+    {
+        --x_it;
+        if( ( x_it->first <= left ) && ( right <= x_it->second ) )
+        {
+            //given range is fully covered
+            //by the previous one of found range
+            return true;
+        }
+    }
+    return false;
+}
+
+void RangeModule::removeRange( int left, int right )
+{
+    if( x_ranges.empty() )
+    {
+        return;
+    }
+
+    vector<array<int, 2>> y_todo;
+
+    auto x1 = x_ranges.lower_bound( left );
+
+    if( x1 != x_ranges.begin() )
+    {
+        //starting from the previous one
+        //of found range
+        --x1;
+    }
+
+    if( x1->second < left )
+    {
+        //x1 is not overlap with
+        //given range
+        //starting from the next one
+        ++x1;
+    }
+
+    auto x_it = x1;
+
+    while( x_it != x_ranges.end() )
+    {
+        if( right < x_it->first )
+        {
+            //current range is far too right
+            //to given range
+            //stop
+            break;
+        }
+
+        if( x_it->first < left )
+        {
+            //overlap
+            //only keep [x_it->first, left]
+            y_todo.emplace_back( array<int, 2> {x_it->first, left} );
+        }
+
+        if( right < x_it->second )
+        {
+            //overlap
+            //only keep [right, x_it->second]
+            y_todo.emplace_back( array<int, 2> {right, x_it->second} );
+        }
+
+        //delete current range
+        x_it = x_ranges.erase( x_it );
+    }
+
+    //add remaining ranges
+    for( const auto& e : y_todo )
+    {
+        x_ranges.emplace( e[0], e[1] );
+    }
+}
+\end{lstlisting}

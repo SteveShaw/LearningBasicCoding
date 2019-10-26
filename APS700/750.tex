@@ -1,0 +1,178 @@
+\section{750 --- Number Of Corner Rectangles}
+Given a grid where each entry is only 0 or 1, find the number of corner rectangles.
+
+A \textit{corner rectangle} is 4 distinct 1s on the grid that form an axis-aligned rectangle. Note that only the corners need to have the value 1. Also, all four 1s used must be distinct.
+ 
+
+\paragraph{Example 1:}
+
+\begin{flushleft}
+\textbf{Input}: 
+
+\fcj{grid}:
+
+\[
+\begin{bmatrix}
+1 & 0 & 0 & 1 & 0 \\
+0 & 0 & 1 & 0 & 1 \\
+0 & 0 & 0 & 1 & 0 \\
+1 & 0 & 1 & 0 & 1
+\end{bmatrix}
+\] 
+
+
+\textbf{Output}: 1
+
+\textbf{Explanation}: 
+
+There is only one corner rectangle, with corners \fcj{grid[1][2]}, \fcj{grid[1][4]}, \fcj{grid[3][2]}, \fcj{grid[3][4]}.
+
+
+
+\end{flushleft} 
+
+\paragraph{Example 2:}
+\begin{flushleft}
+
+
+\textbf{Input}: 
+
+\fcj{grid}:
+
+\[
+\begin{bmatrix}
+1 & 1 & 1\\
+1 & 1 & 1\\
+1 & 1 & 1
+\end{bmatrix}
+\] 
+
+\textbf{Output}: 9
+
+\textbf{Explanation}: 
+
+There are four $2\times2$ rectangles, four $2\times 3$ and $3\times 2$ rectangles, and one $3\times3$ rectangle.
+
+\end{flushleft} 
+
+\paragraph{Example 3:}
+
+\begin{flushleft}
+\textbf{Input}: \fcj{grid = [[1, 1, 1, 1]]}
+
+\textbf{Output}: 0
+
+\textbf{Explanation}: Rectangles must have four distinct corners.
+
+\end{flushleft}
+ 
+
+\paragraph{Note:}
+
+\begin{itemize}
+\item The number of rows and columns of grid will each be in the range \fcj{[1, 200]}.
+\item Each \fcj{grid[i][j]} will be either 0 or 1.
+\item The number of 1s in the grid will be at most 6000.
+
+\end{itemize}
+
+\subsection{Count Corners}
+We ask the question: for each additional row, how many more rectangles are added?
+
+For each pair of 1s in the new row (say at \fcj{new_row[i]} and \fcj{new_row[j]}), we could create more rectangles where that pair forms the base. The number of new rectangles is the number of times some previous row had \fcj{row[i] = row[j] = 1}.
+
+We maintain a count \fcj{count[i, j]}, the number of times we saw \fcj{row[i] = row[j] = 1}. When we process a new row, for every pair \fcj{new_row[i] = new_row[j] = 1}, we add \fcj{count[i, j]} to the answer, then we increment \fcj{count[i, j]}.
+
+\setcounter{lstlisting}{0}
+\begin{lstlisting}[style=customc, caption={Count Corners}]
+int countCornerRectangles( vector<vector<int>>& grid )
+{
+    auto N = grid[0].size();
+    //count[i,j] is the number of rectangles
+    //for a row[i]=row[j]=1
+    unordered_map<int, int> count;
+    int ans = 0;
+    for( const auto& row : grid )
+    {
+        for( size_t c1 = 0; c1 < N - 1; ++c1 )
+        {
+            if( row[c1] == 1 )
+            {
+                for( size_t c2 = c1 + 1; c2 < N; ++c2 )
+                {
+                    if( row[c2] == 1 )
+                    {
+                        //get the count of from count[c1, c2]
+                        int key = c1 * N + c2;
+                        auto it = count.find( key );
+                        if( it == count.end() )
+                        {
+                            //we do not have old_row such that
+                            //old_row[c1]=old_row[c2]=1
+                            //we add a potential rectangle
+                            count.emplace( key, 1 );
+                        }
+                        else
+                        {
+                            //we have old_row where
+                            //old_row[c1]=old_row[c2]=1
+                            //add the number of formed rectanges
+                            //to the answer
+                            ans += it->second;
+                            //increments the formed rectanges at these
+                            //two columns because we have a new rectangle
+                            //formed with row[c1] and row[c2]
+                            ++it->second;
+                        }
+                    }//end if(row2)
+                }//end for(c2)
+            }//end if(row1)
+        } //end for(c1)
+    }//end for (rows)
+    return ans;
+}
+\end{lstlisting}
+
+\subsection{Record Ones Position}
+We actually don't need the \fcj{count}. If we found two rows have ones in the same column, we increments the count, say $x$. After scanning a new row, the number of formed rectangles added will be $x\times (x-1)/2$. To speed the process, we can use an array to record the columns 1s in the base row.
+
+\begin{lstlisting}[style=customc, caption={Optimized}]
+int countCornerRectangles( vector<vector<int>>& grid )
+{
+    auto M = grid.size();
+    auto N = grid[0].size();
+    int ans = 0;
+    vector<size_t> ones;
+    ones.reserve( N );
+    for( size_t r1 = 0;  r1 < M - 1; ++r1 )
+    {
+        ones.clear();
+        //record columns of 1s in row r1
+        for( size_t c = 0; c < N; ++c )
+        {
+            if( grid[r1][c] )
+            {
+                ones.push_back( c );
+            }
+        }
+        //for any new row r2 after r1
+        //check the same columns in ones
+        for( size_t r2 = r1 + 1; r2 < M; ++r2 )
+        {
+            int count = 0;
+            for( auto p : ones )
+            {
+                if( grid[r2][p] )
+                {
+                    //increment the counter
+                    ++count;
+                }
+            }
+            //the new added rectangles will be
+            //(count-1)*count/2;
+            ans += ( count - 1 ) * count / 2;
+        }
+    }
+    return ans;
+}
+\end{lstlisting}

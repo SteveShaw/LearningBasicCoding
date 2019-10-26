@@ -1,0 +1,70 @@
+\section{746 --- Min Cost Climbing Stairs}
+On a staircase, the $i$-th step has some non-negative cost \fcj{cost[i]} assigned (0 indexed).
+
+Once you pay the cost, you can either climb one or two steps. You need to find minimum cost to reach the top of the floor, and you can either start from the step with index 0, or the step with index 1.
+
+\paragraph{Example 1:}
+
+\begin{flushleft}
+\textbf{Input}: \fcj{cost = [10, 15, 20]}
+
+\textbf{Output}: 15
+
+Explanation: Cheapest is start on \fcj{cost[1]}, pay that cost and go to the top
+\end{flushleft}.
+
+\paragraph{Example 2:}
+
+\begin{flushleft}
+\textbf{Input}: \fcj{cost = [1, 100, 1, 1, 1, 100, 1, 1, 100, 1]}
+
+\textbf{Output}: 6
+
+Explanation: Cheapest is start on \fcj{cost[0]}, and only step on 1s, skipping \fcj{cost[3]}.
+
+\end{flushleft}
+
+\paragraph{Note:}
+
+\begin{itemize}
+\item \fcj{cost} will have a length in the range \fcj{[2, 1000]}.
+\item Every \fcj{cost[i]} will be an integer in the range \fcj{[0, 999]}.
+
+\end{itemize}
+
+\subsection{Dynamic Programming}
+There is a clear recursion available: the final cost \fcj{f[i]} to climb the staircase from step $i$ is 
+
+\fcj{f[i] = cost[i] + min(f[i-1], f[i-2])}. 
+
+i.e, either we climb from step $i-1$ by paying cost $f[i-1]$, or we can climb from step $i-2$ by paying cost $f[i-2]$. But to climb from step $i$, we have to add the cost associated which is \fcj{cost[i]}. This motivates dynamic programming.
+
+\setcounter{lstlisting}{0}
+\begin{lstlisting}[style=customc, caption={DP}]
+int minCostClimbingStairs( vector<int>& cost )
+{
+    //to climb from step 0
+    //we have to pay cost[0]
+    int x0 = cost[0];
+    //to climb from step 1
+    //we have to pay cost[1]
+    int x1 = cost[1];
+    for( size_t i = 2; i < cost.size(); ++i )
+    {
+        //to clime from step i
+        //we either have climbed from step i-1 by paying cost x1
+        //or climbed from step i-2 by paying cost x0
+        //then we will pay cost[i] to climb from step i
+        int x2 = cost[i] + ( min )( x0, x1 );
+        x0 = x1;
+        x1 = x2;
+    }
+    //finally, either we climb from step N-2
+    //or climb from step N-1
+    //choose the minimum one
+    return ( min )( x1, x0 );
+}
+\end{lstlisting}
+
+
+

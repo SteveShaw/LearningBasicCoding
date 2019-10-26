@@ -1,0 +1,94 @@
+\section{744 --- Find Smallest Letter Greater Than Target}
+Given a list of sorted characters \fcj{letters} containing only lowercase letters, and given a target letter \fcj{target}, find the smallest element in the list that is larger than the given target.
+
+Letters also wrap around. For example, if the target is \fcj{target = 'z'} and \fcj{letters = ['a', 'b']}, the answer is \fcj{'a'}.
+
+
+\paragraph{Examples:}
+\begin{flushleft}
+\textbf{Input}:
+
+\fcj{letters = ["c", "f", "j"]}
+
+\fcj{target = "a"}
+
+\textbf{Output}: \fcj{"c"}
+
+\textbf{Input}:
+
+\fcj{letters = ["c", "f", "j"]}
+
+\fcj{target = "c"}
+
+\textbf{Output}: \fcj{"f"}
+
+\textbf{Input}:
+
+\fcj{letters = ["c", "f", "j"]}
+
+\fcj{target = "d"}
+
+\textbf{Output}: \fcj{"f"}
+
+\textbf{Input}:
+
+\fcj{letters = ["c", "f", "j"]}
+
+\fcj{target = "g"}
+
+\textbf{Output}: \fcj{"j"}
+
+\textbf{Input}:
+
+\fcj{letters = ["c", "f", "j"]}
+
+\fcj{target = "j"}
+
+\textbf{Output}: \fcj{"c"}
+
+\textbf{Input}:
+
+\fcj{letters = ["c", "f", "j"]}
+
+\fcj{target = "k"}
+
+\textbf{Output}: \fcj{"c"}
+
+\end{flushleft}
+
+\paragraph{Note:}
+
+\begin{itemize}
+\item \fcj{letters} has a length in range \fcj{[2, 10000]}.
+\item \fcj{letters} consists of lowercase letters, and contains at least 2 unique letters.
+\item \fcj{target} is a lowercase letter.
+\end{itemize}
+
+\subsection{Binary Search}
+This is actually a rightmost binary search. If the target letter is larger than all of the letters in the given list, returns the first letter
+
+\setcounter{lstlisting}{0}
+\begin{lstlisting}[style=customc, caption={Binary Search}]
+char nextGreatestLetter( vector<char>& letters, char target )
+{
+    size_t l = 0;
+    auto r = letters.size();
+    while( l < r )
+    {
+        auto mid = ( l + r ) / 2;
+        if( letters[mid] <= target )
+        {
+            l = mid + 1;
+        }
+        else
+        {
+            r = mid;
+        }
+    }
+    if( l == letters.size() )
+    {
+        l = 0;
+    }
+    return letters[l];
+}
+\end{lstlisting}

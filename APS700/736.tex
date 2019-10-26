@@ -1,0 +1,346 @@
+\section{736 --- Parse Lisp Expression}
+You are given a string \fcj{expression} representing a Lisp-like expression to return the integer value of.
+
+The syntax for these expressions is given as follows.
+
+\begin{itemize}
+\item An expression is either an integer, a let--expression, an add--expression, a mult--expression, or an assigned variable. Expressions always evaluate to a single integer.
+
+\item (An integer could be positive or negative.)
+
+\item A \textbf{let--expression} takes the form \fcj{(let v1 e1 v2 e2 ... vn en expr)}, where \fcj{let} is always the string \fcj{"let"}, then there are 1 or more pairs of alternating variables and expressions, meaning that the first variable \fcj{v1} is assigned the value of the expression \fcj{e1}, the second variable \fcj{v2} is assigned the value of the expression \fcj{e2}, and so on sequentially; and then the value of this \textbf{let--expression} is the value of the expression \fcj{expr}.
+
+\item An \textbf{add--expression} takes the form \fcj{(add e1 e2)} where \fcj{add} is always the string \fcj{"add"}, there are always two expressions \fcj{e1}, \fcj{e2}, and this expression evaluates to the addition of the evaluation of \fcj{e1} and the evaluation of \fcj{e2}.
+
+\item A \textbf{mult--expression} takes the form \fcj{(mult e1 e2)} where \fcj{mult} is always the string \fcj{"mult"}, there are always two expressions \fcj{e1}, \fcj{e2}, and this expression evaluates to the multiplication of the evaluation of \fcj{e1} and the evaluation of \fcj{e2}.
+
+\item For the purposes of this question, we will use a smaller subset of variable names. A variable starts with a lowercase letter, then zero or more lowercase letters or digits. Additionally for your convenience, the names \fcj{"add"}, \fcj{"let"}, or \fcj{"mult"} are protected and will never be used as variable names.
+
+\item Finally, there is the concept of scope. When an expression of a variable name is evaluated, \textbf{within the context of that evaluation}, the innermost scope (in terms of parentheses) is checked first for the value of that variable, and then outer scopes are checked sequentially. It is guaranteed that every expression is legal.
+
+\end{itemize}
+
+
+\paragraph{Evaluation Examples:}
+\begin{flushleft}
+
+\textbf{Input}: \fcj{(add 1 2)}
+
+\textbf{Output}: 3
+
+\textbf{Input}: \fcj{(mult 3 (add 2 3))}
+
+\textbf{Output}: 15
+
+\textbf{Input}: \fcj{(let x 2 (mult x 5))}
+
+\textbf{Output}: 10
+
+\textbf{Input}: \fcj{(let x 2 (mult x (let x 3 y 4 (add x y))))}
+
+\textbf{Output}: 14
+
+\textbf{Explanation}: 
+
+In the expression \fcj{(add x y)}, when checking for the value of the variable $x$, we check from the innermost scope to the outermost in the context of the variable we are trying to evaluate. Since $x = 3$ is found first, the value of x is 3.
+
+\textbf{Input}: \fcj{(let x 3 x 2 x)}
+
+\textbf{Output}: 2
+
+\textbf{Explanation}: Assignment in let statements is processed sequentially.
+
+\textbf{Input}: \fcj{(let x 1 y 2 x (add x y) (add x y))}
+
+\textbf{Output}: 5
+
+\textbf{Explanation}:
+
+The first \fcj{(add x y)} evaluates as 3, and is assigned to $x$.
+
+The second \fcj{(add x y)} evaluates as $3+2 = 5$.
+
+\textbf{Input}: \fcj{(let x 2 (add (let x 3 (let x 4 x)) x))}
+
+\textbf{Output}: 6
+
+\textbf{Explanation}: 
+
+Even though \fcj{(let x 4 x)} has a deeper scope, it is outside the context of the final $x$ in the add-expression.  That final x will equal 2.
+
+\textbf{Input}: \fcj{(let a1 3 b2 (add a1 1) b2) }
+
+\textbf{Output}: 4
+
+\textbf{Explanation}: Variable names can contain digits after the first character.
+
+
+\end{flushleft}
+\paragraph{Note:}
+
+\begin{itemize}
+\item The given string \fcj{expression} is well formatted: There are no leading or trailing spaces, there is only a single space separating different components of the string, and no space between adjacent parentheses. The expression is guaranteed to be legal and evaluate to an integer.
+\item The length of \fcj{expression} is at most 2000. (It is also non-empty, as that would not be a legal expression.)
+\item The answer and all intermediate calculations of that answer are guaranteed to fit in a 32-bit integer.
+\end{itemize}
+
+\subsection{Recursive Parsing}
+The algorithm is very straightforward with some very tricky points.
+
+The parsing loop is almost same as problem \textbf{726 --- Number Of Atoms}. We will stop the loop when we at \fcj{')'}.
+
+\begin{enumerate}
+\item When parsing \fcj{'let'}, we record current found variable and value, and maintain a state to indicate if we are parsing a variable or a number.
+\item When parsing \fcj{'add'} or \fcj{'mult'}, we will search the value of the variable in hash maps from inner most to outer most. Thus, we need an array of hash maps to map variable to its value inside each expression.
+\item The last expression of \fcj{'let'} need to be evaluated carefully.
+\end{enumerate}
+
+\setcounter{lstlisting}{0}
+\begin{lstlisting}[style=customc, caption={Recursive Parsing}]
+int evaluate( string expression )
+{
+
+    size_t start = 0;
+
+    string_view expr( expression.c_str(), expression.size() );
+
+    vector<unordered_map<string_view, int>> dicts;
+
+    return parse( expr, start, dicts );
+}
+
+int parse( string_view expr, size_t& start, vector<unordered_map<string_view, int>>& dicts )
+{
+    //the state of parsing <let>
+    //0: parsing a variable
+    //1: parsing a number
+    unsigned char let_state = 0;
+
+    vector<string_view> vars;
+    vector<int> evals;
+
+    dicts.emplace_back( unordered_map<string_view, int> {} );
+
+    char oper = 'z';
+
+    while( ( start < expr.size() ) && ( expr[start] != ')' ) )
+    {
+        if( expr[start] == '(' )
+        {
+            ++start;
+            int val = parse( expr, start, dicts );
+
+            if( oper == 'z' )
+            {
+                //this is the outmost level
+                //directly return the value
+                return val;
+            }
+
+            if( oper == 'l' )
+            {
+                //this is <let>
+                if( let_state == 1 )
+                {
+                    //we are parse number
+                    //map last variable to this value
+                    dicts.back()[vars.back()] = val;
+                    vars.pop_back();
+                }
+                else
+                {
+                    //we should parse variable
+                    //but found a value
+                    //maybe it is the last expression of <let>
+                    evals.push_back( val );
+                }
+                //change state
+                let_state = 1 - let_state;
+            }
+            else
+            {
+                //<add> and <mult> requires a value
+                evals.push_back( val );
+            }
+        }
+        else if( oper == 'z' )
+        {
+            oper = expr[start];
+            //<mult> has four letters
+            start += ( oper == 'm' ) ? 5 : 4;
+        }
+        else if( oper == 'l' )  //let
+        {
+            size_t p = start;
+            //move start until a space, '(' or ')' is met
+            while( ( start < expr.size() ) && !is_sep( expr[start] ) )
+            {
+                ++start;
+            }
+
+            bool is_name = is_lc( expr[p] );
+            if( is_name )
+            {
+                //this is a variable name
+                vars.emplace_back( expr.substr( p, start - p ) );
+            }
+            else
+            {
+                //this is a value
+                evals.push_back( to_int( expr, p, start ) );
+            }
+
+            if( let_state )
+            {
+                //we are parsing a value
+                if( is_name )
+                {
+                    //but we are given a variable
+                    //thus we will map the value of this variable
+                    //to the last variable's value
+                    //we need to pop_back() twice
+                    //because we have push_back current variable
+                    auto var = vars.back();
+                    vars.pop_back();
+
+                    dicts.back()[vars.back()] = dicts.back()[var];
+                    vars.pop_back();
+                }
+                else
+                {
+                    //map the value to the last variable
+                    dicts.back()[vars.back()] = evals.back();
+                    //we need remove last variable
+                    //and current value
+                    vars.pop_back();
+                    evals.pop_back();
+                }
+            }
+            //change the state
+            let_state = 1 - let_state;
+            //only advance start when it is space
+            if( expr[start] == ' ' )
+            {
+                ++start;
+            }
+        }
+        else
+        {
+            auto p = start;
+            //move start until a space, '(' or ')' is met
+            while( ( start < expr.size() ) && !is_sep( expr[start] ) )
+            {
+                ++start;
+            }
+
+            if( is_lc( expr[p] ) )
+            {
+                //we got a variable
+                auto var = expr.substr( p, start - p );
+                //get the value from the hash maps hierachy
+                evals.push_back( find_val( dicts, var ) );
+            }
+            else
+            {
+                //we got a value
+                //save it
+                evals.push_back( to_int( expr, p, start ) );
+            }
+//only advance start when it is space
+            if( expr[start] == ' ' )
+            {
+                ++start;
+            }
+        }
+
+    } //end while
+
+    int val = -1;
+
+    if( oper == 'l' )
+    {
+        //we are end of <let>
+        if( !evals.empty() )
+        {
+            //we have expression value
+            //as the last
+            val = evals.back();
+        }
+        else
+        {
+            //we must have a variable as the last one
+            val = find_val( dicts, vars.back() );
+        }
+    }
+    else
+    {
+        //we are at the end of <add> or <mult>
+        val = evals.back();
+        evals.pop_back();
+
+        if( oper == 'a' )
+        {
+            val += evals.back();
+        }
+        else
+        {
+            val *= evals.back();
+        }
+    }
+    //remove current hash map
+    dicts.pop_back();
+    //advance index
+    ++start;
+    if( ( start < expr.size() ) && ( expr[start] == ' ' ) )
+    {
+        //advance to skip space
+        ++start;
+    }
+    return val;
+}//end parse()
+//helper function to tranform to integer
+int to_int( string_view sv, size_t start, size_t end )
+{
+    int x = 0;
+    int sign = 1;
+    auto i = start;
+    //need to consider negative number
+    if( sv[i] == '-' )
+    {
+        sign = -1;
+        ++i;
+    }
+
+    for( ; i < end; ++i )
+    {
+        x = x * 10 + ( sv[i] - '0' );
+    }
+
+    return x * sign;
+}
+
+bool is_lc( char c )
+{
+    return ( c >= 'a' ) && ( c <= 'z' );
+}
+
+bool is_sep( char c )
+{
+    return ( c == ' ' ) || ( c == ')' ) || ( c == '(' );
+}
+//find value of <var> through
+//hash map hierachy
+int find_val( vector<unordered_map<string_view, int>>& dicts, string_view var )
+{
+    for( auto x = dicts.rbegin(); x != dicts.rend(); ++x )
+    {
+        auto it = x->find( var );
+        if( it != x->end() )
+        {
+            return it->second;
+        }
+    }
+    return 0;
+}
+\end{lstlisting}
+

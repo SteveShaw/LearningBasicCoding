@@ -1,0 +1,214 @@
+\section{755 --- Pour Water}
+We are given an elevation map, \fcj{heights[i]} representing the height of the terrain at that index. The width at each index is 1. After $ V $ units of water fall at index $K$, how much water is at each index?
+
+Water first drops at index $K$ and rests on top of the highest terrain or water at that index. Then, it flows according to the following rules:
+
+\begin{itemize}
+\item If the droplet would eventually fall by moving left, then move left.
+\item Otherwise, if the droplet would eventually fall by moving right, then move right.
+\item Otherwise, rise at it's current position.
+\end{itemize}
+
+Here, \textit{eventually fall} means that the droplet will eventually be at a lower level if it moves in that direction. Also, \textit{level} means the height of the terrain plus any water in that column.
+
+We can assume there's infinitely high terrain on the two sides out of bounds of the array. Also, there could not be partial water being spread out evenly on more than 1 grid block --g- each unit of water has to be in exactly one block.
+
+\paragraph{Example 1:}
+\begin{flushleft}
+\textbf{Input}: 
+
+\fcj{heights = [2,1,1,2,1,2,2]}, $V = 4$, $K = 3$
+
+\textbf{Output}: \fcj{[2,2,2,3,2,2,2]}
+
+\textbf{Explanation}:
+%#       #
+%#       #
+%##  # ###
+%#########
+% 0123456    <- index
+%
+%The first drop of water lands at index K = 3:
+%
+%#       #
+%#   w   #
+%##  # ###
+%#########
+% 0123456    
+%
+%When moving left or right, the water can only move to the same level or a lower level.
+%(By level, we mean the total height of the terrain plus any water in that column.)
+%Since moving left will eventually make it fall, it moves left.
+%(A droplet "made to fall" means go to a lower height than it was at previously.)
+%
+%#       #
+%#       #
+%## w# ###
+%#########
+% 0123456    
+%
+%Since moving left will not make it fall, it stays in place.  The next droplet falls:
+%
+%#       #
+%#   w   #
+%## w# ###
+%#########
+% 0123456  
+%
+%Since the new droplet moving left will eventually make it fall, it moves left.
+%Notice that the droplet still preferred to move left,
+%even though it could move right (and moving right makes it fall quicker.)
+%
+%#       #
+%#  w    #
+%## w# ###
+%#########
+% 0123456  
+%
+%#       #
+%#       #
+%##ww# ###
+%#########
+% 0123456  
+%
+%After those steps, the third droplet falls.
+%Since moving left would not eventually make it fall, it tries to move right.
+%Since moving right would eventually make it fall, it moves right.
+%
+%#       #
+%#   w   #
+%##ww# ###
+%#########
+% 0123456  
+%
+%#       #
+%#       #
+%##ww#w###
+%#########
+% 0123456  
+%
+%Finally, the fourth droplet falls.
+%Since moving left would not eventually make it fall, it tries to move right.
+%Since moving right would not eventually make it fall, it stays in place:
+%
+%#       #
+%#   w   #
+%##ww#w###
+%#########
+% 0123456  
+%
+%The final answer is [2,2,2,3,2,2,2]:
+%
+%    #    
+% ####### 
+% ####### 
+% 0123456 
+
+
+\end{flushleft}
+
+\paragraph{Example 2:}
+
+\begin{flushleft}
+\textbf{Input}: 
+
+\fcj{heights = [1,2,3,4]}, $V = 2$, $K = 2$
+
+\textbf{Output}: \fcj{[2,3,3,4]}
+
+\textbf{Explanation}:
+
+The last droplet settles at index 1, since moving further left would not cause it to eventually fall to a lower height.
+
+\end{flushleft}
+
+
+\paragraph{Example 3:}
+\begin{flushleft}
+
+
+\textbf{Input}: 
+
+\fcj{heights = [3,1,3]}, $V = 5$, $K = 1$
+
+\textbf{Output}: \fcj{[4,4,4]}
+\end{flushleft}
+\paragraph{Note:}
+
+\begin{itemize}
+\item \fcj{heights} will have length in \fcj{[1, 100]} and contain integers in \fcj{[0, 99]}.
+\item $V$ will be in range \fcj{[0, 2000]}.
+\item $K$ will be in range \fcj{[0, heights.length - 1]}.
+\end{itemize}
+
+\subsection{Simulation}
+When a droplet falls, we check if it is possible for it to fall left, i.e., if \fcj{heights[i - 1] <= heights[i]}. If the condition is met, the water will fall to a \textit{candidate} block in that direction. We keep track of every time we actually fall at index $x$. If we \fcj{"eventually fall"} ($x\neq K$) as described in the problem statement, the unit amount of water will stay there. 
+
+Otherwise, we perform a similar check by going right.
+
+If either left and right cannot drop the water, it will stay in $K$.
+
+\setcounter{lstlisting}{0}
+\begin{lstlisting}[style=customc, caption={Simulation}]
+vector<int> pourWater( vector<int>& heights, int V, int K )
+{
+    auto L = static_cast<int>( heights.size() );
+    for( int i = 0; i < V; ++i )
+    {
+        if( ( K > 0 ) && ( heights[K - 1] <= heights[K] ) )
+        {
+            int fill_p = K;
+            //move left
+            int l = K;
+            //the water can flow left
+            //if current height is no larger than its right.
+            while( ( l > 0 ) && ( heights[l - 1] <= heights[l] ) )
+            {
+                if( heights[l - 1] < heights[l] )
+                {
+                    //the water can only fall into
+                    //current index when the height is less than its right
+                    fill_p = l - 1;
+                    //we cannot break here because maybe some lower block
+                    //lie left of current block
+                }
+                --l;
+            }
+            if( heights[fill_p] < heights[K] )
+            {
+                //we found a place that the water
+                //eventually fall
+                ++heights[fill_p];
+                continue;
+            }
+        }
+        if( ( K < L - 1 ) && ( heights[K + 1] <= heights[K] ) )
+        {
+            //similar check for moving right
+            int fill_p = K;
+            int r = K;
+            //move right
+            while( ( r < L - 1 ) && ( heights[r] >= heights[r + 1] ) )
+            {
+                if( heights[r] > heights[r + 1] )
+                {
+                    fill_p = r + 1;
+                    //similarly, we cannot break here
+                    //because some lower block may lie right of current block
+                }
+                ++r;
+            }
+            if( heights[fill_p] < heights[K] )
+            {
+                ++heights[fill_p];
+                continue;
+            }
+        }
+        //neither left nor right
+        //water will fall
+        //stay at K
+        ++heights[K];
+    }
+    return heights;
+}
+\end{lstlisting}

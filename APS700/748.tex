@@ -1,0 +1,56 @@
+\section{748 --- Shortest Completing Word}
+Find the minimum length word from a given dictionary \fcj{words}, which has all the letters from the string \fcj{licensePlate}. Such a word is said to complete the given string licensePlate
+
+Here, for letters we ignore case. For example, \fcj{"P"} on the \fcj{licensePlate} still matches \fcj{"p"} on the word.
+
+It is guaranteed an answer exists. If there are multiple answers, return the one that occurs first in the array.
+
+The license plate might have the same letter occurring multiple times. For example, given a \fcj{licensePlate} of \fcj{"PP"}, the word \fcj{"pair"} does not complete the licensePlate, but the word \fcj{"supper"} does.
+
+\paragraph{Example 1:}
+\begin{flushleft}
+
+
+\textbf{Input}: 
+
+\fcj{licensePlate = "1s3 PSt"}
+
+\fcj{words = ["step", "steps", "stripe", "stepple"]}
+
+\textbf{Output}: \fcj{"steps"}
+
+\textbf{Explanation}: 
+
+The smallest length word that contains the letters \fcj{"S"}, \fcj{"P"}, \fcj{"S"}, and \fcj{"T"}.
+
+Note that the answer is not \fcj{"step"}, because the letter \fcj{"s"} must occur in the word twice.
+
+Also note that we ignored case for the purposes of comparing whether a letter exists in the word.
+\end{flushleft}
+
+\paragraph{Example 2:}
+\begin{flushleft}
+
+\textbf{Input}: 
+
+\fcj{licensePlate = "1s3 456"}
+
+\fcj{words = ["looks", "pest", "stew", "show"]}
+
+\textbf{Output}: \fcj{"pest"}
+
+\textbf{Explanation}: 
+
+There are 3 smallest length words that contains the letters \fcj{"s"}.
+
+We return the one that occurred first.
+\end{flushleft}
+
+\paragraph{Note:}
+
+\begin{itemize}
+\item \fcj{licensePlate} will be a string with length in range \fcj{[1, 7]}.
+\item \fcj{licensePlate} will contain digits, spaces, or letters (uppercase or lowercase).
+\item \fcj{words} will have a length in the range \fcj{[10, 1000]}.
+\item Every \fcj{words[i]} will consist of lowercase letters, and have length in range \fcj{[1, 15]}.
+\end{itemize}

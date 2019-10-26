@@ -1,0 +1,192 @@
+\section{726 --- Number of Atoms}
+Given a chemical \fcj{formula} (given as a string), return the count of each atom.
+
+An atomic element always starts with an uppercase character, then zero or more lowercase letters, representing the name.
+
+1 or more digits representing the count of that element may follow if the count is greater than 1. If the count is 1, no digits will follow. For example, \textbf{H2O} and \textbf{H2O2} are possible, but \textbf{H1O2} is impossible.
+
+Two formulas concatenated together produce another formula. For example, \textbf{H2O2He3Mg4} is also a formula.
+
+A formula placed in parentheses, and a count (optionally added) is also a formula. For example, \textbf{(H2O2)} and \textbf{(H2O2)3} are formulas.
+
+Given a formula, output the count of all elements as a string in the following form: the first name (in sorted order), followed by its count (if that count is more than 1), followed by the second name (in sorted order), followed by its count (if that count is more than 1), and so on.
+
+\paragraph{Example 1:}
+
+\begin{flushleft}
+\textbf{Input}: \fcj{formula = "H2O"}
+
+\textbf{Output}: \fcj{"H2O"}
+
+\textbf{Explanation}: 
+
+The count of elements are \fcj{['H': 2, 'O': 1]}.
+\end{flushleft}
+
+\paragraph{Example 2:}
+
+\begin{flushleft}
+
+\textbf{Input}: \fcj{formula = "Mg(OH)2"}
+
+\textbf{Output}: \fcj{"H2MgO2"}
+
+\textbf{Explanation}: 
+
+The count of elements are \fcj{['H': 2, 'Mg': 1, 'O': 2]}.
+\end{flushleft}
+
+\paragraph{Example 3:}
+
+\begin{flushleft}
+\textbf{Input}: \fcj{formula = "K4(ON(SO3)2)2"}
+
+\textbf{Output}: \fcj{"K4N2O14S4"}
+
+\textbf{Explanation}: 
+
+The count of elements are \fcj{['K': 4, 'N': 2, 'O': 14, 'S': 4]}.
+\end{flushleft}
+
+\paragraph{Note:}
+
+\begin{itemize}
+\item All atom names consist of lowercase letters, except for the first character which is uppercase.
+\item The length of \fcj{formula} will be in the range \fcj{[1, 1000]}.
+\item \fcj{formula} will only consist of letters, digits, and round parentheses, and is a valid formula as defined in the problem.
+\end{itemize}
+
+\subsection{Recursion}
+We will use a helper function, say \fcj{parse}, to parse the \fcj{formula} from index $x$, returning a hash map $M$ which map the element name to their counts.
+
+For the same elements are at the same level (i.e, they are not inside any parenthesis), we will add their counts. When we finish parse a expression inside a parenthesis, we will multiple each name's count by the number immediately following the closing parenthesis.
+
+\begin{itemize}
+\item When we see a \fcj{'('}, we will parse whatever is inside the parenthesis (up to the closing one) and add acquired names and count to $M$.
+\item Otherwise, we should see an uppercase character: we will parse the rest of the letters to get the name, and add the count to the existing name in $M$.
+\item At the end, if there is a final count (representing the multiplicity of a bracketed sequence), we'll multiply each name's count in $M$ by this number.
+\end{itemize}
+
+\setcounter{lstlisting}{0}
+\begin{lstlisting}[style=customc, caption={Recursion}]
+string countOfAtoms( string formula )
+{
+    string_view sv( formula.c_str(), formula.size() );
+
+    //x will be changed during parsing
+    size_t x = 0;
+    auto M = parse( sv, x );
+
+    //output to string
+    string ans;
+    for( const auto& mp : M )
+    {
+        ans += mp.first;
+        if( mp.second > 1 )
+        {
+            ans += to_string( mp.second );
+        }
+    }
+    return ans;
+}
+
+map<string_view, int> parse( string_view s, size_t& x )
+{
+    map<string_view, int> M;
+
+    while( ( x < s.size() ) && ( s[x] != ')' ) )
+    {
+        if( s[x] == '(' )
+        {
+            //the inside expression
+            //starting from next index
+            ++x;
+
+            //parse inside expression
+            //get inside map
+            auto y_inside = parse( s, x );
+
+            for( const auto& inside : y_inside )
+            {
+                M[inside.first] += inside.second;
+            }
+        } //end if (s[x]==')')
+        else
+        {
+            //parse name
+            //s[x] will be uppercase
+            //record current x as x0
+            //starting x from next
+            auto x0 = x;
+            ++x;
+            while( ( x < s.size() ) && ( is_lowercase( s[x] ) ) )
+            {
+                ++x;
+            }
+            //the element name
+            auto name = s.substr( x0, x - x0 );
+            //parse the digit
+            x0 = x;
+            while( ( x < s.size() ) && ( is_digit( s[x] ) ) )
+            {
+                ++x;
+            }
+            int mul = x0 < x ? to_int( s, x0, x ) : 1;
+
+            //add to dictionary
+            //we may have name already appeared
+            //add the count togther because
+            //there are at same level
+            M[name] += mul;
+            //now s[x] is a uppercase or ')' or '('
+            //continue the while loop
+        }//end else
+    }//end while
+
+    //if s[x] is ')', it must be the last letter
+    //int s, because previous ')' is processed
+    //recursively
+    //we will parse after x
+    //to check if there is a number following
+    //the closing parenthesis
+
+    ++x;
+    auto x0 = x;
+    while( ( x < s.size() ) && ( is_digit( s[x] ) ) )
+    {
+        ++x;
+    }
+
+    if( x0 < x )
+    {
+        int mul = to_int( s, x0, x );
+        //since the number is following the
+        //closing parenthesis, we will multiply
+        //the number with each name's count
+        for( auto& mp : M )
+        {
+            mp.second *= mul;
+        }
+    }
+    return M;
+} //end function
+
+//helper functions
+bool is_lowercase( char c )
+{
+    return ( c >= 'a' ) && ( c <= 'z' );
+}
+bool is_digit( char c )
+{
+    return ( c >= '0' ) && ( c <= '9' );
+}
+int to_int( string_view sv, size_t start, size_t end )
+{
+    int x = 0;
+    for( size_t i = start; i < end; ++i )
+    {
+        x = x * 10 + ( sv[i] - '0' );
+    }
+    return x;
+}
+\end{lstlisting}

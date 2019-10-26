@@ -1,0 +1,92 @@
+\section{702 --- Search in a Sorted Array of Unknown Size}
+Given an integer array sorted in ascending order, write a function to search \textbf{target} in nums.  If \textbf{target} exists, then return its index, otherwise return $-1$. However, the array size is unknown to you. You may only access the array using an \fcj{ArrayReader} interface, where \fcj{ArrayReader.get(k)} returns the element of the array at index $k$ (0-indexed).
+
+You may assume all integers in the array are less than 10000, and if you access the array out of bounds, \fcj{ArrayReader.get} will return 2147483647.
+
+\paragraph{Example 1:}
+
+\begin{flushleft}
+\textbf{Input}: \fcj{array = [-1,0,3,5,9,12], target = 9}
+
+\textbf{Output}: 4
+
+\textbf{Explanation}: 9 exists and its index is 4
+\end{flushleft}
+
+\paragraph{Example 2:}
+
+\begin{flushleft}
+\textbf{Input}: \fcj{array = [-1,0,3,5,9,12], target = 2}
+
+\textbf{Output}: $-1$
+
+\textbf{Explanation}: 2 does not exist so return $-1$
+\end{flushleft}
+
+ 
+
+\paragraph{Note:}
+
+\begin{itemize}
+\item You may assume that all elements in the array are unique.
+\item The value of each element in the array will be in the range \fcj{[-9999, 9999]}.
+\end{itemize}
+
+\subsection{Binary Search}
+Since array is sorted, binary search is one of feasible approach, but the problem here is that we don’t know size of array.
+
+If the array size is unknown, that means we do not have proper bounds to apply binary search. So in order to find position of key, first we find bounds and then apply binary search algorithm.
+\begin{itemize}
+    \item Let $l$ be pointing to 1st element and $h$ pointing to 2nd element of array, Now compare key with element at index $h$,
+    \item if it is greater than the element, set $l\gets h$ and $h\gets h\times 2$.
+    \item if it is smaller, then apply binary search on range $(l,h)$.
+\end{itemize}
+
+\setcounter{lstlisting}{0}
+\begin{lstlisting}[style=customc, caption={Binary Search}]
+// Forward declaration of ArrayReader class.
+class ArrayReader;
+
+int search( const ArrayReader& reader, int target )
+{
+    int low = 0;
+    int high = 1;
+
+    int x = reader.get( high );
+
+    //find bounds [low, high]
+    while( target > x )
+    {
+        low  = high;
+        high *= 2;
+        x = reader.get( high );
+    }
+
+    int ans = -1;
+
+    //binary search on [low, high]
+    while( low <= high )
+    {
+        int mid = ( low + high ) / 2;
+
+        x = reader.get( mid );
+
+        if( target > x )
+        {
+            low = mid + 1;
+        }
+        else if( target < x )
+        {
+            high = mid - 1;
+        }
+        else
+        {
+            ans = mid;
+            break;
+        }
+    }
+
+    return ans;
+
+}
+\end{lstlisting}

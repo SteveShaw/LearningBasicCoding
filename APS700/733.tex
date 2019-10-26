@@ -1,0 +1,80 @@
+\section{733 --- Flood Fill}
+An image is represented by a 2-D array of integers, each integer representing the pixel value of the image (from 0 to 65535).
+
+Given a coordinate \fcj{(sr, sc)} representing the starting pixel (row and column) of the flood fill, and a pixel value \fcj{newColor}, \fcj{"flood fill"} the image.
+
+To perform a \fcj{"flood fill"}, consider the starting pixel, plus any pixels connected 4-direction to the starting pixel of the same color as the starting pixel, plus any pixels connected 4-direction to those pixels (also with the same color as the starting pixel), and so on. Replace the color of all of the aforementioned pixels with the \fcj{newColor}.
+
+At the end, return the modified image.
+
+\paragraph{Example 1:}
+
+\textbf{Input}:
+ 
+\fcj{image = [[1,1,1],[1,1,0],[1,0,1]]}
+
+\fcj{sr = 1}, \fcj{sc = 1}, \fcj{newColor = 2}
+
+\textbf{Output}: \fcj{[[2,2,2],[2,2,0],[2,0,1]]}
+
+\textbf{Explanation}:
+ 
+From the center of the image (with position \fcj{(sr, sc) = (1, 1)}), all pixels connected 
+
+by a path of the same color as the starting pixel are colored with the new color.
+
+Note the bottom corner is not colored 2, because it is not 4-direction connected to the starting pixel.
+
+\paragraph{Note:}
+\begin{itemize}
+\item The length of \fcj{image} and \fcj{image[0]} will be in the range \fcj{[1, 50]}.
+
+\item The given starting pixel will satisfy \fcj{0 <= sr < image.length} and \fcj{0 <= sc < image[0].length}.
+
+\item The value of each color in \fcj{image[i][j]} and \fcj{newColor} will be an integer in \fcj{[0, 65535]}.
+
+\end{itemize}
+
+\subsection{Depth First Search}
+This is an easy problem with Depth First Search.
+
+Note: we only do flood filling when \fcj{image[sr][sc]!=newColor}.
+
+\setcounter{lstlisting}{0}
+\begin{lstlisting}[style=customc, caption={Depth First Search}]
+vector<vector<int>> floodFill( vector<vector<int>>& image, int sr, int sc, int newColor )
+{
+    int M = static_cast<int>( image.size() );
+    int N = static_cast<int>( image[0].size() );
+    if( image[sr][sc] == newColor )
+    {
+        //if the pixel value at (sr,sc) is equal to newColor
+        //no need to do flood fill
+        return image;
+    }
+    flood( image, sr, sc, newColor, image[sr][sc] );
+    return image;
+}
+//DFS helper function
+void flood( vector<vector<int>>& G, int r, int c, int color, int gray )
+{
+    int dr[] = {-1, 0, 1, 0};
+    int dc[] = {0, -1, 0, 1};
+    int M = static_cast<int>( G.size() );
+    int N = static_cast<int>( G[0].size() );
+    G[r][c] = color;
+    for( int i = 0; i < 4; ++i )
+    {
+        int nr = r + dr[i];
+        int nc = c + dc[i];
+
+        if( ( nr >= 0 ) && ( nr < M ) && ( nc >= 0 ) && ( nc < N ) )
+        {
+            if( G[nr][nc] == gray )
+            {
+                flood( G, nr, nc, color, gray );
+            }
+        }
+    }
+}
+\end{lstlisting}

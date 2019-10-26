@@ -1,0 +1,51 @@
+\section{708 --- Insert into a Cyclic Sorted List}
+Given a node from a cyclic linked list which is sorted in ascending order, write a function to insert a value into the list such that it remains a cyclic sorted list. The given node can be a reference to any single node in the list, and may not be necessarily the smallest value in the cyclic list.
+
+If there are multiple suitable places for insertion, you may choose any place to insert the new value. After the insertion, the cyclic list should remain sorted.
+
+If the list is empty (i.e., given node is \fcj{null}), you should create a new single cyclic list and return the reference to that single node. Otherwise, you should return the original given node.
+
+The following example may help you understand the problem better:
+
+
+\begin{figure}[H]
+\begin{tikzpicture}
+[every node/.style={draw, circle, fill=gray!20!, minimum size=5mm},
+>=stealth, ->, thick]
+\node(1){1};
+\node(4)[below=12mm of 1]{4};
+\node(3)[right=18mm of 4]{3};
+\draw (4) -- (1);
+\draw (1.east) -| (3.north);
+\node(t)[draw=none, right=12mm of 3]{\scriptsize HEAD};
+\draw (t) -- (3);
+\draw (3) -- (4);
+\end{tikzpicture}
+\end{figure} 
+
+
+
+In the figure above, there is a cyclic sorted list of three elements. You are given a reference to the node with value 3, and we need to insert 2 into the list.
+
+ 
+
+
+
+The new node should insert between node 1 and node 3. After the insertion, the list should look like this, and we should still return node 3.
+
+\begin{figure}[H]
+\begin{tikzpicture}
+[every node/.style={draw, circle, fill=gray!20!, minimum size=5mm},
+>=stealth, ->, thick]
+\node(1){1};
+\node(2)[right=18mm of 1] {2};
+\node(4)[below=12mm of 1]{4};
+\node(3)[right=18mm of 4]{3};
+\draw (4) -- (1);
+\draw (1) -- (2);
+\draw (2) -- (3);
+\node(t)[draw=none, right=12mm of 3]{\scriptsize HEAD};
+\draw (t) -- (3);
+\draw (3) -- (4);
+\end{tikzpicture}
+\end{figure}

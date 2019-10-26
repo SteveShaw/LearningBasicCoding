@@ -1,0 +1,99 @@
+\section{738 --- Monotone Increasing Digits}
+Given a non-negative integer $N$, find the largest number that is less than or equal to $N$ with monotone increasing digits.
+
+(Recall that an integer has monotone increasing digits if and only if each pair of adjacent digits $x$ and $y$ satisfy $x \leq y$.)
+
+\paragraph{Example 1:}
+\begin{flushleft}
+
+\textbf{Input}: $N = 10$
+
+\textbf{Output}: 9
+\end{flushleft}
+
+\paragraph{Example 2:}
+\begin{flushleft}
+
+
+\textbf{Input}: $N = 1234$
+
+\textbf{Output}: 1234
+
+\end{flushleft}
+
+\paragraph{Example 3:}
+\begin{flushleft}
+
+
+\textbf{Input}: $N = 332$
+
+\textbf{Output}: 299
+
+\end{flushleft}
+
+\subsection{Greedy}
+We construct an array of digits from $N$.
+
+Then, we iterate over the digits array by comparing current digits $x$ against its next digit $y$
+
+\begin{itemize}
+\item If $x\leq y$, it meets the monotone increasing condition, thus we move to next digit.
+\item Otherwise, we will change all the digits after $x$ to 9 and change $x$ to $x-1$. Then, we need to go back from $x$ to the first digit. During the tracking back, we check if current digit is less than its previous one. If it is, we will change current digit to 9 and decrement previous digit.
+\end{itemize}
+
+\setcounter{lstlisting}{0}
+\begin{lstlisting}[style=customc, caption={Greedy}]
+int monotoneIncreasingDigits( int N )
+{
+    //expand N to a digit array
+    vector<int> digits;
+    int n = 0;
+    while( N )
+    {
+        int q = N / 10;
+        int r = N - 10 * q;
+        digits.push_back( r );
+        N = q;
+        ++n;
+    }
+    //reverse the array
+    //make sure the highest digit is the first element
+    reverse( begin( digits ), end( digits ) );
+    for( int i = 0; i < n - 1; ++i )
+    {
+        if( digits[i] > digits[i + 1] )
+        {
+            //decrement current digit
+            digits[i] -= 1;
+            //we will change all the digits
+            //after i to 9
+            for( int j = i + 1; j < n; ++j )
+            {
+                digits[j] = 9;
+            }
+            //make sure from the start to i
+            //is still a monoton increasing
+            int j = i;
+            while( j >= 1 )
+            {
+                if( digits[j - 1] > digits[j] )
+                {
+                    //change current digit to 9
+                    //decrements previous digit
+                    digits[j] = 9;
+                    digits[j - 1] -= 1;
+                }
+                --j;
+            }
+            break;
+        }
+    }
+    //reconstruct the answer from the array
+    int ans = 0;
+    for( int d : digits )
+    {
+        ans = ans * 10 + d;
+    }
+    return ans;
+}
+\end{lstlisting}

@@ -1,0 +1,245 @@
+\section{719 --- Find K-th Smallest Pair Distance}
+Given an integer array, $A$, return the $k$-th smallest distance among all the pairs. The distance of a pair $(A, B)$ is defined as the absolute difference between $A$ and $B$.
+
+\paragraph{Example 1:}
+\begin{flushleft}
+
+
+\textbf{Input}:
+
+$A$:  \fcj{[1,3,1]},  $k = 1$
+
+\textbf{Output}: 0 
+
+\textbf{Explanation}:
+
+Here are all the pairs:
+
+$ (1,3) \Longrightarrow 2 $
+
+$ (1,1) \Longrightarrow 0 $
+
+$ (3,1) \Longrightarrow 2 $
+
+Then the 1st smallest distance pair is $ (1,1) $, and its distance is 0.
+\end{flushleft}
+
+\paragraph{Note:}
+
+\begin{enumerate}
+\item $2 \leq \lvert A\rvert \leq 10000$.
+\item $0 \leq A[i] < 1000000$.
+\item $1 \leq k \leq \lvert A\rvert \times (\lvert A\rvert - 1) / 2$.
+
+\end{enumerate}
+
+
+\subsection{Binary Search With Sliding Window}
+The answer is definitely in the range $[0, W]$, where $W = \max(A) - \min(A)$.
+
+To employ a binary search frame work, we need to find out how many pair of $(i,j)$ in $A$ such that $\lvert A[i] -A[j]\rvert \leq m$ where $m$ is the current value we are facing. Then, the $K$-th smallest pair difference will be the smallest (first) distance, say $x$, such that there are equal or larger than $k$ pairs with difference no larger than $x$ (\fcc{lower_bound}). 
+
+Thus, we need to find a way to count the number of these pairs. One of ways to do that is count all the possible pairs in $A$ and compare with $m$. This is definitely very slow.
+
+We may process $A$ and then collect as many as possible information to facilitate the searching process. Thus, we will have the following way.
+
+First, we sort $A$ by ascending order. For a pair $(A[i], A[j])$ and $i<j$. Since $A$ is sorted, the distance will be $A[j]-A[i]$. If we fix index $i$, then we need to find out how many $A[j]$ such that $A[j] - A[i] \leq m$ and $j > i$. 
+
+We will use a sliding window approach. In this approach, for each fixed $i$, we try to find how many $j$ such that $A[j] - A[i]\leq m$. We iterate $i$ from 0 to $\lvert A\rvert -1$, and $j$ will be updated for each $i$ (thus $j$ is keeping change to avoid starting from 0 each time), and then we add up all the counts.
+
+\setcounter{lstlisting}{0}
+\begin{lstlisting}[style=customc, caption={Binary Search With Sliding Window}]
+int smallestDistancePair( vector<int>& nums, int k )
+{
+    //sort nums to facilitate
+    //processing
+    sort( nums.begin(), nums.end() );
+    //the range of k is in [0, max(nums) - min(nums)]
+    int l = 0;
+    int r = nums.back() - nums.front();
+    //leftmost binary search
+    //we find first distance x such that
+    //there are equal or larger than k pairs
+    //with distance no larger than x
+    while( l < r )
+    {
+        int mid = ( l + r ) / 2;
+
+        if( count( nums, mid ) < k )
+        {
+            l = mid + 1;
+        }
+        else
+        {
+            r = mid;
+        }
+    }
+
+    return l;
+}
+
+//count the number of pairs
+//with distance no larger than (dist)
+int count( vector<int>& A, int dist )
+{
+    int N = static_cast<int>( A.size() );
+    //right is updated each time
+    //avoid starting from 0
+    //during iteration
+    int right = 0;
+    //ans is the total count
+    int ans = 0;
+
+    for( int left = 0; left < N; ++left )
+    {
+        while( ( right < N ) && ( A[right] <= A[left] + dist ) )
+        {
+            ++right;
+        }
+        //now A[right] > A[left]+dist
+        //and A[right-1] <=  A[left]+dist
+        //thus there are (right-1-(left+1)+1=right-left-1) pairs
+        ans += ( right - left - 1 );
+    }
+
+    return ans;
+}
+\end{lstlisting}
+
+%We can build two arrays $x$ and $y$. 
+%
+%\begin{itemize}
+%\item $x[k]$ save the number of $A[u]$ such that $A[u] = A[k]$ and $u < k$. 
+%\item $y[t]$ save the number of $A[u]$ such that $A[u] \leq t$. The range of $t$ is limited. It is in  $(\min(A), \min(A))$.
+%\item $x$ and $y$ can be build by scanning the sorted $A$. 
+%\end{itemize}
+%
+%For each fixed index $i$, we can know how many $A[j]$, say $z$, satisfy such that $A[j] \leq A[i] + m$ and $j <  i$. Apparently, $z=y[A[i] + m] - y(A[i])$. 
+%
+%However, we may have repeated $A[i]$ in the array. For example, suppose $A[e] = A[k+1] = \ldots = A[i] = A[i+1] = \ldots = A[f]$ and $y[A[i]] = y[A[f]] = f+1$ (there are $f+1$ numbers no greater than $A[f]$ from $A[0]$ to $A[f]$).c
+%
+%\setcounter{algorithm}{0}
+%\begin{algorithm}[H]
+%\caption{Binary Search And Prefix Sum Based Solution}
+%\begin{algorithmic}[1]
+%\Procedure{SmallestDistancePair}{$A$, $n$, $K$}
+%\State \textbf{Sort} $A$ so that $A[0]\leq A[1] \ldots \leq A[n-1]$
+%\State \textbf{Initialize} $\lambda$ as $\lambda[0] = \ldots = \lambda[n-1] := 0$ \Comment $\lambda[j]$ is the count of $i$ where $i < j$ and $A[i] = A[j]$
+%\For{$i:=1$ \textbf{to} $n-1$}
+%\If{$A[i] = A[i-1]$}
+%\State $\lambda[i] \gets 1 + \lambda[i-1]$
+%\EndIf
+%\EndFor
+%\State \textbf{Initialize} $\delta$ as $\delta[0] = \ldots = \delta[A[n-1]\times 2-1] := 0$ \Comment Prefix array $\delta$'s size is $2\times A[n-1]$
+%\State $l:=0$
+%\For{$i:=0$ \textbf{to} $2\times A[n-1] - 1$}
+%\While{$l < n$ \textbf{and} $A[l] == i$}
+%\State $l\gets l+1$
+%\EndWhile
+%\State $\delta[i] \gets l$
+%\EndFor
+%\algstore{719algo}
+%\end{algorithmic}
+%\end{algorithm}
+%\begin{algorithm}[H]
+%\begin{algorithmic}
+%\algrestore{719algo}
+%\State $l:=0$
+%\State $r:=A[n-1]-A[0]$ \Comment $\max(A) - \min(A)$
+%\While{$l< r$}
+%\State $M:=(l+r)/2$
+%\State $\theta := 0$
+%\For{$i:=0$ \textbf{to} $n-1$}
+%\State $\theta \gets \theta + \delta[A[i] + M] - \delta[A[i]] + \lambda[i]$
+%\EndFor
+%\If{$\theta < k$}
+%\State $l\gets M+1$
+%\Else
+%\State $r\gets M$
+%\EndIf
+%\EndWhile
+%\State \Return $l$
+%\EndProcedure
+%\end{algorithmic}
+%\end{algorithm}
+%
+%\subsection{Trial and Error}
+%The basic idea for the trial and error algorithm is actually very simple and summarized below:
+%\begin{enumerate}
+%\item Construct a candidate $\theta$. \label{testep1}
+%\item Verify if it meets our requirements.
+%\item If it does, accept the solution; else discard it and repeat from [\ref{testep1}]
+%\end{enumerate}
+%However, to make this algorithm work efficiently, the following two conditions need to be true:
+%\begin{enumerate}
+%\item We have an efficient verification algorithm in Step 2;
+%\item The search space formed by all candidate solutions is small or we have efficient ways to traverse (or search) this space if it is large.
+%\end{enumerate}
+%The first condition ensures that each verification operation can be done quickly while the second condition limits the total number of such operations that need to be done. The two combined will guarantee that we have an efficient \textbf{trial and error algorithm} (which also means if any of them cannot be satisfied, you should probably not even consider this algorithm).
+%\subsubsection{Construct a candidate}
+%To construct a candidate, say $\theta$, we need to understand first what the desired solution is.
+%\par
+%The problem description requires we output the $K$--th smallest pair distance, which is a non-negative integer (since the input array $A$ is an integer array and pair distances are absolute values). 
+%\subsubsection{Search space formed by all the candidates}
+%Suppose $\alpha$ and $\beta$ be the \textbf{minimum} and \textbf{maximum} numbers in the input array $A$, and $\Delta = \alpha - \beta$, then any pair distance from $A$ must lie in the range $[0, \Delta]$. As such, our desired solution is also within this range, which implies the search space will be $[0, \Delta]$ (any number outside this range can be ruled out immediately without further verification).
+%\subsubsection{Verify a given candidate solution}
+%This is the key part of this trial and error algorithm. So given a candidate integer $\theta$, how do we determine if it is the $K$--th smallest pair distance?
+%\par
+%First, what does the $K$--th smallest pair distance really mean? By definition, if we compute all the pair distances and sort them in ascending order, then the $K$--th smallest pair distance will be the one at index $K - 1$. This is essentially the naive way for solving this problem.
+%\par
+%Apparently the above definition cannot be used to do the verification, as it requires explicit computation of the pair distance array. Fortunately there is another way to define the $K$--th smallest pair distance: given an integer $I$, suppose $\Theta(I)$ denote the number of pair distances that are less than or equal to $I$, then the $K$--th smallest pair distance will be the smallest integer such that $\Theta(I) \geq K$. i.e., $\Theta(I) \geq K$ and $\Theta(I-1) < K$
+%\par
+%Here is a quick justification of the alternative definition. Let $\mu_k$ be the $K$--th pair distance in the sorted pair distance array with index $K - 1$. Since all the pair distances up to index $K - 1$ are $\leq \mu_k$, we have $\Theta(\mu_k) \geq K$. Now suppose $\theta$ is the smallest integer such that $\Theta(\theta) \geq K$, we show $\theta$ must be equal to $\mu_k$ as follows:
+%\begin{itemize}
+%\item If $\mu_k < \theta$ , since $\Theta(\mu_k) \geq K$, then $\theta$ will not be the smallest integer such that $\Theta(\mu_k) \geq K$, which contradicts our assumption.
+%\item If $\mu_k > \theta$, since $\Theta(\theta) \geq K$, by definition of the $\Theta$ function, there are at least $K$ pair distances that are $\leq \theta$, which implies there are at least $K+1$ pair distances that are smaller than $\mu_k$. This means $\mu_k$ cannot be the $K$--th pair distance, contradicting our assumption again.
+%\end{itemize}
+%Taking advantage of this alternative definition of the $K$--th smallest pair distance, we can transform the verification process into a counting process. So how exactly do we do the counting?
+%\subsubsection{Count the number of pair distances no greater than the given integer}
+%As mentioned before, we cannot use the pair distance array, which means the only option is the input array $A$ itself. If there is no order among its elements, we got no better way other than compute and test each pair distance one by one. This leads to a $O(n^2)$ verification algorithm, which is as bad as the naive solution. So we need to impose some order to $A$ i.e sort $A$.
+%\par
+%Now suppose $A$ is sorted in ascending order, how do we proceed with the counting for a given number $\theta$? Suppose $\delta(i,j) = A[j] - A[i]$. If we keep the first index $i$ fixed, then $\delta(i, j) \leq \theta$ is equivalent to $ A[j] \leq A[i] + \theta$. This suggests that at least we can do a binary search to find the smallest index $j$ such that $A[j] > A[i] + \theta$ for each index $i$, then the count from index $i$ will be $j - i - 1$, and in total we have an $O(n\lg n)$ verification algorithm.
+%\par
+%It turns out the counting can be done in linear time using the classic 2--pointer technique if we make use of the following property:
+%\par
+%Suppose we have two starting indices $i_1$ and $i_2$ with $i_1 < i_2$, if $j_1$ and $j_2$ be the smallest index such that $A[j_1] > A[i_1] + \theta$ and $A[j_2] > A[i_2] + \theta$, respectively, then it must be true that $j_2 \geq j_1$. The proof is straightforward: suppose $j_2 < j_1$, since $j_1$ is the smallest index such that $A[j_1] > A[i_1] + \theta$, we should have $A[j_2] \leq A[i_1] + \theta$. On the other hand, $A[j_2] > A[i_2] + \theta \geq A[i_1] + num.$ The two inequalities contradict each other, thus validate our conclusion above.
+%\subsubsection{How to traverse the search space efficiently}
+%Up to this point, we know the search space, know how to construct the candidate and how to verify it by counting, we still need one last piece for the puzzle: how to traverse the search space.
+%\par
+%Of course we can do the naive linear walk by trying each integer from 0 up to $\Delta$ and choose the first integer $\mu$ such that $\Theta(\mu) \geq K$. The time complexity will be $O(n\Delta)$. However, given that $\Delta$ can be much larger than $n$, this algorithm can be much worse than the naive $O(n^2)$ solution.
+%\par
+%The key observation here is that the candidates are sorted naturally in ascending order, so a binary search is possible. Another fact is the non-decreasing property of the counting function $\Theta$: give two integers $I_1$ and $I_2$ such that $I_1 < I_2$, then $\Theta(I_1) \leq \Theta(I_2)$. So a binary walk of the search space will look like this:
+%\begin{itemize}
+%\item Denote the current search space as $[l, r]$
+%\item Initialize $l:=0$ and $r:=\Delta$
+%\item Use leftmost binary search
+%\end{itemize}
+%
+%\subsubsection{Algorithm}
+%\begin{algorithm}[H]
+%\caption{Trial And Error Algorithm}
+%\begin{algorithmic}[1]
+%\Procedure{SmallestDistancePair}{$A$, $n$}
+%\State \textbf{Sort} $A$ so that $A[0]\leq \ldots \leq A[n-1]$
+%\State $l:=0$
+%\State $r:=A[n-1] - A[0]$ \Comment The maximum pair difference in $A$
+%\While{$l < r$}
+%\State $m:=(l+r)/2$
+%\For{$i:=0$ \textbf{to} $n-1$}
+%\State $\lambda:= 0$
+%\State $\delta:=0$ \Comment Count of the elements
+%\While{$\lambda < n$ \textbf{and} $A[\lambda] \geq A[i] + m$}
+%\State $\lambda \gets \lambda + 1$
+%\EndWhile
+%\State $\delta \gets \delta + (\lambda -i-1)$
+%\EndFor
+%\If{$\delta < K$}
+%\State $l\gets m+1$
+%\Else
+%\State $r \gets m$
+%\EndIf
+%\EndWhile
+%\State \Return $l$
+%\EndProcedure
+%\end{algorithmic}
+%\end{algorithm}

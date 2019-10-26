@@ -1,0 +1,108 @@
+\section{727 --- Minimum Window Subsequence}
+Given strings $ S $ and $ T $, find the minimum (contiguous) \textbf{substring} $ W $ of $ S $, so that $ T $ is a \textbf{subsequence} of $ W $.
+
+If there is no such window in $ S $ that covers all characters in $ T $, return the empty string \fcj{""}. If there are multiple such minimum-length windows, return the one with the left-most starting index.
+
+\paragraph{Example 1:}
+
+\begin{flushleft}
+\textbf{Input}: $S$: \fcj{"abcdebdde"}, $T$: \fcj{"bde"}
+
+\textbf{Output}: \fcj{"bcde"}
+
+\textbf{Explanation}:
+ 
+\fcj{"bcde"} is the answer because it occurs before \fcj{"bdde"} which has the same length.
+
+\fcj{"deb"} is not a smaller window because the elements of $ T $ in the window must occur in order.
+\end{flushleft}
+ 
+
+\paragraph{Note:}
+
+\begin{itemize}
+\item All the strings in the input will only contain lowercase letters.
+\item The length of S will be in the range \fcj{[1, 20000]}.
+\item The length of T will be in the range \fcj{[1, 100]}.
+
+\end{itemize}
+\subsection{Two Indexes Sliding Window}
+We can make use of a sliding window approach framework, but something is tricky here.
+
+This is: when finding a sliding window that contains $T$, we need to trace back from the right edge of the sliding window back to see if we can shrink the window.
+
+And then, we need to start the right edge of sliding window from the next index of current left edge.
+
+\setcounter{lstlisting}{0}
+\begin{lstlisting}[style=customc, caption={Sliding Window}]
+string minWindow( string S, string T )
+{
+    string_view sv( S.c_str(), S.size() );
+
+    size_t ti = 0;
+
+    size_t left = 0;
+
+    string_view best;
+
+    size_t best_len = S.size();
+
+    for( size_t right = 0; right < S.size(); )
+    {
+        if( T[ti] != sv[right] )
+        {
+            //only increment index
+            //in S
+            ++right;
+            continue;
+        }
+        //increment index
+        //in T
+        ++ti;
+
+        if( ti == T.size() )
+        {
+            //T is matched completely
+            //we need to backtrace from current s[right] and t[ti]
+            auto x = right + 1;
+            auto y = T.size();
+
+            //since x and y are size_t type
+            //we need to not use y>=0 or x >= left
+            //[important]: the process of trace back
+            while( ( x > left ) && ( y > 0 ) )
+            {
+                if( sv[x - 1] == T[y - 1] )
+                {
+                    --y;
+                }
+
+                --x;
+            }
+            //now left is the left edge
+            //of shrinked window
+            left = x;
+            //update minimum length
+            //and get the related string
+            if( right - left + 1 < best_len )
+            {
+                best = sv.substr( left, right - left + 1 );
+                best_len = right - left + 1;
+            }
+            //reset index in T to zero
+            ti = 0;
+            //[important]: set right to the next index of left
+            //since we may find another smaller window
+            //starting from left+1
+            right = left + 1;
+        }
+        else
+        {
+            //T has not been matched completely
+            //continue incrementing index in S
+            ++right;
+        }
+    }
+    return { best.data(), best.size() };
+}
+\end{lstlisting}
