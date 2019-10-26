@@ -68,73 +68,71 @@ Sort a linked list $H$ in $O(n\log_2 n)$ time using constant space complexity.
 \end{flushleft}
 \subsection{Merge Sort}
 由于链表的特性，Merge Sort是最适合的排序方法。首先把原链表分成左右两部分，分别对这两部分调用排序函数，然后将这两部分排序号的链表进行merge。
-\par
-另外有一点需要注意，用快慢指针寻找链表的中间位置应该是
-\begin{lstlisting}[style=customc]
-fast = head;
-slow = head;
-while(fast->next && fast->next->next)
+
+\setcounter{lstlisting}{0}
+\begin{lstlisting}[style=customc, caption={Merge Sort}]
+ListNode* sortList( ListNode* head )
 {
-    fast = fast->next->next;
-    slow = slow->next;
+    if( !head || !head->next )
+    {
+        return head;
+    }
+    auto slow = head;
+    auto fast = head;
+    auto pre = slow;
+    //after the while loop
+    //slow will be at the next of middle node
+    //so we require a (pre) node to track the previous
+    //node of slow
+    //for example: 4->2->null, slow will be at 2.
+    while( fast && fast->next )
+    {
+        pre = slow;
+        slow = slow->next;
+        fast = fast->next->next;
+    }
+    //break up the list
+    pre->next = nullptr;
+    //recursively sort left and right
+    auto t1 = sortList( head );
+    auto t2 = sortList( slow );
+    //merge the result
+    return merge( t1, t2 );
 }
-//now slow is the middle node of the list, i.e.,  
-//if we count 0 from head, the number of the slow is
-//floor(L/2). L is the number of nodes in the list
+//merge routine
+ListNode* merge( ListNode* l1, ListNode* l2 )
+{
+    auto dummy = new ListNode( -1 );
+    auto merged = dummy;
+    while( l1 && l2 )
+    {
+        if( l1->val <= l2->val )
+        {
+            merged->next = l1;
+            l1 = l1->next;
+        }
+        else
+        {
+            merged->next = l2;
+            l2 = l2->next;
+        }
+
+        merged = merged->next;
+    }
+    if( l1 )
+    {
+        merged->next = l1;
+    }
+    if( l2 )
+    {
+        merged->next = l2;
+    }
+    auto head = dummy->next;
+    dummy->next = nullptr;
+    delete dummy;
+    return head;
+}
 \end{lstlisting}
-\setcounter{algorithm}{0}
-\begin{algorithm}[H]
-\caption{Merge Sort}
-\begin{algorithmic}[1]
-\Procedure{SortList}{$H$}
-\If{$H=\texttt{null}$ \textbf{or} $H.\texttt{next}=\texttt{null}$}
-\State \Return $H$
-\EndIf
-\State $F:=H$, $S:=H$ \Comment Fast and Slow pointers
-\While{$F.\texttt{next}\neq\texttt{null}$ \textbf{and} $F.\texttt{next}.\texttt{next}\neq\texttt{null}$ }
-\State $F\gets F.\texttt{next}$
-\State $F\gets F.\texttt{next}$
-\State $S\gets S.\texttt{next}$
-\EndWhile
-\State $H_1:=S.\texttt{next}$ \Comment The header of right list
-\State $S.\texttt{next}\gets\texttt{null}$ \Comment Break the original list
-\State $t_0:=\texttt{SortList}(H)$ \Comment Sort left half
-\State $t_1:=\texttt{SortList}(H_1)$ \Comment Sort right half
-\State $\hat{H}:=\texttt{Merge}(H, H_1)$ \Comment Merge the sorted two lists
-\State \Return $\hat{H}$
-\EndProcedure
-\end{algorithmic}
-\end{algorithm}
-Function \texttt{Merge} merge two linked lists $L_1$ and $L_2$ by ascending order and return the header of the merged list
-\begin{algorithm}[H]
-\caption{Merge Helper Function}
-\begin{algorithmic}[1]
-\Function{Merge}{$L_1, L_2$}
-\State Create a dummy header $D$
-\State $\ell:=D$
-\algstore{148algo}
-\end{algorithmic}
-\end{algorithm}
-\begin{algorithm}[H]
-\begin{algorithmic}[1]
-\algrestore{148algo}
-\While{$L_1\neq\texttt{null}$ \textbf{and} $L_2\neq\texttt{null}$}
-\If{$L_1.\texttt{value}<L_2.\texttt{value}$}
-\State $\ell.\texttt{next}\gets L_1$
-\State $L_1\gets L_1.\texttt{next}$
-\Else
-\State $\ell.\texttt{next}\gets L_2$
-\State $L_2\gets L_2.\texttt{next}$
-\EndIf
-\State $\ell\gets\ell.\texttt{next}$ \Comment Move the merged list pointer to next node
-\EndWhile
-\If{$L_1\neq\texttt{null}$} \Comment $L_1$ still has elements 
-\State $\ell.\texttt{next}\gets L_1$ \Comment Link the merged list to the remainings of $L_1$
-\EndIf
-\If{$L_2\neq\texttt{null}$} \Comment $L_2$ still has elements 
-\State $\ell.\texttt{next}\gets L_2$ \Comment Link the merged list to the remainings of $L_2$
-\EndIf
-\State \Return $D.\texttt{next}$ \Comment The dummy header's next node is the header of merged list
-\EndFunction
-\end{algorithmic}
-\end{algorithm}
+
+
+

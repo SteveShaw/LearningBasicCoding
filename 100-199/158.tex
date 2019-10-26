@@ -1,18 +1,127 @@
 \section{158 --- Read N Characters Given Read4 II - Call multiple times }
-The API: \texttt{int read4(char *buf)} reads 4 characters at a time from a file.
-\par
-The return value is the actual number of characters read.
-\par
-For example, it returns 3 if there is only 3 characters left in the file.
-\par
-By using the read4 API, implement the function \texttt{int read(char *p, int n)} that reads $n$ characters from the file.
-\paragraph{Note:}
+Given a file and assume that you can only read the file using a given method \fcj{read4}, implement a method \fcj{read} to read $n$ characters. Your method \fcj{read} may be called \textbf{multiple times}.
+
+\paragraph{Method read4:}
+
+\begin{flushleft}
+The API \fcj{read4} reads 4 consecutive characters from the file, then writes those characters into the buffer array \fcj{buf}.
+
+The return value is the number of actual characters read.
+
+Note that \fcj{read4()} has its own file pointer, much like \fcj{FILE *fp} in C.
+
+Definition of \fcj{read4}: \fcj{int read4(char[] buf)}
+\end{flushleft}
+
+\paragraph{Note:} 
+
 \begin{itemize}
-\item The \texttt{read} function may be called \texttt{multiple} times..
+\item \fcj{buf[]} is destination not source, the results from \fcj{read4} will be copied to \fcj{buf[]}
+\end{itemize}
+
+Below is a high level example of how read4 works:
+
+\begin{flushleft}
+\fcj{File file("abcdefghijk"); // initially file pointer (fp) points to 'a'}
+
+\fcj{char[] buf = new char[4]; // Create buffer with enough space to store characters}
+
+\fcj{read4(buf); // read4 returns 4. Now buf = "abcd", fp points to 'e'}
+
+\fcj{read4(buf); // read4 returns 4. Now buf = "efgh", fp points to 'i'}
+
+\fcj{read4(buf); // read4 returns 3. Now buf = "ijk", fp points to end of file}
+\end{flushleft}
+ 
+\paragraph{Method read:}
+
+\begin{flushleft}
+By using the \fcj{read4} method, implement the method \fcj{read} that reads $n$ characters from the file and store it in the buffer array \fcj{buf}. Consider that you \textbf{cannot} manipulate the file directly.
+
+The return value is the number of actual characters read.
+
+Definition of \fcj{read}: \fcj{int read(char[] buf, int n)}
+\end{flushleft}
+
+\paragraph{Note:} 
+
+\begin{itemize}
+\item \fcj{buf[]} is destination not source, you will need to write the results to \fcj{buf[]}.
+\end{itemize}
+
+
+\paragraph{Example 1:}
+
+\begin{lstlisting}[style=customc]
+File file( "abc" );
+Solution sol;
+// Assume buf is allocated and guaranteed to have enough space for storing all characters from the file.
+sol.read( buf, 1 ); // After calling your read method, buf should contain "a". We read a total of 1 character from the file, so return 1.
+sol.read( buf, 2 ); // Now buf should contain "bc". We read a total of 2 characters from the file, so return 2.
+sol.read( buf, 1 ); // We have reached the end of file, no more characters can be read. So return 0.
+\end{lstlisting}
+
+\paragraph{Example 2:}
+\begin{lstlisting}[style=customc]
+File file( "abc" );
+Solution sol;
+sol.read( buf, 4 ); // After calling your read method, buf should contain "abc". We read a total of 3 characters from the file, so return 3.
+sol.read( buf, 1 ); // We have reached the end of file, no more characters can be read. So return 0.
+\end{lstlisting}
+
+ 
+
+\paragraph{Note:}
+
+\begin{itemize}
+\item Consider that you \textbf{cannot} manipulate the file directly, the file is only accessible for \fcj{read4} but \textbf{not} for \fcj{read}.
+\item The \fcj{read} function may be called \textbf{multiple times}.
+\item You may assume the destination buffer array, \fcj{buf}, is guaranteed to have enough space for storing $n$ characters.
+\item It is guaranteed that in a given test case the same buffer \fcj{buf} is called by \fcj{read}.
 \end{itemize}
 \subsection{Analysis}
-\begin{CJK*}{UTF8}{gbsn}
-这道题是之前157 --- \textbf{Read N Characters Given Read4}的拓展，不同点在于这里\texttt{read}函数可以调用多次，那么难度就增加了，例如：要读取的文件buffer为\texttt{ab}，然后执行read(1)，read(2)，那么第一次调用\texttt{read(1)}后，从buffer中读出一个字符，那么就是第一个字符\texttt{a}，然后又调用了一个\texttt{read(2)}，但是buffer中只剩一个\texttt{b}了，所以就把取出的结果就是\texttt{b}。
-\par
-另外一个例子更能说明不同： 文件的buffer为\texttt{a}, 分别执行\texttt{read(0)}，\texttt{read(1)}，\texttt{read(2)}。第一次调用read(0)，不会读取任何字符。第二次调用\texttt{read(1)}，取一个字符，而buffer中只有一个字符\texttt{a}，因此返回\texttt{a}。然后调用read(2)，但是这时候buffer中没有字符了，所以同样不会读取任何字符。
-\end{CJK*}
+
+We should notice that in each calling function \fcj{read}, the destination \fcj{buf} is a new buffer. Thus, we only need to make sure that current calling \fcj{read} can get the correct result from last read's offset by considering $n$ letters are required.
+
+We maintain two pointers \fcj{left} and \fcj{right} with a 4 byte buffer \fcj{chars}. When \fcj{left = right}, we need to read new characters through \fcj{read4} into \fcj{chars} and update \fcj{right} by the return value. Otherwise, we output one letter from \fcj{chars} to \fcj{buf} and increment \fcj{left}.
+
+\setcounter{lstlisting}{0}
+\begin{lstlisting}[style=customc, caption={Two Pointers}]
+int read4( char *buf );
+class Solution
+{
+public:
+    /**
+     * @param buf Destination buffer
+     * @param n   Number of characters to read
+     * @return    The number of actual characters read
+     */
+    int read( char *buf, int n )
+    {
+        for( int i = 0; i < n; ++i )
+        {
+            if( left == right )
+            {
+                //read letters using read4
+                right = read4( chars );
+                //reset left
+                left = 0;
+                if( right == 0 )
+                {
+                    //no letter is read
+                    //return actual letters read
+                    return i;
+                }
+            }
+            //output from chars to buf
+            buf[i] = chars[left];
+            //increment left
+            ++left;
+        }
+        return n;
+    }
+    int left = 0;
+    int right = 0;
+    char chars[4];
+};
+\end{lstlisting}

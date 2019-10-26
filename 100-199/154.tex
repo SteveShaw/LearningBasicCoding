@@ -1,19 +1,20 @@
 \section{154 --- Find Minimum in Rotated Sorted Array II}
-Suppose an array $A$ sorted in ascending order is rotated at some pivot unknown to you beforehand. (i.e.,  $[0,1,2,4,5,6,7]$ might become  $[4,5,6,7,0,1,2]$).
-\par
+Suppose an array $A$ sorted in ascending order is rotated at some pivot unknown to you beforehand. (i.e.,  \fcj{[0,1,2,4,5,6,7]} might become  \fcj{[4,5,6,7,0,1,2]}).
+
 Find the minimum element.
-\par
+
 The array may contain \textbf{duplicates}.
 \paragraph{Example 1:}
 \begin{flushleft}
-\textbf{Input}: $[1,3,5]$
-\\
+\textbf{Input}: \fcj{[1,3,5]}
+
 \textbf{Output}: 1
 \end{flushleft}
+
 \paragraph{Example 2:}
 \begin{flushleft}
-\textbf{Input}: $[2,2,2,0,1]$
-\\
+\textbf{Input}: \fcj{[2,2,2,0,1]}
+
 \textbf{Output}: 0
 \end{flushleft}
 \paragraph{Note:}
@@ -22,9 +23,9 @@ The array may contain \textbf{duplicates}.
     \item Would allow duplicates affect the run-time complexity? How and why?
 \end{itemize}
 \subsection{Binary Search}
-\begin{CJK*}{UTF8}{gbsn}
+
 这里和153基本类似，不过这里允许重复数字存在。因此算法和153基本类似，唯一不同的是，当$A[m]=A[r]$时，需要将$r$往左移动一个位置，然后继续进行比较。由于重复元素的存在，当然$A[m]=A[r]$时，实际上就成了线性搜索，特别的，当$A$中所有数字都相等时，时间复杂度就是$O(n)$。
-\end{CJK*}
+
 \setcounter{lstlisting}{0}
 \begin{lstlisting}[style=customc, caption={Binary Search}]
 int findMin( vector<int>& A )
@@ -59,5 +60,16 @@ int findMin( vector<int>& A )
 	}
 
 	return A[l];
+}
+\end{lstlisting}
+
+Since for duplicate numbers, we will fall down to linear scan. The best method would be just linear scan.
+
+\setcounter{lstlisting}{0}
+\begin{lstlisting}[style=customc, caption={Linear Scan}]
+int findMin( vector<int>& nums )
+{
+    auto p_min = min_element( begin( nums ), end( nums ) );
+    return *p_min;
 }
 \end{lstlisting}

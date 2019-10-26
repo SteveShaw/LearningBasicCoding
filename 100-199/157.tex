@@ -1,33 +1,158 @@
 \section{157 --- Read N Characters Given Read4}
-The API: \texttt{int read4(char *buf)} reads 4 characters at a time from a file.
-\par
-The return value is the actual number of characters read.
-\par
-For example, it returns 3 if there is only 3 characters left in the file.
-\par
-By using the read4 API, implement the function \texttt{int read(char *p, int n)} that reads $n$ characters from the file.
-\paragraph{Note:}
+Given a file and assume that you can only read the file using a given method \fcj{read4}, implement a method to read $n$ characters.
+ 
+
+\paragraph{Method read4:}
+
+\begin{flushleft}
+The API \fcj{read4} reads 4 consecutive characters from the file, then writes those characters into the buffer array \fcj{buf}.
+
+The return value is the number of actual characters read.
+
+Note that \fcj{read4()} has its own file pointer, much like \fcj{FILE *fp} in C.
+
+Definition of \fcj{read4}: \fcj{int read4(char[] buf)}
+\end{flushleft}
+
+\paragraph{Note:} 
+
 \begin{itemize}
-\item The \texttt{read} function will only be called \textbf{once} for each test case.
+\item \fcj{buf[]} is destination not source, the results from \fcj{read4} will be copied to \fcj{buf[]}
+\end{itemize}
+
+Below is a high level example of how read4 works:
+
+\begin{flushleft}
+\fcj{File file("abcdefghijk"); // File is "abcdefghijk", initially file pointer (fp) points to 'a'}
+
+\fcj{char[] buf = new char[4]; // Create buffer with enough space to store characters}
+
+\fcj{read4(buf); // read4 returns 4. Now buf = "abcd", fp points to 'e'}
+
+\fcj{read4(buf); // read4 returns 4. Now buf = "efgh", fp points to 'i'}
+
+\fcj{read4(buf); // read4 returns 3. Now buf = "ijk", fp points to end of file}
+\end{flushleft}
+ 
+\paragraph{Method read:}
+
+\begin{flushleft}
+By using the \fcj{read4} method, implement the method \fcj{read} that reads $n$ characters from the file and store it in the buffer array \fcj{buf}. Consider that you \textbf{cannot} manipulate the file directly.
+
+The return value is the number of actual characters read.
+
+Definition of \fcj{read}: \fcj{int read(char[] buf, int n)}
+\end{flushleft}
+
+\paragraph{Note:} 
+
+\begin{itemize}
+\item \fcj{buf[]} is destination not source, you will need to write the results to \fcj{buf[]}.
+\end{itemize}
+ 
+
+\paragraph{Example 1:}
+
+\begin{flushleft}
+\textbf{Input}: \fcj{file = "abc"}, $n = 4$
+
+\textbf{Output}: 3
+
+\textbf{Explanation}: 
+
+After calling your \fcj{read} method, \fcj{buf} should contain \fcj{"abc"}. We read a total of 3 characters from the file, so return 3. Note that \fcj{"abc"} is the file's content, not \fcj{buf}. \fcj{buf} is the destination buffer that you will have to write the results to.
+
+\end{flushleft}
+\paragraph{Example 2:}
+
+\begin{flushleft}
+\textbf{Input}: \fcj{file = "abcde"}, $n = 5$
+
+\textbf{Output}: 5
+
+\textbf{Explanation}: 
+
+After calling your \fcj{read} method, buf should contain \fcj{"abcde"}. We read a total of 5 characters from the file, so return 5.
+
+\end{flushleft}
+
+\paragraph{Example 3:}
+
+\begin{flushleft}
+\textbf{Input}: \fcj{file = "abcdABCD1234"}, $n = 12$
+
+\textbf{Output}: 12
+
+\textbf{Explanation}: After calling your read method, \fcj{buf} should contain \fcj{"abcdABCD1234"}. We read a total of 12 characters from the file, so return 12.
+\end{flushleft}
+
+\paragraph{Example 4:}
+
+\begin{flushleft}
+\textbf{Input}: \fcj{file = "leetcode"}, $n = 5$
+
+\textbf{Output}: 5
+
+\textbf{Explanation}: After calling your read method, \fcj{buf} should contain \fcj{"leetc"}. We read a total of 5 characters from the file, so return 5.
+\end{flushleft}
+ 
+
+\paragraph{Note:}
+
+\begin{itemize}
+\item Consider that you cannot manipulate the file directly, the file is only accessible for \fcj{read4} but not for \fcj{read}.
+\item The \fcj{read} function will only be called once for each test case.
+\item You may assume the destination buffer array, \fcj{buf}, is guaranteed to have enough space for storing $n$ characters.
 \end{itemize}
 \subsection{Analysis}
-\begin{CJK*}{UTF8}{gbsn} 
-比较简单的题目，每次调用\texttt{read4}，直到返回值变为零，表示已经全部读完。另外每次调用\texttt{read4}的时候，将\texttt{p}指针根据返回值调整到下一个开始读取的位置。
-\end{CJK*}
-\setcounter{algorithm}{0}
-\begin{algorithm}[H]
-\caption{Implementation read By read4}
-\begin{algorithmic}[1]
-\Procedure{Read}{$p, n$}
-\State $x:=0$ \Comment The read result of each calling \texttt{read4}
-\While{$\texttt{true}$}
-\State $y:= \texttt{read4(p+x)}$ \Comment $y$ is the count of characters read from the file
-\If{$y = 0$}
-\State \texttt{break} \Comment Finished reading from the file
-\EndIf
-\State $x\gets x+y$ \Comment Update current total counts of characters 
-\EndWhile
-\State \Return $\min(x, n)$ \Comment The file may contain less than $n$ characters
-\EndProcedure
-\end{algorithmic}
-\end{algorithm}
+
+比较简单的题目，每次调用\fcj{read4}，直到返回值变为零，表示已经全部读完。另外每次调用\fcj{read4}的时候，将\fcj{p}指针根据返回值调整到下一个开始读取的位置。
+
+%\setcounter{algorithm}{0}
+%\begin{algorithm}[H]
+%\caption{Implementation read By read4}
+%\begin{algorithmic}[1]
+%\Procedure{Read}{$p, n$}
+%\State $x:=0$ \Comment The read result of each calling \texttt{read4}
+%\While{$\texttt{true}$}
+%\State $y:= \texttt{read4(p+x)}$ \Comment $y$ is the count of characters read from the file
+%\If{$y = 0$}
+%\State \texttt{break} \Comment Finished reading from the file
+%\EndIf
+%\State $x\gets x+y$ \Comment Update current total counts of characters 
+%\EndWhile
+%\State \Return $\min(x, n)$ \Comment The file may contain less than $n$ characters
+%\EndProcedure
+%\end{algorithmic}
+%\end{algorithm}
+
+\setcounter{lstlisting}{0}
+\begin{lstlisting}[style=customc, caption={Pointer}]
+// Forward declaration of the read4 API.
+int read4( char *buf );
+/**
+ * @param buf Destination buffer
+ * @param n   Number of characters to read
+ * @return    The number of actual characters read
+ */
+int read( char *buf, int n )
+{
+    int total = 0;
+    while( total < n )
+    {
+        int x = read4( buf );
+        if( x == 0 )
+        {
+            //no content
+            break;
+        }
+        //add to total
+        total += x;
+        //move the buffer pointer
+        buf += x;
+    }
+    //total may be large than n
+    //we return the minimum of total and n
+    return ( min )( total, n );
+}
+\end{lstlisting}

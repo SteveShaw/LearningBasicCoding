@@ -36,55 +36,94 @@ return the root of the binary tree
 \end{figure}
 \end{flushleft}
 \subsection{Recursive Approach}
-\begin{CJK*}{UTF8}{gbsn}
+
 对于一个根节点来说，目标是将其左子节点变为根节点，右子节点变为左子节点，原来的根节点变为右子节点，那么我们判断这个root是否存在，且其有没有left child node，如果不满足这两个条件的话，直接返回即可，否则对left child node调用递归函数，直到到达most left开始翻转，翻转好most left child node后，开始回到上一个left child node继续翻转即可，直至翻转完The whole tree。
-\par
+
 另外注意到题目中给出的特性，所有的右节点要么没有，要么就是叶子节点并且一定有个兄弟节点。
-\end{CJK*}
-\setcounter{algorithm}{0}
-\begin{algorithm}[H]
-\caption{Recursive Approach}
-\begin{algorithmic}[1]
-\Procedure{UpsideDownBinaryTree}{$R$}
-\If{$R=\texttt{null}$ \textbf{or} $R.\texttt{left}=\texttt{null}$}
-\State \Return $R$ \Comment root or left child is empty
-\EndIf
-\State $l:=R.\texttt{left}$ \Comment The left child node of current root $R$
-\State $r:=R.\texttt{right}$ \Comment The right child node of current root $R$
-\State $\hat{R}:=\texttt{UpsideDownBinaryTree}(l)$ \Comment Recursively operating on left tree
-\State $l.\texttt{left}\gets r$ \Comment Change left child node of $l$ to $r$
-\State $l.\texttt{right}\gets R$ \Comment Change right child node $l$ to $R$
-\State $R.\texttt{left}\gets\texttt{null}$ \Comment Set left and right child nodes of current root $R$ to empty
-\State $R.\texttt{right}\gets\texttt{null}$
-\State \Return $\hat{R}$
-\EndProcedure
-\end{algorithmic}
-\end{algorithm}
+
+%\setcounter{algorithm}{0}
+%\begin{algorithm}[H]
+%\caption{Recursive Approach}
+%\begin{algorithmic}[1]
+%\Procedure{UpsideDownBinaryTree}{$R$}
+%\If{$R=\texttt{null}$ \textbf{or} $R.\texttt{left}=\texttt{null}$}
+%\State \Return $R$ \Comment root or left child is empty
+%\EndIf
+%\State $l:=R.\texttt{left}$ \Comment The left child node of current root $R$
+%\State $r:=R.\texttt{right}$ \Comment The right child node of current root $R$
+%\State $\hat{R}:=\texttt{UpsideDownBinaryTree}(l)$ \Comment Recursively operating on left tree
+%\State $l.\texttt{left}\gets r$ \Comment Change left child node of $l$ to $r$
+%\State $l.\texttt{right}\gets R$ \Comment Change right child node $l$ to $R$
+%\State $R.\texttt{left}\gets\texttt{null}$ \Comment Set left and right child nodes of current root $R$ to empty
+%\State $R.\texttt{right}\gets\texttt{null}$
+%\State \Return $\hat{R}$
+%\EndProcedure
+%\end{algorithmic}
+%\end{algorithm}
 \setcounter{lstlisting}{0}
 \begin{lstlisting}[style=customc, caption={Recursive Approach}]
-TreeNode *upsideDownBinaryTree ( TreeNode *root )
+TreeNode *upsideDownBinaryTree( TreeNode *root )
 {
-	if( !root || !root->left )
-	{
-		return root;
-	}
+    if( !root || !root->left )
+    {
+        return root;
+    }
+    //save left child node
+    auto l = root->left;
+    //save right child node
+    auto r = root->right;
+    //Recursive call the function to get the
+    //root of upside-down left child tree
+    auto ans = upsideDownBinaryTree( l );
+    //left's left child node is its parent's right child: right
+    l->left = r;
+    //left's right child node is its parent: root
+    l->right = root;
+    //root become leaf
+    root->left = nullptr;
+    root->right = nullptr;
+    //This is the new root of the changed tree
+    return ans;
+}
+\end{lstlisting}
 
-	//save left child node
-	auto l = root->left;
-	//save right child node
-	auto r = root->right;
-	//Recursive call the function to get the 
-	//root of upside-down left child tree
-	auto l_root = upsideDownBinaryTree ( l );
-	//set left child node of l to r
-	l->left = r;
-	//set right child node of l to current root
-	l->right = root;
-	//since root becomes leaf, 
-	//set its left and child node to null
-	root->left = nullptr;
-	root->right = nullptr;
-	//This is the new root of the changed tree
-	return l_root;
+\subsection{Iterative}
+In this approach, we visit each left child node and change its left and child node. More specifically, suppose we are visiting a node $t$ and its parent node is $p$
+
+\begin{enumerate}
+\item Change \fcj{t->left} to \fcj{p->right}.
+\item Change \fcj{t->right} to \fcj{p}.
+\end{enumerate}
+
+Thus, we need to save current node and its right node before moving to current node's left child.
+
+
+\begin{lstlisting}[style=customc, caption={Iterative}]
+TreeNode* upsideDownBinaryTree( TreeNode* root )
+{
+    //save right child of last visited node
+    TreeNode* x = nullptr;
+    //save last visited node
+    TreeNode* y = nullptr;
+    auto node = root;
+    while( node )
+    {
+        //save left child as next
+        //for successive visit
+        auto next = node->left;
+        //change left child to the right child of its parent
+        //i.e. the sibling: x
+        node->left = x;
+        //save its right child to x
+        x = node->right;
+        //change right child to its parent: y
+        node->right = y;
+        //save node to y
+        y = node;
+        //move to its previous left child
+        node = next;
+    }
+    //now y is the new root
+    return y;
 }
 \end{lstlisting}

@@ -75,24 +75,38 @@ Algorithm of Insertion Sort:
 \end{flushleft}
 \subsection{Insertion Sort}
 首先建立一个Dummy Header，这个dummy header将是排序后的链表的第一个节点。然后从当前链表的第一个节点开始，在每一次循环中，都在以dummy header开头的链表中寻找插入的位置。直至遍历完当前链表。最后返回dummy header的下一个节点作为排序后链表的头节点。
-\setcounter{algorithm}{0}
-\begin{algorithm}[H]
-\caption{}
-\begin{algorithmic}[1]
-\Procedure{InsertionSortList}{$H$}
-\State Initialize a dummy header $D$
-\State $t:=H$
-\While{$t\neq\texttt{null}$}
-\State $d:=D$
-\State $\hat{t}:=t.\texttt{next}$ \Comment Save next node of $t$
-\While{$d.\texttt{next}\neq\texttt{null}$ \textbf{and} $d.\texttt{next}.\texttt{value}\leq t.\texttt{value}$} \Comment Find the place to insert $t$
-\State $d\gets d.\texttt{next}$
-\EndWhile
-\State $t.\texttt{next}\gets d.\texttt{next}$ \Comment Link $t$'s next to $d$'s next node
-\State $d.\texttt{next}\gets t$ \Comment Link $d$'s next to $t$, so $t$ is inserted into the list $D$
-\State $t\gets \hat{t}$ \Comment Move $t$ to next node in list $H$
-\EndWhile
-\State \Return $D.\texttt{next}$
-\EndProcedure
-\end{algorithmic}
-\end{algorithm}
+
+\setcounter{lstlisting}{0}
+\begin{lstlisting}[style=customc, caption={Insertion Sort}]
+public:
+ListNode* insertionSortList( ListNode* head )
+{
+    //the list with dummy header
+    //is the sorted list
+    auto dummy = new ListNode( -1 );
+    auto n = head;
+    while( n )
+    {
+        //save next
+        auto nxt = n->next;
+        //in the list with dummy header
+        //find the first node with value larger than
+        //current node's value
+        auto t = dummy;
+        while( t->next && ( t->next->val <= n->val ) )
+        {
+            t = t->next;
+        }
+        //relink current node's next to t->next;
+        n->next = t->next;
+        //t either is dummy header or
+        //a node with value no larger than n's value
+        t->next = n;
+        //move to the next node in the original node
+        n = nxt;
+    }
+    auto ans = dummy->next;
+    dummy->next = nullptr;
+    return ans;
+}
+\end{lstlisting}

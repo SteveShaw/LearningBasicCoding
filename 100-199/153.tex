@@ -1,25 +1,27 @@
 \section{153 --- Find Minimum in Rotated Sorted Array}
-Suppose an array $A$ sorted in ascending order is rotated at some pivot unknown to you beforehand. (i.e., $[0,1,2,4,5,6,7]$ might become  $[4,5,6,7,0,1,2]$).
-\par
+Suppose an array $A$ sorted in ascending order is rotated at some pivot unknown to you beforehand. (i.e., \fcj{[0,1,2,4,5,6,7]} might become  \fcj{[4,5,6,7,0,1,2]}).
+
 Find the minimum element.
-\par
+
 You may assume no duplicate exists in the array.
 \paragraph{Example 1:}
 \begin{flushleft}
-\textbf{Input}: $[3,4,5,1,2]$
-\\
+\textbf{Input}: \fcj{[3,4,5,1,2]}
+
 \textbf{Output}: 1
 \end{flushleft}
+
 \paragraph{Example 2:}
+
 \begin{flushleft}
-\textbf{Input}: $[4,5,6,7,0,1,2]$
-\\
+\textbf{Input}: \fcj{[4,5,6,7,0,1,2]}
+
 \textbf{Output}: 0
 \end{flushleft}
 \subsection{Binary Search}
-\begin{CJK*}{UTF8}{gbsn}
-基于二分搜索，假设$l$, $r$是当前搜索的边界，那么位于中间位置$m=(l+r)/2$的数$A[m]$。如果这个数比$A[r]$大，那么表明最小值出现在$A[m+1\ldots r]$j区间内，如果比$A[r]$小，则最小值出现在$A[l\ldots m]$中。而题目中给出了没有重复的数字条件，因此不需要考虑$A[m]$和$A[r]$相等的情况。
-\end{CJK*}
+
+基于二分搜索，假设$l$, $r$是当前搜索的边界，那么位于中间位置$m=(l+r)/2$的数$A[m]$。如果这个数比$A[r]$大，那么表明最小值出现在$A[m+1\ldots r]$区间内，如果比$A[r]$小，则最小值出现在$A[l\ldots m]$中。而题目中给出了没有重复的数字条件，因此不需要考虑$A[m]$和$A[r]$相等的情况。
+
 \setcounter{lstlisting}{0}
 \begin{lstlisting}[style=customc, caption={Binary Search}]
 int findMin( vector<int>& A )
@@ -49,5 +51,71 @@ int findMin( vector<int>& A )
 	}
 
 	return A[l];
+}
+\end{lstlisting}
+
+\subsection{Binary Search II}
+Since the array is rotated, we need a modified binary search. 
+
+In this modified version of binary search algorithm, we are looking for a inflection point.
+
+\begin{itemize}
+\item All the elements to the left of inflection point $>$ first element of the array.
+\item All the elements to the right of inflection point $<$ first element of the array.
+\end{itemize}
+
+Thus, this modified version of binary search has following steps
+
+\begin{enumerate}
+\item Find the \fcj{mid} element of the array.
+\item If \fcj{mid} is larger than ($>$) first element of array, this means that we need to look for the \textit{inflection point} on the right of \fcj{mid}.
+\item If \fcj{mid} is less than ($<$) first element of array, we need to look for the \textit{inflection point} on the left of \fcj{mid}.
+\item We stop our search when we find the \textit{inflection point}, when either of the two conditions is satisfied:
+
+\begin{itemize}
+\item \fcj{nums[mid] > nums[mid + 1]}. Hence, \fcj{mid+1} is the smallest.
+\item \fcj{nums[mid - 1] > nums[mid]}. Hence, \fcj{mid} is the smallest.
+\end{itemize}
+\end{enumerate}
+
+\begin{lstlisting}[style=customc, caption={Binary Search II}]
+int findMin( vector<int>& nums )
+{
+    if( nums.size() == 1 )
+    {
+        return nums[0];
+    }
+    if( nums.back() > nums[0] )
+    {
+        //the array is not rotated
+        return nums[0];
+    }
+    int l = 0;
+    int r = static_cast< int >( nums.size() - 1 );
+    while( l <= r )
+    {
+        int mid = ( l + r ) / 2;
+        if( nums[mid] > nums[mid + 1] )
+        {
+            //mid+1 is the inflection point
+            return nums[mid + 1];
+        }
+        if( nums[mid] < nums[mid - 1] )
+        {
+            //mid is the inflection point
+            return nums[mid];
+        }
+        if( nums[mid] > nums[0] )
+        {
+            //inflection point lies right side of mid
+            l = mid + 1;
+        }
+        else
+        {
+            //inflection point lies left side of mid
+            r = mid - 1;
+        }
+    }
+    return -1;
 }
 \end{lstlisting}
