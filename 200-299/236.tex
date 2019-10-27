@@ -82,7 +82,6 @@ The LCA of nodes 5 and 4 is 5, since a node can be a descendant of itself accord
 \item $p$ and $q$ are different and both values will exist in the binary tree.
 \end{itemize}
 \subsection{Recursion}
-\begin{CJK*}{UTF8}{gbsn}
 这道题和235不同，这里只是一般的bianry tree。
 \begin{itemize}
 \item 按照深度优先的方式遍历tree。
@@ -98,7 +97,6 @@ The LCA of nodes 5 and 4 is 5, since a node can be a descendant of itself accord
 \item 在遍历过程中，任何时候发现$l$, $r$和$x$这三个变量中有两个为\texttt{true}了，表明已经找到了$p$和$q$的\texttt{LCA}。
 \item 具体实现时，用$l$, $r$和$x$都设为\texttt{int}。这样可以通过判断这三个的和来判定是否有两个为\texttt{true}。
 \end{itemize}
-\end{CJK*}
 \setcounter{lstlisting}{0}
 \begin{lstlisting}[style=customc, caption={Recursion}]
 TreeNode* LCA( TreeNode* root, TreeNode* p, TreeNode* q )
