@@ -41,32 +41,7 @@ To see how it works, consider the three cases discussed above again.
 \item $A=[1,2,3,4,5]$:  In this case, we firstly find $3$ as the middle element. Since it lies on a rising slope ($3 < 4$), we reduce the search space to $[4, 5]$. Now, $4$ acts as the middle element for this subarray and it lies on a rising slope ($4< 5$), reducing the search space to $[5]$ only. Thus, 5 is returned as the peak correctly.
 \item $A=[2,3,4,5,1]$: In this case, the peak lies somewhere in the middle. The first middle element is $4$. It lies on a rising slope ($4<5$), indicating that the peak lies towards its right. Thus, the search space is reduced to $[5, 1]$. Now, 5 happens to be the on a falling slope ($5 > 1$), reducing the search space to $[5]$ only. Thus, 5 is identified as the peak element correctly.
 \end{enumerate}
-\setcounter{algorithm}{0}
-\setcounter{algorithm}{0}
-\begin{algorithm}[H]
-\caption{Binary Search}
-\begin{algorithmic}[1]
-\Procedure{FindPeakElement}{$A, L$}
-\State $l:=0$
-\State $r:=L-1$
-\While{$l < r$}
-\State $m:=(l+r)/2$
-\If{$A[m] < A[m+1]$} \Comment In a rising slope
-\State $l\gets m+1$
-\Else \Comment In a falling slope
-\State $r\gets m$ 
-\EndIf
-\algstore{162algo}
-\end{algorithmic}
-\end{algorithm}
-\begin{algorithm}[H]
-\begin{algorithmic}[1]
-\algrestore{162algo}
-\EndWhile
-\State \Return $l$
-\EndProcedure
-\end{algorithmic}
-\end{algorithm}
+
 \setcounter{lstlisting}{0}
 \begin{lstlisting}[style=customc, caption={Reference Code}]
 int findPeakElement ( vector<int>& nums )

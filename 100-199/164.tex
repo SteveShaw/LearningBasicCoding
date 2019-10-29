@@ -23,45 +23,59 @@ Return 0 if the array contains less than 2 elements.
     \item You may assume all elements in the array are non-negative integers and fit in the 32-bit signed integer range.
     \item Try to solve it in linear time/space.
 \end{itemize}
+
+
 \subsection{Bucket Sort}
-\begin{algorithm}[H]
-\begin{algorithmic}[1]
-\Procedure{MaximumGap}{$A,L$}
-\If{$L<2$}
-\State \Return 0
-\EndIf
-\State $\alpha:=\min\limits_{0\leq i <L}A[i]$
-\State $\beta:=\max\limits_{0\leq i <L}A[i]$
-\State $s:=\max(1, (\beta-\alpha)/(L-1))$ \Comment The size of each bucket
-\State $\ell:=(\beta-\alpha) / b +1$ \Comment The number of buckets
-\algstore{164algo}
-\end{algorithmic}
-\end{algorithm}
-\begin{algorithm}[H]
-\begin{algorithmic}[1]
-\algrestore{164algo}
-\State Create an array $B_{s\times 1}$ for the buckets.
-\State Each bucket has three elements: 
-\State $u$ --- If the bucket has elements, set to zero initially 
-\State $b_0$ --- The maximum in current bucket and 
-\State $b_1$ --- The minimum in current bucket
-\State Update each bucket in the following loop
-\For{$i:= 0 \to L-1$}
-\State $b_i:=(A[i]-b_{\min})/s$ \Comment The bucket index
-\State $B[b_i].u\gets 1$ \Comment Indicate this bucket has numbers
-\State $B[b_i].b_0\gets \min(B[b_i].b_0, A[i])$ \Comment Update minimum in the bucket
-\State $B[b_i].b_1\gets \min(B[b_i].b_1, A[i])$ \Comment Update maximum in the bucket
-\EndFor
-\State Then, compare the gap between the buckets
-\State $t:=\alpha$ \Comment $t$ is the maximum value of last bucket and is $\min(A)$ at start
-\State $G:=0$ \Comment The result: maximum gap
-\For{$i:=0\to \ell-1$} \Comment Iterate each bucket
-\If{$B[i].u=1$} \Comment This bucket $B[i]$ has numbers
-\State $G\gets \max(G, B[i].b_0 - t)$ \Comment Current bucket's minimum value minus t
-\State $t\gets B[i].b_1$ \Comment Update the maximum value of last bucket
-\EndIf
-\EndFor
-\State \Return $G$
-\EndProcedure
-\end{algorithmic}
-\end{algorithm}
+Suppose for each of the $n$ elements in our array, there was a bucket. Then each element would occupy one bucket. Now If we reduced the number of buckets, some buckets would have to accommodate more than one element.
+
+Suppose all elements of the array are sorted and have a uniform gap between them. This means every adjacent pair of elements differ by the same constant value. So for $n$ elements of the array, there are $n−1$ gaps with width, say $t$. It is trivial to deduce that $t=(\max−\min)/(n−1)$ (where $\max$ and $\min$ are the minimum and maximum elements of the array). This width is the maximal width/gap between two adjacent elements in the array!
+
+Actually, $t$ is the smallest value for any array with the same number of elements (i.e. $n$) and the same range (i.e. ($\max−\min$)). We can start with a uniform width array (as described above) and try to reduce the gap between any two adjacent elements. If the gap is reduced between $A[i−1]$ and $A[i]$ to some value $t−\delta$, then you will notice that the gap between $A[i]$ and $A[i+1]$ would have increased to $t+\delta$. Hence the maximum attainable gap would have become $t+p$ from $t$. Thus the value of the maximum gap $t$ can only increase.
+
+From the Pigeonhole Principle, if we used buckets instead of individual elements for comparison, the number of comparisons would reduce if we could accommodate more than one element in a single bucket. In this way, we only had to compare among the buckets. 
+
+To make sure we only compare between buckets, we have to ensure that the gap between the buckets represent the maximal gap in the input array. We could do that just by setting the gap inside any bucket is smaller than $t=(\max−\min)/(n−1)$ (as described above). Since the gaps (between elements) within the same bucket would only be $\leq t$, we could deduce that the maximal gap would indeed occur only between two adjacent buckets.
+
+Hence by setting bucket size $b$to be $1<b\leq(\max−\min)/(n−1)$, we can ensure that at least one of the gaps between adjacent buckets would serve as the maximal gap.
+
+%\begin{algorithm}[H]
+%\begin{algorithmic}[1]
+%\Procedure{MaximumGap}{$A,L$}
+%\If{$L<2$}
+%\State \Return 0
+%\EndIf
+%\State $\alpha:=\min\limits_{0\leq i <L}A[i]$
+%\State $\beta:=\max\limits_{0\leq i <L}A[i]$
+%\State $s:=\max(1, (\beta-\alpha)/(L-1))$ \Comment The size of each bucket
+%\State $\ell:=(\beta-\alpha) / b +1$ \Comment The number of buckets
+%\algstore{164algo}
+%\end{algorithmic}
+%\end{algorithm}
+%\begin{algorithm}[H]
+%\begin{algorithmic}[1]
+%\algrestore{164algo}
+%\State Create an array $B_{s\times 1}$ for the buckets.
+%\State Each bucket has three elements: 
+%\State $u$ --- If the bucket has elements, set to zero initially 
+%\State $b_0$ --- The maximum in current bucket and 
+%\State $b_1$ --- The minimum in current bucket
+%\State Update each bucket in the following loop
+%\For{$i:= 0 \to L-1$}
+%\State $b_i:=(A[i]-b_{\min})/s$ \Comment The bucket index
+%\State $B[b_i].u\gets 1$ \Comment Indicate this bucket has numbers
+%\State $B[b_i].b_0\gets \min(B[b_i].b_0, A[i])$ \Comment Update minimum in the bucket
+%\State $B[b_i].b_1\gets \min(B[b_i].b_1, A[i])$ \Comment Update maximum in the bucket
+%\EndFor
+%\State Then, compare the gap between the buckets
+%\State $t:=\alpha$ \Comment $t$ is the maximum value of last bucket and is $\min(A)$ at start
+%\State $G:=0$ \Comment The result: maximum gap
+%\For{$i:=0\to \ell-1$} \Comment Iterate each bucket
+%\If{$B[i].u=1$} \Comment This bucket $B[i]$ has numbers
+%\State $G\gets \max(G, B[i].b_0 - t)$ \Comment Current bucket's minimum value minus t
+%\State $t\gets B[i].b_1$ \Comment Update the maximum value of last bucket
+%\EndIf
+%\EndFor
+%\State \Return $G$
+%\EndProcedure
+%\end{algorithmic}
+%\end{algorithm}

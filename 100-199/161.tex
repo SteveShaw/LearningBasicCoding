@@ -1,14 +1,14 @@
 \section{161 --- One Edit Distance}
 Given two strings $S$ and $T$, determine if they are both one edit distance apart.
 \subsection{Analysis}
-\begin{CJK*}{UTF8}{gbsn}
+
 分下面三种情况：
 \begin{enumerate}
 \item 两个字符串的长度之差大于1，那么直接返回\texttt{false}.
 \item 两个字符串的长度之差等于1，那么长的那个字符串去掉一个字符，剩下的应该和短的字符串相同
 \item 两个字符串的长度之差等于0，那么两个字符串对应位置的字符只能有一处不同。
 \end{enumerate}
-\end{CJK*}
+
 \setcounter{lstlisting}{0}
 \begin{lstlisting}[style=customc, caption={Reference Code}]
 bool isOneEditDistance( string s, string t )

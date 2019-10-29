@@ -21,7 +21,7 @@ If the fractional part is repeating, enclose the repeating part in parentheses.
 \textbf{Output}: $0.(6)$
 \end{flushleft}
 \subsection{Hash Map}
-\begin{CJK*}{UTF8}{gbsn}
+
 几个要点：
 \begin{itemize}
     \item 当余数发生重复时，即可停止计算，因为已经找到循环点了。
@@ -36,55 +36,7 @@ If the fractional part is repeating, enclose the repeating part in parentheses.
     \item 可能会造成 overflow 的情况，比如 $N = -2147483648$, $D = -1$，因此具体算法实现时应使用比int type更长的类型，比如long long。
     \item 如果结果为0，而其中一个数字是负数，也要注意不能把负号放入结果中。
 \end{itemize}
-\end{CJK*}
-\setcounter{algorithm}{0}
-\begin{algorithm}[H]
-\caption{Hash Map}
-\begin{algorithmic}[1]
-\Procedure{FractionToDecimal}{$N, D$}
-\State $S:=\emptyset$ \Comment The result decimal string
-\If{$N\times D < 0$}
-\State Add minus symbol $-$ to $S$
-\State Change any negative number to positive number so that $N\geq0$ and $D\geq0$ 
-\EndIf
-\State $q:=N/D$ \Comment The quotient
-\State $r:=N - D\times q$ \Comment The remainder
-\State Transform $q$ to string and append to integer part $S$
-\State $P:=\emptyset$ \Comment The string for decimal part
-\State $M:=\emptyset$ \Comment The hash map for the remainder and the position inside $P$
-\State $t:=0$ \Comment The current position of decimal part
-\While{$r\neq 0$} \label{166while}
-\If{$r \in M$}
-\State Put left parenthesis at position $M[r]$ in $P$
-\State Append right parenthesis to $P$
-\State \texttt{break} \Comment Stop while loop [\ref{166while}]
-\EndIf
-\State $M[r]:=t$
-\State $t\gets t+1$ \Comment Move to next decimal position
-\State $r\gets r\times 10$ \Comment Calculate next quotient
-\State $q \gets r / D$
-\State Transform $q$ to string and append to decimal part $P$
-\State $r\gets r - D\times q$ \Comment New remainder
-\EndWhile
-\algstore{166algo}
-\end{algorithmic}
-\end{algorithm}
-\begin{algorithm}[H]
-\begin{algorithmic}[1]
-\algrestore{166algo}
-\If{$P=\emptyset$} \Comment $N$ can be divided by $D$
-\If{$q=0$} 
-\State \Return 0 \Comment 0 does not have negative sign
-\Else
-\State \Return $S$ \Comment $S$ is the result
-\EndIf
-\EndIf
-\State Append dot symbol to $S$
-\State $S\gets S + P$ \Comment Append decimal part to integer part
-\State \Return $S$
-\EndProcedure
-\end{algorithmic}
-\end{algorithm}
+
 \setcounter{lstlisting}{0}
 \begin{lstlisting}[style=customc, caption={Source Code}]
 string fractionToDecimal( int numerator, int denominator )
