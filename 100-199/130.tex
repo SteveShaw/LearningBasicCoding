@@ -1,0 +1,131 @@
+\section{130 --- Surrounded Regions}
+Given a 2D board containing \fcj{'X'} and \fcj{'O'} (the letter $O$), capture all regions surrounded by \fcj{'X'}.
+
+A region is captured by flipping all \fcj{'O'}s into \fcj{'X'}s in that surrounded region.
+
+\paragraph{Example:}
+
+\begin{flushleft}
+
+
+\[
+\begin{bmatrix}
+X & X & X & X\\
+X & O & O & X\\
+X & X & O & X\\
+X & O & X & X
+\end{bmatrix}
+\]
+
+After running your function, the board should be:
+
+\[
+\begin{bmatrix}
+X & X & X & X\\
+X & X & X & X\\
+X & X & X & X\\
+X & O & X & X
+\end{bmatrix}
+\]
+
+
+
+\paragraph{Explanation:}
+
+Surrounded regions shouldn't be on the border, which means that any \fcj{'O'} on the border of the board are not flipped to \fcj{'X'}. Any \fcj{'O'} that is not on the border and it is not connected to an \fcj{'O'} on the border will be flipped to \fcj{'X'}. Two cells are connected if they are adjacent cells connected horizontally or vertically.
+
+\end{flushleft}
+
+
+\subsection{Replace Border Os}
+\begin{itemize}
+\item Check the four border of the matrix. If there is a element is \fcj{'O'}, alter it and all its neighbor \fcj{'O'} elements to \fcj{'1'}.
+\item Then, change all \fcj{'O'} to \fcj{'X'}
+\item Finally, change back all the \fcj{'1'} to \fcj{'O'}
+\end{itemize}
+
+\setcounter{lstlisting}{0}
+\begin{lstlisting}[style=customc, caption={Border Change First}]
+void solve( vector<vector<char>>& board )
+{
+    //corner case
+    if( board.empty() || ( board[0].empty() ) )
+    {
+        return;
+    }
+    auto M = board.size();
+    auto N = board[0].size();
+    //chech all four borders
+    //flodd all 'O' to '1'
+    for( size_t c = 0; c < N; ++c )
+    {
+        if( board[0][c] == 'O' )
+        {
+            flood( board, 0, c );
+        }
+
+        if( board[M - 1][c] == 'O' )
+        {
+            flood( board, M - 1, c );
+        }
+    }
+    for( size_t r = 1; r < M - 1; ++r )
+    {
+        if( board[r][0] == 'O' )
+        {
+            flood( board, r, 0 );
+        }
+
+        if( board[r][N - 1] == 'O' )
+        {
+            flood( board, r, N - 1 );
+        }
+    }
+    //change all 'O' to 'X'
+    //change back '1' to 'O'
+    for( size_t r = 0; r < M; ++r )
+    {
+        for( size_t c = 0; c < N; ++c )
+        {
+            if( board[r][c] == 'O' )
+            {
+                board[r][c] = 'X';
+            }
+            else if( board[r][c] == '1' )
+            {
+                board[r][c] = 'O';
+            }
+        }
+    }
+}
+//flood 4 neighborhood for 'O'
+void flood( vector<vector<char>>& board, size_t r, size_t c )
+{
+    if( board[r][c] == 'O' )
+    {
+        board[r][c] = '1';
+    }
+    else
+    {
+        return;
+    }
+    auto M = board.size();
+    auto N = board[0].size();
+    if( r + 1 < M )
+    {
+        flood( board, r + 1, c );
+    }
+    if( r >= 1 )
+    {
+        flood( board, r - 1, c );
+    }
+    if( c + 1 < N )
+    {
+        flood( board, r, c + 1 );
+    }
+    if( c >= 1 )
+    {
+        flood( board, r, c - 1 );
+    }
+}
+\end{lstlisting}
