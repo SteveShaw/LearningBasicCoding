@@ -1,109 +1,103 @@
 \section{290 --- Word Pattern}
-Given a pattern $P$ and a string $S$, find if $S$ follows the same pattern.
-\par
-Here follow means a full match, such that there is a bijection between a letter in $P$ and a non-empty word in $S$.
+Given a \fcj{pattern} and a string \fcj{str}, find if \fcj{str} follows the same pattern.
 
+Here \textbf{follow} means a full match, such that there is a \textbf{bijection} between a letter in \fcj{pattern} and a \textbf{non-empty} substring in \fcj{str}.
 \paragraph{Example 1:}
 \begin{flushleft}
-\textbf{Input}: $P$ = \texttt{abba}, $S$ = \texttt{dog cat cat dog}
-\\
-\textbf{Output}: \texttt{true}
+\textbf{Input}: \fcj{pattern = "abba"}, \fcj{str = "dog cat cat dog"}
+
+\textbf{Output}: \fcj{true}
 \end{flushleft}
 
 \paragraph{Example 2:}
 \begin{flushleft}
-Input: $P$ = \texttt{abba}, $S$ = \texttt{dog cat cat fish}
-\\
-Output: \texttt{false}
+\textbf{Input}: \fcj{pattern = "abba"}, \fcj{str = "dog cat cat fish"}
+
+\textbf{Output}: \fcj{false}
 \end{flushleft}
 
 \paragraph{Example 3:}
 \begin{flushleft}
-\textbf{Input}: $P$ = \texttt{aaaa}, $S$ = \texttt{dog cat cat dog}
-\\
-\textbf{Output}: \texttt{false}
+\textbf{Input}: \fcj{pattern = "aaaa"}, \fcj{str = "dog cat cat dog"}
+
+\textbf{Output}: \fcj{false}
 \end{flushleft}
 
 \paragraph{Example 4:}
 \begin{flushleft}
-\textbf{Input}: $P$ = \texttt{abba}, $S$ = \texttt{dog dog dog dog}
+\textbf{Input}: \fcj{pattern = "abba"}, \fcj{str = "dog dog dog dog"}
 \\
-\textbf{Output}: \texttt{false}
+\textbf{Output}: \fcj{false}
 \end{flushleft}
 
 \paragraph{Notes:}
 \begin{itemize}
-\item You may assume $P$ contains only lowercase letters, and $S$ contains lowercase letters separated by a single space.
+\item You may assume \fcj{pattern} contains only lowercase letters, and \fcj{str} contains lowercase letters that may be separated by a single space.
 \end{itemize}
 \subsection{Hash Map}
 这道题并不难。但是如果自己手动写分割字符串，有几点需要注意
 \begin{itemize}
-\item 需要考虑$P$和$S$中$P$的长度和$S$中单词个数不相等的情况。
-\item 如果只是建立$P$中的letter和$S$中的word的map并不够，比如$P$=\texttt{abba}，$S$=\texttt{cat cat cat cat}"，这时候letter $a$和$b$都map到了同一个word即\texttt{cat}上，但是不会产生错误
+\item 需要考虑 \fcj{pattern} 和  \fcj{str} 中  \fcj{pattern} 的长度 和  \fcj{str} 中单词个数不相等的情况。
+\item 如果只是建立 \fcj{pattern} 中的letter和  \fcj{str} 中的word的map并不够，比如\fcj{pattern = "abba"}，\fcj{str = "cat cat cat cat"}，这时候letter \fcj{'a'}和\fcj{'b'}都map到了同一个word即\fcj{"cat"}上，但是不会产生错误
 \item 因此还需要一个hash set用来记录已经出现的word，当发现一个letter没有对应的word时，先检查这个word有没有在hash set中，如果有，表示之前有letter已经和这个word对应了。
 \end{itemize}
 \setcounter{lstlisting}{0}
 \begin{lstlisting}[style=customc, caption={Hash Map}]
 bool wordPattern( string pattern, string str )
 {
-    //letter to word map
-    vector<string> m( 26 );
-
-    //word sets
-    unordered_set<string> ss;
-
-    size_t start = 0;
+    vector<string_view> dict( 26 );
+    unordered_set<string_view> seen;
+    size_t si = 0;
+    //use string_view to minimize memory footprint
+    string_view sv( str );
+    string_view pv( pattern );
+    //the number of letters has matched word
     size_t count = 0;
-
-    for( auto c : pattern )
+    for( auto pc : pattern )
     {
-        auto p = str.find( ' ', start );
-
-        auto word = str.substr( start, p - start );
-
-        start = p + 1;
-
-        if( m[c - 'a'].empty() )
+        int ci = pc - 'a';
+        //find next space
+        auto pos = sv.find( ' ', si );
+        //get the word
+        auto word = pos < sv.size() ? sv.substr( si, pos - si ) : sv.substr( si );
+        if( dict[ci].empty() )
         {
-            if( ss.find( word ) != ss.end() )
+            if( seen.find( word ) != seen.end() )
             {
-                //This word has been already
-                //mapped by another letter
+                //this word has matched another letter
                 return false;
             }
-
-            m[c - 'a'] = word;
-            ss.emplace( word );
+            dict[ci] = word;
+            seen.insert( word );
         }
         else
         {
-            if( m[c - 'a'] != word )
+            if( dict[ci] != word )
             {
-                //The word is different from the word mapped
-                //from the same letter
+                //the recorded matched word does not equal
+                //current word
                 return false;
             }
         }
-
-        //increments the valid match count
+        //increments the number of letters have matched word
         ++count;
-
-        if( p == string::npos )
+        if( pos >= sv.size() )
         {
-            start = str.size();
+            //set start to sv.size()
+            //no more space exist
+            si = sv.size();
             break;
         }
+        si = pos + 1;
     }
-
-    if( start < str.size() )
+    //str length has unmatched word
+    if( si < sv.size() )
     {
-        //str is longer
         return false;
     }
-
-    //The valid match count must equal to
-    //the number letters of pattern
-    return count == pattern.size();
+    //some letters in pattern
+    //do not have matched word
+    return count == pv.size();
 }
 \end{lstlisting}
 

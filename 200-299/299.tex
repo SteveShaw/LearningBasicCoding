@@ -1,17 +1,16 @@
 \section{299 --- Bulls and Cows}
 You are playing the following \textbf{Bulls and Cows} game with your friend: You write down a number and ask your friend to guess what the number is. Each time your friend makes a guess, you provide a hint that indicates how many digits in said guess match your secret number exactly in both digit and position (called \textit{bulls}) and how many digits match the secret number but locate in the wrong position (called \textit{cows}). Your friend will use successive guesses and hints to eventually derive the secret number.
-\par
+
 Write a function to return a hint according to the secret number and friend's guess, use $A$ to indicate the bulls and $B$ to indicate the cows. 
-\par
 
 Please note that both secret number and friend's guess may contain duplicate digits.
 
 \paragraph{Example 1:}
 
 \begin{flushleft}
-\textbf{Input}: secret = 1807, guess = 7810
+\textbf{Input}: \fcj{secret = "1807"},\fcj{ guess = "7810"}
 \\
-\textbf{Output}: $1A3B$
+\textbf{Output}: \fcj{"1A3B"}
 \\
 \textbf{Explanation}: 1 bull and 3 cows. The bull is 8, the cows are 0, 1 and 7.
 \end{flushleft}
@@ -19,9 +18,9 @@ Please note that both secret number and friend's guess may contain duplicate dig
 \paragraph{Example 2:}
 
 \begin{flushleft}
-\textbf{Input}: secret = 1123, guess = 0111
+\textbf{Input}: \fcj{secret = "1123"}, \fcj{guess = "0111"}
 \\
-\textbf{Output}: $1A1B$
+\textbf{Output}: \fcj{"1A1B"}
 \\
 \textbf{Explanation}: The 1st 1 in friend's guess is a bull, the 2nd or 3rd 1 is a cow.
 \end{flushleft}
@@ -36,35 +35,7 @@ Please note that both secret number and friend's guess may contain duplicate dig
 \item 如果$S$当前位置数字的出现次数小于0，则表示其在$G$中出现过，increments cows，同时increments对应的出现次数，
 \item 如果$G$当前位置数字的出现次数大于0，则表示其在$S$中出现过，同样increments cows，但是要decrements对应的出现次数。
 \end{itemize}
-\setcounter{algorithm}{0}
-\begin{algorithm}[H]
-\caption{Counts}
-\begin{algorithmic}[1]
-\Procedure{GetHint}{$S, G, L$}
-\State $\star$ 创建一个array $C$，长度为10，用于记录$S$和$G$中数字的出现次数
-\State $\star$ $C$中所有元素初始化零，而$G$中数字的出现次数用负数表示
-\State $A:=0$ \Comment Number of bulls
-\State $B:=0$ \Comment Number of cows
-\For{$i:=0$ \textbf{to} $L$}
-\If{$S[i] = G[i]$}
-\State $A\gets A+1$ \Comment Number and position are matched --- bull
-\Else
-\If{$C[S[i]] < 0$} 
-\State $\ast$ $S[i]$在$G$中出现过，而且出现次数大于到目前为在$S$的出现次数
-\State $B\gets B+1$
-\EndIf
-\State $C[S[i]]\gets C[S[i]] +1$ \Comment Increments $S[i]$的出现次数
-\If{$C[G[i]] > 0$} 
-\State $\ast$ $G[i]$在$S$中出现过，而且出现次数大于到目前为在$G$的出现次数
-\State $B\gets B+1$
-\EndIf
-\State $C[G[i]]\gets C[G[i]] -1$ \Comment Increments $G[i]$的出现次数(因为是负数，所以减一)
-\EndIf
-\EndFor
-\State \Return $A$的count和$B$的count组成的字符串
-\EndProcedure
-\end{algorithmic}
-\end{algorithm}
+
 \setcounter{lstlisting}{0}
 \begin{lstlisting}[style=customc, caption={Counts}]
 string getHint( string secret, string guess )
@@ -117,29 +88,7 @@ string getHint( string secret, string guess )
 \item 否则的话，分别increment $S$和$G$在当前位置的数字的次数。
 \item 最后，同时遍历$S$和$G$（因为两个长度都是10），然后取其中的较小值加到$B$中。
 \end{itemize}
-\begin{algorithm}[H]
-\caption{Two Pass}
-\begin{algorithmic}[1]
-\Procedure{GetHint}{$S, G, L$}
-\State $\star$ 创建两个数组$x$和$y$，长度都是10
-\State $\star$ $x$用于记录$S$中的number的出现次数，$y$用于记录$G$中的number的出现次数
-\State $A:=0$ \Comment Number of bulls
-\State $B:=0$ \Comment Number of cows
-\For{$i:=0$ \textbf{to} $L-1$}
-\If{$S[i]=G[i]$}
-\State $A\gets A+1$ \Comment Number and position are matched --- bull
-\Else
-\State $x[S[i]]\gets x[S[i]] +1$ \Comment Increments count of $S[i]$
-\State $y[G[i]]\gets y[G[i]] +1$ \Comment Increments count of $G[i]$
-\EndIf
-\EndFor
-\For{$k:=0$ \textbf{to} $9$}
-\State $B\gets B+\min(x[k], y[k])$ \Comment The minimum of $S[k]$ and $G[k]$ is B
-\EndFor
-\State \Return $A$的count和$B$的count组成的字符串
-\EndProcedure
-\end{algorithmic}
-\end{algorithm}
+
 \begin{lstlisting}[style=customc, caption={Two Pass}]
 string getHint( string secret, string guess )
 {
