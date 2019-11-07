@@ -38,44 +38,51 @@ To make sure we only compare between buckets, we have to ensure that the gap bet
 
 Hence by setting bucket size $b$to be $1<b\leq(\max−\min)/(n−1)$, we can ensure that at least one of the gaps between adjacent buckets would serve as the maximal gap.
 
-%\begin{algorithm}[H]
-%\begin{algorithmic}[1]
-%\Procedure{MaximumGap}{$A,L$}
-%\If{$L<2$}
-%\State \Return 0
-%\EndIf
-%\State $\alpha:=\min\limits_{0\leq i <L}A[i]$
-%\State $\beta:=\max\limits_{0\leq i <L}A[i]$
-%\State $s:=\max(1, (\beta-\alpha)/(L-1))$ \Comment The size of each bucket
-%\State $\ell:=(\beta-\alpha) / b +1$ \Comment The number of buckets
-%\algstore{164algo}
-%\end{algorithmic}
-%\end{algorithm}
-%\begin{algorithm}[H]
-%\begin{algorithmic}[1]
-%\algrestore{164algo}
-%\State Create an array $B_{s\times 1}$ for the buckets.
-%\State Each bucket has three elements: 
-%\State $u$ --- If the bucket has elements, set to zero initially 
-%\State $b_0$ --- The maximum in current bucket and 
-%\State $b_1$ --- The minimum in current bucket
-%\State Update each bucket in the following loop
-%\For{$i:= 0 \to L-1$}
-%\State $b_i:=(A[i]-b_{\min})/s$ \Comment The bucket index
-%\State $B[b_i].u\gets 1$ \Comment Indicate this bucket has numbers
-%\State $B[b_i].b_0\gets \min(B[b_i].b_0, A[i])$ \Comment Update minimum in the bucket
-%\State $B[b_i].b_1\gets \min(B[b_i].b_1, A[i])$ \Comment Update maximum in the bucket
-%\EndFor
-%\State Then, compare the gap between the buckets
-%\State $t:=\alpha$ \Comment $t$ is the maximum value of last bucket and is $\min(A)$ at start
-%\State $G:=0$ \Comment The result: maximum gap
-%\For{$i:=0\to \ell-1$} \Comment Iterate each bucket
-%\If{$B[i].u=1$} \Comment This bucket $B[i]$ has numbers
-%\State $G\gets \max(G, B[i].b_0 - t)$ \Comment Current bucket's minimum value minus t
-%\State $t\gets B[i].b_1$ \Comment Update the maximum value of last bucket
-%\EndIf
-%\EndFor
-%\State \Return $G$
-%\EndProcedure
-%\end{algorithmic}
-%\end{algorithm}
+\setcounter{lstlisting}{0}
+\begin{lstlisting}[style=customc, caption={Bucket Sort}]
+int maximumGap( vector<int>& nums )
+{
+    if( nums.empty() || ( nums.size() < 2 ) )
+    {
+        return 0;
+    }
+    //1. find maximum and minimum of nums
+    //to get the bucket size
+    auto p = minmax_element( begin( nums ), end( nums ) );
+    const auto& [p_min, p_max] = p;
+    //2. compute the bucket size and number of buckets
+    auto L = static_cast< int >( nums.size() );
+    int bucket_size = ( *p_max - *p_min ) / ( L - 1 );
+    bucket_size = ( max )( 1, bucket_size );
+    //3. fill buckets
+    int num_buckets = ( *p_max - *p_min ) / bucket_size + 1;
+    vector<array<int, 3>> buckets( num_buckets, array<int, 3> { *p_max, * p_min, 0 } );
+    for( int n : nums )
+    {
+        int bucket_index = ( n - *p_min ) / bucket_size;
+        auto& bucket = buckets[bucket_index];
+        //indicate this bucket is used
+        bucket[2] = 1;
+        //update minimum inside the bucket
+        bucket[0] = ( min )( n, bucket[0] );
+        //update maximum inside the bucket
+        bucket[1] = ( max )( n, bucket[1] );
+    }
+    //4. get the maximum gap
+    int last_max = *p_min;
+    int max_gap = 0;
+    for( const auto& bucket : buckets )
+    {
+        if( !bucket[2] )
+        {
+            //this bucket is not used
+            continue;
+        }
+        //get the gap between buckets
+        max_gap = ( max )( max_gap, bucket[0] - last_max );
+        //update last_max
+        last_max = bucket[1];
+    }
+    return max_gap;
+}
+\end{lstlisting}

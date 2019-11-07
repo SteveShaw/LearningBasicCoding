@@ -3,9 +3,9 @@ Given an input string $S$, reverse the string word by word.
 \par
 \paragraph{Example}:
 \begin{flushleft}
-\textbf{Input}: \texttt{the sky is blue}
-\par
-\textbf{Output}: \texttt{blue is sky the}
+\textbf{Input}: \fcj{"the sky is blue"}
+
+\textbf{Output}: \fcj{"blue is sky the"}
 \end{flushleft}
 \paragraph{Note: }
 
@@ -18,3 +18,32 @@ Given an input string $S$, reverse the string word by word.
 \begin{itemize}
 \item Could you do it in-place without allocating extra space?
 \end{itemize}
+
+\subsection{Two Reverses}
+Reverse whole string first, then reverse each word.
+
+\setcounter{lstlisting}{0}
+\begin{lstlisting}[style=customc, caption={Two Reverses}]
+void reverseWords( vector<char>& s )
+{
+    //reverse whole
+    reverse( begin( s ), end( s ) );
+    //reverse each word
+    for( size_t i = 0; i < s.size(); ++i )
+    {
+        if( s[i] != ' ' )
+        {
+            auto j = i + 1;
+            for( ; j < s.size(); ++j )
+            {
+                if( s[j] == ' ' )
+                {
+                    break;
+                }
+            }
+            reverse( s.begin() + i, s.begin() + j );
+            i = j;
+        }
+    }
+}
+\end{lstlisting}

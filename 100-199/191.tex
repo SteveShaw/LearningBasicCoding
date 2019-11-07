@@ -2,52 +2,48 @@
 Write a function that takes an unsigned integer and return the number of \textbf{1} bits it has (also known as the Hamming weight).
 \paragraph{Example 1:}
 \begin{flushleft}
-\textbf{Input}: 00000000000000000000000000001011
+\textbf{Input}: \fcj{00000000000000000000000000001011}
 \\
 \textbf{Output}: 3
 
 \textbf{Explanation}: 
 \\
-The input binary string \textbf{00000000000000000000000000001011} has a total of three \textbf{1} bits.
+The input binary string \fcj{00000000000000000000000000001011} has a total of three \textbf{1} bits.
 \end{flushleft}
 \paragraph{Example 2:}
 \begin{flushleft}
-\textbf{Input}: 00000000000000000000000010000000
+\textbf{Input}: \fcj{00000000000000000000000010000000}
 \\
 \textbf{Output}: 1
 \\
-\textbf{Explanation}: The input binary string \textbf{00000000000000000000000010000000} has a total of one \textbf{1} bit.
+\textbf{Explanation}: The input binary string \fcj{00000000000000000000000010000000} has a total of one \textbf{1} bit.
 \end{flushleft}
 \textbf{Example 3:}
 \begin{flushleft}
-\textbf{Input}: 11111111111111111111111111111101
+\textbf{Input}: \fcj{11111111111111111111111111111101}
 \\
 \textbf{Output}: 31
 \\
 \textbf{Explanation}:
 \\
-The input binary string \textbf{11111111111111111111111111111101} has a total of thirty one \textbf{1} bits.
+The input binary string \fcj{11111111111111111111111111111101} has a total of thirty one \textbf{1} bits.
 \end{flushleft}
 \textbf{Follow up:}
 \begin{itemize}
 \item If this function is called many times, how would you optimize it?
 \end{itemize}
 \subsection{Trick}
-\begin{CJK*}{UTF8}{gbsn}
-$n \text{ \& } (n-1)$会把末尾的1消除掉，因此不停的进行此操作直至$n$为0，就可以得到1的个数了。
-\end{CJK*}
+\fcj{n & (n-1)} 会把末尾的1消除掉，因此不停的进行此操作直至$n$为0，就可以得到1的个数了。
 \setcounter{lstlisting}{0}
 \begin{lstlisting}[style=customc, caption={Bit Tricks}]
 int hammingWeight( uint32_t n )
 {
     int ans = 0;
-	
     while( n )
     {
         n = n & ( n - 1 );
         ++ans;
     }
-
     return ans;
 }
 \end{lstlisting}

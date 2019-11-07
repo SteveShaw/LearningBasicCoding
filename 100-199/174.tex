@@ -29,69 +29,63 @@ For example, given the dungeon below, the initial health of the knight must be a
 \item Any room can contain threats or power-ups, even the first room the knight enters and the bottom-right room where the princess is imprisoned.
 \end{itemize}
 \subsection{Backward Dynamic Programming}
-\begin{CJK*}{UTF8}{gbsn}
+
 \begin{itemize}
 \item knight在每个格子的生命值至少为1
-\item 从$P$的位置回溯进行DP。
+\item 从右下角位置回溯进行DP。
 \end{itemize}
-\end{CJK*}
-\setcounter{algorithm}{0}
-\begin{algorithm}[H]
-\caption{}
-\begin{algorithmic}[1]
-\Procedure{CalculateMinimumHP}{$D, R, C$}
-\State $\star$ Create a 2D array $F$ same dimensions as $D$
-\State $F[R-1][C-1] \gets \max(1, 1 - D[R-1][C-1])$ \Comment At least the knight must have 1 health point
-\State $\star$ Fill last column of $F$
-\For{$r:=R-2 \to 0$}
-\State $F[r][C-1]\gets\max(1, F[r+1][C-1] - D[r][C-1])$
-\EndFor
-\State $\star$ Fill last row of $F$
-\For{$c:=C-2 \to 0$}
-\State $F[R-1][c]\gets\max(1, F[R-1][c+1] - D[R-1][c])$
-\EndFor
-\State $\star$ Filling all remaining cells back to $F[0][0]$
-\For{$r:=R-2 \to 0$}
-\For{$c:=C-2 \to 0$}
-\State $x:=\min(F[r+1][c], F[r][c+1])$ \Comment Get minimum required health points
-\State $\star$ $x-D[r][c]$ is the health points required to move to \textbf{RIGHT} or \textbf{DOWN}
-\State $\star$ But knight must have at least 1 health point
-\State $F[r][c]\gets\max(1, x - D[r][c])$ 
-\EndFor
-\EndFor
-\State \Return $F[0][0]$
-\EndProcedure
-\end{algorithmic}
-\end{algorithm}
 \setcounter{lstlisting}{0}
-\begin{lstlisting}[style=customc, caption={Source Code}]
+\begin{lstlisting}[style=customc, caption={2D DP}]
 int calculateMinimumHP( vector<vector<int>>& dungeon )
 {
-    int rows = static_cast<int>( dungeon.size() );
-    int cols = static_cast<int>( dungeon[0].size() );
-    vector<vector<int>> F( rows, vector<int>( cols, 0 ) );
-
-    F[rows - 1][cols - 1] = ( max )( 1, 1 - D[rows - 1][cols - 1] );
-
-    for( int r = rows - 2; r >= 0; --r )
+    auto M = dungeon.size();
+    auto N = dungeon[0].size();
+    vector<vector<int>> F( M, vector<int>( N, 1000000000 ) );
+    F[M - 1][N - 1] = ( max )( 1, -dungeon[M - 1][N - 1] + 1 );
+    //1. fill last column
+    for( size_t r = M - 1; r >= 1; --r )
     {
-        F[r][cols - 1] = ( max )( 1, F[r + 1][cols - 1] - dungeon[r][cols - 1] );
+        F[r - 1][N - 1] = ( max )( 1, F[r][N - 1] - dungeon[r - 1][N - 1] );
     }
-
-    for( int c = cols - 2; c >= 0; --c )
+    //2. fill last row
+    for( size_t c = N - 1; c >= 1; --c )
     {
-        F[rows - 1][c] = ( max )( 1, F[rows - 1][c + 1] - dungeon[rows - 1][c] );
+        F[M - 1][c - 1] = ( max )( 1, F[M - 1][c] - dungeon[M - 1][c - 1] );
     }
-
-    for( int r = rows - 2; r >= 0; --r )
+    //3. DP backward
+    for( size_t r = M - 1; r >= 1; --r )
     {
-        for( int c = cols - 2; c >= 0; --c )
+        for( size_t c = N - 1; c >= 1; --c )
         {
-            int next = ( min )( F[r + 1][c], F[r][c + 1] );
-            F[r][c] = ( max )( 1, next - dungeon[r][c] );
+            F[r - 1][c - 1] = ( min )( F[r][c - 1], F[r - 1][c] ) - dungeon[r - 1][c - 1];
+            F[r - 1][c - 1] = ( max )( 1, F[r - 1][c - 1] );
         }
     }
-
     return F[0][0];
+}
+\end{lstlisting}
+
+But we can reduce the dimension to 1D. 
+
+\begin{lstlisting}[style=customc, caption={1D DP}]
+int calculateMinimumHP( vector<vector<int>>& dungeon )
+{
+    auto M = static_cast<int>( dungeon.size() );
+    auto N = static_cast<int>( dungeon[0].size() );
+    vector<int> F( N, 1000'000'000 );
+    F.back() = 1;
+    for( int r = M - 1; r >= 0; --r )
+    {
+        //1. update rightmost element first
+        //it only depends on one cell
+        F[N - 1] = ( max )( 1, F[N - 1] - dungeon[r][N - 1] );
+        //2. update from right to left
+        for( int c = N - 2; c >= 0; --c )
+        {
+            F[c] = ( min )( F[c + 1], F[c] ) - dungeon[r][c];
+            F[c] = ( max )( F[c], 1 );
+        }
+    }
+    return F[0];
 }
 \end{lstlisting}

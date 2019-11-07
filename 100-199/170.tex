@@ -1,14 +1,66 @@
 \section{170 --- Two Sum III: Data structure design}
-Design and implement a \texttt{TwoSum} class. It should support the following operations:\texttt{add} and \texttt{find}.
+Design and implement a \fcj{TwoSum} class. It should support the following operations:\fcj{add} and \fcj{find}.
 \begin{itemize}
-\item \texttt{add} --- Add the number to an internal data structure.
-\item \texttt{find} --- Find if there exists any pair of numbers which sum is equal to the value.
+\item \fcj{add} --- Add the number to an internal data structure.
+\item \fcj{find} --- Find if there exists any pair of numbers which sum is equal to the value.
 \end{itemize}
-For example,
-\begin{lstlisting}[style=customc]
-add(1);
-add(3);
-add(5);
-find(4); \\ return true
-find(7); \\ return false
+
+\paragraph{Example 1:}
+
+\begin{flushleft}
+\fcj{add(1); add(3); add(5);}
+
+\fcj{find(4) -> true}
+
+\fcj{find(7) -> false}
+\end{flushleft}
+
+\paragraph{Example 2:}
+
+\begin{flushleft}
+\fcj{add(3); add(1); add(2);}
+
+\fcj{find(3) -> true}
+
+\fcj{find(6) -> false}
+\end{flushleft}
+
+\subsection{Hash Map}
+\textbf{Easy} problem.\setcounter{lstlisting}{0}
+\begin{lstlisting}[style=customc, caption={Hash Map}]
+class TwoSum
+{
+public:
+    /** Initialize your data structure here. */
+    TwoSum() {}
+    /** Add the number to an internal data structure.. */
+    void add( int number )
+    {
+        m[number]++;
+    }
+    /** Find if there exists any pair of numbers which sum is equal to the value. */
+    bool find( int value )
+    {
+        for( const auto[k, v] : m )
+        {
+            auto it = m.find( value - k );
+            if( it != m.end() )
+            {
+                const auto& [d, count] = *it;
+                if( d != k )
+                {
+                    return true;
+                }
+                if( count > 1 )
+                {
+                    //duplicate number
+                    return true;
+                }
+            }
+        }
+        return false;
+    }
+    unordered_map<int, int> m;
+};
 \end{lstlisting}
+

@@ -21,14 +21,11 @@ If the fractional part is repeating, enclose the repeating part in parentheses.
 \textbf{Output}: $0.(6)$
 \end{flushleft}
 \subsection{Hash Map}
-
-几个要点：
 \begin{itemize}
     \item 当余数发生重复时，即可停止计算，因为已经找到循环点了。
     \item 用一个hash map保存每个小数位上的数字。
     \item 由于要算出小数每一位，因此和手动计算一样，每次要把余数乘10，再除以denominator，得到的商即为小数的下一位数字。
     \item 如果余数在之前出现过，则在这个余数之前对应的位置前加左括号，然后在当前位置处加右括号。
-    \item 由于商必定是小于10的数字，因此小数点的位置每次只是增加1
 \end{itemize}
 另外还需要考虑如下几个边界情况
 \begin{itemize}
@@ -38,67 +35,68 @@ If the fractional part is repeating, enclose the repeating part in parentheses.
 \end{itemize}
 
 \setcounter{lstlisting}{0}
-\begin{lstlisting}[style=customc, caption={Source Code}]
+\begin{lstlisting}[style=customc, caption={Mathematical}]
 string fractionToDecimal( int numerator, int denominator )
 {
-    auto N = static_cast<long long>( numerator );
-    auto D = static_cast<long long>( denominator );
-
+    //1. check if the result will be negative or not
+    unsigned char flag = 0;
+    auto ne = static_cast<long long>( numerator );
+    if( numerator < 0 )
+    {
+        ++flag;
+        ne = -ne;
+    }
+    auto de = static_cast<long long>( denominator );
+    if( denominator < 0 )
+    {
+        ++flag;
+        de = -de;
+    }
     string ans;
-
-	//Negative sign
-    if( N * D < 0 )
+    if( flag == 1 )
     {
+        //result will be negative
+        //add minus symbol
         ans.push_back( '-' );
-
-        N = ( max )( N, -N );
-        D = ( max )( D, -D );
     }
-
-    auto q = N / D;
-    auto r = N - q * D;
-
+    //2. get the integer part
+    auto q = ne / de;
+    auto r = ne - q * de;
     ans += to_string( q );
-
-    string decimal;
-
-    size_t pos = 0;
-    unordered_map<long long, size_t> m;
-
-    while( r != 0 )
+    if( r == 0 )
     {
-        auto it = m.find( r );
-
-        if( it != m.end() )
-        {
-            decimal.insert( it->second, "(" );
-            decimal.push_back( ')' );
-            break;
-        }
-
-        m.emplace( r, pos );
-        ++pos;
-
-        r *= 10;
-        q = r / D;
-        r -= q * D;
-
-        decimal += to_string( q );
-    }
-
-    if( decimal.empty() )
-    {
+        //no decimal part
         if( q == 0 )
         {
+            //we may get "-0"
+            //so return "0" here
             return "0";
         }
-
         return ans;
     }
-
+    //3.add decimal part
     ans.push_back( '.' );
-    ans += decimal;
-
+    //record the repeat part
+    unordered_map<long long, size_t> memo;
+    while( r != 0 )
+    {
+        auto it = memo.find( r );
+        if( it != memo.end() )
+        {
+            //we found the recurrent part
+            //add parenthesis
+            ans.insert( it->second, "(" );
+            ans.push_back( ')' );
+            break;
+        }
+        //each decimal map to a position in ans
+        memo.emplace( r, ans.size() );
+        //get more decimals
+        r *= 10;
+        q = r / de;
+        ans += to_string( q );
+        r = r - de * q;
+    }
     return ans;
 }
 \end{lstlisting}

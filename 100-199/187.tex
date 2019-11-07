@@ -1,21 +1,20 @@
 \section{187 --- Repeated DNA Sequences}
-All DNA is composed of a series of nucleotides abbreviated as $A$, $C$, $G$, and $T$, for example: \texttt{ACGAATTCCG}. When studying DNA, it is sometimes useful to identify repeated sequences within the DNA.
+All DNA is composed of a series of nucleotides abbreviated as $A$, $C$, $G$, and $T$, for example: \fcj{"ACGAATTCCG"}. When studying DNA, it is sometimes useful to identify repeated sequences within the DNA.
 \par
 Write a function to find all the 10-letter-long sequences (substrings) that occur more than once in a DNA molecule.
 \paragraph{Example:}
 \begin{flushleft}
-\textbf{Input}: $s = \texttt{AAAAACCCCCAAAAACCCCCCAAAAAGGGTTT}$
-\\
-\textbf{Output}: $[\texttt{AAAAACCCCC}, \texttt{CCCCCAAAAA}]$
+\textbf{Input}: $s$: \fcj{"AAAAACCCCCAAAAACCCCCCAAAAAGGGTTT"}
+
+\textbf{Output}: \fcj{["AAAAACCCCC", "CCCCCAAAAA"]}
 \end{flushleft}
+
 \subsection{Hash Set}
-\begin{CJK*}{UTF8}{gbsn}
 \begin{itemize}
 \item 需要用两个hash set，一个用来记录出现过的string，另外一个用来存放出现过至少两次的string。之所以用hash set来存放至少两次的string，是因为结果中也不能出现重复的string。
 \item 直接用hash set记录出现的10个字母的string
 \item 如果碰到的string在hash set中出现过，加入到存放结果的hash set中。
 \end{itemize}
-\end{CJK*}
 \setcounter{lstlisting}{0}
 \begin{lstlisting}[style=customc, caption={Hash Sets}]
 vector<string> findRepeatedDnaSequences( string s )
@@ -48,5 +47,114 @@ vector<string> findRepeatedDnaSequences( string s )
     }
 
     return {ss_ans.begin(), ss_ans.end()};
+}
+\end{lstlisting}
+
+\subsection{Constant-time Slice Using Bitmask}
+Since we have only 4 letters, we can map the letter to a 2-bit integer, i.e.
+
+
+\fcj{"A" -> 00}
+
+\fcj{"C" -> 01}
+
+\fcj{"G" -> 10}
+
+\fcj{"T" -> 11}
+
+Since each digit takes no more than 2 bits, the bitmask can be computed as
+
+\begin{enumerate}
+\item Do left shift to free the last two bits: \fcj{bitmask <<= 2}
+
+\item Save current digit in the last two bits: \fcj{bitmask |= nums[i]}
+\end{enumerate}
+
+Now consider the slice 
+
+\fcj{"GAAAAACCCCC" -> "AAAAACCCCC"}. 
+
+For integer arrays that means 
+
+\fcj{20000011111 -> 0000011111}, 
+
+to remove leading 2 and to add trailing 1.
+
+To add trailing 1 is simple, the same idea as just above:
+
+\begin{itemize}
+\item Do left shift to free the last two bits: \fcj{bitmask <<= 2}
+
+\item Save 1 into these last two bits: \fcj{bitmask |= 1}
+\end{itemize}
+
+Now the problem is to remove two leading bits, which contain 2. In other words, the problem is to set 20th bit and 21st bit to zero. We can use the following simple trick:
+
+\begin{itemize}
+\item \fcj{1 << n} is to set $n$--th bit equal to 1.
+
+\item \fcj{\~(1 << n)} is to set $n$--th bit equal to 0, and all lower bits to 1.
+
+\item \fcj{bitmask &= \~(1 << n)} is to set $n$--th bit of bitmask equal to 0.
+\end{itemize}
+
+Thus, to unset the two leading bits, we can do
+
+\fcj{bitmask &= \~(1 << 20) & \~(1 << 21) }, or simplified as 
+
+\fcj{bitmask &= \~(3 << 20) }
+
+\setcounter{lstlisting}{0}
+\begin{lstlisting}[style=customc, caption={Hash Sets}]
+vector<string> findRepeatedDnaSequences( string s )
+{
+    int seq_len = 10;
+    int L = static_cast< int >( s.size() );
+    if( L <= seq_len )
+    {
+        return {};
+    }
+    //1. map letter to integer
+    vector<int> m( 26, 0 );
+    m['C' - 'A'] = 1;
+    m['G' - 'A'] = 2;
+    m['T' - 'A'] = 3;
+    unordered_set<int> seen;
+    int bitmask = 0;
+    int i = 0;
+    //2. get the bitmask of first 10 letters
+    //and then add to the hash set "seen"
+    for( ; i < seq_len; ++i )
+    {
+        bitmask <<= 2;
+        bitmask |= ( m[s[i] - 'A'] );
+    }
+    seen.insert( bitmask );
+    string_view sv( s );
+    //to avoid repeat string, use another hash set
+    unordered_set<string_view> dups;
+    //mask to unset the first 2 bits of bit mask
+    int T = ( ~( 3 << ( 2 * seq_len ) ) );
+    //3. find repeated patterns
+    for( ; i < L; ++i )
+    {
+        // left shift to free the last 2 bit
+        bitmask <<= 2;
+        // add a new 2-bits number in the last two bits
+        bitmask |= ( m[s[i] - 'A'] );
+        // unset first two bits: 2L-bit and (2L + 1)-bit
+        bitmask &= T;
+        if( seen.find( bitmask ) != seen.end() )
+        {
+            //since at current index i, we found duplicate
+            //thus s[i-9, i] is the pattern
+            dups.emplace( sv.substr( i - seq_len + 1, seq_len ) );
+        }
+        else
+        {
+            seen.insert( bitmask );
+        }
+    }
+    return vector<string>( begin( dups ), end( dups ) );
 }
 \end{lstlisting}

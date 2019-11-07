@@ -1,4 +1,58 @@
 \section{163 --- Missing Ranges}
-Given a sorted integer array $A$ where the range of elements are $[0, 99]$ inclusive, return its missing ranges.
+Given a sorted integer array \fcj{nums}, where the range of elements are in the \textbf{inclusive range} \fcj{[lower, upper]}, return its missing ranges.
 
-For example, given $[0, 1, 3, 50, 75]$, return $[2, 4\to49, 51\to74, 76\to99]$
+\paragraph{Example:}
+
+\begin{flushleft}
+\textbf{Input}: 
+
+\fcj{nums = [0, 1, 3, 50, 75]} 
+
+\fcj{lower = 0} and \fcj{upper = 99}
+
+\textbf{Output}: \fcj{["2", "4->49", "51->74", "76->99"]}
+\end{flushleft}
+
+\subsection{One Pass}
+
+Maintain a variable \fcj{pre} to record last range's start. \fcj{pre} starts from \fcj{lower - 1}. The reason is that we can unify the processing of \fcj{lower} and \fcj{higher}
+
+By traversing each number in \fcj{nums}, if the difference between current number $x$ and last range end \fcj{pre} is larger than 2, we found a missing range which has \fcj{pre+1} as the start and $x-1$ as the end. Then update \fcj{pre} as $x$.
+
+After completion of traversing, we have to check if there is a missing range between \fcj{upper} and latest \fcj{pre}. If \fcj{upper - pre >= 1}, a missing range \fcj{[pre+1, upper-1]} does exist.
+
+\setcounter{lstlisting}{0}
+\begin{lstlisting}[style=customc, caption={One Pass}]
+vector<string> findMissingRanges( vector<int>& nums, int lower, int upper )
+{
+    using ll = long long;
+    auto to_str = []( ll s, ll e )
+    {
+        if( s == e )
+        {
+            return to_string( s );
+        }
+
+        return to_string( s ) + "->" + to_string( e );
+    };
+    vector<string> ans;
+    auto pre = static_cast<ll>( lower );
+    --pre;//unify boundary and in range comparison
+    for( int n : nums )
+    {
+        auto ll_n = static_cast< ll >( n );
+        if( n - pre >= 2 )
+        {
+            ans.emplace_back( to_str( pre + 1, ll_n - 1 ) );
+        }
+        pre = n;
+    }
+    //process the case for upper range
+    auto hi = static_cast< ll >( upper );
+    if( hi - pre >= 1 )
+    {
+        ans.emplace_back( to_str( pre + 1, hi ) );
+    }
+    return ans;
+}
+\end{lstlisting}

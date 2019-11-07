@@ -1,17 +1,20 @@
 \section{167 --- Two Sum II: Input array is sorted}
-Given an array of integers $A$ that is already sorted in ascending order, find two numbers such that they add up to a specific target number $T$.
-\par
-The function should return indices of the two numbers such that they add up to the target, where the first index $\alpha$ must be less than the second index $\beta$.
+Given an array of integers $A$ that is already \textbf{sorted in ascending order}, find two numbers such that they add up to a specific target number $T$.
+
+The function should return indices of the two numbers such that they add up to the target, where the first index \fcj{index1} must be less than the second index \fcj{index2}.
 \paragraph{Note:}
 \begin{itemize}
-    \item Your returned answers (both $\alpha$ and $\beta$) are not zero-based.
-    \item You may assume that each input would have exactly one solution and you may not use the same element twice.
+    \item Your returned answers (both \fcj{index1} and \fcj{index2}) are not zero-based.
+    \item You may assume that each input would have \textit{exactly} one solution and you may not use the same element twice.
 \end{itemize}
 \paragraph{Example:}
 \begin{flushleft}
-\textbf{Input}: $A = [2,7,11,15]$, $T = 9$
-\\
+\textbf{Input}: $A$: \fcj{[2,7,11,15]}, \fcj{target = 9}
+
 \textbf{Output}: $[1,2]$
-\\
-\textbf{Explanation}: The sum of 2 and 7 is 9. Therefore $\alpha = 1$, $\beta = 2$.
+
+\textbf{Explanation}: The sum of 2 and 7 is 9. Therefore \fcj{index1 = 1}, \fcj{index2 = 2}.
 \end{flushleft}
+
+\subsection{Two Pointers}
+Using \fcj{left} and \fcj{right} to traverse from both ends of $A$.

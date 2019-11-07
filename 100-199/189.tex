@@ -32,37 +32,7 @@ rotate 2 steps to the right: $[3,99,-1,-100]$
 \item Could you do it in-place with $O(1)$ extra space?
 \end{itemize}
 \subsection{Cyclic Replacement}
-Start from one element and keep rotating until we have rotated n different elements.
-\setcounter{algorithm}{0}
-\begin{algorithm}[H]
-\caption{Cyclic Replacement}
-\begin{algorithmic}[1]
-\Procedure{Rotate}{$A, L, k$}
-\State $\delta:=0$ \Comment The number of elements have been shifted
-\State $x:=0$ \Comment The start index of elements to be shifted
-\State $y:=x$ \Comment The current index of element that is shifted
-\algstore{189algo}
-\end{algorithmic}
-\end{algorithm}
-\begin{algorithm}[H]
-\begin{algorithmic}[1]
-\algrestore{189algo}
-\State $z:=0$ \Comment The variable used as saving number to be shifted
-\While{$\delta < n$}
-\State $n:=A[x]$ \Comment The first number that will be shifted in the following loop
-\Repeat
-\State $y:=(y+k)\bmod L$ \Comment The next index that place $n$
-\State $z:=A[y]$ \Comment Save the value to $z$
-\State $A[y]\gets n$ \Comment Replace $A[y]$ by $n$
-\State $n\gets z$ \Comment The value will replace next element
-\State $\delta\gets\delta+1$ \Comment Increments the number of elements shifted
-\Until{$y\neq x$}
-\EndWhile
-\State $x\gets x+1$ \Comment Move to next element to be shifted
-\State $y\gets x$
-\EndProcedure
-\end{algorithmic}
-\end{algorithm}
+Start from one element and keep rotating until we have rotated $n$ different elements.
 \setcounter{lstlisting}{0}
 \begin{lstlisting}[style=customc, caption={Cyclic Replacement Code}]
 void rotate( vector<int>& nums, int k )
@@ -71,80 +41,64 @@ void rotate( vector<int>& nums, int k )
     {
         return;
     }
-
+    auto L = static_cast<int>( nums.size() );
+    k = ( k % L );
+    //this approach will throw exception
+    //when k=0,so we check if k is zero first
     if( k == 0 )
     {
         return;
     }
-
-    int L = static_cast<int>( nums.size() );
-
-    int x = 0;
-    int y = x;
-
-    int delta = 0;
-
-    int z = -1;
-
-    while( delta < L )
+    //
+    int last = 0;
+    int cur = nums[0];
+    //current index to be rotated
+    int rot_idx = 0;
+    //the original index
+    auto anchor( rot_idx );
+    //rotate each index until hit its original index
+    for( int i = 0; i < L; ++i )
     {
-        int n = nums[x];
-        do
+        last = cur;
+        //move to rotated position
+        rot_idx = ( rot_idx + k ) % L;
+        cur = nums[rot_idx];
+        nums[rot_idx] = last;
+        //check if hit original index
+        if( rot_idx == anchor )
         {
-            y = ( y + k ) % L;
-            z = nums[y];
-            nums[y] = n;
-
-            n = z;
-            ++delta;
+            //try rotate next index
+            ++rot_idx;
+            anchor = rot_idx;
+            cur = nums[rot_idx];
         }
-        while( y != x );
-
-        ++x;
-        y = x;
     }
 }
 \end{lstlisting}
 \subsection{Reverse}
 Reverse the first $n-k$ elements, then reverse last $k$ elements, finally reverse whole array.
+
 \subsection{Swap}
 Swap the last $k$ elements with the first $k$ elements.
-\begin{algorithm}[H]
-\caption{Swap}
-\begin{algorithmic}[1]
-\Procedure{Rotate}{$A,L,k$}
-\State $\theta:=0$ \Comment The start index
-\State $\ell:=L$
-\State $\kappa:=k$
-\While{$\ell\neq0$ \textbf{and} $\kappa\neq 0$}
-\State $\kappa\gets \kappa\bmod L$
-\For{$i:=0\to \kappa-1$}
-\State \Call{swap}{$A[\theta + i]$, $A[\theta + \ell - \kappa + i]$}
-\State $\theta\gets \theta + \kappa$ \Comment Change the start index
-\State $\ell\gets \ell - \kappa$ \Comment Change the length of numbers to be shifted
-\EndFor
-\EndWhile
-\EndProcedure
-\end{algorithmic}
-\end{algorithm}
+
 \begin{lstlisting}[style=customc, caption={Swap}]
 void rotate( vector<int>& nums, int k )
 {
-    int theta = 0;
-    int ell = static_cast<int>( nums.size() );
-    int kappa = k;
-
-    while( ( ell != 0 ) && ( kappa != 0 ) )
+    auto start( 0 );
+    auto L( static_cast<int>( nums.size() ) );
+    while( L && k )
     {
-        kappa = kappa % ell;
-
-        for( int i = 0; i < kappa; ++i )
+        k = ( k % L );
+        //swap first k elements with last k elements
+        for( int i = 0; i < k; ++i )
         {
-            swap( nums[theta + i], nums[theta + ell - kappa + i] );
+            swap( nums[start + i], nums[start + ( L - k + i )] );
         }
-
-        theta += kappa;
-        ell -= kappa;
+        //shrink the range to be swapped
+        //decrease the range length
+        L -= k;
+        //increase the range start
+        start += k;
     }
 }
 \end{lstlisting}

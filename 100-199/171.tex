@@ -1,6 +1,6 @@
 \section{171 --- Excel Sheet Column Number}
 Given a column title as appear in an Excel sheet, return its corresponding column number.
-\par
+
 For example:
 \begin{table}[H]
 \begin{tabular}{lcl}
@@ -16,32 +16,33 @@ AB & $\to$ &28
 \paragraph{Example 1:}
 \begin{flushleft}
 \textbf{Input}: A
-\\
+
 \textbf{Output}: 1
 \end{flushleft}
 \paragraph{Example 2:}
 \begin{flushleft}
 \textbf{Input}: AB
-\\
+
 \textbf{Output}: 28
 \end{flushleft}
 \paragraph{Example 3:}
 \begin{flushleft}
 \textbf{Input}: ZY
-\\
+
 \textbf{Output}: 701
 \end{flushleft}
-\begin{lstlisting}[style=customc]
+
+\subsection{26 Number System}
+\textbf{Easy} Problem.
+\begin{lstlisting}[style=customc, caption={26 Number System}]
 int titleToNumber( string s )
 {
     int ans = 0;
-
     for( auto c : s )
     {
         int x = c - 'A' + 1;
         ans = ans * 26 + x;
     }
-
     return ans;
 }
 \end{lstlisting}

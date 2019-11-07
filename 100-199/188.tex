@@ -27,9 +27,7 @@ $[3,2,6,5,0,3]$, $k = 2$
 \textbf{Explanation}: Buy on day 2 (price = 2) and sell on day 3 (price = 6), profit $= 6-2 = 4$. Then buy on day 5 (price = 0) and sell on day 6 (price = 3), profit $= 3-0 = 3$.
 \end{flushleft}
 \subsection{Dynamic Programming}
-\begin{CJK*}{UTF8}{gbsn}
 算法和123题一模一样，但是需要注意，如果$k$不小于天数，其实就相当与无限次买卖，也就是第122题的情况了。
-\end{CJK*}
 \setcounter{lstlisting}{0}
 \begin{lstlisting}[style=customc, caption={Dynamic Programming}]
 int maxProfit( int k, vector<int>& prices )

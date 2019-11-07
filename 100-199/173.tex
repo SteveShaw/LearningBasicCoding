@@ -35,12 +35,10 @@ iterator.hasNext(); // return false
 \item You may assume that \texttt{next}() call will always be valid, that is, there will be at least a next smallest number in the BST when \texttt{next}() is called.
 \end{itemize}
 \subsection{In-Order Traverse}
-\begin{CJK*}{UTF8}{gbsn}
 其实这就是iterative in-order traverse。下面是iterative in-order traverse的代码
 \begin{lstlisting}[style=customc]
 TreeNode visit = root;
 Stack<TreeNode> stack = new Stack();
-
 while( visit != null || !stack.empty() )
 {
     while( visit != null )
@@ -68,18 +66,9 @@ while( i.hasNext() )
 \item The loop body \textbf{gets the next value} and does something with it.
 \end{itemize}
 这些就组成了这个类的三个函数。
-\end{CJK*}
+
 \setcounter{lstlisting}{0}
-\begin{lstlisting}[style=customc, caption={Class Definition}]
-/**
- * Definition for a binary tree node.
- * struct TreeNode {
- *     int val;
- *     TreeNode *left;
- *     TreeNode *right;
- *     TreeNode(int x) : val(x), left(NULL), right(NULL) {}
- * };
- */
+\begin{lstlisting}[style=customc, caption={Stack}]
 class BSTIterator
 {
 public:
@@ -87,7 +76,6 @@ public:
     {
         node_ = root;
     }
-
     /** @return the next smallest number */
     int next()
     {
@@ -96,28 +84,17 @@ public:
             stk_.push( node_ );
             node_ = node_->left;
         }
-
         auto next = stk_.top();
         stk_.pop();
         node_ = next->right;
-
         return next->val;
     }
-
     /** @return whether we have a next smallest number */
     bool hasNext()
     {
         return ( node_ != nullptr ) || ( !stk_.empty() );
     }
-
     TreeNode* node_;
     stack<TreeNode*> stk_;
 };
-
-/**
- * Your BSTIterator object will be instantiated and called as such:
- * BSTIterator* obj = new BSTIterator(root);
- * int param_1 = obj->next();
- * bool param_2 = obj->hasNext();
- */
 \end{lstlisting}
