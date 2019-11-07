@@ -1,6 +1,6 @@
 \section{292 --- Nim Game}
 You are playing the following \textit{Nim Game} with your friend: There is a heap of stones on the table, each time one of you take turns to remove 1 to 3 stones. The one who removes the last stone will be the winner. You will take the first turn to remove the stones.
-\par
+
 Both of you are very clever and have optimal strategies for the game. Write a function to determine whether you can win the game given the number of stones in the heap.
 
 \paragraph{Example:}
@@ -8,7 +8,7 @@ Both of you are very clever and have optimal strategies for the game. Write a fu
 \begin{flushleft}
 \textbf{Input}: 4
 \\
-\textbf{Output}: \texttt{false} 
+\textbf{Output}: \fcj{false} 
 \\
 \textbf{Explanation}: 
 \\
@@ -17,16 +17,24 @@ If there are 4 stones in the heap, then you will never win the game; No matter 1
 \subsection{Mathematical Analysis}
 You can always win a Nim game if the number of stones $n$ in the pile is not divisible by 4.
 
-\paragraph{Reasoning}
-
 Let us think of the small cases. It is clear that if there are only 1, 2, or 3 stones in the pile, and it is your turn, you can win the game by taking all of them. 
-\par
+
 If there are exactly four stones in the pile, you will lose. Because no matter how many you take, you will leave some stones behind for your opponent to take and win the game.
-\par
+
 So in order to win, you have to ensure that you never reach the situation where there are exactly 4 stones on the pile on your turn.
-\par
+
 Similarly, if there are 5, 6, or 7 stones you can win by taking just enough to leave 4 stones for your opponent so that they lose. 
-\par
+
 But if there are 8 stones on the pile, you will inevitably lose, because regardless whether you pick 1, 2 or 3 stones from the pile, your opponent can pick 3, 2 or 1 stone to ensure that four stones will be left to you on your turn.
-\par
+
 It is obvious that the same pattern repeats itself for $n=4,8,12,16,\dots$. Basically all multiples of 4.
+
+\setcounter{lstlisting}{0}
+\begin{lstlisting}[style=customc, caption={Induction}]
+bool canWinNim( int n )
+{
+    //only n is not divisible by 4
+    //Nim can win
+    return ( n % 4 ) != 0;
+}
+\end{lstlisting}

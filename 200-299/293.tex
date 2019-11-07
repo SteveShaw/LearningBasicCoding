@@ -1,25 +1,30 @@
 \section{293 --- Flip Game }
-You are playing the following Flip Game with your friend: Given a string that contains only these two characters: $+$ and $-$, you and your friend take turns to flip two consecutive $++$ into $--$. The game ends when a person can no longer make a move and therefore the other person will be the winner.
-\par
+You are playing the following Flip Game with your friend: Given a string that contains only these two characters: \fcj{'+'} and \fcj{'-'}, you and your friend take turns to flip two consecutive \fcj{"++"} into \fcj{"--"}. The game ends when a person can no longer make a move and therefore the other person will be the winner.
+
 Write a function to compute all possible states of the string after one valid move.
-\par
-For example, given $s = ++++$, after one move, it may become one of the following states:
-\begin{table}[H]
-\begin{tabular}{c}
- $--++$\\
- $+--+$\\
- $++--$
-\end{tabular}
-\end{table}
+
+\begin{flushleft}
+Example:
+
+\textbf{Input}: \fcj{s = "++++"}
+
+\textbf{Output}: 
+
+  \fcj{"--++"}
+  
+  \fcj{"+--+"}
+  
+  \fcj{"++--"}
+\end{flushleft}
+
 If there is no valid move, return an empty list.
 \subsection{Analysis}
-很简单的题目，从第二个字母开始遍历，每次判断当前字母是否为$+$，和之前那个字母是否为$+$，如果都是，则将翻转后的字符串存入结果中。
+很简单的题目，从第二个字母开始遍历，每次判断当前字母是否为\fcj{'+'}，和之前那个字母是否为\fcj{'+'}，如果都是，则将翻转后的字符串存入结果中。
 \setcounter{lstlisting}{0}
 \begin{lstlisting}[style=customc, caption={Loop}]
 vector<string> generatePossibleNextMoves( string s )
 {
     vector<string> ans;
-
     for( int i = 1; i < s.size(); ++i )
     {
         if( s[i] == '+' && s[i - 1] == '+' )
@@ -27,7 +32,6 @@ vector<string> generatePossibleNextMoves( string s )
             ans.push_back( s.substr( 0, i - 1 ) + "--" + s.substr( i + 1 ) );
         }
     }
-
     return ans;
 }
 \end{lstlisting}

@@ -1,32 +1,31 @@
 \section{291 --- Word Pattern II}
-Given a pattern $P$ and a string $S$, find if $S$ follows the same pattern.
-\par
-Here follow means a full match, such that there is a bijection between a letter in pattern $P$ and a non-empty substring in $S$.
+Given a \fcj{pattern} and a string \fcj{str}, find if \fcj{str} follows the same pattern.
 
+Here \textbf{follow} means a full match, such that there is a \textbf{bijection} between a letter in \fcj{pattern} and a \textbf{non-empty} substring in \fcj{str}.
 \paragraph{Example 1:}
 \begin{flushleft}
-\textbf{Input}: $P$ = \texttt{abba}, $S$ = \texttt{redblueredblue}
-\\
+\textbf{Input}: \fcj{pattern = "abab"}, \fcj{str = "redblueredblue"}
+
 \textbf{Output}: \texttt{true}
 \end{flushleft}
 
 \paragraph{Example 2:}
 \begin{flushleft}
-\textbf{Input}: $P$ = \texttt{aaaa}, $S$ = \texttt{asdasdasdasd}
-\\
-\textbf{Output}: \texttt{true}
+\textbf{Input}: \fcj{pattern = "aaaa"}, \fcj{str = "asdasdasdasd"}
+
+\textbf{Output}: \fcj{true}
 \end{flushleft}
 
 \paragraph{Example 3:}
 \begin{flushleft}
-\textbf{Input}: $P$ = \texttt{aabb}, $S$ = \texttt{xyzabcxzyabc}
-\\
-\textbf{Output}: \texttt{false}
+\textbf{Input}: \fcj{pattern = "aabb"}, \fcj{str = "xyzabcxzyabc"}
+
+\textbf{Output}: \fcj{false}
 \end{flushleft}
 
 \paragraph{Notes:}
 \begin{itemize}
-\item You may assume both $P$ and $S$ contains only lowercase letters.
+\item You may assume both \fcj{pattern} and \fcj{str} contains only lowercase letters.
 \end{itemize}
 \subsection{Backtracking With Hash Map}
 与290 --- Word Pattern类似，需要一个hash map和一个hash set。
@@ -39,140 +38,66 @@ Here follow means a full match, such that there is a bijection between a letter 
  map和hash set，然后继续递归，如果递归结果是\texttt{true}，就返回\texttt{true}，但如果返回\texttt{false}了，则要将这个word从hash map和hash set中删除。
 \end{itemize}
 注意，递归函数中，需要对$S$进行循环测试，而$P$是不需要的，因为我们要对于当前$P[x]$测试从$y$开始的所有$S$的substr。另外，由于题目中说明了$P$和$S$中只有小写字母，因此hash map实际上可以用一个大小为26的字符串数组代替。
-\setcounter{algorithm}{0}
-\begin{algorithm}[H]
-\caption{Backtracking}
-\begin{algorithmic}[1]
-\Procedure{WordPatternMatch}{$P, S$}
-\State $\star$ 初始化一个hash map $M$和一个hash set $T$
-\State $\ast$ $P$ and $S$ are all empty --- Matched
-\If{$P$ is empty \textbf{and} $S$ is empty}
-\State \Return \texttt{true}
-\EndIf
-\State $\ast$ Only one of $P$ and $S$ is empty --- Not Matched
-\If{$P$ is empty \textbf{or} $S$ is empty}
-\State \Return \texttt{false}
-\EndIf
-\State \Call{DFS}{$x=0,y=0,P,S,M,T$} \Comment Start backtracking process
-\EndProcedure
-\end{algorithmic}
-\end{algorithm}
-Function \texttt{DFS} 递归检查$P$和$S$是否匹配，其中$x$，$y$分别为当前$P$和$S$的起始位置，初始都为零。$M$和$T$则是上面提到的hash map和hash set。
-\begin{algorithm}[H]
-\caption{Helper Function}
-\begin{algorithmic}[1]
-\Procedure{DFS}{$x,y,P,S,M,T$}
-\If{$x=L_P$ \textbf{and} $y=L_S$} \Comment $x$和$y$都刚好到达$P$和$S$的末尾，匹配成功
-\State \Return \texttt{true}
-\EndIf
-\If{$x=L_P$ \textbf{or} $y=L_S$} \Comment $x$和$y$中只有一个都刚好到达对应字符串的末尾，匹配失败
-\State \Return \texttt{true}
-\EndIf
-\algstore{291algo}
-\end{algorithmic}
-\end{algorithm}
-\begin{algorithm}[H]
-\begin{algorithmic}[1]
-\algrestore{291algo}
-\For{$i:=y$ \textbf{to} $L_S-1$}
-\State $W:=S[y\ldots i]$ \Comment 当前检查的word
-\If{$P[x]$ is not in $M$} \label{291if1}
-\State $\star$ $W$不能在以前出现过，否则$W$已经和$P$中的另外一个letter建立了对应关系
-\If{$W$ is not in $T$}
-\State $\star$ 将$W$加入$M$和$T$中
-\State $\ast$ 继续到$x+1$和$y+1$继续进行递归
-\State $b:=$\Call{DFS}{$x+1,y+1,P,S,M,T}$
-\If{$b$ is \texttt{true}}
-\State \Return \texttt{true} \Comment $P$ and $S$ is matched
-\EndIf
-\EndIf
-\Else
-\If{$M[i] = W$} \Comment letter $P[x]$ 对应的word和当前的word相等
-\State $\ast$ 继续到$x+1$和$y+1$继续进行递归
-\State $b:=$\Call{DFS}{$x+1,y+1,P,S,M,T}$
-\If{$b$ is \texttt{true}}
-\State \Return \texttt{true} \Comment $P$ and $S$ is matched
-\EndIf
-\EndIf
-\EndIf \Comment End[\ref{291if1}]
-\EndFor
-\State \Return \texttt{false}
-\EndProcedure
-\end{algorithmic}
-\end{algorithm}
+
 \setcounter{lstlisting}{0}
 \begin{lstlisting}[style=customc, caption={Backtracking}]
 bool wordPatternMatch( string pattern, string str )
 {
-    if( pattern.empty() && str.empty() )
-    {
-        return true;
-    }
-
-    if( pattern.empty() || str.empty() )
-    {
-        return false;
-    }
-
-    vector<string> m( 26 );
-    unordered_set<string> ss;
-
-    return dfs( 0, 0, pattern, str, m, ss );
+    //record the map between a letter and a word
+    vector<string_view> dict( 26 );
+    //record if a word has been recorded
+    unordered_set<string_view> seen;
+    return dfs( pattern, 0, str, 0, dict, seen );
 }
-
-bool dfs( size_t x, size_t y, const string& P, const string& S, vector<string>& m, unordered_set<string>& ss )
+//we check every possible substr s[si...] against letter p[pi]
+//if a word is mapped to p[pi],
+//recursively check s[i+1,...] against p[pi+1]
+//otherwise, if this word has not been recorded,
+//recursively check s[i+1,...] against p[pi+1]
+bool dfs( string_view p, size_t pi, string_view s, size_t si, vector<string_view>&dict, unordered_set<string_view>& seen )
 {
-    if( x == P.size() && y == S.size() )
+    if( ( pi == p.size() ) && ( si == s.size() ) )
     {
+        //matched
         return true;
     }
-
-    if( ( x >= P.size() ) || ( y >= S.size() ) )
+    if( ( pi == p.size() ) || ( si == s.size() ) )
     {
+        //not matched
         return false;
     }
-
-    int ci = P[x] - 'a';
-
-    //loop from y to until end of S
-    //to test each word S[y...j]
-    for( size_t j = y; j < S.size(); ++j )
+    int ci = p[pi] - 'a';
+    for( size_t i = si; i < s.size(); ++i )
     {
-        auto word = S.substr( y, j - y + 1 );
-
-        if( m[ci].empty() )
+        //check every possible word s[si,...]
+        auto word = s.substr( si, i - si + 1 );
+        if( dict[ci].empty() )
         {
-            if( ss.find( word ) == ss.end() )
+            if( seen.find( word ) == seen.end() )
             {
-                //this word has not been appeared before
-                ss.emplace( word );
-                m[ci] = word;
-
-                //continue DFS from next position
-                if( dfs( x + 1, j + 1, P, S, m, ss ) )
+                //establish the map between letter and word
+                dict[ci] = word;
+                //add word to seen
+                seen.insert( word );
+                //recursively test p[pi+1] to s[i+1,...]
+                if( dfs( p, pi + 1, s, i + 1, dict, seen ) )
                 {
                     return true;
                 }
-
-                ss.erase( m[ci] );
-
-                m[ci].clear();
-
+                //backtrack
+                dict[ci] = string_view{};
+                seen.erase( word );
             }
-
         }
-        else
+        else if( dict[ci] == word )
         {
-            if( m[ci] == word )
+            //recursively test p[pi+1] to s[i+1,...]
+            if( dfs( p, pi + 1, s, i + 1, dict, seen ) )
             {
-                //S[y...i] is equal to the word mapped by the
-                //letter P[x], continue DFS from next position
-                if( dfs( x + 1, j + 1, P, S, m, ss ) )
-                {
-                    return true;
-                }
+                return true;
             }
         }
+
     }
     return false;
 }

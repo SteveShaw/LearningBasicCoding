@@ -42,12 +42,8 @@ Longest consecutive sequence path is 3--4--5, so return 3.
 Longest consecutive sequence path is 2--3,not 3--2--1, so return 2.
 \end{flushleft}
 \subsection{Depth First Search}
-\begin{itemize}
-\item 对当前节点$t$的left and right node分别处理，
-\item 如果left node存在且值比$t$的值大1，则递归处理left node，同时递归调用函数输入参数中的当前长度加1。否则，还是递归处理left node，但是输入参数中的当前长度重置为1。
-\item 对于right node的处理情况和left node相同。
-\item 处理完左右节点，需要和当前的结果进行比较，得到最大的那个length。
-\end{itemize}
+The bottom-up approach is similar to a post-order traversal. We return the consecutive path length starting at current node to its parent. Then its parent can examine if its node value can be included in this consecutive path.
+
 \setcounter{lstlisting}{0}
 \begin{lstlisting}[style=customc, caption={DFS}]
 int longestConsecutive( TreeNode* root )
@@ -56,18 +52,14 @@ int longestConsecutive( TreeNode* root )
     {
         return 0;
     }
-
     int ans = 0;
-
     dfs( root, 1, ans );
-
     return ans;
 }
 
 void dfs( TreeNode *t, int len, int &ans )
 {
     ans = max( ans, len );
-
     if( t->left )
     {
         if( t->left->val == t->val + 1 )
@@ -98,7 +90,8 @@ void dfs( TreeNode *t, int len, int &ans )
 }
 
 \end{lstlisting}
-另外一种更简洁的代码如下
+\subsection{Top Down Depth-first Search}
+A top down approach is similar to an in-order traversal. We use a variable \fcj{length} to store the current consecutive path length and pass it down the tree. As we traverse, we compare the current node with its parent node to determine if it is consecutive. If not, we reset the \fcj{length} to 1.
 \begin{lstlisting}[style=customc, caption={DFS 2}]
 int longestConsecutive( TreeNode* root )
 {
