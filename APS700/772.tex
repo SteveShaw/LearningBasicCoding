@@ -1,0 +1,112 @@
+\section{772 --- Basic Calculator III}
+Implement a basic calculator to evaluate a simple expression string.
+
+The expression string may contain open \fcj{(} and closing parentheses \fcj{)}, the plus \fcj{+} or minus sign \fcj{-}, non-negative integers and empty spaces .
+
+The integer division should truncate toward zero.
+
+You may assume that the given expression is always valid. All intermediate results will be in the range of \fcj{[-2147483648, 2147483647]}.
+
+Some examples:
+
+\fcj{"1 + 1" = 2}
+
+\fcj{" 6-4 / 2 " = 4}
+
+\fcj{"2*(5+5*2)/3+(6/2+8)" = 21}
+
+\fcj{"(2+6* 3+5- (3*14/7+2)*5)+3"=-12}
+
+\subsection{Brute Force}
+To process the parenthesis, we maintain a variable \fcj{balance}. Whenever we find a \fcj{"("}, start the process by increment \fcj{balance} for \fcj{"("}, and decrement for \fcj{")"}. When \fcj{balance} becomes zero, we recursively process the substring between \fcj{"("} and \fcj{")"}.
+
+\setcounter{lstlisting}{0}
+\begin{lstlisting}[style=customc, caption={Brute Force}]
+int calculate( string s )
+{
+    return evaluate( s );
+}
+//helper function to evaluate the exprssion
+int evaluate( string_view expr )
+{
+    auto L = expr.size();
+    long long parse_num = 0;
+    long long cur_res = 0;
+    long long res = 0;
+    //trick: initialize op as +
+    //can simply the expression evaluation
+    char op = '+';
+    for( size_t i = 0; i < L; ++i )
+    {
+        auto c = expr[i];
+        if( ( c >= '0' ) && ( c <= '9' ) )
+        {
+            //string to integer
+            parse_num = parse_num * 10 + ( c - '0' );
+        }
+        else if( c == '(' )
+        {
+            //using balance to find
+            //substring between a pair of
+            //parenthesis
+            auto j = i + 1;
+            int balance = 1;
+            for( ; j < L; ++j )
+            {
+                if( expr[j] == '(' )
+                {
+                    ++balance;
+                }
+                else if( expr[j] == ')' )
+                {
+                    --balance;
+                }
+
+                if( balance == 0 )
+                {
+                    break;
+                }
+            }
+            parse_num = evaluate( expr.substr( i + 1, j - i - 1 ) );
+            i = j;
+        }
+        //we cannot use "else if" here
+        //since we have to use parse_num as early as possible
+        //3. process the operator and number so far
+        if( ( c == '+' ) || ( c == '-' ) || ( c == '*' ) || ( c == '/' ) || ( i == L - 1 ) )
+        {
+            //check last operator
+            //and perform the computation
+            switch( op )
+            {
+            case '+':
+                cur_res += parse_num;
+                break;
+            case '-':
+                cur_res -= parse_num;
+                break;
+            case '*':
+                cur_res *= parse_num;
+                break;
+            case '/':
+                cur_res /= parse_num;
+                break;
+            }
+            if( ( c == '+' ) || ( c == '-' ) || ( i == L - 1 ) )
+            {
+                //if current operator is +/-
+                //we accumulate the result of cur_res
+                //also for i=L-1
+                res += cur_res;
+                //reset the result obtained so far
+                cur_res = 0;
+            }
+            //update last operator
+            op = c;
+            //reset parsed number
+            parse_num = 0;
+        }
+    }
+    return res;
+}
+\end{lstlisting}

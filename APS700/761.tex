@@ -1,0 +1,68 @@
+\section{761 --- Special Binary String}
+Special binary strings are binary strings with the following two properties:
+
+\begin{itemize}
+\item The number of 0s is equal to the number of 1s.
+\item Every prefix of the binary string has at least as many 1s as 0s.
+\end{itemize}
+
+Given a special string $S$, a move consists of choosing two consecutive, non-empty, special substrings of $S$, and swapping them. (Two strings are consecutive if the last character of the first string is exactly one index before the first character of the second string.)
+
+At the end of any number of moves, what is the lexicographically largest resulting string possible?
+
+\paragraph{Example 1:}
+
+\begin{flushleft}
+\textbf{Input}: \fcj{S = "11011000"}
+
+\textbf{Output}: \fcj{"11100100"}
+
+\textbf{Explanation}:
+
+The strings \fcj{"10"} (occuring at \fcj{S[1]}) and \fcj{"1100"} (at \fcj{S[3]}) are swapped.
+
+This is the lexicographically largest string possible after some number of swaps.
+\end{flushleft}
+
+\paragraph{Note:}
+
+\begin{itemize}
+\item $S$ has length at most 50.
+\item $S$ is guaranteed to be a special binary string as defined above.
+\end{itemize}
+
+\subsection{DFS}
+If we regard 1, 0 in the definition of the special string as \fcj{'('} and \fcj{')'} separately,
+
+the problem is actually to get the string which is so-called valid parenthesis and meanwhile is the lexicographically largest.
+
+It is intuitive that we prefer deeper valid parenthesis to be in front (\textbf{deeper} means the string surrounded with more pairs of parenthesis, e.g., \fcj{'(())'} is deeper than \fcj{'()'} ). We can achieve that by sorting them reversely.
+
+we go through $S$. Whenever the parentheses we met can be balanced, we construct valid parentheses by putting \fcj{'('} on the left boundary, \fcj{')'} on the right boundary, and doing with the inner part following the same pattern.
+
+\setcounter{lstlisting}{0}
+\begin{lstlisting}[style=customc, caption={DFS}]
+string makeLargestSpecial( string S )
+{
+    size_t start = 0;
+    vector<string> segs;
+    int bal = 0;
+    for( size_t i = 0; i < S.size(); ++i )
+    {
+        bal += ( S[i] == '0' ) ? -1 : 1;
+        if( bal == 0 )
+        {
+            //this special string can be rearranged recursively
+            //add to the array
+            segs.push_back( "1" + makeLargestSpecial( S.substr( start + 1, i - start - 1 ) ) + "0" );
+            //the next special string start at i+1
+            start = i + 1;
+        }
+    }
+    //sort generated largest special strings
+    sort( segs.begin(), segs.end() );
+    string init;
+    //add the string from end to beginning
+    return accumulate( rbegin( segs ), rend( segs ), init );
+}
+\end{lstlisting}

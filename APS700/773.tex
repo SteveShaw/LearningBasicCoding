@@ -1,0 +1,60 @@
+\section{773 --- Sliding Puzzle}
+On a $2\times 3$ \fcj{board}, there are 5 tiles represented by the integers 1 through 5, and an empty square represented by 0.
+
+A move consists of choosing 0 and a 4-directionally adjacent number and swapping it.
+
+The state of the board is \textit{solved} if and only if the \fcj{board} is \fcj{[[1,2,3],[4,5,0]]}.
+
+Given a puzzle board, return the least number of moves required so that the state of the board is solved. If it is impossible for the state of the board to be solved, return $-1$.
+
+\paragraph{Examples:}
+\begin{flushleft}
+
+
+\textbf{Input}: \fcj{board = [[1,2,3],[4,0,5]]}
+
+\textbf{Output}: 1
+
+\textbf{Explanation}: Swap the 0 and the 5 in one move.
+
+\textbf{Input}: \fcj{board = [[1,2,3],[5,4,0]]}
+
+\textbf{Output}: $-1$
+
+\textbf{Explanation}: No number of moves will make the board solved.
+
+\textbf{Input}: \fcj{board = [[4,1,2],[5,0,3]]}
+
+\textbf{Output}: 5
+
+\textbf{Explanation}: 5 is the smallest number of moves that solves the board.
+
+An example path:
+
+After move 0: \fcj{[[4,1,2],[5,0,3]]}
+
+After move 1: \fcj{[[4,1,2],[0,5,3]]}
+
+After move 2: \fcj{[[0,1,2],[4,5,3]]}
+
+After move 3: \fcj{[[1,0,2],[4,5,3]]}
+
+After move 4: \fcj{[[1,2,0],[4,5,3]]}
+
+After move 5: \fcj{[[1,2,3],[4,5,0]]}
+
+\textbf{Input}: \fcj{board = [[3,2,4],[1,5,0]]}
+
+\textbf{Output}: 14
+
+\end{flushleft}
+
+\paragraph{Note:}
+
+\begin{itemize}
+\item \fcj{board} will be a $2 \times 3$ array as described above.
+\item \fcj{board[i][j]} will be a permutation of \fcj{[0, 1, 2, 3, 4, 5]}.
+\end{itemize}
+
+\subsection{BFS}
+We can think of this problem as a shortest path problem on a graph. Each node is a different board state, and we connect two boards by an edge if they can be transformed into one another in one move. We can solve shortest path problems with \textit{breadth first search}.

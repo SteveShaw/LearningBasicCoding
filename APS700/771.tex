@@ -1,0 +1,66 @@
+\section{771. Jewels and Stones}
+You're given strings \fcj{J} representing the types of stones that are jewels, and \fcj{S} representing the stones you have.  Each character in \fcj{S} is a type of stone you have.  You want to know how many of the stones you have are also jewels.
+
+The letters in \fcj{J} are guaranteed distinct, and all characters in \fcj{J} and \fcj{S} are letters. Letters are case sensitive, so \fcj{"a"} is considered a different type of stone from \fcj{"A"}.
+
+\paragraph{Example 1:}
+
+\begin{flushleft}
+\textbf{Input}: \fcj{J = "aA"}, \fcj{S = "aAAbbbb"}
+
+\textbf{Output}: 3
+\end{flushleft}
+
+\paragraph{Example 2:}
+
+\begin{flushleft}
+\textbf{Input}: \fcj{J = "z"}, \fcj{S = "ZZ"}
+
+\textbf{Output}: 0
+\end{flushleft}
+
+\paragraph{Note:}
+
+\begin{itemize}
+\item \fcj{S} and \fcj{J} will consist of letters and have length at most 50.
+
+\item The characters in \fcj{J} are distinct.
+\end{itemize}
+
+\subsection{Hash Set}
+\textbf{Easy} Problem. Simulate hash set by an array
+
+\setcounter{lstlisting}{0}
+\begin{lstlisting}[style=customc, caption={Hash Set}]
+int numJewelsInStones( string J, string S )
+{
+    array<int, 52> m;
+    m.fill( 0 );
+    //1. add letters in J to a hash set
+    for( auto c : J )
+    {
+        if( ( c <= 'Z' ) && ( c >= 'A' ) )
+        {
+            m[c - 'A'] = 1;
+        }
+        else
+        {
+            m[c - 'a' + 26] = 1;
+        }
+    }
+    //2. check each letter in S against the hash set
+    int ans = 0;
+    for( auto c : S )
+    {
+        if( ( c <= 'Z' ) && ( c >= 'A' ) )
+        {
+            ans += m[c - 'A'];
+        }
+        else
+        {
+            ans += m[c - 'a' + 26];
+        }
+    }
+    return ans;
+}
+\end{lstlisting}
