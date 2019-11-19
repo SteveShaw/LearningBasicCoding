@@ -1,0 +1,50 @@
+\section{796 --- Rotate String}
+
+Easy
+
+We are given two strings, $A$ and $B$.
+
+$A$ shift on $A$ consists of taking string $A$ and moving the leftmost character to the rightmost position. For example, if \fcj{A = "abcde"}, then it will be \fcj{"bcdea"} after one shift on A. Return \fcj{true} if and only if $A$ can become $B$ after some number of shifts on $A$.
+
+\paragraph{Example 1:}
+
+\begin{flushleft}
+\textbf{Input}: \fcj{A = "abcde"}, \fcj{B = "bcdea"}
+
+\textbf{Output}: \fcj{true}
+\end{flushleft}
+
+
+\paragraph{Example 2:}
+
+\begin{flushleft}
+\textbf{Input}: \fcj{A = "abcde"}, \fcj{B = "abced"}
+
+\textbf{Output}: \fcj{false}
+\end{flushleft}
+
+\paragraph{Note:}
+
+\begin{itemize}
+\item $A$ and $B$ will have length at most 100.
+\end{itemize}
+
+\subsection{Simple Check}
+All rotations of $ A $ are contained in $ A + A $. Thus, we can simply check whether $ B $ is a substring of $ A + A $. We also need to check  \fcj{A.length == B.length} .
+\setcounter{lstlisting}{0}
+\begin{lstlisting}[style=customc, caption={Simple Check}]
+bool rotateString( string A, string B )
+{
+    if( A.empty() )
+    {
+        return B.empty();
+    }
+    if( A.size() != B.size() )
+    {
+        return false;
+    }
+    string T = A;
+    T += A;
+    return T.find( B ) != string::npos;
+}
+\end{lstlisting}

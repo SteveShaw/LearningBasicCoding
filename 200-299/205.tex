@@ -29,49 +29,25 @@ All occurrences of a character must be replaced with another character while pre
     \item You may assume both s and t have the same length.
 \end{itemize}
 \subsection{Hash Map}
-\begin{CJK*}{UTF8}{gbsn}
 用两个哈希表分别来记录原字符串和目标字符串中字符出现情况，由于ASCII码只有256个字符，所以可以用一个256大小的数组来代替哈希表，并初始化为0，
 \par
 然后遍历原字符串，在当前index $i$。分别在两个哈希表中查找$s[i]$和$t[i]$对应的值，若不相等，则返回\texttt{false}，若相等，将两个hash map中对应的值更新为$i + 1$
-\end{CJK*}
-\setcounter{algorithm}{0}
-\begin{algorithm}[H]
-\caption{Two Hash Map}
-\begin{algorithmic}[1]
-\Procedure{isIsomorphic}{$S, T, L$}
-\State $\star$ Create two arrays $x$ and $y$. Each array has 256 elements that initialized to zero
-\For{$i:=0 \to L-1$}
-\If{$x[s[i]]\neq y[t[i]]$}
-\State \Return \texttt{false}
-\EndIf
-\State $\star$ Use $i+1$ to avoid zero as the value
-\State $x[s[i]]\gets i+1$ 
-\State $y[s[i]]\gets i+1$
-\EndFor
-\State \Return \texttt{true}
-\EndProcedure
-\end{algorithmic}
-\end{algorithm}
+
 \setcounter{lstlisting}{0}
 \begin{lstlisting}[style=customc, caption={Two Hash Maps}]
-  bool isIsomorphic(string s, string t) {
-
-        vector<int> x(256, 0);
-
-        vector<int> y(256, 0);
-        
-        for(size_t i = 0; i < s.size(); ++i)
+bool isIsomorphic( string s, string t )
+{
+    vector<int> x( 256, 0 );
+    vector<int> y( 256, 0 );
+    for( size_t i = 0; i < s.size(); ++i )
+    {
+        if( x[s[i]] != y[t[i]] )
         {
-            if(x[s[i]] != y[t[i]])
-            {
-                return false;
-            }
-            
-            x[s[i]] = i+1;
-            y[t[i]] = i+1;
+            return false;
         }
-
-        return true;
-        
+        x[s[i]] = i + 1;
+        y[t[i]] = i + 1;
     }
+    return true;
+}
 \end{lstlisting}

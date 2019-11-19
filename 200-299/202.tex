@@ -9,7 +9,7 @@ Starting with any positive integer, replace the number by the sum of the squares
 
 \textbf{Input}: 19
 \\
-\textbf{Output}: \texttt{true}
+\textbf{Output}: \fcj{true}
 \\
 \textbf{Explanation}: 
 \begin{align*}
@@ -20,53 +20,41 @@ Starting with any positive integer, replace the number by the sum of the squares
 \end{align*}
 \end{flushleft}
 \subsection{Hash Set}
-\begin{CJK*}{UTF8}{gbsn}
 可以用hash set来记录所有出现过的数字，然后每出现一个新数字，在set中查找看是否存在
-\end{CJK*}
 \setcounter{lstlisting}{0}
 \begin{lstlisting}[style=customc, caption={Hash Set}]
 bool isHappy( int n )
 {
     unordered_set<int> s;
     s.insert( n );
-
     while( true )
     {
         int m = n;
         int sum = 0;
-
         while( m )
         {
             int q = m / 10;
             int r = m - 10 * q;
-
             sum += ( r * r );
             m = q;
         }
-
         if( sum == 1 )
         {
             return true;
         }
-
         if( s.find( sum ) != s.end() )
         {
             return false;
         }
-
         s.insert( sum );
-
         n = sum;
     }
-
     return false;
 }
 
 \end{lstlisting}
 \subsection{Mathematical Induction}
-\begin{CJK*}{UTF8}{gbsn}
 Non happy number有个特点，循环的数字中必定会有4
-\end{CJK*}
 \begin{lstlisting}[style=customc, caption={Mathematical Induction}]
 bool isHappy( int n )
 {

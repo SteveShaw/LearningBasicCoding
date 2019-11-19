@@ -11,7 +11,7 @@ Find all possible combinations of $k$ numbers that add up to a number $n$, given
 \\
 \textbf{Output}: 
 \\
-$[[1,2,4]]$
+\fcj{[[1,2,4]]}
 \end{flushleft}
 \paragraph{Example 2:}
 \begin{flushleft}
@@ -22,66 +22,12 @@ $[[1,2,4]]$
 $[[1,2,6], [1,3,5], [2,3,4]]$
 \end{flushleft}
 \subsection{Backtracking Recursion}
-\begin{CJK*}{UTF8}{gbsn}
 \begin{itemize}
 \item 递归生成array
 \item 每个小于$n$的数，先加入到当前array中，然后继续递归，结束后移除这个加入的数，然后前进到下一个数
 \item 为保证不出现重复数字，递归函数应当有一个参数来表示当前搜索到哪个数字了。
 \end{itemize}
-\end{CJK*}
-\setcounter{algorithm}{0}
-\begin{algorithm}[H]
-\caption{Backtracking Recursive Approach}
-\begin{algorithmic}[1]
-\Procedure{CombinationSumIII}{$k, n$}
-\State $\star$ Initialize an empty array $x$ which will contain all valid arrays meet the requirements
-\State $\star$ Initialize an empty array $y$ which save the intermediate result
-\State \Call{DFS}{$n,k,1,0,x,y$} \Comment Call helper function \texttt{DFS}
-\State \Return $x$
-\algstore{216algo}
-\end{algorithmic}
-\end{algorithm}
-\begin{algorithm}[H]
-\begin{algorithmic}[1]
-\algrestore{216algo}
-\EndProcedure
-\end{algorithmic}
-\end{algorithm}
-Input parameters of function \texttt{DFS} are
-\begin{enumerate}
-\item $n$: The target sum
-\item $k$: The target count of numbers
-\item $\alpha$: The start number to search
-\item $\sigma$: The current sum of $y$
-\item $y$: The current array
-\item $x$: The final results
-\end{enumerate}
-\begin{algorithm}[H]
-\caption{Helper Function}
-\begin{algorithmic}[1]
-\Procedure{DFS}{$n,k,\alpha,\sigma,y, x$}
-\State $\star$ When $k$ is zero, the target count of numbers is reached. Recursion will stop
-\If{$k = 0$}
-\If{$\sigma=n$} 
-\State $x\gets x+y$ \Comment Add current array to result
-\EndIf
-\State \Return \Comment Stop recursion
-\EndIf
-\State $\star$ Start search from $\alpha$
-\For{$i:=\alpha \to 9$}
-\State $\star$ Only number less than $n$ is accepted
-\If{$i < n$}
-\State $y\gets y+i$ 
-\State $\star$ By adding $i$ to $y$, the count of numbers to be found is reduced to $k-1$
-\State $\star$ To avoid duplicate number in $y$, next search start from $\alpha+1$
-\State $\star$ Current sum $\delta$ is increased by $i$
-\State \Call{DFS}{$n, k-1, \alpha+1, \delta+i, y, x$}
-\State $y\gets y-i$ \Comment Remove $i$ from $y$ 
-\EndIf
-\EndFor
-\EndProcedure
-\end{algorithmic}
-\end{algorithm}
+
 \setcounter{lstlisting}{0}
 \begin{lstlisting}[style=customc, caption={Backtracking}]
 vector<vector<int>> combinationSum3( int k, int n )

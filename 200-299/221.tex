@@ -16,3 +16,95 @@ Given a 2D binary matrix $M$ filled with 0s and 1s, find the largest square cont
 
 \textbf{Output}: 4
 \end{flushleft}
+
+\subsection{2D Dynamic Programming}
+We initialize another matrix $F$ with the same dimensions as the original one initialized with all zeros.
+
+$F(i,j)$ represents the side length of the \textbf{maximum square} whose bottom right corner is the cell with index $ (i,j) $ in the original matrix.
+
+We can get the recursive relationship as 
+
+$F(i,j)=\min(F(i-1,j), F(i,j-1), F(i-1,j-1)) + 1$
+
+In the meantime, record the size of the largest square found so far. 
+
+In the implementation, we need $F$'s dimension as $(M+1, N+1)$ to cover the edge cases like $1\times N $, $M\times 1$.
+
+\setcounter{lstlisting}{0}
+\begin{lstlisting}[style=customc, caption={2D DP}]
+int maximalSquare( vector<vector<char>>& matrix )
+{
+    if( matrix.empty() || ( matrix[0].empty() ) )
+    {
+        return 0;
+    }
+    auto M = matrix.size();
+    auto N( matrix[0].size() );
+    //we need (M+1) x (N+1) as F's dimension
+    //to cover edge cases
+    vector<vector<int>> F( M + 1, vector<int>( N + 1, 0 ) );
+    auto max_side( 0 );
+    for( size_t i = 1; i <= M; ++i )
+    {
+        for( size_t j = 1; j <= N; ++j )
+        {
+            if( matrix[i - 1][j - 1] == '1' )
+            {
+                //fill current element only found a 1
+                auto x( ( min )( F[i - 1][j], F[i][j - 1] ) );
+                x = ( min )( x, F[i - 1][j - 1] );
+                F[i][j] = x + 1;
+                max_side = ( max )( max_side, F[i][j] );
+            }
+        }
+    }
+    return max_side * max_side;
+}
+\end{lstlisting}
+
+\subsection{1D DP}
+Since $F(i,j)$ only depends on $F(i-1,j)$, $F(i,j-1)$ and $F(i-1,j-1)$, we can use 1D array $F$ as the DP array.
+
+\begin{lstlisting}[style=customc, caption={1D DP}]
+int maximalSquare( vector<vector<char>>& matrix )
+{
+    if( matrix.empty() || ( matrix[0].empty() ) )
+    {
+        return 0;
+    }
+    auto M = matrix.size();
+    auto N( matrix[0].size() );
+    //DP for one row
+    vector<int> F( N + 1, 0 );
+    auto max_side( 0 );
+    //record last F[j]
+    int prev = 0;
+    for( size_t i = 1; i <= M; ++i )
+    {
+        for( size_t j = 1; j <= N; ++j )
+        {
+            //save current F[j] as temp
+            auto temp( F[j] );
+            if( matrix[i - 1][j - 1] == '1' )
+            {
+                //update F[i][j] as (min)(F[i-1][j-1], F[i-1][j], F[i][j-1]) +1
+                //to convert to 1D
+                //F[i-1][j-1] => prev
+                //F[i-1][j] => F[j] before update
+                //F[i][j-1] => F[j-1] after update
+                auto x( ( min )( F[j], F[j - 1] ) );
+                x = ( min )( x, prev );
+                F[j] = x + 1;
+                max_side = ( max )( max_side, F[j] );
+            }
+            else
+            {
+                F[j] = 0;
+            }
+            prev = temp;
+        }
+    }
+    return max_side * max_side;
+}
+\end{lstlisting}
+

@@ -1,0 +1,116 @@
+\section{778 --- Swim in Rising Water}
+On an $N \times N$ grid, each square \fcj{grid[i][j]} represents the elevation at that point $(i,j)$.
+
+Now rain starts to fall. At time $t$, the depth of the water everywhere is $t$. You can swim from a square to another 4-directionally adjacent square if and only if the elevation of both squares individually are at most t. You can swim infinite distance in zero time. Of course, you must stay within the boundaries of the grid during your swim.
+
+You start at the top left square $(0, 0)$. What is the least time until you can reach the bottom right square $(N-1, N-1)$?
+
+\paragraph{Example 1:}
+\begin{flushleft}
+
+
+\textbf{Input}: \fcj{[[0,2],[1,3]]}
+
+\textbf{Output}: 3
+
+\textbf{Explanation}:
+
+At time 0, you are in grid location $ (0, 0) $.
+
+You cannot go anywhere else because 4-directionally adjacent neighbors have a higher elevation than $ t = 0 $.
+
+You cannot reach point $ (1, 1) $ until time 3.
+
+When the depth of water is 3, we can swim anywhere inside the grid.
+\end{flushleft}
+
+\paragraph{Example 2:}
+\begin{flushleft}
+\textbf{Input}:
+\fcj{[[0,1,2,3,4],[24,23,22,21,5],[12,13,14,15,16],[11,17,18,19,20],[10,9,8,7,6]]}
+
+\textbf{Output}: 16
+
+\textbf{Explanation}:
+\[
+\begin{bmatrix}
+0 &  1 & 2 & 3 &  4\\
+24 & 23 & 22 & 21 & 5\\
+12 & 13 & 14 & 15 & 16\\
+11 & 17 & 18 & 19 & 20\\
+10 &  9 &  8 & 7 & 6
+\end{bmatrix}
+\]
+
+The final route is marked in bold.
+
+We need to wait until time 16 so that $ (0, 0) $ and $ (4, 4) $ are connected.
+
+\end{flushleft}
+
+\paragraph{Note:}
+
+\begin{enumerate}
+\item $2 \leq N \leq 50$.
+\item \fcj{grid[i][j]} is a permutation of $[0, \ldots, N^2 - 1]$.
+\end{enumerate}
+
+\subsection{Heap}
+We maintain a priority queue of which square we can walk in next. We always walk in the smallest one that is 4-directionally adjacent to ones we've visited.
+
+When we reach the target, the largest number we have visited so far is the answer.
+
+\setcounter{lstlisting}{0}
+\begin{lstlisting}[style=customc, caption={Heap}]
+int swimInWater( vector<vector<int>>& grid )
+{
+    auto N( static_cast<int>( grid.size() ) );
+    //we use r * N + c to save the coord
+    auto cmp = [ &grid, N ]( int p1, int p2 )
+    {
+        auto r1 = p1 / N;
+        auto c1 = p1 - N * r1;
+        auto r2 = p2 / N;
+        auto c2 = p2 - N * r2;
+        return grid[r1][c1] > grid[r2][c2];
+    };
+    //define heap
+    priority_queue<int, vector<int>, decltype( cmp )> pq( cmp );
+    //add (0,0)
+    pq.push( 0 );
+    //4 adjacent cells offset
+    vector<pair<int, int>> dirs = { { -1, 0 }, { 1, 0 }, { 0, -1 }, { 0, 1 } };
+    //record visited coords
+    unordered_set<int> seen;
+    int ans = 0;
+    while( !pq.empty() )
+    {
+        auto t = pq.top();
+        pq.pop();
+        int r = t / N;
+        int c = t - N * r;
+        ans = ( max )( ans, grid[r][c] );
+        if( ( r == N - 1 ) && ( c == N - 1 ) )
+        {
+            //we are at destination
+            return ans;
+        }
+        for( int i = 0; i < 4; ++i )
+        {
+            auto [dr, dc] = dirs[i];
+            int nr = r + dr;
+            int nc = c + dc;
+            if( ( nr >= 0 ) && ( nr < N ) && ( nc >= 0 ) && ( nc < N ) )
+            {
+                auto t = nr * N + nc;
+                if( seen.find( t ) == seen.end() )
+                {
+                    seen.insert( t );
+                    pq.push( t );
+                }
+            }
+        }//for dirs
+    }//for pq
+    return -1;
+}
+\end{lstlisting}

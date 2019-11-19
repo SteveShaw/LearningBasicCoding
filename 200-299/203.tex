@@ -1,8 +1,9 @@
 \section{203 --- Remove Linked List Elements}
 Remove all elements from a linked list of integers that have value $v$.
 \paragraph{Example}:
-\textbf{Input}:
 \begin{flushleft}
+\textbf{Input}:
+
 \begin{figure}[H]
 \begin{tikzpicture}
 [mynode/.style={draw,circle,minimum size=5mm, fill=gray!20!}]
@@ -42,30 +43,22 @@ $v=6$
 \end{figure}
 \end{flushleft}
 \subsection{Dummy Header}
-\begin{CJK*}{UTF8}{gbsn}
 创建一个dummy header，用它的\texttt{next}指向\texttt{head}，这样就能很好避免很多判断了。
-\end{CJK*}
 \setcounter{lstlisting}{0}
 \begin{lstlisting}[style=customc, caption={Dummy Header}]
 ListNode* removeElements( ListNode* head, int val )
 {
-
     ListNode *dummy = new ListNode( -1 );
-
     dummy->next = head;
-
     auto cur = head;
     auto pre = dummy;
-
     while( cur )
     {
         if( cur->val == val )
         {
             auto next = cur->next;
             cur->next = nullptr;
-
             pre->next = next;
-
             cur = next;
         }
         else

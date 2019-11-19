@@ -20,7 +20,6 @@ Given an array of integers $A$, find out whether there are two distinct indices 
 \textbf{Output}: \texttt{false}
 \end{flushleft}
 \subsection{Tree Map}
-\begin{CJK*}{UTF8}{gbsn}
 \begin{itemize}
 \item 对于index $i$，小于$i-k$的index对结果没有影响。
 \item 需要找到在$[i-k, i]$中是否存在某个index $x$，使得 $-t\leq A[i] - A[x] \leq t$
@@ -28,76 +27,109 @@ Given an array of integers $A$, find out whether there are two distinct indices 
 \item 如果这个$A[x] > A[i]+t$，由于$A[x]$是符合$A[x]\geq A[i]-t$中最小的，因此就不可能存在$A[x]\leq A[i]+t$了。
 \item Coding的时候需要注意当$t$以及$A[i]$都超过了Integer类型的最大值时的边界情况，因此实际上需要比integer更宽的数值类型，比如\texttt{long long}.
 \end{itemize}
-\end{CJK*}
-\setcounter{algorithm}{0}
-\begin{algorithm}[H]
-\caption{Binary Search With Tree Map}
-\begin{algorithmic}[1]
-\Procedure{ContainsNearbyAlmostDuplicate}{$A,L,k,t$}
-\State $\star$ Initialize a tree map $M$
-\State $p:=0$ \Comment The $k$ index left from current index 
-\For{$i:=0 \to L-1$}
-\If{$i-p > k$} \Comment Ingore those indexes are more than $k$ index left from $i$
-\State $\star$ Remove $A[p]$ from $M$ if $A[p]$ is in $M$ and the value is $p$
-\State $p\gets p+1$ \Comment Move $p$ right by one index
-\EndIf
-\State $\star$ Find the first key $y$ that $y\geq (A[i]-t)$
-\If{$y$ can be found and $y\leq (A[i]+t)$}
-\State \Return \texttt{true} \Comment $-t\leq |y-A[i]| \leq t$
-\EndIf
-\State $M[A[i]]:=i$ \Comment Add $A[i]$ to $M$
-\EndFor
-\State \Return \texttt{false}
-\EndProcedure
-\end{algorithmic}
-\end{algorithm}
+
 \setcounter{lstlisting}{0}
 \begin{lstlisting}[style=customc, caption={TreeMap}]
-int L = static_cast< int >( nums.size() );
-
-map<long long, int> m;
-
-int last = 0;
-
-for( int i = 0; i < L; ++i )
+bool containsNearbyAlmostDuplicate( vector<int>& nums, int k, int t )
 {
-    auto x = static_cast< long long >( nums[last] );
-
-    if( i - last > k )
+    using ll_t = long long;
+    map<ll_t, int> window;
+    auto nn( static_cast< int >( nums.size() ) );
+    int left = 0;
+    for( int right = 0; right < nn; ++right )
     {
-        auto it = m.find( x );
-
-        if( ( it != m.end() ) && ( it->second == last ) )
+        if( right - left > k )
         {
-            m.erase( it );
+            //remove left boundary from the window
+            auto p( window.find( nums[left] ) );
+            //we have to make sure that the removed element
+            //is at the boundary. (deal with duplicate number)
+            if( ( p != window.end() ) && ( get<1>( *p ) == left ) )
+            {
+                window.erase( p );
+            }
+
+            ++left;
         }
-
-        ++last;
-    }
-
-    auto y = static_cast< long long >( nums[i] );
-
-    auto it = m.lower_bound( y - t );
-
-    if( it != m.end() )
-    {
-        if( it->first <= y + t )
+        //check in window if there is an element
+        //that in [nums[right]-t, nums[right]+t]
+        auto r( static_cast<ll_t>( nums[right] ) );
+        auto p( window.lower_bound( r - t ) );
+        if( ( p != window.end() ) && ( get<0>( *p ) <= r + t ) )
         {
             return true;
         }
+        //add current element to window
+        window.emplace( r, right );
     }
-
-    it = m.find( y );
-
-    if( it == m.end() )
-    {
-        m.emplace( y, i );
-    }
-    else
-    {
-        it->second = i;
-    }
+    return false;
 }
+\end{lstlisting}
 
-return false;
+\subsection{Buckets Sort}
+
+Put each number into buckets $\ldots$, $(0, t)$, $(t+1, 2t+1)$, $\ldots$.
+
+What we need to check is the bucket that current element $x$ belongs to and its two adjacent buckets. 
+
+Each of the buckets contains at most one element at any time, because two elements in a bucket means they meet the conditions immediately and we can return early from the function.
+
+\begin{lstlisting}[style=customc, caption={Buckets Sort}]
+bool containsNearbyAlmostDuplicate( vector<int>& nums, int k, int t )
+{
+    //when t is negative
+    //the problem is ill-formed
+    if( t < 0 )
+    {
+        return false;
+    }
+    using ll_t = long long;
+    //helper function to get bucket id
+    //given value x and bucket width (width)
+    auto get_bucket_id = []( ll_t x, ll_t width )
+    {
+        if( x < 0 )
+        {
+            return ( x + 1 ) / width - 1;
+        }
+
+        return x / width;
+    };
+    auto nn( static_cast< int >( nums.size() ) );
+    //each bucket only contain only at most one element
+    unordered_map<ll_t, ll_t> buckets;
+    //the bucket width is (d+1)
+    auto d( static_cast< ll_t >( t ) );
+    for( int right = 0; right < nn; ++right )
+    {
+        auto r( static_cast< ll_t >( nums[right] ) );
+        auto bucket_id( get_bucket_id( r, d + 1 ) );
+        //this bucket exists, we found two numers
+        //immediately
+        if( buckets.find( bucket_id ) != buckets.end() )
+        {
+            return true;
+        }
+        //check neighbor buckets with id (bucket_id-1) and (bucket_id+1)
+        auto p1( buckets.find( bucket_id - 1 ) );
+        if( ( p1 != buckets.end() ) && ( abs( r - get<1>( *p1 ) ) <= d ) )
+        {
+            return true;
+        }
+        auto p2( buckets.find( bucket_id + 1 ) );
+        if( ( p2 != buckets.end() ) && ( abs( r - get<1>( *p2 ) ) <= d ) )
+        {
+            return true;
+        }
+        //add bucket to contain this element
+        buckets.emplace( bucket_id, r );
+        if( right >= k )
+        {
+            //remove left boundary from the buckets
+            auto left( static_cast<ll_t>( nums[right - k] ) );
+            buckets.erase( get_bucket_id( left, d + 1 ) );
+        }
+    }
+    return false;
+}
 \end{lstlisting}

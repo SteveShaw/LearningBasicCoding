@@ -1,0 +1,87 @@
+\section{793 --- Preimage Size of Factorial Zeroes Function}
+
+\textbf{Hard}
+
+Let $ f(x) $ be the number of zeroes at the end of $ x! $. (Recall that $ x! = 1 \times 2 \times 3 \times \ldots \times x $, and by convention, $0! = 1$.)
+
+For example, $ f(3) = 0 $ because $ 3! = 6 $ has no zeroes at the end, while $ f(11) = 2 $ because $ 11! = 39916800 $ has 2 zeroes at the end. Given $ K $, find how many non-negative integers $ x $ have the property that $ f(x) = K $.
+
+\paragraph{Example 1:}
+
+\begin{flushleft}
+\textbf{Input}: K = 0
+
+\textbf{Output}: 5
+
+\textbf{Explanation}: 0!, 1!, 2!, 3!, and 4! end with K = 0 zeroes.
+\end{flushleft}
+
+\paragraph{Example 2:}
+
+\begin{flushleft}
+\textbf{Input}: $ K = 5 $
+
+\textbf{Output}: 0
+
+\textbf{Explanation}: There is no $ x $ such that $ x! $ ends in $ K = 5 $ zeroes.
+\end{flushleft}
+
+\paragraph{Note:}
+
+\begin{itemize}
+\item $ K $ will be an integer in the range $ [0, 10^9] $.
+\end{itemize}
+
+\subsection{Binary Search}
+
+Denote $\zeta(x)$ be the number of zeroes at the end of $x!$. If the prime factorization of $ x! $ is $ (2^a * 5^b * \cdots )$, the number of times that 10 divides this is $\min(a, b)$ which is $b$ (number of 5 multiples are less than number of 2 multiples).
+
+Thus, $\zeta(x)$ is the number of times 5 divides $ x! $, which is equal to 
+
+$ \lfloor \frac{x}{5^1} \rfloor + \lfloor \frac{x}{5^2} \rfloor + \lfloor \frac{x}{5^3} \rfloor + \lfloor \frac{x}{5^4} \rfloor + \cdots $
+
+Indeed, $\zeta$ is a monotone increasing function, so we can for both the \textbf{largest} and \textbf{smallest} value $ x $ such that $ \zeta(x) = K $. However, since $ \zeta(5a-1) < \zeta(5a) = \zeta(5a+1) = \zeta(5a+2) = \zeta(5a+3) = \zeta(5a+4) < \zeta(5a+5) $, if it is possible for $ \zeta(x) $ to equal $ K $ for some $ x $, return 5, else the answer is 0.
+
+\setcounter{lstlisting}{0}
+\begin{lstlisting}[style=customc, caption={Binary Search}]
+int preimageSizeFZF( int K )
+{
+    //notice: we need long long data type
+    //to avoid overflow
+    long long lo( K );
+    long long hi( lo * 10 + 1 );
+    //standard binary search
+    while( lo <= hi )
+    {
+        auto mid( lo + ( hi - lo ) / 2 );
+        auto zeros( trail_zeros( mid ) );
+        if( zeros == K )
+        {
+            //only five number can have K
+            //zeros
+            return 5;
+        }
+        if( zeros < K )
+        {
+            lo = mid + 1;
+        }
+        else
+        {
+            hi = mid - 1;
+        }
+    }
+    return 0;
+}
+//helper function to get number of trailing zeros
+//same as problem 173
+int trail_zeros( long long n )
+{
+    int zeros = 0;
+    while( n )
+    {
+        zeros += n / 5;
+        n = n / 5;
+    }
+    return zeros;
+}
+\end{lstlisting}

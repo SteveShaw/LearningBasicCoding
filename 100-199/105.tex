@@ -28,37 +28,3 @@ Return the following binary tree:
 由于Preorder的第一个肯定是根，所以原二叉树的根节点可以知道，题目中给了一个很关键的条件就是树中没有相同元素，有了这个条件我们就可以在中序遍历中也定位出根节点的位置，并以根节点的位置将中序遍历拆分为左右两个部分，分别对其递归调用原函数。
 \par
 递归函数必须指定构建二叉树的preorder数组$A$的区间$[p_0, p_1)$和inorder数组$B$的区间$[i_0,i_1)$，然后由于$A[p_0]$就是当前子树的root，因此在$B$中给定的范围顺序搜寻$A[p_0]$在$B$中的位置$\alpha$。找到这个位置后，就知道以$A[p_0]$为root的左子树的长度$L_0:=\alpha - i_0$，右子树的长度$L_1:=i_1 - \alpha - 1$，因此接下来递归建立左子树时，在preroder数组$A$中的搜寻范围是$[p_0+1, p_0+1+L_0)$，相对应的在$B$中的搜寻范围是$[i_0, \alpha)$，而建立右子树时，在$A$中的搜寻范围是$[p_0+L_0+1, p_1)$，在$B$中的搜寻范围是$[\alpha+1, i_1)$
-\setcounter{algorithm}{0}
-\begin{algorithm}[H]
-\caption{Recursion}
-\begin{algorithmic}[1]
-\Procedure{BuildTree}{$A, B, L$}
-\State $T:=\texttt{CreateTree}(A, 0, L, B, 0, L)$ \Comment Call \texttt{CreateTree} to create binary tree from $A[0,\ldots, L)$ and $B[0,\ldots,L)$
-\State \Return $T$
-\EndProcedure
-\end{algorithmic}
-\end{algorithm}
-\texttt{CreateTree}根据给定的preorder数组$A$和其范围$[p_0, p_1)$以及inorder数组$B$和其范围$[i_0, i_1)$构建出符合要求的binary tree
-\begin{algorithm}[H]
-\caption{Recursively Building Binary Tree}
-\begin{algorithmic}[1]
-\Function{CreateTree}{$A, p_0, p_1, B, i_0, i_1$}
-\If{$p_0\geq p_1$ \textbf{or} $i_0\geq i_1$} \Comment The ranges are not invalid
-\State \Return \texttt{null}
-\EndIf
-\State $\alpha:=i_0$
-\For{$i:=i_0$ \textbf{to} $i_1-1$}
-\If{$A[p_0]=B[i]$}
-\State $\alpha\gets i$ \Comment Update the root position in $B$
-\State \texttt{break} \Comment Stop searching
-\EndIf
-\EndFor
-\State $L_0:=\alpha - i_0$ \Comment The left subtree length
-\State $L_1:=i_1 - \alpha - 1$ \Comment The right subtree length
-\State Create a new tree node $T$ with root value $A[i_0]$
-\State $\texttt{LEFT}(T)\gets \texttt{CreateTree}(A, p_0+1, p_0+L_0+1, B, i_0, \alpha)$ \Comment Create left subtree
-\State $\texttt{RIGHT}(T) \gets \texttt{CreateTree}(A, p_0+L_0+1, p_1, B, \alpha+1, i_1)$ \Comment Create right subtree
-\State \Return $T$
-\EndFunction
-\end{algorithmic}
-\end{algorithm}

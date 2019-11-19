@@ -20,34 +20,12 @@ Given an array of integers $A$ and an integer $k$, find out whether there are tw
 \textbf{Output}: \texttt{false}
 \end{flushleft}
 \subsection{Hash Table}
-\begin{CJK*}{UTF8}{gbsn}
 \begin{itemize}
-    \item 由于遍历数组就是按照顺序遍历的，因此如果按照从小到大遍历，因此只需要判定当前index$i$与之前在hash table中的index$j$是否能存在$i-j\leq k$。
-    \item 算法过程很直接，对于当前index对应的number$n$，如果在hash table中不存在，将$n$和对应的index插入到hash table中，如果存在，则按照上述分析进行比较，如果存在$i-j\leq k$，就直接返回\texttt{true}，然后将$n$对应的index更新为$i$。
+    \item 由于遍历数组就是按照顺序遍历的，因此如果按照从小到大遍历，因此只需要判定当前index $i$与之前在hash table中的index$j$是否能存在$i-j\leq k$。
+    \item 算法过程很直接，对于当前index对应的number kkkkkkk$n$，如果在hash table中不存在，将$n$和对应的index插入到hash table中，如果存在，则按照上述分析进行比较，如果存在$i-j\leq k$，就直接返回\texttt{true}，然后将$n$对应的index更新为$i$。
 \end{itemize}
-\end{CJK*}
-\setcounter{algorithm}{0}
-\begin{algorithm}[H]
-\caption{Hash Table}
-\begin{algorithmic}[1]
-\Procedure{ContainsNearbyDuplicate}{$A, L$}
-\State $\star$ Create an empty hash table $M$
-\For{$i:=0\to L-1$}
-\If{$A[i]$ is not in $M$}
-\State $\star$ set $M[A[i]]:=i$
-\Else
-\State $j:=M[A[i]]$ \Comment Get the last index for number $A[i]$
-\If{$i-j\leq k$}
-\State \Return \texttt{true}
-\Else
-\State $M[A[i]]\gets j$ \Comment Update the index of $A[i]$
-\EndIf
-\EndIf
-\EndFor
-\State \Return \texttt{false}
-\EndProcedure
-\end{algorithmic}
-\end{algorithm}
+
+
 
 \setcounter{lstlisting}{0}
 
@@ -81,4 +59,30 @@ bool containsNearbyDuplicate( vector<int>& nums, int k )
     return false;
 }
 
+\end{lstlisting}
+
+
+\subsection{Sliding Window}
+
+Keep a sliding window of $k$ elements using Hash Table.
+
+\begin{lstlisting}[style=customc, caption={Sliding Window}]
+bool containsNearbyDuplicate( vector<int>& nums, int k )
+{
+    auto L( static_cast<int>( nums.size() ) );
+    unordered_set<int> nsets;
+    for( int i = 0; i < L; ++i )
+    {
+        if( nsets.find( nums[i] ) != nsets.end() )
+        {
+            return true;
+        }
+        nsets.insert( nums[i] );
+        if( i >= k )
+        {
+            nsets.erase( nums[i - k] );
+        }
+    }
+    return false;
+}
 \end{lstlisting}

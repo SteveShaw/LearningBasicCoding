@@ -27,7 +27,6 @@ i & f & l & v\\
 \item You may assume that all inputs are consist of lowercase letters a--z.
 \end{itemize}
 \subsection{DFS + Trie}
-\begin{CJK*}{UTF8}{gbsn}
 \begin{itemize}
 \item Trie的node数据结构中需要放入所加入的word。
 \item 为了避免使用额外的数组来判断$B$中某个位置是否访问过，可以先把该位置上的字符替换为除了a -- z之外的其他字符。然后DFS函数末尾再换回该位置上的原字符。
@@ -42,60 +41,7 @@ void DFS(B, r, c)
 \end{lstlisting}
 \item 如果当前Trie node的word存在，那么除了把这个word加入到返回结果中，可以把这个word置为empty string。这样避免了在返回结果中出现重复的word。
 \end{itemize}
-\end{CJK*}
-\setcounter{algorithm}{0}
-\begin{algorithm}[H]
-\caption{DFS Plus Trie}
-\begin{algorithmic}[1]
-\State $\star$ $B$ has dimension $R\times C$. $W$ has length $L$
-\Procedure{FindWords}{$B, R, C, W, L$}
-\State $\star$ Add each word from $W$ into Trie
-\State $\star$ Iterate over all elements in $B$
-\State $\omega:=\emptyset$ \Comment The found words
-\For{$r:=0\to R-1$} \Comment Row
-\For{$c:=0\to C-1$} \Comment Column
-\State $\star$ Call helper function \texttt{DFS} to find word in $W$
-\State \Call{DFS}{$B, t, r, c, \omega$}
-\EndFor
-\EndFor
-\State \Return $\omega$
-\EndProcedure
-\end{algorithmic}
-\end{algorithm}
-Function \texttt{DFS} have 5 inputs which are
-\begin{itemize}
-\item $B$: The input board
-\item $r$ and $c$: The start position to do DFS
-\item $t$: The root of \textbf{Trie}
-\item $\omega$: The found words
-\end{itemize}
-\begin{algorithm}[H]
-\caption{Helper Function}
-\begin{algorithmic}[1]
-\Function{DFS}{$B,r,c,t,\omega$}
-\If{$B[r][c]$ is not in $t$'s children}
-\State \Return
-\EndIf
-\State $\star$ Update $t$ as $t$'s child in index corresponding to $B[r][c]$
-\If{$t$ has a non-empty \texttt{word} member which is in the dictionary}
-\State $\star$ Add $t$'s \texttt{word} memeber to $\omega$ and reset $t$'s \texttt{word} to empty
-\EndIf
-\algstore{212algo}
-\end{algorithmic}
-\end{algorithm}
-\begin{algorithm}[H]
-\begin{algorithmic}[1]
-\algrestore{212algo}
-\State $x:=B[r][c]$ \Comment Save $B[r][c]$ to $x$
-\State Set $B[r][c]$ to a special character $\pi$ other than a--z.
-\State $\star$ Move one unit in 4 directions. Each move will get a new position $(r_1, c_1)$
-\If{$(r_1, c_1)$ is inside $B$ and $B[r_1][c_1]\neq \pi$}
-\State \Call{DFS}{$B, r_1, c_1, t, \omega$} \Comment Continue DFS from $(r_1,c_1)$
-\EndIf
-\State $B[r][c]\gets x$ \Comment Restore $B[r][c]$ as its original letter
-\EndFunction
-\end{algorithmic}
-\end{algorithm}
+
 \setcounter{lstlisting}{0}
 \begin{lstlisting}[style=customc, caption={DFS And Trie}]
 class Solution

@@ -1,0 +1,39 @@
+\chapter{Network}
+
+\section{Multicast And Broadcast}
+
+Broadcasting and multicasting provide two services for an application: delivery of packets to multiple destinations, and solicitation/discovery of servers by clients.
+
+Although both broadcasting and multicasting can provide these important
+capabilities, multicasting is generally preferable to broadcasting because multicasting involves only those systems that support or use a particular service or protocol, and broadcasting does not. Thus, a broadcast request affects all hosts that are reachable within the scope of the broadcast, whereas multicast affects only those hosts that are likely to be interested in the request. 
+
+\subsection{Broadcast}
+Applications using broadcaast use the UDP and invoke an ordinary set of API calls to send traffic. The only exception is that when invoking the API calls, a special flag (\fcj{SO_BROADCAST}) is used in some operating systems to indicate the application really does intend to send broadcast datagrams. 
+
+For example, in Linux, it is required to use the \fcj{-b} flag when attempting to do a broadcast \fcj{ping}.
+
+To determine which interfaces are used for broadcasting, the IPv4 forwarding table (called ``routing table'') is consulted. (uses the command \fcj{netstat -rn}).
+
+\subsection{Multicast}
+To reduce the amount of overhead involved in broadcasting, it is possible to send traffic only to those receivers that are interested in it. This is called \textit{multicasting}.
+
+Fundamentally, this is accomplished by either having the sender indicate the
+receivers, or instead having the receivers independently indicate their interest. The network then becomes responsible for sending traffic only to intended/interested recipients.
+
+Implementing multicast is considerably more challenging than broadcast because \textit{multicast state} (information) must be maintained by hosts and
+routers as to what traffic is of interest to what receivers. In the TCP/IP model of multicasting, receivers indicate their interest in what traffic they wish to receive by specifying a multicast address and optional list of sources. This information is maintained as \textit{soft state} within hosts and routers, meaning that it must be updated regularly or it will time out and be deleted. When this happens, delivery of multicast traffic either ceases or reverts to broadcast.
+
+The inefficiencies of broadcast apply not only to wide area networks, where they can be extremely severe, but also to local area and enterprise networks. Every host that can be reached on the same LAN or VLAN must process broadcast packets. 
+
+IP multicasting provides a more efficient way to carry out the same types of tasks. If IP multicasting is used properly, only those hosts involved or interested in the communication need to process the associated packets, traffic is carried only on those links where it will be used, and only one copy of any multicast datagram is carried on any such link. To make multicasting work, applications that wish to be involved in a communication require a mechanism to notify their protocol implementations of their desires. The host software can then arrange to receive packets matching the applications’ criteria.
+
+An IP multicast address identifies a group of host interfaces, rather than a
+single one. The single group covers a group's scope which include \textit{node-local}(same computer), \textit{link-local}(same subnet), \textit{site-local}, \textit{global} and \textit{adiministrative}.
+
+When a host sends something to a group
+\begin{itemize}
+\item It creates a datagram using one of its own (unicast) IP addresses as the source address and a multicast IP address as the destination.
+\item All hosts in the scope that have joined the group should receive any datagrams sent to the group.
+\end{itemize}
+
+For IPv4, the class D space (224.0.0.0 --- 239.255.255.255) has been reserved for supporting multicast. With 28 bits free, this provides the possibility of $2^{28}=268,435,456$ host groups (each host group is an IP address).

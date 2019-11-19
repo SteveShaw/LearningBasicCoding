@@ -1,27 +1,25 @@
 \section{109 --- Convert Sorted List to Binary Search Tree}
-Given a singly linked list $L$ where elements are sorted in ascending order, convert it to a height balanced BST.
-\par
-For this problem, a height-balanced binary tree is defined as a binary tree in which the depth of the two subtrees of every node never differ by more than 1.
+Given a singly linked list where elements are sorted in ascending order, convert it to a height balanced BST.
+
+For this problem, a height-balanced binary tree is defined as a binary tree in which the depth of the two subtrees of \textit{every} node never differ by more than 1.
 \paragraph{Example:}
 \begin{flushleft}
-\textbf{Input}: $L = [-10,-3,0,5,9]$,
-\\
-One possible answer is:
+\textbf{Input}: \fcj{[-10,-3,0,5,9]},
+
+One possible answer is: \fcj{[0,-3,9,-10,null,5]}, which represents the following height balanced \textbf{BST}:
+
 \begin{figure}[H]
 \begin{tikzpicture}
-[mynode/.style={draw,circle,minimum size=10mm, fill=gray!20!}]
-\node(){};
-\node[mynode](0) {0};
-\node[mynode](3) [below = 8mm of 0, xshift=-8mm] {-3};
-\node[mynode](9) [below = 8mm of 0, xshift=8mm] {9};
-\node[mynode](10) [below = 8mm of 3, xshift=-8mm] {-10};
-\node[mynode](5) [below = 8mm of 9, xshift=-8mm] {5};
-\draw[>=stealth,->] (0) -- (3);
-\draw[>=stealth,->] (0) -- (9);
-\draw[>=stealth,->] (3) -- (10);
-\draw[>=stealth,->] (9) -- (5);
+[every node/.style={draw, circle, fill=gray!20!, minimum size=5mm},
+%level 1/.style={sibling distance=25mm},
+%level 2/.style={sibling distance=15mm},
+thick]
+\node{0}
+child{node{$-3$} child{node{$-10$}} child[missing]}
+child{node{9} child{node{5}} child[missing]};
 \end{tikzpicture}
 \end{figure}
+
 \end{flushleft}
 \subsection{Recursion}
 链表的查找中间点可以通过快慢指针来操。找到中点后，要以中点的值建立一个根节点，然后需要把原链表断开，分为前后两个链表，都不能包含原中点，

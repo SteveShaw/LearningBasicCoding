@@ -1,29 +1,33 @@
 \section{111 --- Minimum Depth of Binary Tree}
-Given a binary tree $T$, find its minimum depth.
-\par
+Given a binary tree, find its minimum depth.
+
 The minimum depth is the number of nodes along the shortest path from the root node down to the nearest leaf node.
-\par
-Note: A leaf is a node with no children.
+
+\textbf{Note}: A leaf is a node with no children.
+
 \paragraph{Example:}
 \begin{flushleft}
-Given binary tree
+
+Given binary tree \fcj{[3,9,20,null,null,15,7]},
+
+\begin{figure}[H]
+
 \begin{figure}[H]
 \begin{tikzpicture}
-[mynode/.style={draw,circle,minimum size=10mm, fill=gray!20!}]
-\node(){};
-\node[mynode](3) {3};
-\node[mynode](9) [below = 8mm of 3, xshift=-10mm] {9};
-\node[mynode](20) [below = 8mm of 1, xshift=10mm] {20};
-\node[mynode](15) [below = 8mm of 20, xshift=-6mm] {15};
-\node[mynode](7) [below = 8mm of 20, xshift=6mm] {7};
-\draw[>=stealth,->] (3) -- (9);
-\draw[>=stealth,->] (3) -- (20);
-\draw[>=stealth,->] (20) -- (15);
-\draw[>=stealth,->] (20) -- (7);
+[every node/.style={draw, circle, fill=gray!20!, minimum size=5mm},
+%level 1/.style={sibling distance=25mm},
+%level 2/.style={sibling distance=15mm},
+thick]
+\node{3}
+child{node{9}}
+child{node{20} child{node{15}} child{node{7}}};
 \end{tikzpicture}
 \end{figure}
-return its minimum depth: 2.
+
+\end{figure}
+return its minimum \fcj{depth = 2}.
 \end{flushleft}
+
 \subsection{Depth First Search}
 We incorporate find balance into calculate depth. If we find each node has unbalanced left and right child tree, we return a negative number.
 

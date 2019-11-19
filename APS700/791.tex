@@ -1,0 +1,71 @@
+\section{791 --- Custom Sort String}
+$S$ and $T$ are strings composed of lowercase letters. In $S$, no letter occurs more than once.
+
+$S$ was sorted in some custom order previously. We want to permute the characters of $T$ so that they match the order that $S$ was sorted. More specifically, if $x$ occurs before $y$ in $S$, then $x$ should occur before $y$ in the returned string.
+
+Return any permutation of $T$ (as a string) that satisfies this property.
+
+\paragraph{Example:}
+\begin{flushleft}
+
+
+\textbf{Input}: 
+
+\fcj{S = "cba"}
+
+\fcj{T = "abcd"}
+
+\textbf{Output}: \fcj{"cbad"}
+
+\textbf{Explanation}: 
+
+\fcj{"a"}, \fcj{"b"}, \fcj{"c"} appear in $S$, so the order of \fcj{"a"}, \fcj{"b"}, \fcj{"c"} should be \fcj{"c"}, \fcj{"b"}, and \fcj{"a"}.
+ 
+Since \fcj{"d"} does not appear in $S$, it can be at any position in $T$. \fcj{"dcba"}, \fcj{"cdba"}, \fcj{"cbda"} are also valid outputs.
+ 
+\end{flushleft}
+
+\paragraph{Note:}
+
+\begin{itemize}
+\item $S$ has length at most 26, and no character is repeated in $S$.
+\item $T$ has length at most 200.
+\item $S$ and $T$ consist of lowercase letters only.
+\end{itemize}
+
+\subsection{Count And Write}
+First, count elements in $T$ and then traversing $S$. write those elements in the order in $S$. Then add those letters do not appear in $S$.
+
+\setcounter{lstlisting}{0}
+\begin{lstlisting}[style=customc, caption={Count And Write}]
+string customSortString( string S, string T )
+{
+    vector<int> dict( 26, 0 );
+
+    //count letters in T
+    for( auto c : T )
+    {
+        dict[c - 'a'] += 1;
+    }
+    string ans;
+    ans.reserve( T.size() );
+    for( auto c : S )
+    {
+        if( dict[c - 'a'] > 0 )
+        {
+            //we add this letter first
+            ans.append( dict[c - 'a'], c );
+            dict[c - 'a'] = 0;
+        }
+    }
+    //then add letters do not appear in S
+    for( int i = 0; i < 26; ++i )
+    {
+        if( dict[i] > 0 )
+        {
+            ans.append( dict[i], 'a' + i );
+        }
+    }
+    return ans;
+}
+\end{lstlisting}

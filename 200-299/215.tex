@@ -18,108 +18,18 @@ Find the $k$th largest element in an unsorted array. Note that it is the $k$th l
 \end{itemize}
 \subsection{Quick Select Algorithm}
 In \textbf{quick sort} algorithm, there is a subprocedure called \textbf{partition} that can, in linear time, group an array (ranging from indices $l$ to $r$) into two parts: those less than a certain element, and those greater than or equal to the element. Here is pseudocode that performs a partition about the element $A[p]$
-\setcounter{algorithm}{0}
-\begin{algorithm}[H]
-\caption{Lomuto Partition Scheme}
-\begin{algorithmic}[1]
-\Procedure{partition}{$A, l, r, p$}
-\State $x:=A[p]$ \Comment Save the value of pivot element
-\State $\star$ Swap $A[p]$ and $A[r]$ \Comment Move pivot element to end
-\State $\alpha:=l$ \Comment The stored index
-\For{$i:=l \to r-1$}
-\If{$A[i] < x$}
-\State $\star$ Swap $A[\alpha]$ and $A[i]$
-\State $\alpha\gets\alpha+1$
-\EndIf
-\EndFor
-\State $\star$ Swap $A[r]$ and $A[\alpha]$ to move the pivot element to its final place.
-\algstore{215algo}
-\end{algorithmic}
-\end{algorithm}
-\begin{algorithm}[H]
-\begin{algorithmic}[1]
-\algrestore{215algo}
-\State \Return $\alpha$
-\EndProcedure
-\end{algorithmic}
-\end{algorithm}
-A more efficient partition method is \textbf{Hoare's original partition scheme}.
-\begin{algorithm}[H]
-\caption{Hoare Partition Scheme}
-\begin{algorithmic}[1]
-\Procedure{partition}{$A, l, r$}
-\State $x:=A[(l+r)/2]$
-\State $i:=l-1$
-\State $j:=r+1$
-\Loop
-\Repeat
-\State $i\gets i+1$
-\Until{$A[i] \geq x$}
-\Repeat
-\State $j\gets j-1$
-\Until{$A[j] \leq x$ }
-\If{$i\geq j$}
-\State \Return $j$
-\EndIf
-\State $\star$ Swap $A[i]$ and $A[j]$
-\EndLoop
-\EndProcedure
-\end{algorithmic}
-\end{algorithm}
+
 Like \textbf{Lomuto}'s partition scheme, \textbf{Hoare}'s partitioning also would cause \textbf{quick sort} to degrade to $O(n^2)$ for already sorted input, if the pivot was chosen as the \textbf{first} or the \textbf{last} element. With the \textbf{middle} element as the \textbf{pivot}, however, sorted data results with (almost) \textbf{no swaps} in equally sized partitions leading to best case behavior of quick sort, i.e. $O(n \log n)$. Like others, \textbf{Hoare}'s partitioning does not produce a stable sort.
-\par
+
 Note that in this scheme, the pivot's final location is not necessarily at the index that was returned, and the next two segments that the main algorithm recurs on are $[l, p]$ and $[p+1, r]$ as opposed to $[l, p-1]$ and $[p+1, r]$ as in \textbf{Lomuto}'s scheme. However, the partitioning algorithm guarantees $l\geq p < r$ which implies both resulting partitions are non-empty, hence there's no risk of infinite recursion.
-\par
+
 Back to the quick selection algorithm: In \textbf{quick sort}, we recursively sort both branches, leading to best-case $O(n \log n)$ time. However, when doing \textbf{selection}, we already know which partition our desired element lies in, since the pivot is in its final sorted position, with all those preceding it in an unsorted order and all those following it in an unsorted order. Therefore, a single recursive call locates the desired element in the correct partition, and we build upon this for \textbf{quick select}:
-\begin{algorithm}[H]
-\caption{Quick Selection}
-\begin{algorithmic}[1]
-\Procedure{select}{$A, l, r, k$}
-\If{$l=r$} \Comment $A$ contains only one element
-\State \Return $A[l]$
-\EndIf
-\State $\star$ Select a pivot index between $l$ and $r$
-\State $p\gets$ \Call{partition}{$A,l,r,p$} \Comment get the pivot index in its final sorted position
-\If{$k=p$}
-\State \Return $A[k]$
-\ElsIf{$k < p$}
-\State \Return \Call{partition}{$A, l, p-1, k$}
-\Else
-\State \Return \Call{partition}{$A, p+1, r, k$}
-\EndIf
-\EndProcedure
-\end{algorithmic}
-\end{algorithm}
-\begin{CJK*}{UTF8}{gbsn}
-上述递归算法也可以用循环来代替，算法如下：
-\end{CJK*}
-\setcounter{algorithm}{0}
-\begin{algorithm}[H]
-\caption{Quick Selection Tail Recursion}
-\begin{algorithmic}[1]
-\Procedure{SELECT}{$A, l, r, k$}
-\Loop
-\If{$l=r$}
-\State \Return $A[l]$
-\EndIf
-\State $\star$ Select a pivot index between $l$ and $r$
-\State $p\gets$ \Call{partition}{$A,l,r,p$} \Comment get the pivot index in its final sorted position
-\If{$k=p$}
-\State \Return $A[k]$
-\ElsIf{$k < p$}
-\State $r\gets p-1$
-\Else
-\State $l\gets p+1$
-\EndIf
-\EndLoop
-\EndProcedure
-\end{algorithmic}
-\end{algorithm}
-\begin{CJK*}{UTF8}{gbsn}
+
+
 有一点需要注意，题目要求的是$k$th largest，而上述算法则是$k$th smallest，因此需要转换一下，求$k$th largest 实际上等价于求 $(L-k)$th smallest ($L$是原数组的长度)。
-\par
+
 另外，Horae partition schema由于返回的不一定是 pivot的最终位置，因此在quick select中不太适合。
-\end{CJK*}
+
 \setcounter{lstlisting}{0}
 \begin{lstlisting}[style=customc, caption={Quick Select}]
 class Solution

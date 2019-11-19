@@ -1,0 +1,93 @@
+\section{775 --- Global and Local Inversions}
+We have some permutation $A$ of \fcj{[0, 1, ..., N - 1]}, where $N$ is the length of $A$.
+
+The number of (global) inversions is the number of $i < j$ with $0 \leq i < j < N$ and $A[i] > A[j]$.
+
+The number of local inversions is the number of $i$ with $0 \leq i < N$ and $A[i] > A[i+1]$.
+
+Return \fcj{true} if and only if the number of global inversions is equal to the number of local inversions.
+
+\paragraph{Example 1:}
+
+\begin{flushleft}
+\textbf{Input}: \fcj{A = [1,0,2]}
+
+\textbf{Output}: \fcj{true}
+
+\textbf{Explanation}: There is 1 global inversion, and 1 local inversion.
+\end{flushleft}
+
+\paragraph{Example 2:}
+\begin{flushleft}
+
+\textbf{Input}: \fcj{A = [1,2,0]}
+
+\textbf{Output}: \fcj{false}
+
+\textbf{Explanation}: There are 2 global inversions, and 1 local inversion.
+
+\end{flushleft}
+
+\paragraph{Note:}
+
+\begin{itemize}
+\item $A$ will be a permutation of \fcj{[0, 1, ..., A.length - 1]}.
+\item $A$ will have length in range \fcj{[1, 5000]}.
+\item The time limit for this problem has been reduced.
+\end{itemize}
+
+\subsection{One Pass}
+The number of global inversions is equal to the number of local inversions means we only have local inversions.
+
+Therefore, an \textit{ideal} permutation is the one without global inversions. In this case, if zero is at index 2 or greater, $A[0] > A[2] =0$ which is a global inversion. Thus zero can only be in index 0 or 1. 
+
+If $A[1] = 0$, we must have $A[0]=1$ otherwise $A[0] > A[j]=1$ where $j\geq 2$ and we get a global inversion.
+
+Thus if $A$ is an \textit{ideal} permutation array, we must have 
+
+\begin{itemize}
+\item $A[0]=0$ and $A[1,N-1]$ is also ideal permutation.
+\item $A[1]=0$ and $A[2,N-1]$ is also ideal permutation.
+\end{itemize}
+
+Then the condition for $A$ to be an ideal permutation array is 
+
+$\lvert A[i] - i\rvert \leq 1 $.
+
+\setcounter{lstlisting}{0}
+\begin{lstlisting}[style=customc, caption={One Pass}]
+bool isIdealPermutation( vector<int>& A )
+{
+    auto L( static_cast<int>( A.size() ) );
+    for( int i = 0; i < L; ++i )
+    {
+        if( abs( A[i] - i ) > 1 )
+        {
+            //global inversion exists
+            return false;
+        }
+    }
+    return true;
+}
+\end{lstlisting}
+
+\subsection{Keep Minimum}
+If we use a brute force approach, for each index $i$, we will check if there is a index $j\geq i+2$ such that $A[i]>A[j]$. This is same as checking $A[i] > \min(A[i+2], \ldots, A[N-1]$. We can record minimum value so far from right to left to speed this checking.
+
+\begin{lstlisting}[style=customc, caption={Keep Minimum}]
+bool isIdealPermutation( vector<int>& A )
+{
+    auto N( static_cast<int>( A.size() ) );
+    auto cur_min( N );
+    for( int i = N - 1; i >= 2; --i )
+    {
+        cur_min = ( min )( cur_min, A[i] );
+        if( A[i - 2] > cur_min )
+        {
+            //global inversion exists
+            return false;
+        }
+    }
+    return true;
+}
+\end{lstlisting}

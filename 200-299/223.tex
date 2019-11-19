@@ -33,7 +33,6 @@ Each rectangle is defined by its bottom left corner and top right corner as show
 \item Assume that the total area is never beyond the maximum possible value of \texttt{int}.
 \end{itemize}
 \subsection{Geometry}
-\begin{CJK*}{UTF8}{gbsn}
 \begin{itemize}
 \item 算出两个矩形的面积和
 \item 确定两个矩形是否overlap，其实只有四种情形需要考虑，即 $B\geq H$ or $E\geq C$ or $F\geq D$ or $A\geq G$.
@@ -41,57 +40,24 @@ Each rectangle is defined by its bottom left corner and top right corner as show
 等于$\min(D,H)$。
 \item 为了避免出现数据精度overflow，所有的宽度和高度计算都转换成\texttt{long long}
 \end{itemize}
-\end{CJK*}
-\setcounter{algorithm}{0}
-\begin{algorithm}[H]
-\caption{Geometry}
-\begin{algorithmic}[1]
-\Procedure{ComputeArea}{$A,B,C,D,E,F,G,H$}
-\State $S:=(C-A)\times(D-B) + (G-E)\times(H-F)$ \Comment Total sum
-\State $\ast$ Check if there is overlap
-\algstore{223algo}
-\end{algorithmic}
-\end{algorithm}
-\begin{algorithm}[H]
-\begin{algorithmic}[1]
-\algrestore{223algo}
-\If{$A\geq G$ \textbf{or} $B \geq H$ \textbf{or} $E\geq C$ \textbf{or} $F\geq D$}
-\State \Return $S$ \Comment No overlap
-\EndIf
-\State $\ast$ Compute the overlapped area
-\State $l:=\max(A, G)$
-\State $b:=\max(B, F)$
-\State $r:=\min(C, G)$
-\State $t:=\min(D, H)$
-\State $S_0:=(r-l)\times(t-b)$ \Comment The area of overlap
-\State \Return $S-S_0$
-\EndProcedure
-\end{algorithmic}
-\end{algorithm}
+
 \setcounter{lstlisting}{0}
 \begin{lstlisting}[style=customc, caption={Geometry}]
 int computeArea( int A, int B, int C, int D, int E, int F, int G, int H )
 {
-
     long long w = C - A;
     long long h = D - B;
-
     auto ans = w * h;
-
     w = G - E;
     h = H - F;
-
     ans += w * h;
 
     if( ( A >= G ) || ( B >= H ) || ( E >= C ) || ( F >= D ) )
     {
         return ans;
     }
-
     w = ( min )( C, G ) - ( max )( A, E );
     h = ( min )( D, H ) - ( max )( B, F );
-
-
     return ans - w * h;
 }
 \end{lstlisting}

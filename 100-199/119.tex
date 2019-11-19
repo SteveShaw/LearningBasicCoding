@@ -1,41 +1,55 @@
 \section{119 --- Pascal's Triangle II}
 Given a non-negative index $k$ where $k \leq 33$, return the $k$th index row of the Pascal's triangle.
-\par
+
 Note that the row index starts from 0.
-\par
+
 In Pascal's triangle, each number is the sum of the two numbers directly above it.
+
 \paragraph{Example:}
+
 \begin{flushleft}
+
 \textbf{Input}: 3
-\\
-Output: $[1,\;3,\;3,\;1]$
+
+\textbf{Output}: \fcj{[1,3,3,1]}
+
 \end{flushleft}
+
+
 \paragraph{Follow up:}
-\begin{flushleft}
-Could you optimize your algorithm to use only $O(k)$ extra space?
-\end{flushleft}
-\subsection{Analysis}
-\begin{CJK*}{UTF8}{gbsn}
-如果只能用$O(k)$的存储空间，那么为了重复利用这个存储空间，必须想办法如何既能得到新一层的值而同时能够保留需要用的上一层的值，办法就是从第二层开始，每一层都是从最后一个元素往前更新，这样，当前元素更新后，不影响上一层其左边元素的值。比如$k=3$，那么数组的更新顺序结果如下
 \begin{itemize}
-\item $k=0$: $[1,0,0,0]$
-\item $k=1$: $[1,1,0,0]$
-\item $k=2$: $[1,2,1,0]$
-\item $k=3$: $[1,3,3,1]$
+\item Could you optimize your algorithm to use only $O(k)$ extra space?
 \end{itemize}
-\end{CJK*}
-\setcounter{algorithm}{0}
-\begin{algorithm}[H]
-\caption{Update From End To Front}
-\begin{algorithmic}[1]
-\Procedure{GetRow}{$k$}
-\State $A$ as $A[0]:=1,\;A[1]=\ldots=A[k]=0$
-\For{$x=1 \to k$}
-\For{$y=k \to 1$}
-\State $A[y]\gets A[y] + A[y-1]$ \Comment Update $A[y]$ but $A[y-1]$ is not affected
-\EndFor
-\EndFor
-\State \Return $A$
-\EndProcedure
-\end{algorithmic}
-\end{algorithm}
+
+\subsection{Analysis}
+
+如果只能用$O(k)$的存储空间，那么为了重复利用这个存储空间，必须想办法如何既能得到新一层的值而同时能够保留需要用的上一层的值，办法就是从第二层开始，每一层都是从最后一个元素往前更新，这样，当前元素更新后，不影响上一层其左边元素的值。比如$k=3$，那么数组的更新顺序结果如下
+
+\begin{itemize}
+\item $k=0$: \fcj{[1,0,0,0]}
+\item $k=1$: \fcj{[1,1,0,0]}
+\item $k=2$: \fcj{[1,2,1,0]}
+\item $k=3$: \fcj{[1,3,3,1]}
+\end{itemize}
+
+\setcounter{lstlisting}{0}
+\begin{lstlisting}[style=customc, caption={DP}]
+vector<int> getRow( int rowIndex )
+{
+    if( rowIndex == 0 )
+    {
+        return vector<int> {1};
+    }
+    vector<int> row( rowIndex + 1, 0 );
+    row[0] = 1;
+    for( int r = 1; r <= rowIndex; ++r )
+    {
+        //update from end to front
+        for( int c = rowIndex; c >= 1; --c )
+        {
+            row[c] += row[c - 1];
+        }
+    }
+    return row;
+}
+\end{lstlisting}

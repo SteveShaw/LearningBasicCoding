@@ -24,18 +24,3 @@ Given binary tree
 return its depth $D = 3$.
 \subsection{Recursion}
 A very easy problem. Just return the maximum depth of left substree and right subtree plus 1 (since we need to count the root).
-\subsubsection{Algorithm}
-\setcounter{algorithm}{0}
-\begin{algorithm}[H]
-\caption{Recursion}
-\begin{algorithmic}[1]
-\Procedure{MaxDepth}{$T$}
-\If{$T=\texttt{null}$}
-\State \Return 0 \Comment Empty tree has height 1
-\EndIf
-\State $\alpha:=\texttt{MaxDepth}(\texttt{LEFT}(T))$ \Comment The maximum depth of left subtree
-\State $\beta:=\texttt{MaxDepth}(\texttt{RIGHT}(T))$ \Comment The maximum depth of right subtree
-\State \Return $1+\max(\alpha, \beta)$
-\EndProcedure
-\end{algorithmic}
-\end{algorithm}

@@ -26,9 +26,7 @@ stack.empty(); // returns false
 \item You may assume that all operations are valid (for example, no pop or top operations will be called on an empty stack).
 \end{itemize}
 \subsection{One queue}
-\begin{CJK*}{UTF8}{gbsn}
 这题一般的思路是用两个queue，然后当需要进行pop时，就将其中一个queue中的元素弹出放入另外一个queue。这无形中增加了memory的需求。其实这题可以借助一个queue来完成，即每次加入一个元素后，检查当前queue的size是否大于1。 如果大于1，则不停的将queue的front弹出重新加入queue中，直到处理到当前加入的元素。每次这样操作后，queue中的元素排列顺序就和stack是一样的了。
-\end{CJK*}
 \setcounter{lstlisting}{0}
 \begin{lstlisting}[style=customc, caption={Queue}]
 class MyStack

@@ -58,3 +58,95 @@ After move 5: \fcj{[[1,2,3],[4,5,0]]}
 
 \subsection{BFS}
 We can think of this problem as a shortest path problem on a graph. Each node is a different board state, and we connect two boards by an edge if they can be transformed into one another in one move. We can solve shortest path problems with \textit{breadth first search}.
+
+\setcounter{lstlisting}{0}
+\begin{lstlisting}[style=customc, caption={BFS}]
+int slidingPuzzle( vector<vector<int>>& board )
+{
+    pair<int, int> p_zero;
+    //transform board to integer
+    auto get_key = [&board]( pair<int, int>& p_zero )
+    {
+        int key = 0;
+        for( int r = 0; r < 2; ++r )
+        {
+            for( int c = 0; c < 3; ++c )
+            {
+                if( board[r][c] == 0 )
+                {
+                    get<0>( p_zero ) = r;
+                    get<1>( p_zero ) = c;
+                }
+
+                key = key * 10 + board[r][c];
+            }
+        }
+        return key;
+    };
+    //transform integer to the board
+    auto to_board = []( int n, vector<vector<int>>& board )
+    {
+        for( int r = 1; r >= 0; --r )
+        {
+            for( int c = 2; c >= 0; --c )
+            {
+                int q = n / 10;
+                board[r][c] = n - 10 * q;
+                n = q;
+            }
+        }
+    };
+    int target = 123450;
+    unordered_set<int> seen;
+    //start BFS
+    queue<array<int, 3>> q;
+    auto key = get_key( p_zero );
+    //each element in the queue
+    //has key, and (r,c) of zero element
+    q.emplace( array<int, 3> {key, get<0>( p_zero ), get<1>( p_zero )} );
+    seen.insert( key );
+    //the breadth level
+    int level = 0;
+    vector<pair<int, int>> dirs = {{-1, 0}, {1, 0}, {0, 1}, {0, -1}};
+    while( !q.empty() )
+    {
+        auto level_sz = q.size();
+        for( size_t i = 0; i < level_sz; ++i )
+        {
+            auto t = q.front();
+            q.pop();
+            if( t[0] == target )
+            {
+                return level;
+            }
+            //get (r,c) of zero
+            auto r = t[1];
+            auto c = t[2];
+            to_board( t[0], board );
+            //find 4 adjacent elements to swap
+            for( int di = 0; di < 4; ++di )
+            {
+                auto[dr, dc] = dirs[di];
+                auto nr = r + dr;
+                auto nc = c  + dc;
+                if( ( nr >= 0 ) && ( nr < 2 ) && ( nc >= 0 ) && ( nc < 3 ) )
+                {
+                    //swap zero with board[nr][nc]
+                    swap( board[nr][nc], board[r][c] );
+                    key = get_key( p_zero );
+                    if( seen.find( key ) == seen.end() )
+                    {
+                        q.emplace( array<int, 3> {key, get<0>( p_zero ), get<1>( p_zero )} );
+                        //add key to hash set
+                        seen.insert( key );
+                    }
+                    //restore board before swap
+                    swap( board[nr][nc], board[r][c] );
+                }
+            } //end direction
+        }//end for level
+        ++level;
+    }//end while q
+    return -1;
+}
+\end{lstlisting}

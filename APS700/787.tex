@@ -1,0 +1,142 @@
+\section{787 --- Cheapest Flights Within K Stops}
+There are $n$ cities connected by $m$ flights. Each fight starts from city $u$ and arrives at $v$ with a price $w$.
+
+Now given all the cities and flights, together with starting city \fcj{src} and the destination \fcj{dst}, your task is to find the cheapest price from \fcj{src} to \fcj{dst} with up to $k$ stops. If there is no such route, output $-1$.
+
+\paragraph{Example 1:}
+
+\begin{flushleft}
+\textbf{Input}: 
+
+$n = 3$, \fcj{edges = [[0,1,100],[1,2,100],[0,2,500]]}
+
+\fcj{src = 0}, \fcj{dst = 2}, $k = 1$
+
+\textbf{Output}: 200
+
+\textbf{Explanation}: 
+
+The graph looks like this:
+
+\begin{figure}[H]
+\begin{tikzpicture}
+[every node/.style={draw, circle, fill=gray!20!, minimum size=1cm},
+thick, >=stealth, ->]
+\node(0){0};
+\node(1)[below=3cm of 0, xshift=-2.5cm]{1};
+\node(2)[below=3cm of 0, xshift=2.5cm]{2};
+\draw[red] (0) -- (1) node[sloped, above, draw=none, fill=none, pos=0.5, auto]{100};
+\draw[red] (1) -- (2) node[sloped, below, draw=none, fill=none, pos=0.5]{100};
+\draw[blue] (0) -- (2) node[sloped, above, draw= none, fill=none, pos=0.5]{500};
+\end{tikzpicture}
+\end{figure}
+
+The cheapest price from city 0 to city 2 with at most 1 stop costs 200, as marked red in the picture.
+
+\end{flushleft}
+
+\paragraph{Example 2:}
+
+\begin{flushleft}
+
+
+\textbf{Input}: 
+
+$ n = 3 $, \fcj{edges = [[0,1,100],[1,2,100],[0,2,500]]}
+
+\fcj{src = 0}, \fcj{dst = 2}, $k = 0$
+
+\textbf{Output}: 500
+
+\textbf{Explanation}: 
+
+The graph looks like this:
+
+\begin{figure}[H]
+\begin{tikzpicture}
+[every node/.style={draw, circle, fill=gray!20!, minimum size=1cm},
+thick, >=stealth, ->]
+\node(0){0};
+\node(1)[below=3cm of 0, xshift=-2.5cm]{1};
+\node(2)[below=3cm of 0, xshift=2.5cm]{2};
+\draw[red] (0) -- (1) node[sloped, above, draw=none, fill=none, pos=0.5, auto]{100};
+\draw[red] (1) -- (2) node[sloped, below, draw=none, fill=none, pos=0.5]{100};
+\draw[blue] (0) -- (2) node[sloped, above, draw= none, fill=none, pos=0.5]{500};
+\end{tikzpicture}
+\end{figure}
+
+The cheapest price from city 0 to city 2 with at most 0 stop costs 500, as marked blue in the picture.
+
+\end{flushleft}
+
+
+\paragraph{Note:}
+
+\begin{itemize}
+\item The number of nodes $n$ will be in range \fcj{[1, 100]}, with nodes labeled from 0 to $n - 1$.
+\item The size of flights will be in range $[0, n \times (n - 1) / 2]$.
+\item The format of each flight will be \fcj{(src, dst, price)}.
+\item The price of each flight will be in the range \fcj{[1, 10000]}.
+\item $k$ is in the range of $[0, n - 1]$.
+\item There will not be any duplicated flights or self cycles.
+\end{itemize}
+
+\subsection{Bellman Ford}
+This algorithm is based on \textbf{DP}. We utilize a 2-d function $F$ where $F(i,j)$ means the minimum price to destination $i$ by taking at most $j$ stops. 
+
+We iterate stops from 1 to $K+1$ (we need one more stop to get to destination), to fill $F$. For \fcj{src}, we always set its value to zero no matter how many stops.
+
+\setcounter{lstlisting}{0}
+\begin{lstlisting}[style=customc, caption={2D DP}]
+int findCheapestPrice( int n, vector<vector<int>>& flights, int src, int dst, int K )
+{
+    auto max_prc( 100000 );
+    vector<vector<int>> F( n, vector<int>( K + 2, max_prc ) );
+    F[src][0] = 0;
+    for( int stops = 1; stops <= K + 1; ++stops )
+    {
+        //cost for src with any stops
+        //is zero
+        F[src][stops] = 0;
+        //Fill F
+        for( const auto& flight : flights )
+        {
+            int from = flight[0];
+            int to = flight[1];
+            int prc = flight[2];
+            //F[from][stops-1]: the cost to fly to <from> with stops-1
+            F[to][stops] = ( min )( F[from][stops - 1] + prc, F[to][stops] );
+        }
+    }
+    return F[dst][K + 1] == max_prc ? -1 : F[dst][K + 1];
+}
+\end{lstlisting}
+
+We can reduce memory usage by changing the 2D to 1D \textbf{DP} with two 1D arrays. One array is used to get next iteration result.
+
+\begin{lstlisting}[style=customc, caption={1D DP}]
+int findCheapestPrice( int n, vector<vector<int>>& flights, int src, int dst, int K )
+{
+    auto max_prc( 100000 );
+    vector<int> F( n, max_prc );
+    F[src] = 0;
+    for( int stops = 1; stops <= K + 1; ++stops )
+    {
+        F[src] = 0;
+
+        //used to current iteration result
+        vector<int> NF( F );
+        for( const auto& flight : flights )
+        {
+            int from = flight[0];
+            int to = flight[1];
+            int prc = flight[2];
+            NF[to] = ( min )( F[from] + prc, NF[to] );
+        }
+        swap( NF, F );
+    }
+    return F[dst] == max_prc ? -1 : F[dst];
+}
+\end{lstlisting}
+
+

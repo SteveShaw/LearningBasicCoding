@@ -1,0 +1,101 @@
+\section{786 --- K-th Smallest Prime Fraction}
+A sorted list $A$ contains 1, plus some number of primes. Then, for every $p < q$ in the list, we consider the fraction $p/q$.
+
+What is the $K$-th smallest fraction considered?  Return your answer as an array of ints, where \fcj{answer[0] = p} and \fcj{answer[1] = q}.
+
+\paragraph{Examples:}
+\begin{flushleft}
+
+
+\textbf{Input}: \fcj{A = [1, 2, 3, 5]}, $K = 3$
+
+\textbf{Output}: \fcj{[2, 5]}
+
+\textbf{Explanation}:
+
+The fractions to be considered in sorted order are:
+
+$1/5$, $1/3$, $2/5$, $1/2$, $3/5$, $2/3$.
+
+The third fraction is 2/5.
+
+\textbf{Input}: \fcj{A = [1, 7]}, \fcj{K = 1}
+
+\textbf{Output}: \fcj{[1, 7]}
+
+\end{flushleft}
+
+\paragraph{Note:}
+
+\begin{enumerate}
+\item $A$ will have length between 2 and 2000.
+
+\item Each \fcj{A[i]} will be between 1 and 30000.
+
+\item $K$ will be between 1 and \fcj{A.length * (A.length - 1) / 2}.
+\end{enumerate}
+
+\subsection{Binary Search}
+The fraction range will be $(0, 1)$. Suppose $f(x)$ be the number of fractions below $x$. It's an increasing function on $x$, so we can binary search for the correct answer.
+
+During the finding of $x$ such that there are exactly $K$ fractions below $x$, we record the largest fraction which is less than $x$.
+
+\setcounter{lstlisting}{0}
+\begin{lstlisting}[style=customc, caption={Binary Search}]
+vector<int> kthSmallestPrimeFraction( vector<int>& A, int K )
+{
+    auto hi( 1.0 );
+    auto lo( 0.0 );
+    auto norm( 0 );
+    auto denorm( 1 );
+    auto count( 0 );
+    vector<int> ans( 2 );
+    while( hi - lo > 1e-9 )
+    {
+        auto mid( hi * .5 + lo * .5 );
+        //get the count of fractions less than x
+        get_count( A, mid, norm, denorm, count );
+
+        if( count < K )
+        {
+            //search in higher half
+            lo = mid;
+        }
+        else
+        {
+            //search in lower half
+            hi = mid;
+            //record norm/denorm
+            ans[0] = norm;
+            ans[1] = denorm;
+        }
+    }
+    return ans;
+}
+//helper function to get
+//number of fractions less than x
+void get_count( vector<int>& A, double x, int& norm, int& denorm, int& count )
+{
+    norm = 0;
+    denorm = 1;
+    count = 0;
+    auto L( static_cast< int >( A.size() ) );
+    int left = -1;
+    for( int right = 1; right < L; ++right )
+    {
+        while( static_cast< double >( A[left + 1] ) / static_cast< double >( A[right] ) < x )
+        {
+            ++left;
+        }
+        //when left = -1
+        //left +1=0, this is a very good trick
+        count += ( left + 1 );
+        //get maximum fraction so far
+        if( ( left >= 0 ) && ( norm * A[right] < denorm * A[left] ) )
+        {
+            norm = A[left];
+            denorm = A[right];
+        }
+    }
+}
+\end{lstlisting}

@@ -1,16 +1,16 @@
 \section{115 --- Distinct Subsequences}
 Given a string $S$ and a string $T$, count the number of distinct subsequences of $S$ which equals $T$.
-\par
-A subsequence of a string is a new string which is formed from the original string by deleting some (can be none) of the characters without disturbing the relative positions of the remaining characters. (i.e, \texttt{ACE} is a subsequence of \texttt{ABCDE} while \texttt{AEC} is not).
+
+A subsequence of a string is a new string which is formed from the original string by deleting some (can be none) of the characters without disturbing the relative positions of the remaining characters.  (i.e, \fcj{"ACE"} is a subsequence of \fcj{"ABCDE"} while \fcj{"AEC"} is not).
 \paragraph{Example 1:}
 \begin{flushleft}
-\textbf{Input}: $S = \texttt{rabbbit}$, $T = \texttt{rabbit}$
-\\
+\textbf{Input}: \fcj{S = "rabbbit"}, \fcj{T = "rabbit"}
+
 \textbf{Output}: 3
-\\
+
 \textbf{Explanation}:
-\\
-As shown below, there are 3 ways you can generate \texttt{rabbit} from $S$.
+
+As shown below, there are 3 ways you can generate \fcj{"rabbit"} from $S$.
 \begin{itemize}
     \item \textbf{rabb}b\textbf{it}
     \item \textbf{ra}b\textbf{bbit}
@@ -19,13 +19,13 @@ As shown below, there are 3 ways you can generate \texttt{rabbit} from $S$.
 \end{flushleft}
 \paragraph{Example 2:}
 \begin{flushleft}
-\textbf{Input}: $S = \texttt{babgbag}$,  $T = \texttt{bag}$
-\\
+\textbf{Input}: \fcj{S = "babgbag"}, \fcj{T = "bag"}
+
 \textbf{Output}: 5
-\\
+
 \textbf{Explanation}:
-\\
-As shown below, there are 5 ways you can generate \texttt{bag} from $S$.
+
+As shown below, there are 5 ways you can generate \fcj{"bag"} from $S$.
 \begin{itemize}
     \item \textbf{ba}b\textbf{g}bag
     \item \textbf{ba}bgba\textbf{g}

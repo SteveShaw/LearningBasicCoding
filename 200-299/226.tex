@@ -47,7 +47,7 @@ Invert a binary tree.
 \end{figure}
 \end{flushleft}
 \subsection{Recursion}
-\begin{CJK*}{UTF8}{gbsn}
+
 对于每一个节点，都是相同的操作，
 \begin{itemize}
 \item 获得当前节点的左右子节点
@@ -55,23 +55,6 @@ Invert a binary tree.
 \item 将当前节点的左子节点指向invert后的右子树
 \item 将当前节点的右子节点指向invert后的左子数。
 \end{itemize}
-\end{CJK*}
-\setcounter{algorithm}{0}
-\begin{algorithm}[H]
-\caption{Recursion}
-\begin{algorithmic}[1]
-\Procedure{Invert}{$T$}
-\If{$T$ is an empty node}
-\State \Return $T$
-\EndIf
-\State $\star$ Set $l$ equal to $T$'s left node
-\State $\star$ Set $r$ equal to $T$'s right node
-\State $\star$ Set $T$'s left node to the inverted $r$
-\State $\star$ Set $T$'s right node to the inverted $l$
-\State \Return $T$
-\EndProcedure
-\end{algorithmic}
-\end{algorithm}
 \setcounter{lstlisting}{0}
 \begin{lstlisting}[style=customc, caption={Recursion}]
 TreeNode* invertTree( TreeNode* root )

@@ -21,12 +21,10 @@ search("b..") // true
 \item You may assume that all words are consist of lowercase letters a--z.
 \end{itemize}
 \subsection{Trie}
-\begin{CJK*}{UTF8}{gbsn}
 \begin{itemize}
 \item 由于dot能代表所有字符，因此search必然需要设计成调用一个递归函数来进行搜索。
 \item 这里采用hash map而不是array来存放每层的trie。
 \end{itemize}
-\end{CJK*}
 \setcounter{lstlisting}{0}
 \begin{lstlisting}[style=customc, caption={Trie}]
 class WordDictionary

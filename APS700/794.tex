@@ -1,0 +1,156 @@
+\section{794 --- Valid Tic-Tac-Toe State}
+
+\textbf{Medium}
+
+A Tic-Tac-Toe board is given as a string array \fcj{board}. Return \fcj{true} if and only if it is possible to reach this board position during the course of a valid tic-tac-toe game.
+
+The board is a $ 3 \times 3 $ array, and consists of characters \fcj{" "}, \fcj{"X"}, and \fcj{"O"}.  The \fcj{" "} character represents an empty square.
+
+Here are the rules of Tic-Tac-Toe:
+
+\begin{itemize}
+\item Players take turns placing characters into empty squares (\fcj{" "}).
+
+\item The first player always places \fcj{"X"} characters, while the second player always places \fcj{"O"} characters.
+
+\item \fcj{"X"} and \fcj{"O"} characters are always placed into empty squares, never filled ones.
+
+\item The game ends when there are 3 of the same (non-empty) character filling any row, column, or diagonal.
+
+\item The game also ends if all squares are non-empty.
+
+\item No more moves can be played if the game is over.
+\end{itemize}
+
+\paragraph{Example 1:}
+
+\begin{flushleft}
+\textbf{Input}: \fcj{board = ["O  ", "   ", "   "]}
+
+\textbf{Output}: \fcj{false}
+
+\textbf{Explanation}: The first player always plays \fcj{"X"}.
+\end{flushleft}
+
+\paragraph{Example 2:}
+
+\begin{flushleft}
+\textbf{Input}: \fcj{board = ["XOX", " X ", "   "]}
+
+\textbf{Output}: \fcj{false}
+
+\textbf{Explanation}: Players take turns making moves.
+\end{flushleft}
+
+\paragraph{Example 3:}
+
+\begin{flushleft}
+\textbf{Input}: \fcj{board = ["XXX", "   ", "OOO"]}
+
+\textbf{Output}: \fcj{false}
+\end{flushleft}
+
+\paragraph{Example 4:}
+
+\begin{flushleft}
+\textbf{Input}: \fcj{board = ["XOX", "O O", "XOX"]}
+
+\textbf{Output}: \fcj{true}
+\end{flushleft}
+
+\paragraph{Note:}
+
+\begin{itemize}
+\item board is a length-3 array of strings, where each string \fcj{board[i]} has length 3.
+\item Each \fcj{board[i][j]} is a character in the set \fcj{[" ", "X", "O"]}.
+\end{itemize}
+
+\subsection{Ad Hoc}
+Since players take turns, the number of \fcj{'X'} must be equal to or one greater than the number of \fcj{'O'}.
+
+\begin{enumerate}
+\item If the first player wins, the number of \fcj{'X'} is one more than the number of \fcj{'O'}.
+
+\item If the second player wins, the number of \fcj{'X'}s is equal to the number of \fcj{'O'}.
+
+\item The board can't simultaneously have three \fcj{'X'} and three \fcj{'O'} in a row, and once one player has won (on their move), there are no subsequent moves.
+\end{enumerate}
+
+
+It turns out these conditions are also sufficient to check the validity of all boards. 
+
+For the first two cases, count the number of \fcj{'X'} and \fcj{'O'}.
+
+As to the 3rd case, use a helper function \fcj{win(player)} to check if that \fcj{player} has won. This checks the 8 horizontal, vertical, or diagonal lines of the board to find if there are three in a row equal to that player.
+
+
+\setcounter{lstlisting}{0}
+\begin{lstlisting}[style=customc, caption={Ad Hoc}]
+bool validTicTacToe( vector<string>& board )
+{
+    auto count_X( 0 );
+    auto count_O( 0 );
+    for( const auto& row : board )
+    {
+        for( auto c : row )
+        {
+            if( c == 'X' )
+            {
+                count_X += 1;
+            }
+            else if( c == 'O' )
+            {
+                count_O += 1;
+            }
+        }
+    }
+    //num(x)==num(o) or num(x)==num(o) + 1
+    if( ( count_X != count_O ) && ( count_X != count_O + 1 ) )
+    {
+        return false;
+    }
+    //if X wins, num(x)=num(o)+1 because X play first
+    if( can_win( board, 'X' ) && ( count_X != count_O + 1 ) )
+    {
+        return false;
+    }
+    //if O wins, num(x)=num(o) because X play first
+    if( can_win( board, 'O' ) && ( count_X != count_O ) )
+    {
+        return false;
+    }
+    return true;
+}
+//check if player wins
+//any row, column, diagnaol or anti-diagnaol
+//have same kind of player
+bool can_win( const vector<string>& b, char player )
+{
+    for( int i = 0; i < 3; ++i )
+    {
+        //horizon
+        if( ( b[i][0] == player ) && ( b[i][1] == player ) && ( b[i][2] == player ) )
+        {
+            return true;
+        }
+
+        //vertical
+        if( ( b[0][i] == player ) && ( b[1][i] == player ) && ( b[2][i] == player ) )
+        {
+            return true;
+        }
+    }
+
+    //diagnaol
+    if( ( b[0][0] == player ) && ( b[1][1] == player ) && ( b[2][2] == player ) )
+    {
+        return true;
+    }
+    //aniti-diagnaol
+    if( ( b[2][0] == player ) && ( b[1][1] == player ) && ( b[0][2] == player ) )
+    {
+        return true;
+    }
+    return false;
+}
+\end{lstlisting}

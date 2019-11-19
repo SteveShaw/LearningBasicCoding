@@ -1,0 +1,81 @@
+\section{795 --- Number of Subarrays with Bounded Maximum}
+
+\textbf{Medium}
+
+We are given an array $A$ of positive integers, and two positive integers $L$ and $R$ ($L \leq R$).
+
+Return the number of (contiguous, non-empty) subarrays such that the value of the maximum array element in that subarray is at least $L$ and at most $R$.
+
+\paragraph{Example :}
+\begin{flushleft}
+
+
+\textbf{Input}: 
+
+\fcj{A = [2, 1, 4, 3]}
+
+$ L = 2 $
+
+$ R = 3 $
+
+\textbf{Output}: 3
+
+\textbf{Explanation}: 
+
+There are three subarrays that meet the requirements: \fcj{[2]}, \fcj{[2, 1]}, \fcj{[3]}.
+\end{flushleft}
+
+\paragraph{Note:}
+
+\begin{enumerate}
+\item $L$, $R$  and \fcj{A[i]} will be an integer in the range $[0, 10^9]$.
+\item The length of $A$ will be in the range of \fcj{[1, 50000]}.
+\end{enumerate}
+
+\subsection{Counting}
+As we only care about whether each element is less than, between, or greater than the interval $ [L, R] $, we can mark each element is either $a$ if it is less than $L$; $b$ if it is between $L$ and $R$; or $c$ if it is greater than $R$.
+
+Then, we want the number of subarrays with no $c$ and at least one $b$. $c$ split the array into groups of arrays with only $a$ and $b$. For example, if the given array is \fcj{[a, a, b, c, c, b, a, c, a]}, then the answer is just the answer for \fcj{[a, a, b]} plus the answer for \fcj{[b, a]} plus the answer for \fcj{[a]}.
+
+For each such group (arrays of only $a$ or $b$), to count the number of subarrays that have at least one $b$, let's count all the subarrays in the group, minus the subarrays that only have $a$.
+
+For example, 
+
+\fcj{[a, a, b]} has 6 subarrays, 3 of which are $a$-only, which adds 3 to the answer; 
+
+\fcj{[b, a]} has 3 subarrays, 1 of which is $a$-only, which adds 2 to the answer; 
+
+and \fcj{[0]} has 1 subarray, 1 of which is $a$-only, which adds 0 to the answer. 
+
+The final answer to the previous original example of \fcj{A = [0, 0, 1, 2, 2, 1, 0, 2, 0]} is $ 3 + 2 + 0 = 5 $.
+
+\setcounter{lstlisting}{0}
+\begin{lstlisting}[style=customc, caption={Count}]
+int numSubarrayBoundedMax( vector<int>& A, int L, int R )
+{
+    //lambda function to find
+    //number of subarray with value no larger than limit
+    auto count = [ &A ]( int limit )
+    {
+        int res = 0;
+        int consec = 0;
+        for( int n : A )
+        {
+            if( n <= limit )
+            {
+                ++consec;
+            }
+            else
+            {
+                consec = 0;
+            }
+
+            res += consec;
+        }
+
+        return res;
+    };
+    //remove the number of subarrays with value less than L
+    return count( R ) - count( L - 1 );
+}
+\end{lstlisting}

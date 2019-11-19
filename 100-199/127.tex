@@ -1,5 +1,5 @@
 \section{127 --- Word Ladder}
-Given two words ($\alpha$ and $\beta$), and a dictionary's word list $A$, find the length of shortest transformation sequence from $\alpha$ to $\beta$, such that:
+Given two words (\fcj{beginWord} and \fcj{endWord}), and a dictionary's word list, find the length of shortest transformation sequence from \fcj{beginWord} to \fcj{endWord}, such that:
 \begin{itemize}
 \item Only one letter can be changed at a time.
 \item Each transformed word must exist in the word list. Note that begin word $\alpha$ is not a transformed word.
@@ -10,59 +10,148 @@ Given two words ($\alpha$ and $\beta$), and a dictionary's word list $A$, find t
 \item All words have the same length.
 \item All words contain only lowercase alphabetic characters.
 \item You may assume no duplicates in the word list.
-\item You may assume $\alpha$ and $\beta$ are non-empty and are not the same.
+\item You may assume \fcj{beginWord} and \fcj{endWord} are non-empty and are not the same.
 \end{itemize}
 \paragraph{Example 1:}
 \begin{flushleft}
-\textbf{Input}: $\alpha$ = \textbf{hit}, $\beta$ = \textbf{cog}, $A$ = (hot, dot, dog, lot, log, cog)
-\\
+\textbf{Input}: 
+
+\fcj{beginWord = "hit"}
+
+\fcj{endWord = "cog"}
+
+\fcj{wordList = ["hot","dot","dog","lot","log","cog"]}
+
 \textbf{Output}: 5
-\\
-\textbf{Explanation}: As one shortest transformation is hit \textrightarrow hot \textrightarrow dot \textrightarrow dog \textrightarrow cog, return its length 5.
+
+\textbf{Explanation}: As one shortest transformation is \fcj{"hit" -> "hot" -> "dot" -> "dog" -> "cog"}, return its length 5.
+
 \end{flushleft}
+
 \paragraph{Example 2:}
+
 \begin{flushleft}
-\textbf{Input}: $\alpha$ = \textbf{hit},  $\beta$ = \textbf{cog}, $A$ = (hot, dot, dog, lot, log)
-\\
+
+\textbf{Input}: 
+
+\fcj{beginWord = "hit"}
+
+\fcj{endWord = "cog"}
+
+\fcj{wordList = ["hot","dot","dog","lot","log"]}
+
 \textbf{Output}: 0
-\\
-\textbf{Explanation}: The end word \textit{cog} is not in $A$, therefore no possible transformation.
+
+\textbf{Explanation}: 
+
+The endWord \fcj{"cog"} is not in wordList, therefore no possible transformation.
+
 \end{flushleft}
 
 这道题和上一题类似，但是相对简单，因为只需要求出最短路径的长度。同样是用一个hash set代表当前层的所有string，然后根据给定的规则进行变换，得到下一层的hash set，然后交换这两个hash set，使得算法能够前进到下一层，如果在变换中找到目标string即$\beta$，则返回找到的层数，也就是最短路径的长度。
 
-\setcounter{algorithm}{0}
-\begin{algorithm}[H]
-\caption{BFS}
-\begin{algorithmic}[1]
-\Procedure{LadderLength}{$\alpha, \beta, A$}
-\If{$\beta \notin A$} \Comment The end word is not in the given word list
-\State \Return 0
-\EndIf
-\State $x:=\emptyset$ \Comment $x$ is a hash set which has all strings in current level in the BFS tree
-\State $x\gets x+\alpha$ \Comment The BFS tree's root is $\alpha$
-\State $\ell:=0$ \Comment The length of transformation
-\While{$x\neq \emptyset$}
-\State $\ell\gets \ell +1$ \Comment Increment level when searching in a new level in the BFS tree
-\State $y:=\emptyset$ \Comment $y$ is a hash set which has all strings transformed from words in $x$
-\For{$w\in x$} \label{127for3}
-\State $s:=w$
-\For{$i:=0\to |s|$} \Comment Start transform process \label{127for2}
-\State $c:=s[i]$ \Comment Current letter 
-\For{$k:=\texttt{char}(a) \to \texttt{char}(z)$ \textbf{and} $k\neq c$} \Comment Try each lowercase letter \label{127for1}
-\State $s[i]\gets k$ \Comment Do transform
-\If{$s=\beta$} \Comment Reach the end word
-\State \Return $\ell +1$ \Comment Need to return the number of next level
-\EndIf
-\State $A\gets A- s$ \Comment Remove $s$ from $A$ to avoid repeating search
-\State $y\gets y+s$ \Comment Add to next level
-\EndFor \Comment End[\ref{127for1}]
-\State $s[i] = c$ \Comment Restore $s$
-\EndFor \Comment End[\ref{127for2}]
-\EndFor \Comment End[\ref{127for3}]
-\State $x\gets y$ \Comment Update $x$ as next level
-\EndWhile
-\State \Return 0 \Comment Cannot reach end word
-\EndProcedure
-\end{algorithmic}
-\end{algorithm}
+\setcounter{lstlisting}{0}
+\begin{lstlisting}[style=customc, caption={Bidirectional BFS}]
+unordered_set<string_view> dict;
+
+int ladderLength( string beginWord, string endWord, vector<string>& wordList )
+{
+    //forward levels
+    unordered_set<string> q_fwd;
+    //backward levels
+    unordered_set<string> q_bck;
+    //forward starts from beginWord
+    q_fwd.emplace( beginWord );
+    //backward starts from endWord
+    q_bck.emplace( endWord );
+    //create dictionary from given wordList
+    unordered_set<string_view> tmp( begin( wordList ), end( wordList ) );
+    swap( tmp, dict );
+    if( dict.find( string_view( endWord ) ) == dict.end() )
+    {
+        //endWord cannot be reached
+        return 0;
+    }
+    bool matched = false;
+    //notice: forward steps is starting from 1
+    //since beginWord is not in given wordList
+    int fwd_steps = 1;
+    //backward steps starts from 0
+    int bck_steps = 0;
+    while( !q_fwd.empty() && !q_bck.empty() )
+    {
+        for( const auto& word : q_fwd )
+        {
+            dict.erase( string_view( word ) );
+        }
+        for( const auto& word : q_bck )
+        {
+            dict.erase( string_view( word ) );
+        }
+        if( q_fwd.size() <= q_bck.size() )
+        {
+            //transform forward level
+            //increment forward steps
+            ++fwd_steps;
+            if( process( q_fwd, q_bck ) )
+            {
+                matched = true;
+                break;
+            }
+        }
+        else
+        {
+            //transform backward level
+            //increment backward steps
+            ++bck_steps;
+            if( process( q_bck, q_fwd ) )
+            {
+                matched = true;
+                break;
+            }
+        }
+    }
+    if( !matched )
+    {
+        return 0;
+    }
+    //the total of forward and backward steps
+    //is the answer
+    return fwd_steps + bck_steps;
+}
+//helper function to transform A into next level words
+bool process( unordered_set<string>& A, unordered_set<string>& B )
+{
+    unordered_set<string> nexts;
+    for( auto& word : A )
+    {
+        auto s( word );
+        for( auto& c : s )
+        {
+            //transform s
+            auto ch = c;
+            for( char x = 'a'; x <= 'z'; ++x )
+            {
+                if( x == ch )
+                {
+                    continue;
+                }
+                c = x;
+                if( B.find( s ) != B.end() )
+                {
+                    //found matched word
+                    return true;
+                }
+                if( dict.find( s ) != dict.end() )
+                {
+                    //add to next level words
+                    nexts.emplace( s );
+                }
+            }
+            c = ch;
+        }
+    }
+    swap( nexts, A );
+    return false;
+}
+\end{lstlisting}

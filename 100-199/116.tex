@@ -3,24 +3,28 @@
 \definecolor{mymauve}{rgb}{0.58,0,0.82}
 
 \section{116 --- Populating Next Right Pointers in Each Node}
-Given a binary tree $T$
+You are given a perfect binary tree where all leaves are on the same level, and every parent has two children. The binary tree has the following definition:
 
 \begin{lstlisting}[style=customc]
-struct TreeLinkNode {
-  TreeLinkNode *left;
-  TreeLinkNode *right;
-  TreeLinkNode *next;
+struct Node
+{
+    int val;
+    Node *left;
+    Node *right;
+    Node *next;
 }
 \end{lstlisting}
-Populate each next pointer to point to its next right node. If there is no next right node, the next pointer should be set to \texttt{null}.
-\par
-Initially, all next pointers are set to \texttt{null}.
+
+opulate each next pointer to point to its next right node. If there is no next right node, the next pointer should be set to \fcc{NULL}.
+
+Initially, all next pointers are set to \fcj{NULL}.
 \paragraph{Note:}
+
 \begin{itemize}
-    \item You may only use constant extra space.
-    \item Recursive approach is fine, implicit stack space does not count as extra space for this problem.
-    \item You may assume that it is a perfect binary tree (i.e., all leaves are at the same level, and every parent has two children).
+\item You may only use constant extra space.
+\item Recursive approach is fine, implicit stack space does not count as extra space for this problem.
 \end{itemize}
+
 \paragraph{Example:}
 \begin{flushleft}
 \textbf{Input}

@@ -1,0 +1,107 @@
+\section{798 --- Smallest Rotation with Highest Score}
+
+\textbf{Hard}
+
+Given an array $A$, we may rotate it by a non-negative integer $K$ so that the array becomes $ A[K] $, $ A[K+1] $, $ A[K+2] $, $\ldots$, $ A[\lvert A\rvert - 1] $, $ A[0] $, $ A[1] $, $\ldots$, $ A[K-1] $.  Afterward, any entries that are less than or equal to their index are worth 1 point. 
+
+For example, if we have \fcj{[2, 4, 1, 3, 0]}, and we rotate by $ K = 2 $, it becomes \fcj{[1, 3, 0, 2, 4]}.  This is worth 3 points because 
+
+$ 1 > 0 $ [no points], 
+
+$ 3 > 1 $ [no points], 
+
+$ 0 \leq 2 $ [one point], 
+
+$ 2 \leq 3 $ [one point], 
+
+$ 4 \leq 4 $ [one point].
+
+Over all possible rotations, return the rotation index $ K $ that corresponds to the highest score we could receive.  If there are multiple answers, return the smallest such index $ K $.
+\paragraph{Example 1:}
+
+\begin{flushleft}
+\textbf{Input}: \fcj{[2, 3, 1, 4, 0]}
+
+\textbf{Output}: 3
+
+\textbf{Explanation}:  
+
+Scores for each K are listed below: 
+
+\fcj{K = 0},  \fcj{A = [2,3,1,4,0]}, score 2
+
+\fcj{K = 1},  \fcj{A = [3,1,4,0,2]}, score 3
+
+\fcj{K = 2},  \fcj{A = [1,4,0,2,3]}, score 3
+
+\fcj{K = 3},  \fcj{A = [4,0,2,3,1]}, score 4
+
+\fcj{K = 4},  \fcj{A = [0,2,3,1,4]}, score 3
+
+So we should choose $ K = 3 $, which has the highest score.
+
+
+\end{flushleft}
+ 
+
+\paragraph{Example 2:}
+\begin{flushleft}
+
+\textbf{Input}: \fcj{[1, 3, 0, 2, 4]}
+
+\textbf{Output}: 0
+
+\textbf{Explanation}:  
+
+$A$ will always have 3 points no matter how it shifts. So we will choose the smallest K, which is 0.
+
+
+\end{flushleft}
+
+
+\paragraph{Note:}
+
+\begin{itemize}
+\item $A$ will have length at most 20000.
+\item $A[i]$ will be in the range \fcj{[0, A.length]}.
+\end{itemize}
+
+\subsection{Find Score Of Each Possible Position}
+Suppose $N$ is the length of $A$. 
+
+When $A[i]=0$, since any index is no less than zero, we can get score by putting $A[i]$ at any place. Conversely, if $A[i]=N$, we cannot get score from this number at any place. Thus, the range of numbers can score is $[1, N-1]$.
+
+$(i-A[i]+N)\bmod N)$ is the value of $ K $ making $ A[i] $'s index just equal to $ A[i] $.
+
+For example, If $ A[6] = 1 $, then $ K = (6 - A[6]) \bmod 6 = 5 $ making $ A[6] $ to index 1 of new array. Then if $K$ is bigger, i.e., $ K = (i - A[i] + 1) \bmod N $, we start to lose this point, and decrements the score.
+
+
+Thus we can record the value of $K$ for all $ A[i] $ where we lose points.
+
+\setcounter{lstlisting}{0}
+\begin{lstlisting}[style=customc, caption={One Pass}]
+int bestRotation( vector<int>& A )
+{
+    vector<int> bad( A.size(), 0 );
+    auto N( static_cast<int>( A.size() ) );
+    for( int i = 0; i < N; ++i )
+    {
+        //record the count of numbers
+        //at index i - A[i] + N + 1
+        //At this index, we will lost score
+        bad[( i - A[i] + N + 1 ) % N] -= 1;
+    }
+	//find the position that we have maximum
+	//count of nubmers.
+    auto max_index( 0 );
+    for( int i = 1; i < N; ++i )
+    {
+        bad[i] += bad[i - 1] + 1;
+        if( bad[i] > bad[max_index] )
+        {
+            max_index = i;
+        }
+    }
+    return max_index;
+}
+\end{lstlisting}

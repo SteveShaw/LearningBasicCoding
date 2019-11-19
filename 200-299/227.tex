@@ -35,7 +35,7 @@ The expression string contains only non-negative integers, $+$, $-$, $\times$, $
 \end{itemize}
 
 \subsection{Two Stacks}
-\begin{CJK*}{UTF8}{gbsn}
+
 \begin{itemize}
 \item 用两个stack，一个放数字 $S_1$，一个放操作符 $S_2$。其中$S_2$只放入除法或者乘法。
 \item 与224类似，用一个sign来表示正负数，这样就避免了进行减法的操作。
@@ -43,66 +43,8 @@ The expression string contains only non-negative integers, $+$, $-$, $\times$, $
 \item 遍历$S$结束后，由于最后一个数字和操作符没有被处理，仍然需要先处理。
 \item 最后，陆续弹出$S_1$中的元素，将它们相加即为所求结果。
 \end{itemize}
-\end{CJK*}
 
-\setcounter{algorithm}{0}
-\begin{algorithm}[H]
-\caption{Two Stacks}
-\begin{algorithmic}[1]
-\Procedure{Calculate}{$S$}
-\State $\star$ Prepare two stacks $S_1$ and $S_2$
-\State $n:=0$ \Comment The current number
-\State $z:=1$ \Comment The sign
-\For{Each character $c$ in $S$}
-\If{$c$ is a space}
-\State \texttt{Continue} \Comment Skip space
-\EndIf
-\If{$c$ is a digit}
-\State $n\gets n\times 10 + \texttt{Int}(c)$ \Comment Update $n$
-\State \texttt{Continue}
-\EndIf
-\State $n\gets n\times z$ \Comment Update $n$ by the sign
-\If{$S_2$ is not empty} \Comment We have met $\times$ or $\div$ before
-\State $\star$ Get and pop top of $S_1$ as $t_1$
-\State $\star$ Get and pop top of $S_2$ as \texttt{op}
-\State $\star$ Push the result of $t_1$ \texttt{op} $n$ to $S_1$
-\Else
-\State $\star$ Push $n$ to $S_1$ \Comment No $\times$ or $\div$ was found before
-\EndIf
-\If{$c$ is $\times$ or $\div$}
-\State $z\gets 1$ \Comment Reset sign to 1
-\State $\star$ Push $c$ to $S_2$
-\ElsIf{$c$ is $+$}
-\State $z\gets 1$ \Comment Reset sign to 1
-\ElsIf{$c$ is $-$}
-\State $z\gets -1$ \Comment Reset sign to $-1$
-\EndIf
-\EndFor
-\State $n\gets n\times z$ \Comment $n$ is the last number that has not been processed
-\State $\ast$ We still need to check if the last operation is $\times$ or $\div$ after the iteration over $S$ is completed
-\algstore{227algo}
-\end{algorithmic}
-\end{algorithm}
-\begin{algorithm}[H]
-\begin{algorithmic}[1]
-\algrestore{227algo}
-\If{$S_2$ is not empty} \Comment We have met $\times$ or $\div$ before
-\State $\star$ Get and pop top of $S_1$ as $t_1$
-\State $\star$ Get and pop top of $S_2$ as \texttt{op}
-\State $\star$ Push the result of $t_1$ \texttt{op} $n$ to $S_1$
-\Else
-\State $\star$ Push $n$ to $S_1$ \Comment No $\times$ or $\div$ was found before
-\EndIf
-\State $\ast$ Add all numbers in $S_1$ to get the final result
-\State $\sigma:=0$ \Comment The total sum
-\While{$S_1$ is not empty}
-\State $\star$ Add top of $S_1$ to $\sigma$
-\State $\star$ Pop top of $S_1$
-\EndWhile
-\State \Return $\sigma$
-\EndProcedure
-\end{algorithmic}
-\end{algorithm}
+
 \setcounter{lstlisting}{0}
 \begin{lstlisting}[style=customc, caption={Two Stacks}]
 int calculate( string s )

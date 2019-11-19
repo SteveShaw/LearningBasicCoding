@@ -73,13 +73,15 @@ A city's skyline is the outer contour of the silhouette formed by all the buildi
 The geometric information of each building is represented by a triplet of integers $[L_i, R_i, H_i]$, where $L_i$ and $R_i$ are the $x$ coordinates of the left and right edge of the $i$th building, respectively, and $H_i$ is its height. It is guaranteed that $0 \leq L_i, R_i \leq$ \texttt{INT\_MAX}, $0 < H_i \leq$ \texttt{INT\_MAX}, and $R_i - L_i > 0$. You may assume all buildings are perfect rectangles grounded on an absolutely flat surface at height 0.
 \par
 For instance, the dimensions of all buildings in Figure A are recorded as:
-$[2, 9, 10]$, $[3, 7, 15]$, $[5, 12, 12]$, $[15, 20, 10]$, $[19, 24, 8]$.
-\par
+
+\fcj{[2, 9, 10], [3, 7, 15], [5, 12, 12], [15, 20, 10], [19, 24, 8]}.
+
 The output is a list of \textit{key points} (red dots in Figure B) in the format of $[x_1,y_1]$, $[x_2, y_2]$, $[x_3, y_3]$, $\ldots$ that uniquely defines a skyline. A \textit{key point} is the left endpoint of a horizontal line segment. Note that the last key point, where the rightmost building ends, is merely used to mark the termination of the skyline, and always has zero height. Also, the ground in between any two adjacent buildings should be considered part of the skyline contour.
-\par
+
 For instance, the skyline in Figure B should be represented as:
-$
-[2, 10]$, $[3, 15]$, $[7, 12]$, $[12, 0]$, $[15 ,10]$, $[20, 8]$, $[24, 0]$
+
+
+\fcj{[2, 10], [3, 15], [7, 12], [12, 0], [15 ,10], [20, 8], [24, 0]}
 
 \paragraph{Notes:}
 \begin{itemize}
@@ -108,29 +110,7 @@ $
     \item 用\texttt{multiset}作为存放矩形高度的数据结构，因为\texttt{priority queue}不提供删除操作。
     \item 在遍历critical points之前，将0放入到heap中，因为最后的矩形的右下角总是要包含在key point中的。
 \end{itemize}
-\setcounter{algorithm}{0}
-\begin{algorithm}[H]
-\caption{Heap Based Sorting}
-\begin{algorithmic}[1]
-\Procedure{GetSkyline}{$B, L$}
-\State $\star$ sort all left and right points in $B$
-\State $H_0:=0$ \Comment Last maximum height
-\For{Each sorted point $p$}
-\If{$p$ is the left edge of a rectangle}
-\State $\star$ Add $p$ to the heap
-\Else
-\State $\star$ Remove $p$ from the heap
-\EndIf
-\State $\star$ Get current maixmum height $H$ from the heap
-\If{$H_0\neq H$} \Comment A key point is found
-\State $\star$ Add $p$'s $x$ coordinate and $H$ into the result array
-\State $H_0\gets H$ \Comment Update last maximum height
-\EndIf
-\EndFor
-\State $\star$ Returns the result array
-\EndProcedure
-\end{algorithmic}
-\end{algorithm}
+
 \setcounter{lstlisting}{0}
 \begin{lstlisting}[style=customc, caption={Sorting}]
 public:

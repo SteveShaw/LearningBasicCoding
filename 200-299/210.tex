@@ -1,12 +1,12 @@
 \section{210 --- Course Schedule II}
 There are a total of $n$ courses you have to take, labeled from 0 to $n-1$.
-\par
+
 Some courses may have prerequisites, for example to take course 0 you have to first take course 1, which is expressed as a pair: $[0,1]$
-\par
+
 Given the total number of courses $n$ and a list of prerequisite \textbf{pairs} $P$, return the ordering of courses you should take to finish all courses.
-\par
+
 There may be multiple correct orders, you just need to return one of them. If it is impossible to finish all courses, return an empty array.
-\par
+
 \paragraph{Example 1:}
 \begin{flushleft}
 \textbf{Input}: $n=2$, $P=[[1,0]]$
@@ -38,53 +38,6 @@ The basic idea is similar, but with little modification.
     \item Add node to path when it survives the DFS process
     \item Since those nodes which depend on other nodes are added first into the path, reverse the final path to get the correct order.
 \end{itemize}
-\setcounter{algorithm}{0}
-\begin{algorithm}[H]
-\caption{DFS}
-\begin{algorithmic}[1]
-\State $\star$ $P$ is the prerequisite pair array with length $L$ and $L$ may not equal to $n$
-\Procedure{FindOrder}{$n, P, L$}
-\State $\star$ Build a adjacent graph structure $G$ from $P$
-\State $\star$ Array $x$ records each node's marked color, initially, all nodes are colored as 0
-\State $\omega:=\emptyset$ \Comment The result path
-\For{$\alpha \in G$} \Comment Iterate through each outgoing node in $G$
-\If{$x[\alpha]=2$} \Comment $\alpha$ has been visited
-\State \textbf{continue}
-\EndIf
-\State $b:=$ \Call{DFS}{$\alpha, G, x, \omega$}
-\If{$b=\texttt{false}$}
-\State \Return $\emptyset$ \Comment Found cycle in $G$, no such path exists
-\EndIf
-\EndFor
-\State $\star$ Reverse the path $\omega$
-\State \Return $\omega$
-\EndProcedure
-\end{algorithmic}
-\end{algorithm}
-Function \texttt{DFS} color each node by number 2. Before the depth first search process, the starting node is marked by number 1. If a node marked by number 1 meet again, there is a cycle in the graph. Add to path $\omega$ each node that can complete DFS process, 
-\begin{algorithm}[H]
-\caption{Helper Function}
-\begin{algorithmic}[1]
-\Function{DFS}{$\alpha, G, x, \omega$}
-\If{$x[\alpha]=2$} \Comment This node has been visited
-\State \Return \texttt{true}
-\EndIf
-\If{$x[\alpha]=1$} \Comment This node is found by back edge so there is a cycle
-\State \Return \texttt{false}
-\EndIf
-\State $x[\alpha]\gets 1$ \Comment Color the node as 1 indicate DFS is going on from this node
-\For{$t \in G[\alpha]$} \Comment Iterate through each connected node of $\alpha$
-\State $b:=$ \Call{DFS}{$t, G, x, \omega$}
-\If{$b = \texttt{false}$} \Comment There is a cycle
-\State \Return \texttt{false}
-\EndIf
-\EndFor
-\State $x[\alpha]\gets 2$ \Comment Color the node as 2 indicate this node has survived the DFS process
-\State $\omega\gets\omega+\alpha$ \Comment Add $\alpha$ to the path $\omega$
-\State \Return \texttt{true}
-\EndFunction
-\end{algorithmic}
-\end{algorithm}
 \setcounter{lstlisting}{0}
 \begin{lstlisting}[style=customc, caption={DFS}]
 vector<int> findOrder(int numCourses, vector<pair<int, int>>& prerequisites) 
@@ -160,106 +113,51 @@ The basic idea is similar
     \item When get a node from the queue, add to the path, then decrements in-degree of each connected node. If a connected node has zero in-degree, push it into the queue.
     \item Check if the number of visited nodes is equal to the total number of nodes. If they are not equal, there exists a cycle in the graph. Hence, the path does not exist.
 \end{itemize}
-\begin{algorithm}[H]
-\caption{BFS}
-\begin{algorithmic}[1]
-\Procedure{FindOrder}{$n, P, L$}
-\State $\star$ Build a adjacent graph structure $G$ from $P$
-\State $\star$ Process array $P$ and put all nodes' in-degree into an array $I$
-\State $\star$ Initialize an empty queue $Q$
-\For{$i:=0\to n-1$}
-\If{$I[i]=0$} \Comment In-degree of node $i$ is zero
-\State $Q\gets Q + (i)$ \Comment Push $i$ into the queue
-\EndIf
-\EndFor
-\State $\delta:=0$ \Comment The number of visited nodes
-\State $\omega:=\emptyset$ \Comment The path which visit all nodes once
-\While{$Q\neq\emptyset$}
-\State $\star$ Get the front of $Q$: $x$
-\State $\star$ Pop front of $Q$
-\State $\delta\gets\delta+1$ \Comment Increments the number of visited nodes
-\State $\omega\gets\omega+x$ \Comment Put $x$ in the path
-\If{$G[x]\neq \emptyset$} \Comment $x$ has connected nodes
-\For{$y \in G[x]$} \Comment Iterate all connected nodes of $x$
-\If{$I[y] > 0$}
-\State $I[y]\gets I[y]-1$ \Comment Decrements the in-degree of $y$
-\If{$I[y] = 0$}
-\State $\star$ Push $y$ into $Q$
-\EndIf
-\EndIf
-\EndFor
-\EndIf
-\EndWhile
-\If{$\delta\neq n$} \Comment Number of visited nodes does not equal to number of nodes
-\State \Return $\emptyset$\ \Comment There exits a cycle
-\Else
-\State \Return $\omega$
-\EndIf
-\algstore{210algo}
-\end{algorithmic}
-\end{algorithm}
-\begin{algorithm}[H]
-\begin{algorithmic}[1]
-\algrestore{210algo}
-\EndProcedure
-\end{algorithmic}
-\end{algorithm}
 \begin{lstlisting}[style=customc, caption={BFS}]
-vector<int> findOrder(int numCourses, vector<pair<int, int>>& prerequisites) {
-
-    vector<int> v_ins(numCourses, 0);
-
-    vector<vector<int>> g(numCourses);
-
-    for(const auto& p: prerequisites)
+vector<int> findOrder( int numCourses, vector<pair<int, int>>& prerequisites )
+{
+    vector<int> v_ins( numCourses, 0 );
+    vector<vector<int>> g( numCourses );
+    for( const auto& p : prerequisites )
     {
         v_ins[p.first]++;
-        g[p.second].push_back(p.first);
+        g[p.second].push_back( p.first );
     }
-
     queue<int> q;
-
     vector<int> ans;
-
-    ans.reserve(numCourses);
-
+    ans.reserve( numCourses );
     int num_visited = 0;
-
-    for(int i = 0; i < numCourses; ++i)
+    for( int i = 0; i < numCourses; ++i )
     {
-        if(v_ins[i] == 0)
+        if( v_ins[i] == 0 )
         {
-            q.push(i);
+            q.push( i );
         }
     }
-
-    while(!q.empty())
+    while( !q.empty() )
     {
         int t = q.front();
         q.pop();
-
-        ans.push_back(t);
-
+        ans.push_back( t );
         ++num_visited;
-
-        for(int next: g[t])
+        for( int next : g[t] )
         {
-            if(v_ins[next] > 0)
+            if( v_ins[next] > 0 )
             {
                 v_ins[next]--;
 
-                if(v_ins[next] == 0)
+                if( v_ins[next] == 0 )
                 {
-                    q.push(next);
+                    q.push( next );
                 }
             }
-        }
-    }
+        }//end for
+    }//end while
 
-    if(num_visited == numCourses)
+    if( num_visited == numCourses )
     {
         return ans;
     }
-
     return {};
+}
 \end{lstlisting}

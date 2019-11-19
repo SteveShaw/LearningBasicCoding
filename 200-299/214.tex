@@ -224,35 +224,8 @@ $f(i)$ & 0 & 0 & 1 & 2 & 3 & 4 & 0 & 1 \\ \hline
 \item 将$s$ reverse 为 $\hat{s}$
 \item 在$s$和$\hat{s}$中间加入一个特殊字符 t， 比如\$。形成一个新的string $x$，即$x=s+t+\hat{s}$。这个$t$是必须的，比如\texttt{aaaa}，如果不加$t$，$x=\texttt{aaaaaaaa}$，那么最长的prefix就是\texttt{aaaaaaa}，长度为7。(注意，prefix是不包含整个string的)。
 \item 生成$x$的KMP lookup table $f$。那么$f[l_t-1]$的长度就是$t$最长的prefix与suffix相等的substring的长度。于是$s$中反转的部分即为$\hat{s}[0, l_s-f[l_t-1]$
-\item $\hat{s}[0, l\_s-f[l\_t-1]] + s$即为所能生成的最小长度的palindrome string。
+\item $\hat{s}[0, l_s-f[l_t-1]] + s$即为所能生成的最小长度的palindrome string。
 \end{itemize}
-\setcounter{algorithm}{0}
-\begin{algorithm}[H]
-\caption{KMP Lookup Table}
-\begin{algorithmic}[1]
-\Procedure{ShortestPalindrome}{$S, L$}
-\State $\star$ Reverse $S$ as $\hat{S}$
-\State $\star$ Generate string $x=S + \omega + \hat{S}$ where $\omega$ is a special character
-\State $\star$ Initialize KMP lookup table $f$ whose length is $|x|$
-\State $\star$ Generate KMP lookup table for string $x$
-\State $f[0]=0$
-\For{$i:=1 \to l_x-1$}
-\State $t:=f[i-1]$
-\While{$t> 0$ \textbf{and} $x[i]\neq x[t]$}
-\State $t\gets f[t-1]$
-\EndWhile
-\If{$x[i]=x[t]$}
-\State $t\gets t+1$
-\EndIf
-\State $f[i]\gets t$
-\EndFor
-\State $\star$ Suppose $y$ is the part of $S$ after the longest palindrome substring from $S[0]$
-\State $\star$ $y:=S[f[l_x-1], L-1]$.
-\State $\star$ Since $y$ need to be reversed to $\hat{y}$, actually $\hat{y}:=\hat{S}[0, L - f[l_x-1]]$
-\State \Return $\hat{y} + S$
-\EndProcedure
-\end{algorithmic}
-\end{algorithm}
 \setcounter{lstlisting}{0}
 \begin{lstlisting}[style=customc, caption={KMP Table}]
 string shortestPalindrome( string s )
@@ -290,11 +263,8 @@ string shortestPalindrome( string s )
 
         f[i] = t;
     }
-
     string ans = r.substr( 0, s.size() - f.back() );
     ans += s;
-
     return ans;
-
 }
 \end{lstlisting}

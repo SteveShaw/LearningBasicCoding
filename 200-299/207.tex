@@ -1,14 +1,14 @@
 \section{207 --- Course Schedule}
 There are a total of $n$ courses you have to take, labeled from 0 to $n-1$.
 \par
-Some courses may have prerequisites, for example to take course 0 you have to first take course 1, which is expressed as a pair: $[0,1]$
+Some courses may have prerequisites, for example to take course 0 you have to first take course 1, which is expressed as a pair: \fcj{[0,1]}
 \par
 Given the total number of courses $n$ and a list of prerequisite pairs $P$, is it possible for you to finish all courses?
 \paragraph{Example 1:}
 \begin{flushleft}
-\textbf{Input}: $2$, $[[1,0]]$
+\textbf{Input}: $2$, \fcj{[[1,0]]}
 \\
-\textbf{Output}: \texttt{true}
+\textbf{Output}: \fcj{true}
 \\
 \textbf{Explanation}:
 \\
@@ -16,9 +16,9 @@ There are a total of 2 courses to take. To take course 1 you should have finishe
 \end{flushleft}
 \paragraph{Example 2:}
 \begin{flushleft}
-\textbf{Input}: $2$, $[[1,0],[0,1]]$
+\textbf{Input}: $2$, \fcj{[[1,0],[0,1]]}
 \\
-\textbf{Output}: \texttt{false}
+\textbf{Output}: \fcj{false}
 \\
 \textbf{Explanation}:
 \\
@@ -31,52 +31,6 @@ There are a total of 2 courses to take. To take course 1 you should have finishe
 \end{itemize}
 \subsection{DFS}
 To detect cycle in directed graph, mark the visited node as one color number like 1. And then if there is a cycle, some nodes that has already been colored as $1$ could be meeted again. If there is no cycle, Otherwise, after the DFS is done for this starting node, mark this node as another color number like 2.
-\setcounter{algorithm}{0}
-\begin{algorithm}[H]
-\caption{DFS}
-\begin{algorithmic}[1]
-\State $\star$ $P$ is the prerequisite pair array with length $L$ and $L$ may not equal to $n$
-\Procedure{CanFinish}{$n, P, L$}
-\State $\star$ Build a adjacent graph structure $G$ from $P$
-\State $\star$ Create a array $x$ which records each node's marked color, initially, all nodes are colored as 0
-\For{$\alpha \in G$} \Comment Iterate through each outgoing node in $G$
-\State $b:=$ \Call{DFS}{$\alpha, G, x$}
-\If{$b=\texttt{false}$}
-\State \Return $b$ \Comment Found cycle in $G$
-\EndIf
-\State \Return \texttt{true}
-\EndFor
-\EndProcedure
-\end{algorithmic}
-\end{algorithm}
-Function \texttt{DFS} color each node by number 2. Before the depth first search process, the starting node is marked by number 1. If a node marked by number 1 meet again, there is a cycle in the graph. 
-\begin{algorithm}[H]
-\caption{Helper Function}
-\begin{algorithmic}[1]
-\Function{DFS}{$\alpha, G, x$}
-\If{$x[\alpha]=2$} \Comment This node has been visited
-\State \Return \texttt{true}
-\EndIf
-\If{$x[\alpha]=1$} \Comment This node is found by back edge so there is a cycle
-\State \Return \texttt{false}
-\EndIf
-\State $x[\alpha]\gets 1$ \Comment Color the node as 1 indicate DFS is going on from this node
-\For{$t \in G[\alpha]$} \Comment Iterate through each connected node of $\alpha$
-\State $b:=$ \Call{DFS}{$t, G, x$}
-\If{$b = \texttt{false}$} \Comment There is a cycle
-\State \Return \texttt{false}
-\EndIf
-\algstore{207algo}
-\end{algorithmic}
-\end{algorithm}
-\begin{algorithm}[H]
-\begin{algorithmic}[1]
-\algrestore{207algo}
-\EndFor
-\State $x[\alpha]\gets 2$ \Comment Color the node as 2 indicate this node has survived the DFS process
-\EndFunction
-\end{algorithmic}
-\end{algorithm}
 \setcounter{lstlisting}{0}
 \begin{lstlisting}[style=customc]
 bool canFinish( int numCourses, vector<pair<int, int>>& prerequisites )
@@ -155,49 +109,7 @@ The idea is to simply use \textbf{Topological Sorting}
 \item Repeat 3 until $Q$ is empty.
 \item If count of visited nodes is not equal to the number of nodes in the graph, then there exits a cycle.
 \end{enumerate}
-\begin{algorithm}[H]
-\caption{BFS}
-\begin{algorithmic}[1]
-\Procedure{CanFinish}{$n, P, L$}
-\State $\star$ Build a adjacent graph structure $G$ from $P$
-\State $\star$ Process array $P$ and put all nodes' in degree into an array $I$
-\State $\star$ Initialize an empty queue $Q$
-\For{$i:=0\to n-1$}
-\If{$I[i]=0$} \Comment In-degree of node $i$ is zero
-\State $Q\gets Q + (i)$ \Comment Push $i$ into the queue
-\EndIf
-\EndFor
-\State $\delta:=0$ \Comment The number of visited nodes
-\While{$Q\neq\emptyset$}
-\State $\star$ Get the front of $Q$: $x$
-\State $\star$ Pop front of $Q$
-\State $\delta\gets\delta+1$ \Comment Increments the number of visited nodes
-\algstore{207algo}
-\end{algorithmic}
-\end{algorithm}
-\begin{algorithm}[H]
-\begin{algorithmic}[1]
-\algrestore{207algo}
-\If{$G[x]\neq \emptyset$} \Comment $x$ has connected nodes
-\For{$y \in G[x]$} \Comment Iterate all connected nodes of $x$
-\If{$I[y] > 0$}
-\State $I[y]\gets I[y]-1$ \Comment Decrements the in-degree of $y$
-\If{$I[y] = 0$}
-\State $\star$ Push $y$ into $Q$
-\EndIf
-\EndIf
-\EndFor
-\EndIf
-\EndWhile
-\If{$\delta\neq n$} \Comment Number of visited nodes does not equal to number of nodes
-\State \Return \texttt{false} \Comment There exits a cycle
-\Else
-\State \Return \texttt{true}
-\EndIf
-\EndProcedure
-\end{algorithmic}
-\end{algorithm}
-\setcounter{lstlisting}{0}
+
 \begin{lstlisting}[style=customc, caption={BFS}]
 bool canFinish( int numCourses, vector<pair<int, int>>& prerequisites )
 {

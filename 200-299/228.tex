@@ -21,18 +21,16 @@ Given a sorted integer array $A$ without duplicates, return the summary of its r
 \textbf{Explanation}: $2,3,4$ form a continuous range; $8,9$ form a continuous range.
 \end{flushleft}
 \subsection{Plain Algorithm}
-\begin{CJK*}{UTF8}{gbsn}
+
 \begin{itemize}
 \item 遍历数组，然后寻找连续数的segment。
 \item 需要小心处理每一个分割点。
 \item 需要将\texttt{int} type升级成\texttt{long long} type以处理数据精度overflow。
 \end{itemize}
-\end{CJK*}
 \setcounter{lstlisting}{0}
 \begin{lstlisting}[style=customc, caption={Plain Algorithm}]
 vector<string> summaryRanges( vector<int>& nums )
 {
-
     if( nums.empty() )
     {
         return {};

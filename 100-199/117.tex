@@ -1,11 +1,14 @@
 \section{117 --- Populating Next Right Pointers in Each Node II}
-Given a binary tree $T$
+Given a binary tree
+
 \setcounter{lstlisting}{0}
 \begin{lstlisting}[style=customc]
-struct TreeLinkNode {
-  TreeLinkNode *left;
-  TreeLinkNode *right;
-  TreeLinkNode *next;
+struct Node
+{
+    int val;
+    Node *left;
+    Node *right;
+    Node *next;
 }
 \end{lstlisting}
 
@@ -14,8 +17,8 @@ Populate each next pointer to point to its next right node. If there is no next 
 Initially, all next pointers are set to \fcj{null}.
 \paragraph{Note:}
 \begin{itemize}
-    \item You may only use constant extra space.
-    \item Recursive approach is fine, implicit stack space does not count as extra space for this problem.
+\item You may only use constant extra space.
+\item Recursive approach is fine, implicit stack space does not count as extra space for this problem.
 \end{itemize}
 \paragraph{Example:}
 \begin{flushleft}
@@ -67,48 +70,65 @@ Initially, all next pointers are set to \fcj{null}.
 \end{flushleft}
 \subsection{Level Traversing}
 虽然题目要求中可能不是完全二叉树，但是基本思路仍然是用指针分别指向当前节点以及下层节点的首节点以及下层节点的当前节点。保留下层节点的首节点是当遍历完当前level的时候，能够move到下一层。
-%\setcounter{algorithm}{0}
-%\begin{algorithm}[H]
-%\caption{Iterative Approach}
-%\begin{algorithmic}[1]
-%\Procedure{Connect}{$T$}
-%\If{$T=\texttt{null}$}
-%\State \Return
-%\EndIf
-%\State $x:=T$ \Comment Current node of current level
-%\State $y:=\texttt{null}$ \Comment Current node of next level
-%\State $z:=\texttt{null}$ \Comment The first node of next level
-%\While{$x\neq \texttt{null}$}
-%\State $t:=x$
-%\While{$t\neq \texttt{null}$} \label{117while1} 
-%\If{$\texttt{Left}(t) \neq \texttt{null}$}
-%\If{$y\neq \texttt{null}$}
-%\State $\texttt{Next}(y)\gets \texttt{Left}(t)$ \Comment Link sibling's left node
-%\Else \Comment $t$'s left node is the first node
-%\State $z\gets \texttt{Left}(t)$
-%\EndIf
-%\State $y\gets \texttt{Left}(t)$ \Comment Move $y$ to the next node in next level
-%\EndIf
-%\If{$\texttt{Right}(t) \neq \texttt{null}$}
-%\If{$y\neq \texttt{null}$}
-%\State $\texttt{Next}(y)\gets \texttt{Right}(t)$ \Comment Link sibling's left node
-%\Else \Comment $t$'s right node is the first node
-%\State $z\gets \texttt{Right}(t)$
-%\EndIf
-%\State $y\gets \texttt{Right}(t)$ \Comment Move $y$ to the next node in next level
-%\EndIf
-%\State $t\gets \texttt{Next}(t)$ \Comment Update $t$ to next sibling node
-%\algstore{117algo}
-%\end{algorithmic}
-%\end{algorithm}
-%\begin{algorithm}[H]
-%\begin{algorithmic}[1]
-%\algrestore{117algo}
-%\EndWhile \Comment End [\ref{117while1}]
-%\State $x\gets z$ \Comment Move $x$ to next level
-%\State $z\gets \texttt{null}$ \Comment Reset $z$ as empty
-%\State $y\gets \texttt{null}$ \Comment Reset $y$ as empty
-%\EndWhile
-%\EndProcedure
-%\end{algorithmic}
-%\end{algorithm}
+
+\setcounter{lstlisting}{0}
+\begin{lstlisting}[style=customc, caption={Level}]
+Node* connect( Node* root )
+{
+    auto node( root );
+    //the current node in the next level of node
+    Node* child = nullptr;
+    //the first node int the next level of node
+    Node* first_child = nullptr;
+    while( node )
+    {
+        auto t( node );
+        //traverse current level
+        while( t )
+        {
+            if( t->left )
+            {
+                if( child )
+                {
+                    //child is the last node of t->left
+                    child->next = t->left;
+                }
+                else
+                {
+                    //we have not set child
+                    //so this is the first child in the next level of node
+                    first_child = t->left;
+                }
+                //update current child node
+                child = t->left;
+            }
+
+            if( t->right )
+            {
+                if( child )
+                {
+                    //child is the last node of t->right
+                    child->next = t->right;
+                }
+                else
+                {
+                    //we have not set child
+                    //so this is the first child in the next level of node
+                    first_child = t->right;
+                }
+                //update current child node
+                child = t->right;
+            }
+
+            t = t->next;
+        }
+        //move node to the next level
+        node = first_child;
+        //we have to reset child and first_child to nullptr
+        //for processing next level
+        child = nullptr;
+        first_child = nullptr;
+    }
+    return root;
+}
+\end{lstlisting}

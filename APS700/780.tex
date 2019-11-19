@@ -1,0 +1,96 @@
+\section{780 --- Reaching Points}
+A move consists of taking a point $ (x, y) $ and transforming it to either $ (x, x+y) $ or $ (x+y, y) $.
+
+Given a starting point  \fcj{(sx, sy)}  and a target point  \fcj{(tx, ty)} , return \fcj{true} if and only if a sequence of moves exists to transform the point \fcj{(sx, sy)} to \fcj{(tx, ty)}. Otherwise, return \fcj{false}.
+
+\paragraph{Examples}:
+\begin{flushleft}
+
+
+\textbf{Input}: \fcj{sx = 1}, \fcj{sy = 1}, \fcj{tx = 3}, \fcj{ty = 5}
+
+\textbf{Output}: \fcj{true}
+
+\textbf{Explanation}:
+
+One series of moves that transforms the starting point to the target is:
+\fcc{(1, 1) -> (1, 2)}
+
+\fcj{(1, 2) -> (3, 2)}
+
+\fcj{(3, 2) -> (3, 5)}
+
+
+\textbf{Input}: \fcj{sx = 1}, \fcj{sy = 1}, \fcj{tx = 2}, \fcj{ty = 2}
+
+\textbf{Output}: \fcj{false}
+
+\textbf{Input}: \fcj{sx = 1}, \fcj{sy = 1}, \fcj{tx = 1}, \fcj{ty = 1}
+
+\textbf{Output}: \fcj{true}
+\end{flushleft}
+
+\paragraph{Note:}
+
+\begin{itemize}
+\item \fcj{sx}, \fcj{sy}, \fcj{tx}, \fcj{ty} will all be integers in the range $[1, 10^9]$.
+\end{itemize}
+
+\subsection{Work Backwards}
+Every parent point $(x, y)$ has two children, $(x, x+y)$ and $(x+y, y)$. However, every point $(x, y)$ only has one parent candidate $(x-y, y)$ if $x \geq y$, else $(x, y-x)$.
+
+Therefore, we can backward from \fcj{(tx, ty)} to \fcj{(sx, sy)}. For each step, we subtract the smaller one from the larger one of \fcj{tx} and \fcj{ty}. 
+
+To speed up the process, suppose \fcj{tx > ty}. From the above analysis, we know the next operations will be \fcj{(tx-ty, ty)} until \fcj{tx = tx \% ty}. If \fcj{tx > ty} and \fcj{ty > sy}, we can combine the next operations into one operation, i.e., \fcj{tx = tx \% ty}.
+
+Otherwise, if \fcj{ty <= sy}, we can only change \fcj{tx}. Since we can only do \fcj{tx - ty}, to reach the source point, we need \fcj{(tx - sx)} is the multiple of \fcj{ty}.
+
+For the case \fcj{tx < ty}, the process is similar. 
+
+When \fcj{tx = ty}, we can not make anymore movement.
+
+\setcounter{lstlisting}{0}
+\begin{lstlisting}[style=customc, caption={Bacward With Modular}]
+bool reachingPoints( int sx, int sy, int tx, int ty )
+{
+    while( ( tx >= sx ) && ( ty >= sy ) )
+    {
+        if( tx == ty )
+        {
+            //no more move can be made
+            break;
+        }
+        if( tx > ty )
+        {
+            if( ty > sy )
+            {
+                //we will perform tx -ty until tx < ty
+                //at the end tx = tx - tx/ty*ty;
+                //i.e. tx = tx mod ty;
+                tx %= ty;
+            }
+            else
+            {
+                //ty <= sy
+                //we can only change tx
+                //so tx-n*ty=sx;
+                //(tx-sx) must be multiple of ty
+                return ( ( tx - sx ) % ty ) == 0;
+            }
+        }
+        else //tx < ty
+        {
+            //same analysis as above
+            if( tx > sx )
+            {
+                ty %= tx;
+            }
+            else
+            {
+                return ( ( ty - sy ) % tx ) == 0;
+            }
+        }
+    }
+    return ( tx == sx ) && ( ty == sy );
+}
+\end{lstlisting}

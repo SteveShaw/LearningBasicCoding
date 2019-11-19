@@ -34,23 +34,29 @@ Rob house 1 (\fcj{money = 2}), rob house 3 (\fcj{money = 9}) and rob house 5 (\f
 \begin{lstlisting}[style=customc, caption={Dynamic Programming}]
 int rob( vector<int>& nums )
 {
+    //empty
     if( nums.empty() )
     {
         return 0;
     }
-
-    int x = nums[0];
-    int y = 0;
-
-    for( size_t i = 1; i < nums.size(); ++i )
+    //the money by robbing current house
+    int take = nums[0];
+    //the money by not robbing current house
+    int pass = 0;
+    //DP
+    for( auto i = 1ULL; i < nums.size(); ++i )
     {
-        int cur_x = ( max )( x, y + nums[i] );
-        int cur_y = ( max )( y, x );
-
-        x = cur_x;
-        y = cur_y;
+        //rob current house
+        //we must not rob previous house
+        int take_now = ( max )( take, pass + nums[i] );
+        //we can rob current house
+        //since we do not rob previous one
+        int pass_now = ( max )( take, pass );
+        //update
+        take = take_now;
+        pass = pass_now;
     }
-
-    return ( max )( x, y );
+    //the maximum of two actions result
+    return ( max )( take, pass );
 }
 \end{lstlisting} 

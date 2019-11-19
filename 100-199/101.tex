@@ -41,43 +41,7 @@ But the following is not:
 Bonus points if you could solve it both recursively and iteratively.
 \subsection{Recursion}
 首先注意到，用于做比较的函数肯定需要两个nodes $n_1$ and $n_2$，因此需要一个额外的辅助函数来进行递归，因为主函数只有一个输入就是根节点。接下来，如果$n_1$ and $n_2$都是空节点，显然是相等的，否则如果都是非空节点并且$n_1$的值和$n_2$的值相等，则递归比较$n_1$的左子树和$n_2$的右子树以及$n_1$的右子树和$n_2$的左子树。
-\setcounter{algorithm}{0}
-\begin{algorithm}[H]
-\caption{Recursion}
-\begin{algorithmic}[1]
-\Procedure{IsSymmetric}{$T$}
-\If{$T=\text{NULL}$}
-\State \Return \texttt{true} \Comment Empty node
-\EndIf
-\State $\texttt{ans}:=\texttt{DFS}(\text{LEFT}(T), \text{RIGHT}(T))$
-\algstore{101algo}
-\end{algorithmic}
-\end{algorithm}
-\begin{algorithm}[H]
-\begin{algorithmic}[1]
-\algrestore{101algo}
-\EndProcedure
-\end{algorithmic}
-\end{algorithm}
-\begin{algorithm}[H]
-\caption{Recursive Function}
-\begin{algorithmic}[1]
-\Function{DFS}{$n_1, n_2$}
-\If{$n_1=\text{NULL}$ \textbf{and} $n_2=\text{NULL}$}
-\State \Return \texttt{true}
-\EndIf
-\If{$n_1\neq\text{NULL}$ \textbf{and} $n_2\neq\text{NULL}$ \textbf{and} $\text{Value}(n_1)=\text{Value}(n_2)$}
-\State $\texttt{ans}:= \texttt{DFS}(\text{LEFT}(n_1), \text{RIGHT}(n_2))$ \Comment Compare left against right
-\If{$\texttt{ans}=\texttt{false}$}
-\State \Return \texttt{false}
-\EndIf
-\State $\texttt{ans}\gets \texttt{DFS}(\text{RIGHT}(n_1), \text{LEFT}(n_2))$ \Comment Compare right against left
-\State \Return \texttt{ans}
-\EndIf
-\State \Return \texttt{false}
-\EndFunction
-\end{algorithmic}
-\end{algorithm}
+
 \subsection{Iteration}
 这里需要两个queue，一个存放根节点的左子树，另外一个存放根节点的右子树，然后算法基本就和recursion一样。
 \begin{algorithm}[H]

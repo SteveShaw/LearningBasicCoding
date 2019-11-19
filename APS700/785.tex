@@ -1,0 +1,125 @@
+\section{785 --- Is Graph Bipartite?}
+Given an undirected \fcj{graph}, return \fcj{true} if and only if it is bipartite.
+
+Recall that a graph is \textbf{bipartite} if we can split it's set of nodes into two independent subsets A and B such that every edge in the graph has one node in A and another node in B.
+
+The graph is given in the following form: \fcj{ graph[i]} is a list of indexes $j$ for which the edge between nodes $i$ and $j$ exists. Each node is an integer between 0 and \fcj{graph.length - 1}.  There are no self edges or parallel edges: \fcj{graph[i]} does not contain $i$, and it doesn't contain any element twice.
+
+\paragraph{Example 1:}
+\begin{flushleft}
+\textbf{Input}: \fcj{[[1,3], [0,2], [1,3], [0,2]]}
+
+\textbf{Output}: true
+
+\textbf{Explanation}: 
+
+The graph looks like this:
+\begin{figure}[H]
+\begin{tikzpicture}
+[every node/.style={draw, circle, fill=gray!20!, minimum size=5mm},
+thick]
+\node(0){0};
+\node(1)[right=1cm of 0]{1};
+\node(2)[below=1cm of 1]{2};
+\node(3)[below=1cm of 0]{3};
+\draw (0) -- (1) -- (2) -- (3) -- (0);
+\end{tikzpicture}
+\end{figure}
+%0----1
+%|    |
+%|    |
+%3----2
+We can divide the vertices into two groups: \fcj{(0, 2)} and \fcj{(1, 3)}.
+
+
+\end{flushleft}
+
+\paragraph{Example 2:}
+
+\begin{flushleft}
+\textbf{Input}: \fcj{[[1,2,3], [0,2], [0,1,3], [0,2]]}
+
+\textbf{Output}: \fcj{false}
+
+\textbf{Explanation}: 
+
+The graph looks like this:
+
+\begin{figure}[H]
+\begin{tikzpicture}
+[every node/.style={draw, circle, fill=gray!20!, minimum size=5mm},
+thick]
+\node(0){0};
+\node(1)[right=1cm of 0]{1};
+\node(2)[below=1cm of 1]{2};
+\node(3)[below=1cm of 0]{3};
+\draw (0) -- (1) -- (2) -- (3) -- (0);
+\draw (0) -- (2);
+\end{tikzpicture}
+\end{figure}
+
+%0----1
+%| \  |
+%|  \ |
+%3----2
+We cannot find a way to divide the set of nodes into two independent subsets.
+
+
+\end{flushleft}
+
+\paragraph{Note:}
+
+\begin{itemize}
+\item \fcj{graph} will have length in range \fcj{[1, 100]}.
+\item \fcj{graph[i]} will contain integers in range \fcj{[0, graph.length - 1]}.
+\item \fcj{graph[i]} will not contain $i$ or duplicate values.
+\item The graph is undirected: if any element $j$ is in \fcj{graph[i]}, then $i$ will be in \fcj{graph[j]}.
+\end{itemize}
+
+\subsection{Coloring Node}
+For each uncolored node, we start the coloring process by doing a \textbf{DFS} on that node. Every neighbor gets colored the opposite color from the current node. If we find a neighbor colored the same color as the current node, then our coloring was impossible.
+
+
+\setcounter{lstlisting}{0}
+\begin{lstlisting}[style=customc, caption={DFS}]
+bool isBipartite( vector<vector<int>>& graph )
+{
+    auto N( static_cast< int >( graph.size() ) );
+    vector<int> colors( N, -1 );
+    for( int i = 0; i < N; ++i )
+    {
+        if( colors[i] == -1 )
+        {
+            //node i is not colored
+            //color i with color 1
+            colors[i] = 1;
+            //start dfs
+            stack<int> stk;
+            stk.push( i );
+            while( !stk.empty() )
+            {
+                int node = stk.top();
+                stk.pop();
+                //visit adjacent nodes
+                for( int adj : graph[node] )
+                {
+                    if( colors[adj] == -1 )
+                    {
+                        //this adjacent node is not colored
+                        stk.push( adj );
+                        //color it as inverse color of node
+                        colors[adj] = 1 - colors[node];
+                    }
+                    else if( colors[adj] == colors[node] )
+                    {
+                        //the adjacent node has same color with node
+                        //we cannot bipartite the graph
+                        return false;
+                    }
+                }//for(adj)
+            }//while(stk)
+        }//if(color)
+    }//for(i)
+    return true;
+}
+\end{lstlisting}

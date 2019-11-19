@@ -1,0 +1,76 @@
+\section{781 --- Rabbits in Forest}
+In a forest, each rabbit has some color. Some subset of rabbits (possibly all of them) tell you how many other rabbits have the same color as them. Those \fcj{answers} are placed in an array.
+
+Return the minimum number of rabbits that could be in the forest.
+
+\paragraph{Examples:}
+\begin{flushleft}
+
+
+\textbf{Input}: \fcj{answers = [1, 1, 2]}
+
+\textbf{Output}: 5
+
+\textbf{Explanation}:
+
+The two rabbits that answered \fcj{"1"} could both be the same color, say red.
+
+The rabbit than answered \fcj{"2"} can't be red or the answers would be inconsistent.
+
+Say the rabbit that answered \fcj{"2"} was blue.
+
+Then there should be 2 other blue rabbits in the forest that didn't answer into the array.
+
+The smallest possible number of rabbits in the forest is therefore 5: 3 that answered plus 2 that didn't.
+
+\textbf{Input}: \fcj{answers = [10, 10, 10]}
+
+\textbf{Output}: 11
+
+\textbf{Input}: \fcj{answers = []}
+
+\textbf{Output}: 0
+\end{flushleft}
+
+\paragraph{Note:}
+
+\begin{enumerate}
+\item \fcj{answers} will have length at most 1000.
+\item Each \fcj{answers[i]} will be an integer in the range \fcj{[0, 999]}.
+\end{enumerate}
+
+\subsection{Count}
+If $ x+1 $ rabbits have same color, then we get $ x+1 $ rabbits who all answer $ x $.
+
+now if $n$ rabbits answer $x$.
+
+\begin{itemize}
+\item If $n$ is the multiple of $x+1$, we need $n / (x + 1)$ groups of $x + 1$ rabbits.
+\item Otherwise, we need $n / (x + 1) + 1$ groups of $x + 1$ rabbits.
+\end{itemize}
+
+The number of groups is \fcj{math.ceil(n / (x + 1))} which is equal to $(n+x)/(x+1)$. 
+
+\setcounter{lstlisting}{0}
+\begin{lstlisting}[style=customc, caption={Count}]
+int numRabbits( vector<int>& answers )
+{
+    unordered_map<int, int> dict;
+    for( int n : answers )
+    {
+        dict[n] += 1;
+    }
+    int ans = 0;
+    for( auto[x, n] : dict )
+    {
+        //if n % (x+1) =0, we need n / (x+1) groups
+        //otherwise, we need n / (x+1) + 1 groups
+        //each group has x+1 rabbits
+        //(n+x)/(x+1) covers two cases
+        ans += ( x + n ) / ( x + 1 ) * ( x + 1 );
+    }
+    return ans;
+}
+\end{lstlisting}
+
+

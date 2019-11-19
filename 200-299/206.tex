@@ -11,11 +11,8 @@ Starting from the beginning, for each node
 \begin{lstlisting}[style=customc, caption={Iterative}]
 ListNode* reverseList(ListNode* head)
 {
-
     ListNode* pre = nullptr;
-    
     auto cur = head;
-    
     while(cur)
     {
         auto next = cur->next;
@@ -23,26 +20,24 @@ ListNode* reverseList(ListNode* head)
         pre = cur;
         cur = next;
     }
-    
     return pre;
-
 }
 \end{lstlisting}
 \subsection{Recursion}
 The recursive version is slightly trickier and the key is to work backwards. Assume that the rest of the list had already been reversed, now how to reverse the front part?
-\par
+
 Assumes the list is 
-\par
+
 $n_1\to\ldots\to n_{k-1}\to n_k\to n_{k+1}\to\ldots\to n_m\to \varnothing$
-\par
+
 Assume from node $n_{k+1}$ to $n_m$ has been reversed and now at node $n_{k}$, as shown below
-\par
+
 $n_1\to\ldots\to n_{k-1}\to \mathbf{n_k}\to n_{k+1}\longleftarrow\ldots\longleftarrow n_m$
-\par
+
 What need to do is change $n_{k+1}$'s \texttt{next} to point to $n_k$, therefore
-\par
+
 $n_k.\texttt{next}.\texttt{next}\gets n_k$
-\par
+
 An important note is that $n_1$'s \texttt{next} must point to $\varnothing$. Otherwise, the linked list has a cycle in it.
 \begin{lstlisting}[style=customc, caption={Recursion}]
 ListNode* reverseList(ListNode* head)

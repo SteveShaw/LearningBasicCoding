@@ -59,13 +59,12 @@ $k = 3$
 \item What if the BST is modified (insert/delete operations) often and you need to find the $k$th smallest frequently? How would you optimize the function?
 \end{itemize}
 \subsection{In-order Traverse}
-\begin{CJK*}{UTF8}{gbsn}
+
 \begin{itemize}
 \item 仔细分析就可以看出，由于BST的特性，中序遍历其实就是从小到大的顺序。
 \item 因此求$k$th smallest element就变成中序遍历中记录当前访问元素是否是遍历到的第$k$个数字即可。
 \item 中序遍历可以使用stack，递归，以及Morris Traverse。
 \end{itemize}
-\end{CJK*}
 \setcounter{lstlisting}{0}
 \begin{lstlisting}[style=customc, caption={Stack Based In-order Traverse}]
 int kthSmallest( TreeNode* root, int k )
@@ -124,7 +123,7 @@ void inorder( TreeNode* node, int k, int& x, int& val )
 }
 \end{lstlisting}
 \subsection{Divide And Conquer}
-\begin{CJK*}{UTF8}{gbsn}
+
 \begin{itemize}
 \item 由于BST的性质，可以快速定位出第$k$小的元素是在左子树还是右子树，
 \item 首先计算出左子树的结点个数总和$t$，
@@ -132,7 +131,7 @@ void inorder( TreeNode* node, int k, int& x, int& val )
 \item 如果$k>t+1$，说明目标值在右子树中，对右子结点调用递归函数，注意此时的$k$需要更新为$k-t-1$，因为已经减少了左子树和根节点总计$t+1$个结点。
 \item 如果$k=t+1$，说明当前结点即为所求，返回当前结点值即可
 \end{itemize}
-\end{CJK*}
+
 \begin{lstlisting}[style=customc, caption={Divide And Conquer}]
 int kthSmallest( TreeNode* root, int k )
 {
@@ -161,14 +160,13 @@ int countNodes( TreeNode* root )
 }
 \end{lstlisting}
 \subsection{Follow Up}
-\begin{CJK*}{UTF8}{gbsn}
+
 \begin{itemize}
 \item 如果该BST被修改的很频繁，而且查找操作也很频繁，那么最好的方法还是用分治法来快速定位目标所在的位置，
 \item 分治法中最低效的部分在于每次都需要遍历左子树所有结点来计算个数。
 \item 为了提升效率，需要修改\texttt{TreeNode struct}，在其中保存包括当前结点和其左右子树所有结点的个数，这样就可以快速得到任何左子树结点总数。
 \item 由于\texttt{TreeNode struct}被修改了，因此需要重新build BST。然后再进行查找$k$th smallest element的操作。
 \end{itemize}
-\end{CJK*}
 \begin{lstlisting}[style=customc, caption={Follow Up}]
 class Solution
 {
@@ -258,3 +256,20 @@ public:
     }
 };
 \end{lstlisting}
+
+\subsection{Follow Up Official Solution}
+The time complexity of Insert and Delete operations in BST is $\mathcal{O}(H)$, where $H$ is a height of binary tree, and $H = \log N$ for the balanced tree.
+
+Hence without any optimization insert/delete and search of $k$th element has $\mathcal{O}(2H + k)$ complexity. How to optimize that?
+
+This is a design question, basically we need to implement a structure which contains a BST inside and optimizes the following operations : Insert/Delete/Find $k$th smallest
+
+We can use the same logic as for \textbf{LRU cache design}, and combine an indexing structure (BST here) with a double linked list.
+
+Such a structure would provide:
+
+\begin{itemize}
+\item $\mathcal{O}(H)$ time for the insert and delete.
+
+\item $\mathcal{O}(k)$ for the search of $k$th smallest.
+\end{itemize}

@@ -1,0 +1,93 @@
+\section{779 --- K-th Symbol in Grammar}
+On the first row, we write a 0. Now in every subsequent row, we look at the previous row and replace each occurrence of \fcj{0} with \fcj{01}, and each occurrence of 1 with \fcj{10}.
+
+Given row $N$ and index $K$, return the $K$--th indexed symbol in row $N$. (The values of $K$ are 1-indexed.)
+
+\paragraph{Examples:}
+\begin{flushleft}
+\textbf{Input}: $N = 1$, $K = 1$
+
+\textbf{Output}: 0
+
+\textbf{Input}: $N = 2$, $K = 1$
+
+\textbf{Output}: 0
+
+\textbf{Input}: $N = 2$, $K = 2$
+
+\textbf{Output}: 1
+
+\textbf{Input}: $N = 4$, $K = 5$
+
+\textbf{Output}: 1
+
+
+\textbf{Explanation}:
+
+row 1: \fcj{0}
+
+row 2: \fcj{01}
+
+row 3: \fcj{0110}
+
+row 4: \fcj{01101001}
+
+\end{flushleft}
+
+\paragraph{Note:}
+
+\begin{enumerate}
+\item $N$ will be an integer in the range \fcj{[1, 30]}.
+\item $K$ will be an integer in the range $[1, 2^{N-1}]$.
+\end{enumerate}
+
+\subsection{Recursion}
+We can notice a pattern by observing a few rows: the right half is always the left half \textit{flipped}.
+
+Therefore, if $K$ is in the right half, we could set $K\gets K - 2 ^{N-2}$ to be in the first half, and flip the final answer.
+
+\setcounter{lstlisting}{0}
+\begin{lstlisting}[style=customc, caption={Recursion}]
+int kthGrammar( int N, int K )
+{
+    if( N == 1 )
+    {
+        return 0;
+    }
+    if( K <= ( 1 << ( N - 2 ) ) )
+    {
+        //K is in the left half
+        //we can find in level N-1
+        return kthGrammar( N - 1, K );
+    }
+    //K is in the right half
+    //we can find in level N-1 for index K - ( 1 << ( N - 2 ) )
+    //and flip the result
+    return ( kthGrammar( N - 1, K - ( 1 << ( N - 2 ) ) ) ) ^ 1;
+}
+\end{lstlisting}
+
+\subsection{Binary Count}
+We know that right half of every row is the left half flipped.
+
+When $K$ is written in binary (indexing from zero),  indexes of the right half of a row are ones with the first bit set to 1.
+
+This means the number of times we flip the final answer is just the number of 1s in the binary representation of $K-1$.
+
+\setcounter{lstlisting}{0}
+\begin{lstlisting}[style=customc, caption={Bit Counts}]
+int kthGrammar( int N, int K )
+{
+    int n = 0;
+    --K;
+    //the result is 1 flip
+    //by the times which equal to
+    //the bit 1s in K
+    while( K )
+    {
+        K = ( K & ( K - 1 ) );
+        ++n;
+    }
+    return n & 1;
+}
+\end{lstlisting}

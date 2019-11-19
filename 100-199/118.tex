@@ -1,48 +1,41 @@
 \section{118 --- Pascal's Triangle}
+Given a non-negative integer \fcj{numRows}, generate the first \fcj{numRows} of Pascal's triangle.
+
 In Pascal's triangle, each number is the sum of the two numbers directly above it.
 \paragraph{Example:}
 \begin{flushleft}
 \textbf{Input}: 5
 \\
 \textbf{Output}:
-$\left[(1),\ (1,\;1),\ (1,\;2,\;1),\ (1,\;3,\;3,\;1),\ (1,\;4,\;6,\;4,\;1)\right]$
+
+\fcj{[[1], [1,1], [1,2,1], [1,3,3,1], [1,4,6,4,1]]}
 \end{flushleft}
 \subsection{Analysis}
-\begin{CJK*}{UTF8}{gbsn}
+
 每一层的首个和结尾一个数字都是1，从第三层开始，中间的每个数字都是上一行的左右两个数字之和
-\end{CJK*}
-\setcounter{algorithm}{0}
-\begin{algorithm}[H]
-\caption{Iterative Approach}
-\begin{algorithmic}[1]
-\Procedure{Generate}{$N$}
-\State $\texttt{ans}:=\emptyset$
-\If{$N = 0$}
-\State \Return \texttt{ans}
-\EndIf
-\State $\texttt{ans}\gets (1)$
-\If{$N = 1$}
-\State \Return \texttt{ans}
-\EndIf
-\State $\texttt{ans}\gets \texttt{ans} + (1,\;1)$
-\If{$N = 2$}
-\State \Return \texttt{ans}
-\EndIf
-\For{$i:=3 \to N$}
-\State $L$ as $L[0]=1,\;L[i-1]=1$
-\State $L_0:=\texttt{ans}[i-2]$ \Comment The last level array
-\For{$k:=1 \to i-2$}
-\State $L[k]\gets L_0[k-1] + L_0[k]$
-\EndFor
-\State $\texttt{ans}\gets \texttt{ans} + L$
-\EndFor
-\algstore{118algo}
-\end{algorithmic}
-\end{algorithm}
-\begin{algorithm}[H]
-\begin{algorithmic}[1]
-\algrestore{118algo}
-\State \Return \texttt{ans}
-\EndProcedure
-\end{algorithmic}
-\end{algorithm}
+
+\setcounter{lstlisting}{0}
+\begin{lstlisting}[style=customc, caption={DP}]
+vector<vector<int>> generate( int numRows )
+{
+    vector<vector<int>> ans;
+    if( numRows == 0 )
+    {
+        return ans;
+    }
+    ans.emplace_back( vector<int> {1} );
+    for( int r = 2; r <= numRows; ++r )
+    {
+        vector<int> cur( r, 1 );
+        //the head and tail are 1
+        //fill from index = 1 to r-2
+        for( int i = 1; i < r - 1; ++i )
+        {
+            cur[i] = ans.back()[i - 1] + ans.back()[i];
+        }
+        ans.emplace_back( vector<int> {} );
+        ans.back().swap( cur );
+    }
+    return ans;
+}
+\end{lstlisting}

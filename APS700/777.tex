@@ -1,0 +1,138 @@
+\section{777 --- Swap Adjacent in LR String}
+In a string composed of \fcj{'L'}, \fcj{'R'}, and \fcj{'X'} characters, like \fcj{"RXXLRXRXL"}, a move consists of either replacing one occurrence of \fcj{"XL"} with \fcj{"LX"}, or replacing one occurrence of \fcj{"RX"} with \fcj{"XR"}. Given the starting string \fcj{start} and the ending string \fcj{end}, return \fcj{true} if and only if there exists a sequence of moves to transform one string to the other.
+
+
+\paragraph{Example:}
+\begin{flushleft}
+
+
+\textbf{Input}: \fcj{start = "RXXLRXRXL"}, \fcj{end = "XRLXXRRLX"}
+
+\textbf{Output}: \fcj{true}
+
+\textbf{Explanation}:
+
+We can transform start to end following these steps:
+
+\fcj{RXXLRXRXL ->}
+
+\fcj{XRXLRXRXL ->}
+
+\fcj{XRLXRXRXL ->}
+
+\fcj{XRLXXRRXL ->}
+
+\fcj{XRLXXRRLX}
+
+\end{flushleft}
+
+\paragraph{Note:}
+
+\begin{enumerate}
+\item \fcj{1 <= len(start) = len(end) <= 10000}.
+
+\item Both \fcj{start} and \fcj{end} will only consist of characters in \fcj{['L', 'R', 'X']}.
+\end{enumerate}
+
+\subsection{Two Scans}
+One of conditions that remain true after making any move is that \fcj{'L'} and \fcj{'R'} cannot pass through each other, which means \fcj{start} and \fcj{end} strings must be the same when reading only \fcj{'L'} and \fcj{'R'}.
+
+Another condition is 
+
+For \fcj{'L'}, each \fcj{'L'} in \fcj{end} cannot appear in the right side of its original position in \fcj{start}. 
+
+For \fcj{'R'}, each \fcj{'R'} in \fcj{end} cannot appear in the left side of its original position in \fcj{start}.
+
+If above conditions can be met, we can be sure \fcj{start} can be transformed into \fcj{end}.
+
+
+\setcounter{lstlisting}{0}
+\begin{lstlisting}[style=customc, caption={Two Scans}]
+bool canTransform( string start, string end )
+{
+    int count_x = 0;
+    int count_L = 0;
+    int count_R = 0;
+    //indicate if X exists
+    bool flag = false;
+    for( auto i = 0ull; i < start.size(); ++i )
+    {
+        if( start[i] == 'X' )
+        {
+            ++count_x;
+        }
+        else if( start[i] == 'L' )
+        {
+            ++count_L;
+        }
+        else
+        {
+            ++count_R;
+        }
+
+        if( count_x )
+        {
+            flag = true;
+        }
+        if( end[i] == 'X' )
+        {
+            --count_x;
+        }
+        else if( end[i] == 'L' )
+        {
+            --count_L;
+        }
+        else
+        {
+            --count_R;
+        }
+    }
+    if( count_x || count_L || count_R || !flag )
+    {
+        //no equal X, R, L
+        //or no X
+        return false;
+    }
+    auto matching_pos( 0ull );
+    //compare position of L
+    //L in start cannot appear left side of corresponding L in end
+    for( auto i = 0ull; i < start.size(); ++i )
+    {
+        if( start[i] == 'L' )
+        {
+            //find corresponding L in end
+            while( end[matching_pos] != 'L' )
+            {
+                ++matching_pos;
+            }
+            //check if corresponding L in <end> appears on right side of i
+            if( i < matching_pos )
+            {
+                return false;
+            }
+            ++matching_pos;
+        }
+    }
+    matching_pos = 0ull;
+    //compare position of R
+    //R in start cannot appear right side of corresponding R in end
+    for( auto i = 0ull; i < start.size(); ++i )
+    {
+        if( start[i] == 'R' )
+        {
+
+            while( end[matching_pos] != 'R' )
+            {
+                ++matching_pos;
+            }
+            //check if corresponding R in <end> appears on left side of i
+            if( i > matching_pos )
+            {
+                return false;
+            }
+            ++matching_pos;
+        }
+    }
+    return true;
+}
+\end{lstlisting}

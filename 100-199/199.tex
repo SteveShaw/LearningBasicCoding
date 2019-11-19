@@ -21,64 +21,44 @@ Given a binary tree, imagine yourself standing on the right side of it, return t
 \textbf{Output}: $[1,3,4]$
 \end{flushleft}
 \subsection{Breath First Search}
-给每一个node进行编号，同时记录node所在的层级编号。
-\begin{lstlisting}[style=customc]
+Typical application of BFS with level traversing.
+\begin{lstlisting}[style=customc, caption={BFS}]
 vector<int> rightSideView( TreeNode* root )
 {
     if( !root )
     {
         return {};
     }
-
-    vector<pair<int, int>> v;
-
-    queue<tuple<TreeNode*, int, int>> q;
-
-    q.emplace( root, 0, 0 );
-
+    queue<TreeNode*> q;
+    q.push( root );
+    vector<int> ans;
+	//BFS
     while( !q.empty() )
     {
-        auto t = q.front();
-        q.pop();
-
-        auto node = get<0>( t );
-
-        int index = get<1>( t ); //The index of current node
-        int l = get<2>( t ); //The level of current node
-
-        if( v.empty() || v.size() <= static_cast<size_t>( l ) )
+        auto sz( q.size() );
+		//record the rightmost node's value
+        auto rightmost( 0 );
+		//level traverse
+        for( auto i = 0ULL; i < sz; ++i )
         {
-            v.emplace_back( index, node->val );
-        }
-        else
-        {
-            if( index > v[l].first )
+            auto t = q.front();
+            q.pop();
+            if( t->left )
             {
-                v[l].second = node->val;
+                q.push( t->left );
             }
+            if( t->right )
+            {
+                q.push( t->right );
+            }
+			//the last updated value
+			//is the one we need
+            rightmost = t->val;
         }
-
-        if( node->left )
-        {
-            //index *2 +1 is the index of left child
-            q.emplace( node->left, index * 2 + 1, l + 1 );
-        }
-
-        if( node->right )
-        {
-            //index *2 +2 is the index of right child
-            q.emplace( node->right, index * 2 + 2, l + 1 );
-        }
+		//add the value to the output
+        ans.push_back( rightmost );
     }
-
-    vector<int> ans;
-    ans.reserve( v.size() );
-
-    for( const auto& p : v )
-    {
-        ans.push_back( p.second );
-    }
-
     return ans;
 }
+
 \end{lstlisting}

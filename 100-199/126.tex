@@ -83,105 +83,161 @@ Given two words (\fcj{beginWord} and \fcj{endWord}), and a dictionary's word lis
 在实现时，用一个hash map记录每个word所transform出的单词，可能是一个也可能是多个，因此这个hash map的value就是一个array。由于我们是从两个方向同时进行DFS，因此每次选择DFS的开始层时，总是选择node最少的层开始，另外就是注意由于是两个方向，而hash map所记录的转换关系是单向的，即是从$\alpha$到$\beta$，所以如果当前处理的方向是从$\beta$到$\alpha$，那么在更新hash map时，要把tranform出的word作为key，而作为transform源头的word放入key对应的array中。
 
 有了最短路径后，我们就得到了每个word及其transform出的word，接下来就可以用递归即DFS的方式构建出path了。
-\setcounter{algorithm}{0}
-\begin{algorithm}[H]
-\caption{Bidirectional BFS Search + DFS Path Building}
-\begin{algorithmic}[1]
-\Procedure{FindLadders}{$\alpha,\;\beta,\;A$}
-\If{$\beta\notin A$} \Comment The end word is not in the word list
-\State \Return $\emptyset$ \Comment Cannot reach end word through $A$
-\EndIf
-\State $A\gets A\setminus \beta$ \Comment Remove end word from $A$
-\algstore{126algo}
-\end{algorithmic}
-\end{algorithm}
-\begin{algorithm}[H]
-\begin{algorithmic}[1]
-\algrestore{126algo}
-\State $x:=\emptyset,\ y:=\emptyset$ \Comment Two hash sets to simulate BFS tree
-\State $x\gets x + \alpha$ \Comment The forward BFS tree root
-\State $y\gets y + \alpha$ \Comment The backward BFS tree root
-\State $C:=\emptyset$ \Comment The hash map contains the words and transformed words from each word
-\State $b:=\texttt{false}$ \Comment Indicate if the two trees have same words in their respective current level
-\State $d:=0$ \Comment Indicate the type of current tree (0 is forward tree and 1 is backward tree)
-\While{$x\neq \emptyset$ \textbf{and} $y\neq\emptyset$ and $b:=\texttt{false}$}
-\For{$w \in x$}
-\State $A\gets A\setminus w$ \Comment Remove transformed words in $x$ from $A$ to avoid repeating search
-\EndFor
-\For{$w \in y$}
-\State $A\gets A\setminus w$ \Comment Remove transformed words in $y$ from $A$ to avoid repeating search
-\EndFor
-\If{$|x| \leq |y|$} \Comment $x$ has fewer or equal nodes than $y$
-\State $\texttt{Process}(x, y, C, A, b, \texttt{forward})$ \Comment Forward direction
-\Else 
-\State $\texttt{Process}(y, x, C, A, b, \texttt{backward})$ \Comment Backward direction
-\EndIf
-\EndWhile
-\State $P:=\emptyset$ \Comment The building path during recursive
-\State $\pi:=\emptyset$ \Comment The final results
-\State $\texttt{BuildPath}(\alpha, \beta, C, P, \pi)$ \Comment Build paths from $\alpha$ to $\beta$ from parent/children map $C$
-\State \Return $pi$
-\EndProcedure
-\end{algorithmic}
-\end{algorithm}
-\texttt{Process}将BFS的tree当前level $L_0$ transform到$A$中允许的words，同时比较另外一个tree的当前Level $L_1$，看是否有相同的word，如果有相同的word，就表示已经找到最短路径的transform path了。如果没有，但是是$A$中的word，就把transform出的word加入到下一层level $L_n$中，最后swap $L_n$和$L$，使得$L$变为下一个level。
 
-两种情况下，都要根据是forward还是barward将word和transform出的word加入到parent--children map $C$中。
+\setcounter{lstlisting}{0}
+\begin{lstlisting}[style=customc, caption={Two Directional BFS}]
+//record the transformed words for each word
+unordered_map<string, vector<string>> path;
+//the input word lists
+unordered_set<string_view> dict;
 
-最后，如果在$L_0$和$L_1$中找到相同的word，\text{Process}会修改$b$为\texttt{true}。
-\begin{algorithm}[H]
-\caption{Helper Function To Process BFS Tree}
-\begin{algorithmic}[1]
-\Function{Process}{$L_0, L_1, C, A, b, \texttt{Direction}$}
-\State $L_n:=\emptyset$ \Comment The hash set of next level from $L_0$
-\For{$w\in L_0$}
-\State $s:=w$ 
-\For{$i:=0 \to |s|$} \label{126for02}
-\State $e:=s[i]$ \Comment Current character
-\For{$g:=\texttt{char}(a)\to \texttt{char}(z)$ \textbf{and} $g\neq e$} \Comment try every letter from `a' to `z' \label{126for01}
-\State $s[i]\gets g$
-\If{$s\in L_1$} \Comment Found in current level of another tree \label{126if02}
-\State $b\gets \texttt{true}$
-\If{\texttt{Direction}=\texttt{Forward}} \Comment $L_0$ is current level of forward tree \label{126if01}
-\State $C[w]\gets C[w] + s$ \Comment Add $s$ as $w$'s children list
-\Else \Comment $L_0$ is current level of backward tree
-\State $C[s]\gets C[s] + w$ \Comment Add $w$ as $s$'s children list
-\EndIf \Comment End [\ref{126if01}]
-\Else \Comment $s$ is not current level of another tree
-\If{$b=\texttt{false}$} \Comment No matched word in current level of two trees \label{126if03}
-\State $L_n\gets L_n+s$ \Comment Add $s$ to next level
-\If{\texttt{Direction}=\texttt{Forward}} 
-\State $C[w]\gets C[w] + s$ 
-\Else 
-\State $C[s]\gets C[s] + w$ 
-\EndIf 
-\EndIf \Comment End [\ref{126if03}]
-\EndIf \Comment End [\ref{126if02}]
-\EndFor \Comment End [\ref{126for01}]
-\State $s[i]\gets e$ \Comment Restore $s$ to original word 
-\EndFor \Comment End [\ref{126for02}]
-\EndFor
-\State $\texttt{swap}(L_0, L_n)$ \Comment Update $L_0$ as its next level
-\EndFunction
-\end{algorithmic}
-\end{algorithm}
-\texttt{BuildPath}则根据parent--children map $C$ 以及给定的begin word $w$和end word $\beta$，构建出所有可能的path，并将生成的path加入到最终结果$\pi$中。初始时，$w=\alpha$
-\begin{algorithm}[H]
-\caption{DFS Build Path}
-\begin{algorithmic}[1]
-\Function{BuildPath}{$w, \beta, P, C, \pi$}
-\If{$w:=\beta$} \Comment Reach the end
-\State $\pi\gets \pi + P$ \Comment Add current path
-\State \Return
-\EndIf
-\If{$w\notin C$} \Comment The begin word is not in $C$
-\State \Return \Comment Do nothing
-\EndIf
-\For{$s\in C[w]$} \Comment Test each transformed word from $w$
-\State $P\gets P + s$ \Comment Add $s$ to current path
-\State $\texttt{BuildPath}(s, \beta, P, C, \pi)$ \Comment Proceed to next word $s$
-\State $P\gets P - s$ \Comment Remove $s$ from current path
-\EndFor
-\EndFunction
-\end{algorithmic}
-\end{algorithm}
+vector<vector<string>> findLadders( string beginWord, string endWord, vector<string>& wordList )
+{
+    //forward level
+    unordered_set<string> q_fwd;
+    //backward level
+    unordered_set<string> q_bck;
+    //create dictionary
+    unordered_set<string_view> tmp( begin( wordList ), end( wordList ) );
+    dict.swap( tmp );
+    //we cannot reach endWord if it is not in wordList
+    if( dict.find( string_view( endWord ) ) == dict.end() )
+    {
+        return {};
+    }
+    //forward level start from beginWord
+    q_fwd.emplace( beginWord );
+    //backward level start from endWord
+    q_bck.emplace( endWord );
+    //indicate if we find the path
+    bool flag = false;
+    while( !q_fwd.empty() && !q_bck.empty() )
+    {
+        //remove words in forward and backward level
+        //from the dictionary
+        for( auto& word : q_fwd )
+        {
+            dict.erase( word );
+        }
+        for( auto& word : q_bck )
+        {
+            dict.erase( word );
+        }
+        //only process level has fewer words
+        if( q_fwd.size() <= q_bck.size() )
+        {
+            if( process( q_fwd, q_bck, true ) )
+            {
+                //found the path
+                flag = true;
+                break;
+            }
+        }
+        else
+        {
+            if( process( q_bck, q_fwd, false ) )
+            {
+                flag = true;
+                break;
+            }
+        }
+    }
+    if( !flag )
+    {
+        return {};
+    }
+    //dfs to find the ladder
+    vector<vector<string>> ans;
+    vector<string> ladder;
+    ladder.emplace_back( beginWord );
+    build( beginWord, endWord, ladder, ans );
+    return ans;
+}
+//helper function to process level A
+//B is used for checking if there is a transformed word
+//is found in B
+//fwd_flag: indicate if A is forward level or backward level
+bool process( unordered_set<string>& A, unordered_set<string>& B, bool fwd_flag )
+{
+    //transformed words from A
+    unordered_set<string> nexts;
+    bool matched = false;
+    for( auto& word : A )
+    {
+        string s( word );
+        for( auto& c : s )
+        {
+            auto ch = c;
+            //transform by changing each letter one time
+            for( char x = 'a'; x <= 'z'; ++x )
+            {
+                if( x == ch )
+                {
+                    continue;
+                }
+                c = x;
+                if( B.find( s ) != B.end() )
+                {
+                    matched = true;
+                    //find in the backward level
+                    if( fwd_flag )
+                    {
+                        path[word].emplace_back( s );
+                    }
+                    else
+                    {
+                        path[s].emplace_back( word );
+                    }
+                    //since there could be some other words
+                    //can also transformed to matched word
+                    //we cannot return here
+                }
+                else if( dict.find( s ) != dict.end() )
+                {
+                    //if we already found match word
+                    //no need to expand the path
+                    if( !matched )
+                    {
+                        nexts.emplace( s );
+                        if( fwd_flag )
+                        {
+                            path[word].emplace_back( s );
+                        }
+                        else
+                        {
+                            path[s].emplace_back( word );
+                        }
+                    }
+                }
+            } //for char
+            //backtrack
+            c = ch;
+        }// for (c)
+    } //for (word)
+    //swap next level to current level
+    swap( nexts, A );
+    return matched;
+}
+//dfs helper function
+//to build ladder from path
+void build( const string& word, const string& target, vector<string>& ladder, vector<vector<string>>& ans )
+{
+    if( word == target )
+    {
+        ans.emplace_back( begin( ladder ), end( ladder ) );
+        return;
+    }
+    auto it( path.find( word ) );
+    if( it == path.end() )
+    {
+        return;
+    }
+    for( const auto& next : it->second )
+    {
+        ladder.emplace_back( next );
+        build( next, target, ladder, ans );
+        //backtracking
+        ladder.pop_back();
+    }
+}
+\end{lstlisting}
