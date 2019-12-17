@@ -33,7 +33,6 @@ $(2\times((3-4)\times5)) = -10 $
 $(((2\times3)-4)\times5) = 10$
 \end{flushleft}
 \subsection{Recursion}
-\begin{CJK*}{UTF8}{gbsn}
 \begin{itemize}
 \item 遍历输入数组，每次遇到操作符号时，就从这个地方分成左右两个部分。
 \item 分别对左右两个部分进行递归，返回结果就是各个部分运算得到的结果数组
@@ -41,7 +40,6 @@ $(((2\times3)-4)\times5) = 10$
 \item 如果输入字符串只包含数字，则将该数字作为输出数组中的唯一元素。
 \item 可以用memorize的方法减少重复的搜索。
 \end{itemize}
-\end{CJK*}
 \setcounter{lstlisting}{0}
 \begin{lstlisting}[style=customc, caption={Recursion Without Memorization}]
 vector<int> diffWaysToCompute( string input )
@@ -112,6 +110,66 @@ void calc( vector<int>& left, vector<int>& right, vector<int>& results, char ope
             {
                 results.push_back( l + r );
             }
+        }
+    }
+}
+\end{lstlisting}
+
+
+\begin{lstlisting}[style=customc, caption={String View}]
+vector<int> diffWaysToCompute( string input )
+{
+    return dfs( input );
+}
+vector<int> dfs( string_view sv )
+{
+    int num = 0;
+    vector<int> vec_res;
+    for( size_t i = 0; i < sv.size(); ++i )
+    {
+        auto c = sv[i];
+        if( ( c >= '0' ) && ( c <= '9' ) )
+        {
+            num = num * 10 + ( c - '0' );
+        }
+        else
+        {
+            //recursive on left and right
+            auto lhs = dfs( sv.substr( 0, i ) );
+            auto rhs = dfs( sv.substr( i + 1 ) );
+            if( c == '+' )
+            {
+                combine( lhs, rhs, vec_res, std::plus<int>() );
+            }
+            else if( c == '-' )
+            {
+                combine( lhs, rhs, vec_res, std::minus<int>() );
+            }
+            else
+            {
+                combine( lhs, rhs, vec_res, std::multiplies<int>() );
+            }
+            //reset num to zero
+            num = 0;
+        }
+    }
+    //if there is only number
+    //add number to the result
+    if( vec_res.empty() )
+    {
+        vec_res.push_back( num );
+    }
+    return vec_res;
+}
+//generate all possible results
+template<typename F>
+void combine( vector<int>& lhs, vector<int>& rhs, vector<int>& res, F f )
+{
+    for( int l : lhs )
+    {
+        for( int r : rhs )
+        {
+            res.push_back( f( l, r ) );
         }
     }
 }

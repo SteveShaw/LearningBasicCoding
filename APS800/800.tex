@@ -1,0 +1,60 @@
+\section{800 --- Similar RGB Color}
+In the following, every capital letter represents some hexadecimal digit from 0 to f.
+
+The red-green-blue color \fcj{"#AABBCC"} can be written as \fcj{"#ABC"} in shorthand.  For example, \fcj{"#15c"} is shorthand for the color \fcj{"#1155cc"}.
+
+Now, say the similarity between two colors \fcj{"#ABCDEF"} and \fcj{"#UVWXYZ"} is 
+
+\fcj{-(AB - UV)^2 - (CD - WX)^2 - (EF - YZ)^2}.
+
+Given the color \fcj{"#ABCDEF"}, return a 7 character color that is most similar to \fcj{#ABCDEF}, and has a shorthand (that is, it can be represented as some \fcj{"#XYZ"}
+
+\paragraph{Example 1:}
+
+\begin{flushleft}
+\textbf{Input}: \fcj{color = "#09f166"}
+
+\textbf{Output}: \fcj{"#11ee66"}
+
+\textbf{Explanation}:  
+
+The similarity is \fcj{-(0x09 - 0x11)^2 -(0xf1 - 0xee)^2 - (0x66 - 0x66)^2 = -64 -9 -0 = -73}.
+
+This is the highest among any shorthand color.
+\end{flushleft}
+
+\paragraph{Note:}
+
+\begin{itemize}
+\item \fcj{color} is a string of length 7.
+\item \fcj{color} is a valid RGB color: for \fcj{i > 0}, \fcj{color[i]} is a hexadecimal digit from 0 to f
+\item Any answer which has the same (highest) similarity as the best answer will be accepted.
+\item All inputs and outputs should use lowercase letters, and the output is 7 characters.
+\end{itemize}
+
+\subsection{Brute Force}
+Each digit in the shorthand \fcj{"#RGB"} could be from 0 to 15. This leads to a color of 
+\fcj{17 * R * (1 << 16) + 17 * G * (1 << 8) + 17 * B}. 
+
+The reason for the 17 is because a hexadecimal value of \fcj{0x22} is equal to \fcj{2 * 16 + 2 * 1} which is \fcj{2 * (17)}. The other values for red and green work similarly, just shifted up by 8 or 16 bits.
+
+It should be noted that the answer is always unique. Indeed, for two numbers that differ by 17, every integer is closer to one than the other. For example, with 0 and 17, 8 is closer to 0 and 9 is closer to 17 --- there is no number that is tied in closeness.
+
+\setcounter{lstlisting}{0}
+\begin{lstlisting}[style=customc, caption={Brute Force}]
+string similarRGB( string color )
+{
+    for( size_t i = 1; i < color.size(); i += 2 )
+    {
+        //change to integer
+        auto num = stoi( color.substr( i, 2 ), nullptr, 16 );
+        //get the closet integer with form (cc)
+        int x = num / 17 + ( ( num % 17 ) > 8 ? 1 : 0 );
+        //change to string
+        color[i] = ( x > 9 ) ? ( x - 10 + 'a' ) : ( x + '0' );
+        color[i + 1] = color[i];
+    }
+
+    return color;
+}
+\end{lstlisting}

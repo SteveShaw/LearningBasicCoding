@@ -146,7 +146,6 @@ bool dfs( TreeNode* node, TreeNode* p, TreeNode* q, TreeNode*& lca )
 }
 \end{lstlisting}
 \subsection{Another Recursion}
-\begin{CJK*}{UTF8}{gbsn}
 在binary tree中搜索$p$和$q$，然后从遍历路径中找到最后一个相同的节点即为\texttt{LCA}。边界情况很简单： 首先看当前结点是否为\texttt{null}，若为\texttt{null}则直接返回\texttt{null}，若为$p$或$q$中的任意一个，直接返回当前结点
 \par
 如果当前结点不等于$p$或$q$，$p$和$q$要么分别位于左右子树中，要么同时位于左子树，或者同时位于右子树
@@ -159,7 +158,7 @@ bool dfs( TreeNode* node, TreeNode* p, TreeNode* q, TreeNode*& lca )
 \end{enumerate}
 \item 若$p$和$q$同时位于右子树，和上述左子树情形类似。
 \end{itemize}
-\end{CJK*}
+
 \begin{lstlisting}[style=customc, caption={Recursion Based On Left And Right Subtree}]
 TreeNode* LCA( TreeNode* root, TreeNode* p, TreeNode* q )
 {
@@ -191,7 +190,7 @@ TreeNode* LCA( TreeNode* root, TreeNode* p, TreeNode* q )
 }
 \end{lstlisting}
 \subsection{Iterative using parent pointers}
-\begin{CJK*}{UTF8}{gbsn}
+
 这种方法则需要借助queue和hash map来寻找最接近$p$和$q$的common ancestor。
 \par
 算法步骤如下
@@ -201,7 +200,7 @@ TreeNode* LCA( TreeNode* root, TreeNode* p, TreeNode* q )
 \item 一旦找到$p$和$q$，将$p$的所有ancestors从$M$中加入到一个hash set $S$中。
 \item 然后在$M$中遍历$q$所有的ancestors。如果当前遇到的ancestor可以在$S$中找到，这就是$p$和$q$的\texttt{LCA}。
 \end{enumerate}
-\end{CJK*}
+
 \begin{lstlisting}[style=customc, caption={Iterative Searching}]
 TreeNode* LCA( TreeNode* root, TreeNode* p, TreeNode* q )
 {

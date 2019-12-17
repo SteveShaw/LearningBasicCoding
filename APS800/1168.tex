@@ -1,0 +1,155 @@
+\section{1168 --- Optimize Water Distribution in a Village}
+
+\textbf{Hard}
+
+There are $n$ houses in a village. We want to supply water for all the houses by building wells and laying pipes.
+
+For each house $i$, we can either build a well inside it directly with cost \fcj{wells[i]}, or pipe in water from another well to it. The costs to lay pipes between houses are given by the array \fcj{pipes}, where each \fcj{pipes[i] = [house1, house2, cost]} represents the cost to connect \fcj{house1} and \fcj{house2} together using a pipe. Connections are bidirectional.
+
+Find the minimum total cost to supply water to all houses.
+
+
+\paragraph{Example 1:}
+
+\begin{flushleft}
+\textbf{Input}: $ n = 3 $, \fcj{wells = [1,2,2]}, \fcj{pipes = [[1,2,1],[2,3,1]]}
+
+\textbf{Output}: 3
+
+\textbf{Explanation}: 
+
+The image shows the costs of connecting houses using pipes.
+
+The best strategy is to build a well in the first house with cost 1 and connect the other houses to it with cost 2 so the total cost is 3.
+
+\begin{figure}[H]
+\begin{tikzpicture}
+[every node/.style={draw, circle, fill=gray!20!, minimum size=9mm},
+thick]
+\node(1){1};
+\node(2)[below=2cm of 1, xshift=-5mm]{2};
+\node(3)[below=1.2cm of 1, xshift=3cm]{3};
+\draw (1) -- (2);
+\draw (2) -- (3);
+\end{tikzpicture}
+\end{figure}
+
+\end{flushleft}
+ 
+
+\paragraph{Constraints:}
+
+\begin{itemize}
+\item $1 \leq n \leq 10000$
+\item \fcj{wells.length == n}
+\item \fcj{0 <= wells[i] <= 10^5}
+\item \fcj{1 <= pipes.length <= 10000}
+\item \fcj{1 <= pipes[i][0], pipes[i][1] <= n}
+\item \fcj{0 <= pipes[i][2] <= 10^5}
+\item \fcj{pipes[i][0] != pipes[i][1]}
+\end{itemize}
+
+\subsection{Minimum Spanning Tree}
+This is a typical Minimum Spanning Tree problem, except that at each node, we have the option of digging new wells.
+
+The trick here is to view \textit{digging new wells} as \textit{laying new pipes to a hidden well 0}. Then we have a typical \textbf{MST} problem to solve.
+
+We use Kruskal algorithm using a disjoint set. The pseudocode of this algorithm is as below
+
+\setcounter{lstlisting}{0}
+\begin{lstlisting}[style=customc, caption={Kruskal's Algorithm}]
+vector<Edge> kruskal( vector<Edge> edges, int numVertices )
+{
+    DisjSets ds{ numVertices };
+    priority_queue pq{ edges };
+    vector<Edge> mst;
+    while( mst.size( ) != numVertices - 1 )
+    {
+        Edge e = pq.pop( ); // Edge e = (u, v)
+        SetType uset = ds.find( e.getu( ) );
+        SetType vset = ds.find( e.getv( ) );
+        if( uset != vset )
+        {
+            // Accept the edge
+            mst.push_back( e );
+            ds.union( uset, vset );
+        }
+    }
+    return mst;
+}
+\end{lstlisting}
+
+In the implementation, we first change each \fcj{wells} into a \fcj{pipe} which is the cost from each node to a dummy node 0 and add to the input array \fcj{pipes}.
+
+The priority queue is not needed here since we can sort the pipes inplace.
+\begin{lstlisting}[style=customc, caption={MST By Kruskal}]
+int minCostToSupplyWater( int n, vector<int>& wells, vector<vector<int>>& pipes )
+{
+    int node = 1;
+    //change each well into a pipe
+    //which connect node to a dummy house 0
+    //and then insert into pipes
+    for( int well : wells )
+    {
+        pipes.emplace_back( vector<int> {0, node++, well} );
+    }
+    //sort pipes inplace per the cost
+    sort( begin( pipes ), end( pipes ), []( const vector<int>& p1, const vector<int>& p2 )
+    {
+        return p1[2] < p2[2];
+    } );
+    //the vectors used for DSU
+    vector<int> parents( n + 1ll );
+    for( int i = 0; i <= n; ++i )
+    {
+        parents[i] = i;
+    }
+    vector<int> ranks( n + 1ll );
+    int ans = 0;
+    //Kruskal's algorithm
+    for( const auto& edge : pipes )
+    {
+        int x = edge[0];
+        int y = edge[1];
+        auto px = find( x, parents );
+        auto py = find( y, parents );
+        if( px != py )
+        {
+            //we ignore add x and y into MST
+            //since the problem doesn't need
+            ans += edge[2];
+            //connect x and y
+            connect( px, py, parents, ranks );
+        }
+    }
+    return ans;
+}
+//union find
+int find( int x, vector<int>& parents )
+{
+    while( x != parents[x] )
+    {
+        x = parents[x];
+    }
+
+    return x;
+}
+//connect x and y with path compression
+void connect( int x, int y, vector<int>& parents, vector<int>& ranks )
+{
+    auto px = find( x, parents );
+    auto py = find( y, parents );
+    if( px != py )
+    {
+        if( ranks[px] < ranks[py] )
+        {
+            std::swap( px, py );
+        }
+        else if( ranks[px] == ranks[py] )
+        {
+            ++ranks[px];
+        }
+        parents[py] = px;
+    }
+}
+\end{lstlisting}

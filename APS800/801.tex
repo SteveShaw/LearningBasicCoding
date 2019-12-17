@@ -1,0 +1,96 @@
+\section{801 --- Minimum Swaps To Make Sequences Increasing}
+
+\textbf{Medium}
+
+We have two integer sequences A and B of the same non-zero length.
+
+We are allowed to swap elements \fcj{A[i]} and \fcj{B[i]}.  Note that both elements are in the same index position in their respective sequences.
+
+At the end of some number of swaps, A and B are both strictly increasing. (A sequence is strictly increasing if and only if 
+
+\fcj{A[0] < A[1] < A[2] < ... < A[A.length - 1]}. )
+
+Given A and B, return the minimum number of swaps to make both sequences strictly increasing.  It is guaranteed that the given input always makes it possible.
+
+\paragraph{Example:}
+
+\begin{flushleft}
+\textbf{Input}: \fcj{A = [1,3,5,4]}, \fcj{B = [1,2,3,7]}
+
+\textbf{Output}: 1
+
+\textbf{Explanation}: 
+
+Swap A[3] and B[3].  Then the sequences are:
+
+\fcj{A = [1, 3, 5, 7]} and \fcj{B = [1, 2, 3, 4]}
+
+which are both strictly increasing.
+\end{flushleft}
+
+\paragraph{Note:}
+
+\begin{itemize}
+\item A, B are arrays with the same length, and that length will be in the range \fcj{[1, 1000]}.
+
+\item \fcj{A[i]}, \fcj{B[i]} are integer values in the range \fcj{[0, 2000]}.
+\end{itemize}
+
+\subsection{Dynamic Programming}
+Suppose $n_1$ is the cost of making the first $i-1$ columns increasing and not swapping the $(i-1)$th column; and $s_1$ is the cost of making the first $i-1$ columns increasing and swapping the $(i-1)$th column.
+
+Now we want candidates $n_2$ (and $s_2$), the costs of making the first $i$ columns increasing if we do not swap (or swap, respectively) the $i$th column.
+
+\paragraph{Algorithm}
+
+Say $a_1 = A[i-1]$, $b_1 = B[i-1]$ and $a_2 = A[i]$, $b_2 = B[i]$.
+
+Now, if $a_1 < a_2$ and $b_1 < b_2$, it is allowed to have both of these columns unswapped, or both of these columns swapped. This leads to $n_2 = \min(n_2, n_1)$ and $s_2 = \min(s_2, s_1 + 1)$.
+
+Another possibility is that $ a_1 < b_2 $ and $ b_1 < a_2 $. This means that it is allowed to have exactly one of these columns swapped. This leads to $n_2 = \min(n_2, s_1)$ or $s_2 = \min(s_2, n_1 + 1)$.
+
+Note that it is important to use two \fcj{if} statements separately, because both of the above possibilities might be possible.
+
+At the end, the optimal solution must leave the last column either natural or swapped, so we take the minimum number of swaps between the two possibilities.
+
+
+\setcounter{lstlisting}{0}
+\begin{lstlisting}[style=customc, caption={Dynamic Programming}]
+int minSwap( vector<int>& A, vector<int>& B )
+{
+    //n1 = the cost of making first (i-1) columns sorted
+    //but not swap column (i-1)
+    int n1 = 0;
+    //s1 = the cost of making first (i-1) columns sorted
+    //but swap column (i-1)
+    int s1 = 1;
+
+    for( size_t i = 1; i < A.size(); ++i )
+    {
+        int n2 = INT_MAX;
+        int s2 = INT_MAX;
+        if( ( A[i - 1] < A[i] ) && ( B[i - 1] < B[i] ) )
+        {
+            //we can choose to not swap column (i-1) and (i)
+            n2 = ( min )( n2, n1 );
+            //or we can choose to swap column (i-1) and (i)
+            s2 = ( min )( s2, s1 + 1 );
+        }
+
+        if( ( A[i - 1] < B[i] ) && ( B[i - 1] < A[i] ) )
+        {
+            //we can choose to swap column (i-1)
+            //but leave column i not swapped
+            n2 = ( min )( n2, s1 );
+            //or we can choose to swap column i
+            //but leave column (i-1) not swapped
+            s2 = ( min )( s2, n1 + 1 );
+        }
+
+        n1 = n2;
+        s1 = s2;
+    }
+    //the minimum of n1 and s1 is the answer
+    return ( min )( n1, s1 );
+}
+\end{lstlisting}

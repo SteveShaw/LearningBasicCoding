@@ -1,16 +1,27 @@
 \section{244 --- Shortest Word Distance II}
 This is a follow up of \textbf{242 --- Shortest Word Distance}. The only difference is now you are given the list of words and your method will be called repeatedly many times with different parameters. How would you optimize it?
-\par
-Design a class which receives a list of words $W$ in the constructor, and implements a method that takes two words $A$ and $B$ and return the shortest distance between these two words in the list.
-\par
-For example,
-\par
-Assume that $W = [\texttt{practice}, \texttt{makes}, \texttt{perfect}, \texttt{coding}, \texttt{makes}]$.
-\par
-Given $A = \texttt{coding}$, $B = \texttt{practice}$, return 3.
-\par
-Given $A = \texttt{makes}$, $B = \texttt{coding}$, return 1.
+
+Design a class which receives a list of words in the constructor, and implements a method that takes two words \fcj{word1} and \fcj{word2} and return the shortest distance between these two words in the list. Your method will be called \textit{repeatedly} many times with different parameters. 
+
+For example, Assume that words are 
+
+\fcj{["practice", "makes", "perfect", "coding", "makes"]}.
+
+\begin{flushleft}
+
+\textbf{Input}: \fcj{word1 = "coding"}, \fcj{word2 = "practice"}
+
+\textbf{Output}: 3
+
+\textbf{Input}: \fcj{word1 = "makes"}, \fcj{word2 = "coding"}
+
+\textbf{Output}: 1
+\end{flushleft}
+
 \paragraph{Note:}
 \begin{itemize}
-\item You may assume that $A$ does not equal to $B$, and $A$ and $B$ are both in the list.
+\item You may assume that \fcj{word1} \textbf{does not equal to} \fcj{word2}, and \fcj{word1} and \fcj{word2} are both in the list.
 \end{itemize}
+
+\subsection{Hash Map}
+We have to preprocess the input strings array, and for each string, get its indices into an associated array.

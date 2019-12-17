@@ -1,49 +1,29 @@
 \section{253 --- Meeting Rooms II}
 Given an array of meeting time intervals $A$ consisting of start and end times $[s_1,\;e_1],\;[s_2,\;e_2],\;\ldots$ $(s_i < e_i)$, find the minimum number of conference rooms required.
-\par
+
+
+\paragraph{Example 1:}
+
 \begin{flushleft}
-\textbf{Input}: $A =[[0, 30],\;[5, 10],\;[15, 20]]$
-\\
+\textbf{Input}: \fcj{[[0, 30],[5, 10],[15, 20]]}
+
 \textbf{Output}: 2
+
 \end{flushleft}
+
+\paragraph{Example 2:}
+
+\begin{flushleft}
+\textbf{Input}: \fcj{[[7,10],[2,4]]}
+
+\textbf{Output}: 1
+\end{flushleft}
+
 \subsection{Tree Map}
-\begin{itemize}
-\item Tree Map能够自动排序插入的数
-\item 遍历$A$，同时maintain一个tree map $M$
-\begin{itemize}
-\item 遇到start，将其插入$M$，对应的值设为$1$，如果已经存在将其对应的value加1
-。
-\item 遇到end，将其拆入$M$，对应的值设为$-1$。如果这个end在$M$中存在，将其对应的value减1。
-\end{itemize}
-\item 然后遍历$M$，累加各个key的value，同时maintain一个计数器，如果发生overlap，那么这个计数器的值在一直增加。
-\item 记录遍历过程中计数器的最大值，这个最大值就是overlap的最多的interval的个数。
-\end{itemize}
-\setcounter{algorithm}{0}
-\begin{algorithm}[H]
-\caption{Counter Of Overlapped Intervals}
-\begin{algorithmic}[1]
-\Procedure{MinMeetingRooms}{$A, L$}
-\State $\star$ 创建一个Tree Map $M$
-\For{$i:=0$ \textbf{to} L-1}
-\State $\star$ 将$A[i]$的\texttt{start}插入$M$,对应的value为1,如果存在就increments其value
-\State $\star$ 将$A[i]$的\texttt{end}插入$M$,对应的value为$-1$,如果存在就decrements其value
-\EndFor
-\State $\ast$ 初始化一个计数器$\delta$为0
-\State $\ast$ 创建一个变量$x$作为记录$\delta$在遍历$M$中出现的最大值
-\For{Each key $k$ in $M$}
-\State $\delta\gets\delta+M[k]$
-\State $x\gets\max(x, \delta)$
-\EndFor
-\algstore{253algo}
-\end{algorithmic}
-\end{algorithm}
-\begin{algorithm}[H]
-\begin{algorithmic}[1]
-\algrestore{253algo}
-\State \Return $x$
-\EndProcedure
-\end{algorithmic}
-\end{algorithm}
+Iterate the input arrays, For start time, increment the value, and for end time, decrement the value. 
+
+Then, iterate over the map, get the sum of all keys' values. The maximum value during this process will be the maximum number of overlapped intervals.
+
 \setcounter{lstlisting}{0}
 \begin{lstlisting}[style=customc, caption={Tree Map}]
 int minMeetingRooms( vector<Interval>& intervals )
@@ -84,7 +64,96 @@ int minMeetingRooms( vector<Interval>& intervals )
         delta += p.second;
         x = ( max )( x, delta );
     }
-
     return x;
+}
+\end{lstlisting}
+
+\subsection{Two Arrays}
+
+If we separate the starting and ending time, and treat them individually, then the identity of a meeting goes away. This is fine because:
+
+When we encounter an ending event, that means that some meeting that started earlier has ended now. We are not really concerned with which meeting has ended. All we need is that some meeting ended thus making a room available.
+
+Using two arrays say $X$ and $Y$. $X$ is used to record sorted start times while $Y$ for end times. 
+
+When iterating over both $X$ and $Y$. If current start time is earlier than current end time, increment the result, and jump to next start time in $X$. Otherwise, we jump to next end time in $Y$ and next start time in $X$.
+
+\begin{lstlisting}[style=customc, caption={Two Arrays}]
+int minMeetingRooms( vector<vector<int>>& intervals )
+{
+    vector<int> starts( intervals.size() );
+    vector<int> ends( intervals.size() );
+    size_t i = 0;
+    for( const auto& x : intervals )
+    {
+        starts[i] = x[0];
+        ends[i] = x[1];
+        ++i;
+    }
+    sort( begin( starts ), end( starts ) );
+    sort( begin( ends ), end( ends ) );
+    size_t ix = 0ull;
+    size_t iy = 0ull;
+    int ans = 0;
+    auto N = intervals.size();
+    while( ( ix < N ) && ( iy < N ) )
+    {
+        if( starts[ix] < ends[iy] )
+        {
+            //overlapped intervals
+            ++ans;
+            //only jump to next in starts
+            ++ix;
+        }
+        else
+        {
+            //we neet to jump to next
+            //in starts and ends
+            ++iy;
+            ++ix;
+        }
+    }
+    return ans;
+}
+\end{lstlisting}
+
+\subsection{Priority Queue}
+
+we can keep all the rooms in a \textbf{min heap} where the key for the min heap would be the ending time of meeting.
+
+So, every time we want to check if any room is free or not, simply check the topmost element of the \textbf{min heap} as that would be the room that would get free the earliest out of all the other rooms currently occupied.
+
+If the room we extracted from the top of the \textbf{heap} isn't free, then no other room is. So, we can save time here and simply allocate a new room.
+
+After processing all the meetings, the size of the heap will tell us the number of rooms allocated. This will be the minimum number of rooms needed to accommodate all the meetings.
+
+\begin{lstlisting}[style=customc, caption={Min Heap}]
+int minMeetingRooms( vector<vector<int>>& intervals )
+{
+    if( intervals.empty() )
+    {
+        return 0;
+    }
+    //min heap
+    priority_queue<int, vector<int>, greater<int>> pq;
+    //sort intervals by start time
+    sort( begin( intervals ), end( intervals ), []( const vector<int>& a1, const vector<int>& a2 )
+    {
+        return a1[0] < a2[0];
+    } );
+    pq.push( intervals[0][1] );
+    for( size_t i = 1; i < intervals.size(); ++i )
+    {
+        if( intervals[i][0] >= pq.top() )
+        {
+            //we can use this room that occupied before
+            pq.pop();
+        }
+        //either we have used previous meeting room
+        //or we allocate a new one with end time as
+        //intervals[i][1]
+        pq.push( intervals[i][1] );
+    }
+    return ( int )( pq.size() );
 }
 \end{lstlisting}

@@ -1,10 +1,49 @@
 \section{252 --- Meeting Rooms}
 Given an array of meeting time intervals $A$ consisting of start and end times $[s_1,\;e_1],\;[s_2,\;e_2],\;\ldots$ $(s_i < e_i)$, determine if a person could attend all meetings.
-\par
+
+\paragraph{Example 1:}
+
 \begin{flushleft}
-\textbf{Input}: $A =[[0, 30],\;[5, 10],\;[15, 20]]$
-\\
-\textbf{Output}: \texttt{false}
+\textbf{Input}: \fcj{[[0,30],[5,10],[15,20]]}
+
+\textbf{Output}: \fcj{false}
+
 \end{flushleft}
+
+\paragraph{Example 2:}
+
+\begin{flushleft}
+\textbf{Input}: \fcj{[[7,10],[2,4]]}
+
+\textbf{Output}: \fcj{true}
+\end{flushleft}
+
 \subsection{Check Overlapped Ranges}
 很简单的题目，将输入的ranges按照start time从小到打排序，然后依次看上一个range的end是否小于或者等于下一个range的start time。
+
+\setcounter{lstlisting}{0}
+\begin{lstlisting}[style=customc, caption={Sort}]
+bool canAttendMeetings( vector<vector<int>>& intervals )
+{
+    if( intervals.empty() || ( intervals.size() == 1 ) )
+    {
+        return true;
+    }
+    sort( begin( intervals ), end( intervals ), []( const vector<int>& a1, const vector<int>& a2 )
+    {
+        return a1[0] < a2[0];
+    } );
+    auto last_end = intervals.front()[1];
+    for( size_t i = 1; i < intervals.size(); ++i )
+    {
+        if( intervals[i][0] < last_end )
+        {
+            //overlapped
+            return false;
+        }
+
+        last_end = intervals[i][1];
+    }
+    return true;
+}
+\end{lstlisting}

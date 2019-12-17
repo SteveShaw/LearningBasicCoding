@@ -31,18 +31,18 @@ queue.empty(); // returns false
 \item You may assume that all operations are valid (for example, no \texttt{pop} or \texttt{peek} operations will be called on an empty queue).
 \end{itemize}
 \subsection{Two Stacks}
-\begin{CJK*}{UTF8}{gbsn}
+
 \begin{itemize}
 \item 因为是queue，所以新加入的number需要push到bottom of the stack.
 \begin{enumerate}
-\item 首先把$S_1$中的所有number都转移到辅助栈$S_2中$
+\item 首先把$S_1$中的所有number都转移到辅助栈$S_2$中
 \item 然后把新加入的number push到$S_2$中，这时候这个新的number就在$S_2$中的top上。
 \item 再将$S_2$中的所有元素弹出，push到$S_1$。
 \end{enumerate}
 \item 由于上述push的操作，$S_1$总是把第一个插入的number放在top。因此直接从$S_1$弹出top即可。
 \item 这种方法中，$S_2$只是用于reverse input numbers的顺序，因此除了push函数中会暂时有numbers进入，其余任何时候都是empty。
 \end{itemize}
-\end{CJK*}
+
 \setcounter{lstlisting}{0}
 \begin{lstlisting}[style=customc,caption={Two Stacks}]
 class MyQueue
@@ -110,7 +110,7 @@ public:
 };
 \end{lstlisting}
 \subsection{Two Stacks With Amortized O(1)}
-\begin{CJK*}{UTF8}{gbsn}
+
 \begin{itemize}
 \item 新加入的number $x$总是放在$S_1$的top
 \item 对于pop
@@ -193,4 +193,3 @@ public:
     int front;
 };
 \end{lstlisting}
-\end{CJK*}

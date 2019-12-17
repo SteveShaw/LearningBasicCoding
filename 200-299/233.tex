@@ -21,34 +21,7 @@ Digit 1 occurred in the following numbers: 1, 10, 11, 12, 13.
 \item 分析千位上的1时，$a=3141$而$b=592$。这时候如果仅仅考虑从1000到3141999，这个位上的1的出现次数为$315\times 1000$。但是$n=3141592 < 3141999$，因此千位上的1在百位，十位和个位递增时，只重复了593次，即从$1000$到$1592$。因此实际的重复次数是$314\times 1000 + 592$，用$a$和$b$表示即为 $(\lfloor a / 10\rfloor \times 1000) + (b + 1)$ times.
 \item 上述情况的区分点在于要分析的位上的数字是否大于等于2，如果大于等于2，那么从$100\ldots0$到$199\ldots9$都能包括。否则就要考虑实际的重复次数了。
 \end{itemize}
-\setcounter{algorithm}{0}
-\begin{algorithm}[H]
-\caption{Mathematical Induction}
-\begin{algorithmic}[1]
-\Procedure{CountDigitOne}{$n$}
-\State $\star$ Initialize $a$ and $b$ as any value
-\State $\star$ Initialize the counter $x$ as zero
-\For{$p:=1$ \textbf{to} $n$}
-\State $\ast$ Split $n$ into $a$ and $b$ based on $p$
-\State $a\gets n / p$
-\State $b\gets n - a\times p$ \Comment $b\gets n\bmod p$
-\State $\ast$ Analyze if the number $r$ at position $p$ is no less than 2
-\State $t:=a/10$ \Comment $a$ includes the number at position $p$
-\State $r:=a-t\times 10$ \Comment $r$ is the number at position $p$
-\If{$r < 2$} \Comment $r$ is zero or 1, so cannot count from $10\ldots0$ to $(t)19\ldots9$
-\State $x\gets x+ t\times p$ \Comment The number 1 at $p$ position appears $\lfloor a/10\rfloor \times p$ times
-\If{$r=1$}
-\State $x\gets x+(b+1)$ \Comment Still needs to count from $1\ldots 0$ to $(t)1(b)$
-\EndIf
-\Else
-\State $x\gets (t+1)\times p$ \Comment Number 1 at position $p$ can appear from $10\ldots0$ to $(t)19\ldots9$
-\EndIf
-\State $p\gets p\times 10$ \Comment Move to next position
-\EndFor
-\State \Return $x$
-\EndProcedure
-\end{algorithmic}
-\end{algorithm}
+
 \setcounter{lstlisting}{0}
 \begin{lstlisting}[style=customc, caption={Mathematical Induction}]
 int countDigitOne( int n )

@@ -42,40 +42,14 @@ Given a singly linked list, determine if it is a palindrome.
 \item Could you do it in $O(n)$ time and $O(1)$ space?
 \end{itemize}
 \subsection{Fast Slow Pointer And Reverse}
-\begin{CJK*}{UTF8}{gbsn}
+
 \begin{itemize}
 \item 先用快慢指针找到链表的中间位置
 \item 将中间位置往右的部分reverse
 \item 比较前半部分链表和reverse的后半部分。
 \end{itemize}
-\end{CJK*}
-\setcounter{algorithm}{0}
-\begin{algorithm}[H]
-\caption{Reverse Right Half}
-\begin{algorithmic}[1]
-\Procedure{IsPalindrome}{$H$}
-\State $\ast$ Corner case
-\If{$L$ is empty or has only one node}
-\State \Return \texttt{true}
-\EndIf
-\State $\star$ Initialize two pointers $f$ and $s$ as head node $H$. $f$ move two nodes at once while $s$ one node
-\algstore{234algo}
-\end{algorithmic}
-\end{algorithm}
-\begin{algorithm}[H]
-\begin{algorithmic}[1]
-\algrestore{234algo}
-\While{$f$'s next node and next of $f$'s next node are not empty}
-\State $\star$ Move $s$ one node forward
-\State $\star$ Move $f$ two nodes forward
-\EndWhile
-\State $\star$ Save $s$'s next node as $x$ and then set it as null pointer
-\State $\star$ Reverse the right half list starting from $x$ and then get the head of reversed list as $y$
-\State $\star$ Compare left half list starting from $H$ and right half list with head $y$
-\State $\star$ Return \texttt{false} whenever found different values. Otherwise, Return \texttt{true}
-\EndProcedure
-\end{algorithmic}
-\end{algorithm}
+
+
 \setcounter{lstlisting}{0}
 \begin{lstlisting}[style=customc, caption={Find Middle Reverse Right Half}]
 bool isPalindrome( ListNode* head )

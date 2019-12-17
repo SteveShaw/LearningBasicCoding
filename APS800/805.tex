@@ -1,0 +1,102 @@
+\section{805 --- Split Array With Same Average}
+
+\textbf{Hard}
+
+In a given integer array A, we must move every element of A to either list B or list C. (B and C initially start empty.)
+
+Return \fcj{true} if and only if after such a move, it is possible that the average value of B is equal to the average value of C, and B and C are both non-empty.
+
+\paragraph{Example:}
+
+\begin{flushleft}
+\textbf{Input}: 
+
+\fcj{[1,2,3,4,5,6,7,8]}
+
+\textbf{Output}: \fcj{true}
+
+Explanation: We can split the array into \fcj{[1,4,5,8]} and \fcj{[2,3,6,7]}, and both of them have the average of 4.5.
+\end{flushleft}
+
+\paragraph{Note:}
+
+\begin{itemize}
+\item The length of A will be in the range \fcj{[1, 30]}.
+\item \fcj{A[i]} will be in the range of \fcj{[0, 10000]}.
+\end{itemize}
+
+\subsection{Dynamic Programming}
+
+Suppose $A$ has $N$ numbers, and $B$ has $K$ elements. Then $C$ will have $N-K$ numbers.
+
+Assume the total sum of $A$ is $x$, and $B$ is $y$, we have $y/K = (x-y)/(N-K)$. Then $y\times(N-K) = K\times (x-y)$, finally we can get $y\times N = K\times x$, i.e., $K\times x /N = y$.
+
+Since $y$ is integer, $K\times x$ must be $N$'s multiple. Since $A$ is divided into two arrays, we can let $B$ has smaller size. Thus, $K \in [1, N/2]$. Combined with above discussion, if we cannot find a $K$ in $[1,N/2]$ such that $K\times x$ is not multiple $N$, we can directly return \fcj{false}.
+
+So, if we find the $K$, the problem will be find $K$ numbers in $A$ such that the sum of these numbers is $y$.
+
+Assume $F[i]$ is the all possible sums when select $i$ numbers in $A$. Then, for $F[i+1]$, we add a new number. To achieve this, we need three level loops:
+
+\begin{enumerate}
+\item Level 1: each number in $A$
+\item Level 2: from $N/2$ to 1 ( each $i$ )
+\item Level 3: each sum in $F[i]$.
+\end{enumerate}
+
+Then we test each $K$ to find if $y$ exists in $F$.
+
+\setcounter{lstlisting}{0}
+\begin{lstlisting}[style=customc, caption={DP}]
+bool splitArraySameAverage( vector<int>& A )
+{
+    int sum = accumulate( begin( A ), end( A ), 0 );
+    auto sz = A.size();
+    auto t = ( sz / 2 );
+    bool possible = false;
+    //check if (sum * K) is multiple of szs
+    for( auto K = 1ull; K <= t; ++K )
+    {
+        if( ( sum * K ) % sz == 0 )
+        {
+            possible = true;
+            break;
+        }
+    }
+    if( !possible )
+    {
+        return false;
+    }
+    //F[i]: find all possible sums when
+    //selecting i numbers from A
+    //These i numbers could be duplicate
+    //so F could include sum that select duplicate numbers
+    //but we don't care
+    //we only care if the sum can be found
+    vector<unordered_set<int>> F( t + 1 );
+    //to avoid (i-1) overflow
+    F[0].insert( 0 );
+    for( int x : A )
+    {
+        for( auto K = t; K >= 1ull; --K )
+        {
+            for( int s : F[K - 1] )
+            {
+                F[K].insert( s + x );
+            }
+        }
+    }
+    //test if such a K exists
+    for( auto K = 1; K <= t; ++K )
+    {
+        if( ( sum * K ) % sz == 0 )
+        {
+            auto sum1 = ( sum * K ) / sz;
+            if( F[K].find( sum1 ) != F[K].end() )
+            {
+                return true;
+            }
+        }
+    }
+    return false;
+}
+\end{lstlisting}

@@ -1,0 +1,110 @@
+\section{802 --- Find Eventual Safe States}
+
+\textbf{Medium}
+
+In a directed graph, we start at some node and every turn, walk along a directed edge of the graph. If we reach a node that is terminal (that is, it has no outgoing directed edges), we stop.
+
+Now, say our starting node is eventually safe if and only if we must eventually walk to a terminal node. More specifically, there exists a natural number K so that for any choice of where to walk, we must have stopped at a terminal node in less than K steps.
+
+Which nodes are eventually safe?  Return them as an array in sorted order.
+
+The directed graph has $N$ nodes with labels 0, 1, $\ldots$, $N-1$, where $N$ is the length of graph. The graph is given in the following form: \fcj{graph[i]} is a list of labels $j$ such that $ (i, j) $ is a directed edge of the graph.
+
+\paragraph{Example:}
+\begin{flushleft}
+
+
+\textbf{Input}: \fcj{graph = [[1,2],[2,3],[5],[0],[5],[],[]]}
+
+\textbf{Output}: \fcj{[2,4,5,6]}
+
+Here is a diagram of the above graph.
+
+\begin{figure}[H]
+\begin{tikzpicture}
+[every node/.style={draw, circle, fill=gray!20!, minimum size=5mm},
+thick, ->, >=stealth, node distance=9mm, start chain]
+\node(0)[on chain]{0};
+\node(1)[on chain]{1};
+\node(2)[on chain]{2};
+\node(3)[on chain]{3};
+\node(4)[on chain]{4};
+\node(5)[on chain]{5};
+\node(6)[on chain]{6};
+\draw (0) to [bend left=45] (1);
+\draw (0) to [bend left=60] (2);
+\draw (1) to [bend right=45] (2);
+\draw (1) to [bend right=60] (3);
+\draw (2) to [bend left=60] (5);
+\draw (4) to [bend left=45] (5);
+\draw[red] (3) to [bend right=60] (0);
+\end{tikzpicture}
+\end{figure}
+
+\end{flushleft}
+
+\paragraph{Note:}
+
+\begin{itemize}
+\item \fcj{graph} will have length at most 10000.
+\item The number of edges in the \fcj{graph} will not exceed 32000.
+\item Each \fcj{graph[i]} will be a sorted list of different integers, chosen within the range \fcj{[0, graph.length - 1]}.
+\end{itemize}
+
+\subsection{Depth-First Search}
+We can apply a classic \textit{white-gray-black} DFS algorithm by marking the node \textit{gray} on entry and \textit{black} on exit. If we see a \textit{gray} node during DFS, it must be part of a cycle.
+
+For this problem, When we visit a node, the only possibilities are that we've marked the entire subtree black (which must be eventually safe), or it has a cycle and we have only marked the members of that cycle gray. So \textit{gray} nodes are always part of a cycle, and \textit{black} nodes are always eventually safe.
+
+\setcounter{lstlisting}{0}
+\begin{lstlisting}[style=customc, caption={DP}]
+vector<int> eventualSafeNodes( vector<vector<int>>& graph )
+{
+    vector<int> color( graph.size(), 0 );
+    auto N = static_cast< int >( graph.size() );
+    vector<int> ans;
+    for( int i = 0ull; i < N; ++i )
+    {
+        if( dfs( graph, i, color ) )
+        {
+            ans.push_back( i );
+        }
+    }
+    return ans;
+}
+//0: white, 1: gray, 2: black
+bool dfs( vector<vector<int>>& G, int start, vector<int>& color )
+{
+    if( color[start] > 0 )
+    {
+        //black node is safe node
+        return color[start] == 2;
+    }
+    //mark current node as gray
+    color[start] = 1;
+    for( int adj : G[start] )
+    {
+        if( color[adj] == 2 )
+        {
+            //this is already a safe node
+            //no need to visit
+            continue;
+        }
+        else if( color[adj] == 1 )
+        {
+            //we are in a cycle
+            return false;
+        }
+        else
+        {
+            if( !dfs( G, adj, color ) )
+            {
+                return false;
+            }
+        }
+    }
+    //mark node as black
+    color[start] = 2;
+    return true;
+}
+\end{lstlisting}

@@ -82,14 +82,14 @@ The LCA of nodes 2 and 4 is 2, since a node can be a descendant of itself accord
 \item $p$ and $q$ are different and both values will exist in the \texttt{BST}.
 \end{itemize}
 \subsection{BST Search}
-\begin{CJK*}{UTF8}{gbsn}
+
 借助\texttt{BST}的特性，由于题目中说明了每个节点的value都是unique的，所以
 \begin{itemize}
 \item 当根节点的value比$p$和$q$的value都大时，说明$p$和$q$的\texttt{LCA}在左子树，因此递归到左子树寻找。
 \item 当根节点的value比$p$和$q$的value都大小时，说明$p$和$q$的\texttt{LCA}在右子树，因此递归到右子树寻找。
 \item 否则，根节点的value处于$p$和$q$的value中间，因此根节点就是$p$和$q$的\texttt{LCA}。
 \end{itemize}
-\end{CJK*}
+
 \setcounter{lstlisting}{0}
 \begin{lstlisting}[style=customc, caption={BST Properties}]
 TreeNode* LCA( TreeNode* root, TreeNode* p, TreeNode* q )

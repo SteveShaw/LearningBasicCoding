@@ -1,0 +1,62 @@
+\section{242 --- Valid Anagram}
+Given two strings \fcj{s} and \fcj{t} , write a function to determine if  \fcj{t} is an anagram of  \fcj{s}.
+
+\paragraph{Example 1:}
+
+\begin{flushleft}
+\textbf{Input}: \fcj{s = "anagram"}, \fcj{t = "nagaram"}
+
+\textbf{Output}: \fcj{true}
+
+\end{flushleft}
+
+\paragraph{Example 2:}
+
+\begin{flushleft}
+\textbf{Input}: \fcj{s = "rat"}, \fcj{t = "car"}
+
+\textbf{Output}: \fcj{false}
+
+\end{flushleft}
+
+\paragraph{Note:}
+
+\begin{itemize}
+\item You may assume the string contains only lowercase alphabets.
+\end{itemize}
+
+\paragraph{Follow up:}
+\begin{itemize}
+\item What if the inputs contain unicode characters? How would you adapt your solution to such case?
+\end{itemize}
+
+\subsection{Counter}
+
+\setcounter{lstlisting}{0}
+\begin{lstlisting}[style=customc, caption={Counter}]
+bool isAnagram( string s, string t )
+{
+    //anagram strings must be equal size
+    if( s.size() != t.size() )
+    {
+        return false;
+    }
+    int m[26] = {0};
+    for( auto c : s )
+    {
+        m[c - 'a'] += 1;
+    }
+    for( auto c : t )
+    {
+        m[c - 'a'] -= 1;
+        if( m[c - 'a'] < 0 )
+        {
+            //don't have same count of same letter
+            return false;
+        }
+    }
+    return true;
+}
+\end{lstlisting}
+
+For unicode string, use a hash table instead of a fixed size counter. 

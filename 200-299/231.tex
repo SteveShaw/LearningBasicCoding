@@ -29,12 +29,12 @@ Given an integer $n$, write a function to determine if it is a power of two.
 \textbf{Output}: \texttt{false}
 \end{flushleft}
 \subsection{Bit Operation}
-\begin{CJK*}{UTF8}{gbsn}
+
 \begin{itemize}
 \item 利用$n$\&$(n-1)$能够消除rightmost 1-bit的特性。如果是2的power，那么$n$\&$(n-1)$就为零。
 \item 需要考虑当$n$是int type所能代表的最大和最小值，以及$n=0$。这三种情况都返回\texttt{false}。
 \end{itemize}
-\end{CJK*}
+
 \setcounter{lstlisting}{0}
 \begin{lstlisting}[style=customc, caption={Bit Operation}]
 bool isPowerOfTwo( int n )

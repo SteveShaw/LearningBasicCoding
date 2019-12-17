@@ -1,31 +1,31 @@
 \section{251 --- Flatten 2D Vector}
-Implement an iterator to flatten a 2d vector.
-\par
-For example,
-\par
-Given 2d vector = $[[1,2],\;[3],\;[4,5,6]]$
-\par
-By calling \texttt{next} repeatedly until \texttt{hasNext} returns \texttt{false}, the order of elements returned by \texttt{next} should be: 
-\par
+Design and implement an iterator to flatten a 2d vector. It should support the following operations: \fcj{next} and \fcj{hasNext}.
 
-$[1,2,3,4,5,6]$.
-\par
-\texttt{Hint:}
+\paragraph{Example:}
 
-\begin{itemize}
-\item How many variables do you need to keep track?
-\item Two variables is all you need. Try with $x$ and $y$.
-\item Beware of empty rows. It could be the first few rows.
-\item To write correct code, think about the invariant to maintain. What is it?
-\item The invariant is $x$ and $y$ must always point to a valid point in the 2d vector. Should you maintain your invariant ahead of time or right when you need it?
-\item Not sure? Think about how you would implement \texttt{hasNext}(). Which is more complex?
-\item Common logic in two different places should be refactored into a common method.
-\end{itemize}
+\begin{flushleft}
+\fcj{Vector2D iterator = new Vector2D([[1,2],[3],[4]]);}
+
+\fcj{iterator.next(); // return 1}
+
+\fcj{iterator.next(); // return 2}
+
+\fcj{iterator.next(); // return 3}
+
+\fcj{iterator.hasNext(); // return true}
+
+\fcj{iterator.hasNext(); // return true}
+
+\fcj{iterator.next(); // return 4}
+
+\fcj{iterator.hasNext(); // return false}
+\end{flushleft}
 
 \paragraph{Follow up:}
 \begin{itemize}
 \item As an added challenge, try to code it using only iterators in \texttt{C++} or iterators in \texttt{Java}.
 \end{itemize}
+
 \subsection{Iterator}
 将$x$定义为row的iterator，再用另外一个变量$z$指向二维数组的末尾，同时定义一个整型变量$y$来指向列位置
 \setcounter{lstlisting}{0}
@@ -33,30 +33,43 @@ $[1,2,3,4,5,6]$.
 class Vector2D
 {
 public:
-    Vector2D( vector<vector<int>>& vec2d )
+    Vector2D( vector<vector<int>>& v )
     {
-        x = vec2d.begin();
-        z = vec2d.end();
+        x = v.begin();
+        endV = v.end();
+        if( x != endV )
+        {
+            y = x->begin();
+        }
     }
-	
     int next()
     {
-        return ( *x )[y++];
+        if( !hasNext() )
+        {
+            //make sure we have next
+            return -1;
+        }
+        int n = *y;
+        ++y;
+        return n;
     }
-	
     bool hasNext()
     {
-        if( ( x != z ) && ( y == ( *x ).size() ) )
+        //we need a loop here
+        //to skip empty vectors
+        while( ( x != endV ) && ( y == x->end() ) )
         {
             ++x;
-            y = 0;
+            if( x != endV )
+            {
+                y = x->begin();
+            }
         }
-        return x != z;
+        return x != endV;
     }
-
 private:
     vector<vector<int>>::iterator x;
-    vector<vector<int>>::iterator z;
-    size_t y = 0;
+    vector<vector<int>>::iterator endV;
+    vector<int>::iterator y;
 };
 \end{lstlisting}

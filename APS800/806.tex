@@ -1,0 +1,89 @@
+\section{806 --- Number of Lines To Write String}
+
+\textbf{Easy}
+
+We are to write the letters of a given string $S$, from left to right into lines. Each line has maximum width 100 units, and if writing a letter would cause the width of the line to exceed 100 units, it is written on the next line. We are given an array \fcj{widths}, an array where \fcj{widths[0]} is the width of \fcj{'a'}, \fcj{widths[1]} is the width of \fcj{'b'}, $\ldots$, and \fcj{widths[25]} is the width of \fcj{'z'}.
+
+Now answer two questions: how many lines have at least one character from S, and what is the width used by the last such line? Return your answer as an integer list of length 2.
+
+ 
+
+\paragraph{Example:}
+
+\begin{flushleft}
+\textbf{Input}:
+ 
+\fcj{widths = [10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10]}
+
+\fcj{S = "abcdefghijklmnopqrstuvwxyz"}
+
+\textbf{Output}: \fcj{[3, 60]}
+
+\textbf{Explanation}: 
+
+All letters have the same length of 10. To write all 26 letters,
+
+we need two full lines and one line with 60 units.
+\end{flushleft}
+
+
+\paragraph{Example:}
+
+\begin{flushleft}
+\textbf{Input}:
+
+\fcj{widths = [4,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10]}
+
+\fcj{S = "bbbcccdddaaa"}
+
+\textbf{Output}: \fcj{[2, 4]}
+
+\textbf{Explanation}: 
+
+All letters except \fcj{'a'} have the same length of 10, 
+
+and \fcj{"bbbcccdddaa"} will cover $ 9 \times 10 + 2 \times 4 = 98 $ units.
+
+For the last \fcj{'a'}, it is written on the second line because
+
+there is only 2 units left in the first line.
+
+So the answer is 2 lines, plus 4 units in the second line.
+\end{flushleft}
+ 
+
+\paragraph{Note:}
+
+\begin{itemize}
+\item The length of $S$ will be in the range \fcj{[1, 1000]}.
+
+\item $ S $ will only contain lowercase letters.
+
+\item \fcj{widths} is an array of length 26.
+
+\item \fcj{widths[i]} will be in the range of \fcj{[2, 10]}.
+\end{itemize}
+
+\subsection{Simulation}
+
+\setcounter{lstlisting}{0}
+\begin{lstlisting}[style=customc, caption={Simulation}]
+vector<int> numberOfLines( vector<int>& widths, string S )
+{
+    int line_width = 0;
+    int num_lines = 1;
+    for( auto c : S )
+    {
+        int width = widths[c - 'a'];
+        if( line_width + width > 100 )
+        {
+            //new line
+            ++num_lines;
+            //reset width
+            line_width = 0;
+        }
+        line_width += width;
+    }
+    return {num_lines, line_width};
+}
+\end{lstlisting}

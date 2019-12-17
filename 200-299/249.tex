@@ -23,74 +23,39 @@ $\texttt{a},\;\texttt{z}$
 \item For the return value, each inner list's elements must follow the lexicographic order.
 \end{itemize}
 \subsection{Unique Distance}
-注意到shift的字符串中其实每个字母和首字符的相对差都是相等的，比如\texttt{abc}和\texttt{efg}互为shift strings，对于\texttt{abc}来说，$b$和$a$的差是1，$c$和$a$的差是2，对于\texttt{efg}来说，$f$和$e$的difference是1，$g$和$e$的difference是2。利用这个特性就能很好的对字符串进行分组了。
-\par
-技巧就是用每个字符串中每个字符和首字符的difference构成一个key，然后用这个key作为group string的依照。比如\texttt{abc}的每个字符和首字符的difference构成的key为$012$，然后用$012$这个key去判断哪些字符也具有这个key。
-\par
+注意到shift的字符串中其实每个字母和首字符的相对差都是相等的，比如\fcj{abc}和\fcj{efg}互为shift strings，对于\fcj{abc}来说，$b$和$a$的差是1，$c$和$a$的差是2，对于\texttt{efg}来说，$f$和$e$的difference是1，$g$和$e$的difference是2。利用这个特性就能很好的对字符串进行分组了。
+
+技巧就是用每个字符串中每个字符和首字符的difference构成一个key，然后用这个key作为group string的依照。比如\fcj{abc}的每个字符和首字符的difference构成的key为$012$，然后用$012$这个key去判断哪些字符也具有这个key。
+
 在coding时，这个key可以转换成字符串。以避免形成0开头的数字所带来的重复key的问题。
-\par
+
 另外，由于题目要求是按照字典顺序，同时考虑到可能存在重复的字符串，因此用multiset来存放相同的字符串。
-\setcounter{algorithm}{0}
-\begin{algorithm}[H]
-\caption{Unique Distance}
-\begin{algorithmic}[1]
-\Procedure{GroupStrings}{$A, L$}
-\State $\star$ 创建一个hash map $M$。key的类型是string，而value的类型是multiset
-\State $\ast$ 按照每个字符和首字符的偏移量进行字符串归类
-\algstore{249algo}
-\end{algorithmic}
-\end{algorithm}
-\begin{algorithm}[H]
-\begin{algorithmic}[1]
-\algrestore{249algo}
-\For{$i:=0$ \textbf{to} $L-1$}
-\State $S:=A[i]$
-\State $\star$ 用$S$中每个字符与$S[0]$的difference构成一个字符串key
-\State $\star$ 将这个key和对应的$S$插入到$M$中。
-\EndFor
-\State $\star$ 从M中取出每个key对应的value，将其转换成字符串数组
-\State $\star$ 返回这些字符串数组所组成的数组集
-\EndProcedure
-\end{algorithmic}
-\end{algorithm}
+
 \setcounter{lstlisting}{0}
 \begin{lstlisting}[style=customc, caption={Unique Distance}]
 vector<vector<string>> groupStrings( vector<string>& strings )
 {
-    unordered_map<string, multiset<string>> m;
-
-    //group strings based on difference
-    //between the first character in each string
-
-    for( const auto&s  : strings )
+ vector<vector<string>> groupStrings( vector<string>& strings )
+{
+    unordered_map<string, vector<string_view>> dict;
+    for( const auto& s : strings )
     {
-        string key = "";
-
-        for( char c : s )
+        string key;
+        for( size_t i = 1; i < s.size(); ++i )
         {
-            int diff = c - s[0];
-            key += to_string( diff );
-            key.push_back( '#' );  //make sure the string is unique
+            //make sure the difference between
+            //current letter and the first letter
+            //is positive number
+            key += to_string( ( s[i] - s[0] + 26 ) % 26 );
+            key.push_back( '#' );
         }
-
-        auto it = m.find( key );
-        if( it == m.end() )
-        {
-            m.emplace( key, initializer_list<string> {s} );
-        }
-        else
-        {
-            it->second.emplace( s );
-        }
+        dict[key].emplace_back( s.c_str(), s.size() );
     }
-
-    vector<vector<string> > ans;
-
-    for( const auto& p : m )
+    vector<vector<string>> ans;
+    for( const auto& p : dict )
     {
-        ans.emplace_back( p.second.begin(), p.second.end() );
+        ans.emplace_back( begin( p.second ), end( p.second ) );
     }
-
     return ans;
 }
 \end{lstlisting}

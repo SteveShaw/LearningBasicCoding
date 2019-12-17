@@ -3,9 +3,9 @@ Given an array $A$, there is a sliding window of size $k$ which is moving from t
 
 \paragraph{Example:}
 \begin{flushleft}
-\textbf{Input}: $A = [1,3,-1,-3,5,3,6,7]$, and $k = 3$
+\textbf{Input}: \fcj{A = [1,3,-1,-3,5,3,6,7]}, and $k = 3$
 \\
-\textbf{Output}: $[3,3,5,5,6,7]$
+\textbf{Output}: \fcj{[3,3,5,5,6,7]}
 \\
 \textbf{Explanation:} 
 \begin{itemize}
@@ -26,7 +26,6 @@ Given an array $A$, there is a sliding window of size $k$ which is moving from t
 \item Could you solve it in linear time?
 \end{itemize}
 \subsection{Double-End Queue}
-\begin{CJK*}{UTF8}{gbsn}
 所有的固定长度滑动窗口问题都有可以用double-end queue来作为基础的数据结构。
 \begin{itemize}
 \item 遍历数组$A$。用一个double-end queue $q$来存放访问的index
@@ -36,47 +35,15 @@ Given an array $A$, there is a sliding window of size $k$ which is moving from t
 \item 然后将$i$加入到$q$的后面。
 \item 如果$i\geq k$，这时候就要输出最大值了，而最大值就是$q$的front。
 \end{itemize}
-\end{CJK*}
-\setcounter{algorithm}{0}
-\begin{algorithm}[H]
-\caption{Deque}
-\begin{algorithmic}[1]
-\Procedure{MaxSlidingWindow}{$A, L, k$}
-\State $\star$ Initialize a empty double-end queue $q$
-\For{$i:=0$ \textbf{to} $L-1$}
-\State $\ast$ Check if it needs to pop front from $q$
-\If{$q$ is not empty \textbf{and} its front equal to $i-k$}
-\State $\star$ Pop front from $q$
-\EndIf
-\State $\ast$ Check if it needs to pop back from $q$
-\While{$q$ is not empty}
-\State $\star$ Get the number $a$ at index equal to $q$'s
- \texttt{back}.
-\If{$A[i] \geq a$}
-\State $\star$ Pop \texttt{back} from $q$
-\EndIf
-\EndWhile
-\State $\star$ Push $i$ to $q$'s back
-\State $\star$ Check if it needs to output maximum value in the sliding window
-\If{$i \geq k-1$}
-\State $\star$ Add the number at index equal to $q$'s \texttt{front} to result array $W$
-\EndIf
-\EndFor
-\State \Return $W$
-\EndProcedure
-\end{algorithmic}
-\end{algorithm}
+
 \setcounter{lstlisting}{0}
 \begin{lstlisting}[style=customc, caption={Deque}]
 vector<int> maxSlidingWindow( vector<int>& nums, int k )
 {
     int L = static_cast<int>( nums.size() );
-
     deque<int> q;
-
     vector<int> m;
     m.reserve( L - k + 1 );
-
     for( int i = 0; i < L; ++i )
     {
         //pop out index outside sliding window
@@ -84,17 +51,14 @@ vector<int> maxSlidingWindow( vector<int>& nums, int k )
         {
             q.pop_front();
         }
-
         //pop out back index where numbers are no larger than
         //current number
         while( !q.empty() && ( nums[q.back()] <= nums[i] ) )
         {
             q.pop_back();
         }
-
         //add current index to q's back end
         q.push_back( i );
-
         // need to output maximum of sliding window
         // from k-1 to L-1
         if( i >= k - 1 )

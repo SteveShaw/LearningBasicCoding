@@ -8,6 +8,7 @@ Write an efficient algorithm that searches for a value in an $m \times n$ matrix
 \paragraph{Example:}
 \begin{flushleft}
 Consider the following matrix:
+
 \begin{table}[H]
 \begin{tabular}{lllll}
 1  & 4  & 7  & 11 & 15 \\
@@ -17,7 +18,42 @@ Consider the following matrix:
 18 & 21 & 23 & 26 & 30
 \end{tabular}
 \end{table}
-Given target = 5, return \texttt{true}.
-\\
-Given target = 20, return \texttt{false}.
+Given \fcj{target = 5}, return \fcj{true}.
+
+Given \fcj{target = 20}, return \fcj{false}.
 \end{flushleft}
+
+\subsection{Search Space Reduction}
+Search from the top-right element and reduce the search space by one row or column at each time.
+
+\setcounter{lstlisting}{0}
+\begin{lstlisting}[style=customc, caption={Search Space Reduction}]
+bool searchMatrix( vector<vector<int>>& matrix, int target )
+{
+    if( matrix.empty() || matrix[0].empty() )
+    {
+        return false;
+    }
+    auto M = static_cast<int>( matrix.size() );
+    auto N = static_cast<int>( matrix[0].size() );
+    auto row = 0;
+    auto col = N - 1;
+    while( ( row < M ) && ( col >= 0 ) )
+    {
+        auto v = matrix[row][col];
+        if( v == target )
+        {
+            return true;
+        }
+        if( v < target )
+        {
+            ++row;
+        }
+        else
+        {
+            --col;
+        }
+    }
+    return false;
+}
+\end{lstlisting}

@@ -7,5 +7,70 @@ You may assume each number in the sequence is unique.
 \item Could you do it using only constant space complexity?
 \end{itemize}
 \subsection{Stack}
+先设一个最小值 \fcj{lastMin}，然后遍历数组，
+
+如果当前值小于这个最小值 \fcj{lastMin}，返回 \fcj{false}，
+
+对于根节点，将其压入栈中，然后往后遍历，
+
+如果遇到的数字比栈顶元素小，说明是其左子树的点，继续压入栈中，直到遇到的数字比栈顶元素大，那么就是右边的值了，
+
+需要找到是哪个节点的右子树，所以更新 \fcj{lastMin} 值并删掉栈顶元素，然后继续和下一个栈顶元素比较，如果还是大于，则继续更新 \fcj{lastMin} 值和删掉栈顶，直到栈为空或者当前栈顶元素大于当前值停止，压入当前值，
+
+这样如果遍历完整个数组之前都没有返回 \fcj{false} 的话，最后返回 \fcj{true} 即可
+
+\setcounter{lstlisting}{0}
+\begin{lstlisting}[style=customc, caption={Stack}]
+bool verifyPreorder( vector<int>& preorder )
+{
+    stack<int> s;
+    int lastMin = INT_MIN;
+    for( size_t i = 0; i < preorder.size(); ++i )
+    {
+        int n = preorder[i];
+        //check if we found a number than the minimum
+        //we have met
+        if( n < lastMin )
+        {
+            return false;
+        }
+        //pop all the numbers that are less than n
+        while( !s.empty() && ( s.top() < n ) )
+        {
+            lastMin = s.top();
+            s.pop();
+        }
+        //push current element
+        s.push( n );
+    }
+    return true;
+}
+\end{lstlisting}
 \subsection{Constant Space}
-\subsection{Divide And Conquer}
+为了使空间复杂度为常量，我们不能使用 stack，所以直接修改 preorder，将 \fcj{lastMin} 值存在 preorder 的特定位置即可，前提是不能影响当前的遍历
+
+\begin{lstlisting}[style=customc, caption={Constant Space}]
+bool verifyPreorder( vector<int>& preorder )
+{
+    int lastMin = INT_MIN;
+    long i = -1;
+    for( int x : preorder )
+    {
+        if( x < lastMin )
+        {
+            return false;
+        }
+        //simulate stack
+        //find the first index in that preorder[i] >=x
+        while( ( i >= 0 ) && ( preorder[i] < x ) )
+        {
+            lastMin = preorder[i];
+            --i;
+        }
+        //we put x at preorder[i+1];
+        ++i;
+        preorder[i] = x;
+    }
+    return true;
+}
+\end{lstlisting}

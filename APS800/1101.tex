@@ -1,0 +1,125 @@
+\section{1101 --- The Earliest Moment When Everyone Become Friends}
+
+\textbf{Medium}
+
+In a social group, there are $N$ people, with unique integer ids from 0 to $N-1$.
+
+We have a list of logs, where each \fcj{logs[i] = [timestamp, id_A, id_B]} contains a non-negative integer timestamp, and the ids of two different people.
+
+Each log represents the time in which two different people became friends.  Friendship is symmetric: if A is friends with B, then B is friends with A.
+
+Let's say that person A is acquainted with person B if A is friends with B, or A is a friend of someone acquainted with B.
+
+Return the earliest time for which every person became acquainted with every other person. Return $-1$ if there is no such earliest time.
+
+ 
+
+\paragraph{Example 1:}
+
+\begin{flushleft}
+\textbf{Input}: 
+
+\fcj{logs = } 
+
+\fcj{[[20190101,0,1],[20190104,3,4],[20190107,2,3],}
+
+\fcj{[20190211,1,5],[20190224,2,4],[20190301,0,3],[20190312,1,2],[20190322,4,5]]}
+ 
+$N = 6$
+
+\textbf{Output}: 20190301
+
+Explanation: 
+
+The first event occurs at \fcj{timestamp = 20190101} and after 0 and 1 become friends we have the following friendship groups \fcj{[0,1], [2], [3], [4], [5]}.
+
+The second event occurs at \fcj{timestamp = 20190104} and after 3 and 4 become friends we have the following friendship groups \fcj{[0,1], [2], [3,4], [5]}.
+
+The third event occurs at \fcj{timestamp = 20190107} and after 2 and 3 become friends we have the following friendship groups \fcj{[0,1], [2,3,4], [5]}.
+
+The fourth event occurs at \fcj{timestamp = 20190211} and after 1 and 5 become friends we have the following friendship groups \fcj{[0,1,5], [2,3,4]}.
+
+The fifth event occurs at \fcj{timestamp = 20190224} and as 2 and 4 are already friend anything happens.
+
+The sixth event occurs at \fcj{timestamp = 20190301} and after 0 and 3 become friends we have that all become friends.
+\end{flushleft}
+ 
+
+\paragraph{Note:}
+
+\begin{itemize}
+\item $2 \leq N \leq 100$
+\item \fcj{1 <= logs.length <= 10^4}
+\item \fcj{0 <= logs[i][0] <= 10^9}
+\item \fcj{0 <= logs[i][1], logs[i][2] <= N - 1}
+\item It's guaranteed that all \fcj{timestamps} in \fcj{logs[i][0]} are different.
+\item \fcj{logs} are not necessarily ordered by some criteria.
+\item \fcj{logs[i][1] != logs[i][2]}
+\end{itemize}
+
+\subsection{Union Find}
+We can apply disjoint set to this problem. When connect two nodes, we record the number of groups and finally check if the number of groups is one.
+
+\setcounter{lstlisting}{0}
+\begin{lstlisting}[style=customc, caption={DSU}]
+int earliestAcq( vector<vector<int>>& logs, int N )
+{
+    //sort logs so that the timestamp is sorted
+    sort( logs.begin(), logs.end() );
+    //DSU related vectors
+    vector<int> parents( N );
+    vector<int> ranks( N );
+    for( int i = 0; i < N; ++i )
+    {
+        parents[i] = i;
+    }
+    int ans = -1;
+    //initially, each person is a group
+    //so we have N groups
+    int groups = N;
+    for( const auto& log : logs )
+    {
+        auto x = log[1];
+        auto y = log[2];
+        auto px = find( x, parents );
+        auto py = find( y, parents );
+        if( px != py )
+        {
+            //connect these two persons
+            //record the timestamp
+            ans = log[0];
+            connect( px, py, parents, ranks );
+            //reduce groups by one
+            --groups;
+        }
+    }
+    //only one group will get the answer
+    return groups == 1 ? ans : -1;
+}
+int find( int x, vector<int>& parents )
+{
+    while( x != parents[x] )
+    {
+        x = parents[x];
+    }
+
+    return x;
+}
+void connect( int x, int y, vector<int>& parents, vector<int>& ranks )
+{
+    auto px = find( x, parents );
+    auto py = find( y, parents );
+    if( px != py )
+    {
+        if( ranks[px] < ranks[py] )
+        {
+            std::swap( px, py );
+        }
+        else if( ranks[px] == ranks[py] )
+        {
+            ++ranks[px];
+        }
+        parents[py] = px;
+    }
+}
+\end{lstlisting}

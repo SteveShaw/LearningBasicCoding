@@ -1,0 +1,50 @@
+\section{237 --- Delete Node in a Linked List}
+Write a function to delete a node (except the tail) in a singly linked list, given only access to that node.
+
+\paragraph{Example 1:}
+
+\textbf{Input}:\fcj{ head = [4,5,1,9]}, \fcj{node = 5}
+
+\textbf{Output}: \fcj{[4,1,9]}
+
+\textbf{Explanation}: 
+
+You are given the second node with value 5, the linked list should become \fcj{4 -> 1 -> 9} after calling your function.
+
+\paragraph{Example 2:}
+
+\textbf{Input}: \fcj{head = [4,5,1,9]}, \fcj{node = 1}
+
+\textbf{Output}: \fcj{[4,5,9]}
+
+\textbf{Explanation}: 
+
+You are given the third node with value 1, the linked list should become \fcj{4 -> 5 -> 9} after calling your function.
+ 
+
+\paragraph{Note:}
+
+\begin{itemize}
+\item The linked list will have at least two elements.
+\item All of the nodes' values will be unique.
+\item The given node will not be the tail and it will always be a valid node of the linked list.
+\item Do not return anything from your function.
+\end{itemize}
+
+\subsection{Swap}
+Copy the next node's value to the deleted node and delete next node.
+
+\setcounter{lstlisting}{0}
+\begin{lstlisting}[style=customc, caption={Swap}]
+void deleteNode( ListNode* node )
+{
+    //copy node->next's value
+    //to node
+    auto p( node->next );
+    node->val = p->val;
+    //delete node->next
+    node->next = p->next;
+    p->next = nullptr;
+    delete p;
+}
+\end{lstlisting}

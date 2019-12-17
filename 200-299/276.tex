@@ -36,30 +36,7 @@ y[i] &= F[i-1]\times(k-1)\\
 F[i] &= x[i] + y[i]\\
 \end{align*}
 由于上述递推关系之和$i-1$有关，因此具体代码实现时，可以用两个变量来代表$x[i]$和$y[i]$
-\setcounter{algorithm}{0}
-\begin{algorithm}[H]
-\caption{Dynamic Programming}
-\begin{algorithmic}[1]
-\Procedure{NumWays}{$n,k$}
-\If{$n=0$}
-\State \Return 0
-\EndIf
-\State $\ast$ $n=1$时，只有一个post，所以有$k$个方法
-\State $x:=0$
-\State $y:=k$
-\State $F:=x+y$
-\For{$i:=2$ \textbf{to} $n$}
-\State $\ast$ $x[i]\gets y[i-1]$ The number ways that $i$th post has same color as $(i-1)$th post
-\State $x\gets y$ 
-\State $\ast$ $x[i]\gets y[i-1]$ The number ways that $i$th post has different color than $(i-1)$th post
-\State $y\gets F\times (k-1)$ 
-\State $\ast$ $F[i]\gets x[i]+y[i]$ The total ways that $i$th post can be painted
-\State $F\gets x+y$ 
-\EndFor
-\State \Return $F$
-\EndProcedure
-\end{algorithmic}
-\end{algorithm}
+
 \setcounter{lstlisting}{0}
 \begin{lstlisting}[style=customc, caption={Dynamic Programming}]
 int numWays( int n, int k )

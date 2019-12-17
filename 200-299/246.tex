@@ -23,3 +23,34 @@ Write a function to determine if a number is strobogrammatic. The number is repr
 \\
 \textbf{Output}: \texttt{false}
 \end{flushleft}
+
+\subsection{Replace And Reverse}
+
+\setcounter{lstlisting}{0}
+\begin{lstlisting}[style=customc, caption={Replace And Reverse}]
+bool isStrobogrammatic( string num )
+{
+    string y( num );
+    unordered_map<char, char> m =
+    {
+        { '6', '9' },
+        {'9', '6'},
+        {'8', '8'},
+        {'1', '1'},
+        {'0', '0'}
+    };
+    for( auto& c : y )
+    {
+        auto it = m.find( c );
+        if( it == m.end() )
+        {
+            //cannot get valid letter
+            return false;
+        }
+        c = it->second;
+    }
+    //we need to reverse the generated string
+    reverse( begin( y ), end( y ) );
+    return y == num;
+}
+\end{lstlisting}
