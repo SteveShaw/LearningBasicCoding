@@ -1,0 +1,165 @@
+\section{631 --- Design Excel Sum Formula}
+Your task is to design the basic function of Excel and implement the function of sum formula. Specifically, you need to implement the following functions:
+
+\begin{lstlisting}[style=customc]
+/**
+Excel(int H, char W):
+
+This is the constructor.
+The inputs represents the height and width of the Excel form.
+H is a positive integer, range from 1 to 26.
+It represents the height.
+
+W is a character range from 'A' to 'Z'.
+It represents that the width is the number of characters from 'A' to W.
+
+The Excel form content is represented by a height * width 2D integer array C,
+it should be initialized to zero.
+You should assume that the first row of C starts from 1,
+and the first column of C starts from 'A'.
+**/
+
+Excel( int H, char W );
+
+/**
+void Set(int row, char column, int val): Change the value at C(row, column) to be val.
+**/
+
+void Set( int row, char column, int val );
+
+/**
+int Get(int row, char column): Return the value at C(row, column).
+**/
+
+int Get( int row, char column );
+
+/**
+int Sum(int row, char column, List of Strings : numbers):
+
+This function calculate and set the value at C(row, column),
+where the value should be the sum of cells represented by numbers.
+This function return the sum result at C(row, column).
+This sum formula should exist until this cell is overlapped
+by another value or another sum formula.
+
+numbers is a list of strings that each string represent a cell or a range of cells.
+If the string represent a single cell, then it has the following format : ColRow.
+For example, "F7" represents the cell at (7, F).
+**/
+int Sum( int row, char column, List of Strings : numbers );
+\end{lstlisting}
+
+
+
+\paragraph{Example 1:}
+
+\begin{lstlisting}[style=customc]
+/**
+ construct a 3*3 2D array with all zero.
+
+   A B C
+ 1 0 0 0
+ 2 0 0 0
+ 3 0 0 0
+**/
+Excel( 3, "C" );
+
+/**
+ set C(1,"A") to be 2.
+
+   A B C
+ 1 2 0 0
+ 2 0 0 0
+ 3 0 0 0
+**/
+Set( 1, "A", 2 );
+
+/**
+ set C(3,"C") to be the sum of value at C(1,"A") and
+ the values sum of the rectangle range
+ whose top-left cell is C(1,"A") and bottom-right cell is C(2,"B").
+
+ Return 4.
+
+   A B C
+ 1 2 0 0
+ 2 0 0 0
+ 3 0 0 4
+**/
+Sum( 3, "C", ["A1", "A1:B2"] );
+
+/**
+
+set C(2,"B") to be 2. Note C(3, "C") should also be changed.
+
+   A B C
+ 1 2 0 0
+ 2 0 2 0
+ 3 0 0 6
+**/
+Set( 2, "B", 2 );
+\end{lstlisting}
+
+\paragraph{Note:}
+
+\begin{itemize}
+\item You could assume that there won't be any circular sum reference. For example, \texttt{A1 = sum(B1)} and \texttt{B1 = sum(A1)}.
+\item The test cases are using double-quotes to represent a character.
+\item Please remember to RESET your class variables declared in class Excel, as static/class variables are persisted across multiple test cases. Please see here for more details.
+\end{itemize}
+
+\subsection{Topological Sort}
+When we make any change to any cell, $x$, we need to determine the cells which are dependent on $x$, and update these cells, and further determine the cells which are dependent on the changed cells and so on. Since no cycles are present in the formulas, i.e. Any cell's value won't directly or indirectly be dependent on its own value.
+
+Also, suppose cell $y$ is dependent on $x$. We need to update $x$  prior to $y$.
+
+In order to do so, we can view the dependence between the cells in the form of a dependency graph, which can be a Directed Graph. Since no cycles are allowed between the formulas, the graph reduces to a Directed Acyclic Graph. Now, to solve the problem of evaluating the cells in the required order, we can make use of a very well known method specifically used for such problems in Directed Acyclic Graphs, known as the \textbf{Topological Sorting}.
+
+Topological sorting for Directed Acyclic Graph (DAG) is a linear ordering of vertices such that for every directed edge $(u,v)$, vertex $u$ comes before $v$ in the ordering. For example, a topological sorting of the following graph is \textcolor{red}{5 4 2 3 1 0}.
+
+\begin{figure}[H]
+\begin{tikzpicture}
+[every node/.style={draw, circle, fill=gray!30!, minimum size=5mm},
+>=stealth, ->, thick]
+\node(5) {5};
+\node(4)[right=20mm of 5]{4};
+\node(2)[below=10mm of 5, xshift=-10mm]{2};
+\node(0)[below=10mm of 5, xshift=15mm]{0};
+\node(1)[below=10mm of 4, xshift=10mm]{1};
+\node(3)[below=10mm of 0]{3};
+\draw (5) -- (2);
+\draw (5) -- (0);
+\draw (4) -- (0);
+\draw (4) -- (1);
+\draw (2) -- (3);
+\draw (3) -- (1);
+\end{tikzpicture}
+\end{figure}
+
+There can be more than one topological sorting for a graph. For example, another topological sorting of the following graph is \textcolor{red}{4 5 2 3 1 0}. The first vertex in topological sorting is always a vertex with in-degree as 0 (a vertex with no in-coming edges).
+
+Topological Sorting can be done if we modify the Depth First Search to some extent. In Depth First Search, we start from a vertex, we first print it and then recursively call DFS for its adjacent vertices. Thus, the DFS obtained for the graph above, starting from node 5, will be \textcolor{red}{5 2 3 1 0 4}. But, in the case of a topological sort, we can't print a node until all the nodes on which it is dependent have already been printed.
+
+To solve this problem, we make use of a temporary stack. We do the traversals in the same manner as in DFS, but we don’t print the current node immediately. Instead, for the current node we do as follows:
+
+\begin{enumerate}
+\item Recursively call topological sorting for all the nodes adjacent to the current node.
+
+\item Push the current node onto a stack.
+
+\item Repeat the above process till all the nodes have been considered at least once.
+
+\item Print the contents of the stack.
+
+\end{enumerate}
+
+Note that a vertex is pushed to stack only when all of its adjacent(dependent) vertices (and their adjacent(dependent) vertices and so on) are already in stack. Thus, we obtain the correct ordering of the vertices. 
+
+\subsection{Algorithm Implementation}
+\begin{itemize}
+\item For each cell, put all the other cells on which the cell's value is dependent into a hash map $M$. Therefore, each cell will have its associated hash map to store the cells that can affect its value.
+\item The key of $M$ is the cell name, which is composed by the column letter and row number. The value of $M$ is the count of the cell happen in the sum formula. For example, $C1=C2+C3+C2$. In this case, the count of $C3$ is 1 and that of $C2$ is 2.
+\item In function \texttt{set}, we need to clear the hash map of the cell at given $r$ and $c$, and then do the topological sorting to put the cells into a stack. Then, pop each cell from the stack, and set the sum of the values from its related cells as the value of this cell.
+\item In function \texttt{sum}, we also clear the hash map of the cell at given $r$ and $c$, and then put all the cells from the formula into the map. Next, summation all the values from the cells in the map. Since this cell's value is changed, we also need to do topological sorting again to set the values of all the cells that depend on this cell at given $r$ and $c$.
+\
+\end{itemize}

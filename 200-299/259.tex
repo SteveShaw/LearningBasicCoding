@@ -22,32 +22,35 @@ Because there are two triplets which sums are less than 2: $[-2, 0, 1]$ and $[-2
 \item 如果$A[i]+A[l]+A[r]<T$，那么$(i, l, l+1),\ ,(i,l,l+2),\ ,\ldots, (i,l,r)$都是符合要求的triplets。总共有$r-(l+1)+1=r-l$个。接着increments  $l$
 \item 如果$A[i]+A[l]+A[r]<\geq T$，这时候需要减小右侧的数，因此decrements $r$。
 \end{itemize}
-\setcounter{algorithm}{0}
-\begin{algorithm}[H]
-\caption{Left And Right Indexes}
-\begin{algorithmic}[1]
-\Procedure{ThreeSumSmaller}{$A, L, T$}
-\State $\star$ 对$A$从小到大进行排序
-\State $\star$ 初始化变量$\delta$为0，用于记录number of triplets
-\For{$i:=0$ \textbf{to} $L-2$}
-\State $l:=i+1$
-\State $r:=L-1$
-\While{$l < r$}
-\If{$A[i]+A[l]+A[r] < T$}
-\algstore{259algo}
-\end{algorithmic}
-\end{algorithm}
-\begin{algorithm}[H]
-\begin{algorithmic}[1]
-\algrestore{259algo}
-\State $\delta\gets\delta + (r-l)$
-\State $l\gets l+1$ \Comment Move $l$ rightwards to test next bigger number
-\Else
-\State $r\gets r-1$  \Comment Move $r$ leftwards to test next smaller number
-\EndIf
-\EndWhile
-\EndFor
-\State \Return $\delta$
-\EndProcedure
-\end{algorithmic}
-\end{algorithm}
+
+
+\setcounter{lstlisting}{0}
+\begin{lstlisting}[style=customc, caption={Two Pointers}]
+int threeSumSmaller( vector<int>& nums, int target )
+{
+    sort( begin( nums ), end( nums ) );
+    long len = ( long )( nums.size() );
+    int ans = 0;
+    for( long i = 0l; i < len - 1; ++i )
+    {
+        long j = i + 1;
+        long k = len - 1;
+
+        while( j < k )
+        {
+            if( nums[i] + nums[j] + nums[k] < target )
+            {
+                //(i,j,j+1), (i,j,j+2), ..., (i,j,k)
+                //are all valid triplets
+                ans += ( k - j );
+                ++j;
+            }
+            else
+            {
+                --k;
+            }
+        }
+    }
+    return ans;
+}
+\end{lstlisting}

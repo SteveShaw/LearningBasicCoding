@@ -1,0 +1,289 @@
+\section{632 --- Smallest Range}
+You have $k$ lists of sorted integers in ascending order. Find the \textbf{smallest} range that includes at least one number from each of the $k$ lists.
+
+We define the range $[a,b]$ is smaller than range $[c,d]$ if $b-a < d-c$ or $a < c$ if $b-a = d-c$.
+
+\paragraph{Example 1:}
+
+\begin{flushleft}
+\textbf{Input}:$[[4,10,15,24,26], [0,9,12,20], [5,18,22,30]]$
+
+\textbf{Output}: $[20,24]$
+
+\textbf{Explanation}: 
+
+List 1: $[4, 10, 15, 24,26]$, 24 is in range $[20,24]$.
+
+List 2: $[0, 9, 12, 20]$, 20 is in range $[20,24]$.
+
+List 3: $[5, 18, 22, 30]$, 22 is in range $[20,24]$.
+\end{flushleft}
+
+\paragraph{Note:}
+
+\begin{itemize}
+\item The given list may contain duplicates, so ascending order means $\geq$ here.
+\item $ 1 \leq k \leq 3500$
+\item $-10^5 \leq n \leq 10^5$, where $n$ is the value of element
+\end{itemize}
+
+\subsection{Brute Force}
+The naive way is to compare each pair of elements, say $p_1 = A[x][i]$ and $ p_2 = A[y][j]$ from the given list. For each range, $R=[p_1, p_2]$, we can traverse the given list to find if at least one element in each list is contained in $R$. If so, compare with the minimum range so far and update it then.
+
+But we can do better because all the arrays in the given list are sorted. Thus, we can make use of binary search to find if current range $R$ can contain at least one element of current array considered without testing each element in the array.
+
+\setcounter{lstlisting}{0}
+\begin{lstlisting}[style=customc, caption={Brute Force With Binary Search}]
+vector<int> smallestRange( vector<vector<int>>& nums )
+{
+
+    int min_beg = -100000;
+    int max_end = 100000;
+
+    for( size_t x = 0; x < nums.size(); ++x )
+    {
+        for( size_t i = 0; i < nums[x].size(); ++i )
+        {
+            //p1=nums[x][i]
+
+            for( size_t y = x; y < nums.size(); ++y )
+            {
+                //the range start and end
+                //can both from same array
+                for( size_t j = ( x == y ) ? i : 0; j < nums[y].size(); ++j )
+                {
+                    //get min and max of nums[x][i] and nums[y][j]
+                    int beg = nums[x][i];
+                    int end = nums[y][j];
+
+                    if( beg > end )
+                    {
+                        swap( beg, end );
+                    }
+
+                    //test each array in nums
+                    //to find if at least one element of each array
+                    //can be contained in this range
+
+                    bool flag = true;
+                    for( const auto& arr : nums )
+                    {
+                        auto z = leftmost( arr, beg );
+
+                        if( ( z == arr.size() ) || ( arr[z] > end ) )
+                        {
+                            //either arr.back() < beg or arr[0] > end
+                            flag = false;
+                            break;
+                        }
+                    }
+
+                    if( flag )
+                    {
+                        //compare with global minimum range
+                        if( ( end - beg < max_end - min_beg ) || ( ( end - beg == max_end - min_beg ) && ( min_beg > beg ) ) )
+                        {
+                            min_beg = beg;
+                            max_end = end;
+                        }
+                    }
+
+                } //end for j
+            } //end for y
+
+        } //end for i
+    }// end for x
+
+    return {min_beg, max_end};
+
+
+}
+
+size_t leftmost( const vector<int>& A, int target )
+{
+    size_t l = 0;
+    size_t r = A.size();
+
+    while( l < r )
+    {
+        auto mid = ( l + r ) / 2;
+        if( A[mid] < target )
+        {
+            l = mid + 1;
+        }
+        else
+        {
+            r = mid;
+        }
+    }
+
+    return l;
+}
+\end{lstlisting}
+
+\subsection{Index Arrays}
+In this approach, we maintain an array of indexes $I$ to track each array in the given list. The length of $I$ is equal to the one of the given list.
+
+At start, all the entries in $I$ are zero. This means we are dealing with each array's minimum number. From these numbers, we get the maximum and minimum one, say $x$ and $y$, and the index of the lists that contains them, say $i$ and $j$. Apparently, range $R=[x,y]$ contains at least one number from each array in the given list. 
+
+From now on, we try to minimize $R$ as much as possible. To do that, we can either increase $x$ or decrease $y$. Since $y$ is already a minimum number in one of array. If we decrease $y$ further, the range will include none of elements in that array. Thus, what we can do is increasing $x$.
+
+Hence, we go to the array which contain $x$ and increment the index $t$ for this array to consider next number. Now, we have to update current minimum and maximum number because by advancing in one array may change these two values. We also need to record the indexes of the arrays that contain the current minimum and maximum number, and compare/update the global minimum range so far.
+Whenever the index of an array reaches the end, we know that we cannot find any range that can contain at least one element from each array, the process is stopped.
+
+Summarizing the statements above, the process becomes:
+
+\begin{enumerate}
+\item Initialize index array $T$ with all 0's.
+
+\item Find the indices of the arrays containing the current minimum and the maximum elements among the elements by the indices in $T$.
+
+\item If the range formed by the maximum and minimum elements found above is smaller than the global minimum range, update it.
+
+\item Increment the index for the array that contains current minimum element.
+
+\item   Repeat steps 2 to 4 untill any of the lists gets exhausted.
+
+\end{enumerate}
+
+\begin{lstlisting}[style=customc, caption={Index Array}]
+vector<int> smallestRange( vector<vector<int>>& nums )
+{
+    //global range's start and end
+    int min_beg = -100001;
+    int max_end = 100001;
+
+    //the array contains index for each array
+    vector<size_t> T( nums.size(), 0 );
+
+    //the index of array contains the current minimum element
+
+    size_t min_ai = 0;
+
+    while( true )
+    {
+        int x = 100001;
+        int y = -100001;
+
+        //we need to get current max and min element
+        //not global
+        for( size_t i = 0; i < nums.size(); ++i )
+        {
+            int n = nums[i][T[i]];
+
+            if( n < x )
+            {
+                x = n;
+                //the index of array contains minimum number
+                min_ai = i;
+            }
+
+            if( n > y )
+            {
+                y = n;
+            }
+
+        }
+
+        int min_range = max_end - min_beg;
+        int cur_range = y - x;
+
+        if( ( min_range > cur_range ) || ( ( min_range == cur_range ) && ( min_beg > x ) ) )
+        {
+            max_end = y;
+            min_beg = x;
+        }
+
+        //go to the next element in the array
+        //which contains the current min element
+        ++T[min_ai];
+
+        if( T[min_ai] == nums[min_ai].size() )
+        {
+            //we have already exhausted one of array
+            //break now
+            break;
+        }
+
+    }
+
+    return {min_beg, max_end};
+}
+\end{lstlisting}
+  
+\subsection{Priority Queue}
+The idea behind is similar to sort $K$ lists. In the last approach, we update the index in the array that containing current minimum element and traverse over $T$ array to determine the next maximum and minimum elements. By comparing the two steps in the last approach, almost all elements that are used to determine current maximum and minimum values are the same except the new element in the array that containing the minimum value in the last step. This new element could contribute to current maximum element. 
+
+Thus, we actually find minimum element at every step. To avoid iterate the whole $T$ array, we can make use of min-heap which stores all the numbers at the indices from $T$ for each array. Since the heap has the minimum number at the top, we don't need to iterate over $T$ again to find new minimum element.
+
+Thus, at each step, we remove the top which is the current minimum, and update current maximum by the next number in the array containing the current minimum. Form the range with this minimum and current maximum to compare and update global range. Then we add the new number in the array that containing current minimum element to the queue. Repeat the steps until one of array is exhausted.
+
+\begin{lstlisting}[style=customc, caption={Priority Queue}]
+vector<int> smallestRange( vector<vector<int>>& nums )
+{
+    using node_t = array<size_t, 2>;
+
+    auto cmp = [&nums]( const node_t& n1, const node_t& n2 )
+    {
+        auto& A1 = nums[n1[0]];
+        auto& A2 = nums[n2[0]];
+
+        return A1[n1[1]] > A2[n2[1]];
+    };
+
+    priority_queue<node_t, vector<node_t>, decltype( cmp )> q( cmp );
+
+    //current maximum
+    int y = -100001;
+
+    //the global minimum range
+    //start and end
+    int start = -100001;
+    int end = 100001;
+
+    //firstly, add first number of each array
+    //into the queue
+    for( size_t i = 0; i < nums.size(); ++i )
+    {
+        q.push( node_t{ i, 0 } );
+        y = ( max )( y, nums[i][0] );
+    }
+
+
+    while( !q.empty() )
+    {
+        //remove the top
+        auto t = q.top();
+        q.pop();
+
+        //the top is the global minimum
+        //A is the array containing
+        //the minimum element
+        auto& A = nums[t[0]];
+
+        int min_range = end - start;
+        int cur_range = y - A[t[1]];
+
+        if( ( cur_range < min_range ) || ( ( cur_range == min_range ) && ( A[t[1]] < start ) ) )
+        {
+            start = A[t[1]];
+            end = y;
+        }
+
+        //go to the next element
+        //int A
+        auto next = t[1] + 1;
+
+        if( next == A.size() )
+        {
+            break;
+        }
+
+        y = ( max )( A[next], y );
+
+        q.push( node_t{t[0], next} );
+    }
+
+    return {start, end};
+}
+\end{lstlisting}

@@ -1,0 +1,128 @@
+\section{676 --- Implement Magic Dictionary}
+Implement a magic directory with \lstinline[language=Java, basicstyle=\small\ttfamily, keywordstyle=\bfseries\color{green!40!black}]|buildDict|, and \lstinline[language=Java, basicstyle=\small\ttfamily, keywordstyle=\bfseries\color{green!40!black}]|search| methods.
+
+For the method \lstinline[language=Java, basicstyle=\small\ttfamily, keywordstyle=\bfseries\color{green!40!black}]|buildDict|, you'll be given a list of non-repetitive words to build a dictionary.
+
+For the method search, you'll be given a word, and judge whether if you modify exactly one \textbf{character} into another \textbf{character} in this word, the modified word is in the dictionary you just built.
+
+\paragraph{Example 1:}
+\begin{flushleft}
+
+
+\textbf{Input}: \lstinline[language=Java, basicstyle=\small\ttfamily, keywordstyle=\bfseries\color{green!40!black}]|buildDict(["hello", "leetcode"])|, \textbf{Output}: \lstinline[language=Java, basicstyle=\small\ttfamily, keywordstyle=\bfseries\color{green!40!black}]|Null|
+
+\textbf{Input}: \lstinline[language=Java, basicstyle=\small\ttfamily, keywordstyle=\bfseries\color{green!40!black}]|search("hello")|, \textbf{Output}: \lstinline[language=Java, basicstyle=\small\ttfamily, keywordstyle=\bfseries\color{green!40!black}]|False|
+
+\textbf{Input}: \lstinline[language=Java, basicstyle=\small\ttfamily, keywordstyle=\bfseries\color{green!40!black}]|search("hhllo")|, \textbf{Output}: \lstinline[language=Java, basicstyle=\small\ttfamily, keywordstyle=\bfseries\color{green!40!black}]|True|
+
+\textbf{Input}: \lstinline[language=Java, basicstyle=\small\ttfamily, keywordstyle=\bfseries\color{green!40!black}]|search("hell")|, \textbf{Output}: \lstinline[language=Java, basicstyle=\small\ttfamily, keywordstyle=\bfseries\color{green!40!black}]|False|
+
+\textbf{Input}: \lstinline[language=Java, basicstyle=\small\ttfamily, keywordstyle=\bfseries\color{green!40!black}]|search("leetcoded")|, \textbf{Output}: \lstinline[language=Java, basicstyle=\small\ttfamily, keywordstyle=\bfseries\color{green!40!black}]|False|
+\end{flushleft}
+\paragraph{Note:}
+
+\begin{itemize}
+\item  You may assume that all the inputs are consist of lowercase letters \texttt{a} -- \texttt{z}.
+\end{itemize}
+
+\subsection{Hash Set}
+If the word can be found by changing only one letter, this word must have the same size as the one in the dictionary. Thus we can group all the input strings per their lengths.
+
+During the search, we iterate over the input word. Try all lowercase letters except the one in current position and see if we can find the result string in the strings that has same size as the input word.
+
+\setcounter{lstlisting}{0}
+\begin{lstlisting}[style=customc, caption={Hash}]
+class MagicDictionary
+{
+public:
+    /** Initialize your data structure here. */
+    MagicDictionary()
+    {
+    }
+
+    /** Build a dictionary through a list of words */
+    void buildDict( vector<string> dict )
+    {
+        swap( m_words, dict );
+
+        //group the words
+        //per their size
+        for( const auto& word : m_words )
+        {
+            auto key = word.size();
+
+            auto it = m_dict.find( key );
+
+            string_view sv( word.c_str(), word.size() );
+
+            if( it == m_dict.end() )
+            {
+
+                m_dict.emplace( key, unordered_set<string_view> {sv} );
+            }
+            else
+            {
+                it->second.insert( sv );
+            }
+        }
+
+    }
+
+    /** Returns if there is any word in the trie that equals to the given word after modifying exactly one character */
+    bool search( string word )
+    {
+
+        auto it = m_dict.find( word.size() );
+
+        if( it == m_dict.end() )
+        {
+            return false;
+        }
+
+        //find in the strings with same size as word
+        for( size_t i = 0; i < word.size(); ++i )
+        {
+            char wc = word[i];
+
+            for( char c = 'a'; c <= 'z'; ++c )
+            {
+                if( c == wc )
+                {
+                    continue;
+                }
+
+                //change word by modifying current letter
+                word[i] = c;
+
+                string_view sv( word.c_str(), word.size() );
+
+                if( it->second.find( sv ) != it->second.end() )
+                {
+                    //found target
+                    return true;
+                }
+            }
+
+            //restore word
+            word[i] = wc;
+        }
+
+        return false;
+    }
+
+    //the dictionry used in the algorithm
+    unordered_map<size_t, unordered_set<string_view>> m_dict;
+
+    //store the input dictionary
+    vector<string> m_words;
+
+
+};
+
+/**
+ * Your MagicDictionary object will be instantiated and called as such:
+ * MagicDictionary* obj = new MagicDictionary();
+ * obj->buildDict(dict);
+ * bool param_2 = obj->search(word);
+ */
+\end{lstlisting}

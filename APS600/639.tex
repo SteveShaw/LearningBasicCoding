@@ -1,0 +1,70 @@
+\section{639 --- Decode Ways II}
+A message containing letters from A-Z is being encoded to numbers using the following mapping way:
+
+\begin{table}[H]
+\begin{tabular}{lc}
+\hline
+ A & 1 \\
+B & 2\\
+$\ldots$  & $\ldots$ \\
+Z & 26 \\
+\hline
+\end{tabular}
+\end{table}
+
+Beyond that, now the encoded string can also contain the character $\ast$, which can be treated as one of the numbers from 1 to 9.
+
+Given the encoded message containing digits and the character $\ast$, return the total number of ways to decode it.
+
+Also, since the answer may be very large, you should return the output mod $10^9 + 7$.
+
+\paragraph{Example 1:}
+
+\begin{flushleft}
+\textbf{Input}: $\ast$
+
+\textbf{Output}: 9
+
+Explanation: The encoded message can be decoded to the string: A, B, C, D, E, F, G, H, I.
+\end{flushleft}
+
+\paragraph{Example 2:}
+
+\begin{flushleft}
+Input: $1\ast$
+
+Output: $9 + 9 = 18$
+
+\end{flushleft}
+
+\paragraph{Note:}
+
+\begin{itemize}
+\item The length of the input string will fit in range $[1, 10^5]$.
+\item The input string will only contain the character $\ast$ and digits 0 to 9.
+\end{itemize}
+
+
+\subsection{Dynamic Programming}
+Suppose $F[i]$ is the number of decode ways for string $S[0, i-1]$, then for $F[i+1]$, we can decode $S[i]$ with $S[i-1]$ and decode $S[i]$ only.
+
+If we decode $S[i]$ with $S[i-1]$, there are three scenarios: 
+\begin{enumerate}
+\item If $S[i-1] = 1$, then $S[i-1]$ and $S[i]$ can be decoded together since $11$ to $19$ can represent valid letters. Thus, if $S[i]$ is in range $[0,9]$, $F[i]$ will add the result from $F[i-1]$. If $S[i]$ is $\ast$, then $F[i]$ will add $9\times F[i-1]$ since we can append 9 possible numbers from 1 to 9 to the decode results for $S[0,i-2]$.
+\item If $S[i-1] = 2$, $S[i-1]$ and $S[i]$ can be decoded together only when $S[i]$ is in range $[0,6]$. Thus, if $S[i]$ is in range $[0,6]$, we add $F[i-1]$ to $F[i]$. If $S[i]$ is $\ast$, $F[i]$ will add $6 \times F[i-1]$ since we can append 6 possible numbers from 1 to 6 to the decode results for $S[0, i-2]$.
+\item If $S[i-1]$ is $\ast$, then the choice of numbers to replace $\ast$ depends on $S[i]$.
+\begin{itemize}
+\item When $S[i]$ is in range $[0,6]$, we can choose 1 or 2 to replace $\ast$. Thus, we add $2\times F[i-1]$ to $F[i+1]$ for two possible numbers.
+\item When $S[i]$ is in range $[7,9]$, we can only choose 1 to replace $\ast$. Then $F[i+1]$ is updated by adding $F[i-1]$.
+\item When $S[i]$ is also $\ast$, we can choose between $[11,19]$ and $[21,26]$ to replace $S[i-1, i]$ because $\ast$ cannot be zero. Therefore, we have 15 possible numbers to append to the decode results for $S[0, i-2]$, which means $F[i+1]$ will be added by $15\times F[i-1]$.
+\end{itemize}
+\end{enumerate}
+
+To decode $S[i]$ only, 
+
+\begin{enumerate}
+\item If $S[i]$ is between 1 and 9, just add $F[i]$ to $F[i+1]$ because each number represent only one letter.
+\item If $S[i-1]$ is $\ast$, we will add $9\times F[i]$ to $F[i+1]$ since we have 9 possible numbers appending to the decode results for $S[0, i-1]$. 
+\end{enumerate}
+
+Lastly, for empty string, we set $F[0]=1$. From above description, we also see that $F[i+1]$ only depends on $F[i-1]$ and $F[i]$. Thus, we can use two variables to replace $F[i-1]$ and $F[i]$. 

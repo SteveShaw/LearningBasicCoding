@@ -1,0 +1,54 @@
+\section{604 --- Design Compressed String Iterator}
+Design and implement a data structure for a compressed string iterator. It should support the following operations: \texttt{next} and \texttt{hasNext}.
+
+The given compressed string will be in the form of each letter followed by a positive integer representing the number of this letter existing in the original uncompressed string.
+
+\begin{itemize}
+\item \texttt{next}: if the original string still has uncompressed characters, return the next letter; Otherwise return a white space.
+\item \texttt{hasNext}: Judge whether there is any letter needs to be uncompressed.
+
+\end{itemize}
+\paragraph{Note:}
+
+\begin{itemize}
+\item Please remember to \texttt{RESET} your class variables declared in \texttt{StringIterator}, as static/class variables are persisted across multiple test cases.
+\end{itemize}
+
+\paragraph{Example:}
+\setcounter{lstlisting}{0}
+
+\begin{lstlisting}[style=customc]
+StringIterator iterator = new StringIterator("L1e2t1C1o1d1e1");
+
+iterator.next(); // return 'L'
+iterator.next(); // return 'e'
+iterator.next(); // return 'e'
+iterator.next(); // return 't'
+iterator.next(); // return 'C'
+iterator.next(); // return 'o'
+iterator.next(); // return 'd'
+iterator.hasNext(); // return true
+iterator.next(); // return 'e'
+iterator.hasNext(); // return false
+iterator.next(); // return ' '
+\end{lstlisting}
+
+\subsection{State Machine}
+We can conclude that there are 3 kind of states for the iterator
+\begin{itemize}
+\item Count of current letter is zero
+\item Count of current letter is non-zero
+\item End of string.
+\end{itemize}
+
+For function \texttt{next}, we could have
+\begin{itemize}
+\item Count of current letter is zero and not at the end of string: we get next letter and its count, at the same time, move index to where a new letter is found or the end of string.
+\item Count of current letter is non-zero: we output current letter and decrements the count.
+\end{itemize}
+
+For function \texttt{hasNext}, we have to check both conditions
+\begin{itemize}
+\item Count of current letter is zero or not
+\item The index is at the end of string or not.
+\end{itemize}

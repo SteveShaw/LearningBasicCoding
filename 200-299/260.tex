@@ -27,46 +27,29 @@ Given an array of numbers $A$, in which exactly two elements appear only once an
 \begin{lstlisting}[style=customc, caption={XOR}]
 vector<int> singleNumber( vector<int>& nums )
 {
-    //get xor results of all numbers in nums
-    int z = 0;
-
-    for( auto n : nums )
+    int m = 0;
+    for( int n : nums )
     {
-        z ^= n;
+        m = ( m ^ n );
     }
-
-    //find which bit is 1
-    //and create a mask for this bit
-    int mask = 1;
-
-    for( int i = 1; i < 32; ++i )
-    {
-        if( z & mask )
-        {
-            break;
-        }
-
-        mask <<= 1;
-    }
-
-    int x = 0;
-    int y = 0;
-
-    //use mask to test which number is set on
-    //that bit
-    for( auto n : nums )
+    //find rightmost bit 1
+    //m & (m-1) clear the rightmost bit 1
+    //then xor m will give the mask with
+    //only rightmost bit 1
+    int mask = ( m & ( m - 1 ) ) ^ m;
+    vector<int> ans( 2, 0 );
+    for( int n : nums )
     {
         if( n & mask )
         {
-            x ^= n;
+            ans[0] ^= n;
         }
         else
         {
-            y ^= n;
+            ans[1] ^= n;
         }
     }
-
-    return { x, y };
+    return ans;
 }
 \end{lstlisting}
 

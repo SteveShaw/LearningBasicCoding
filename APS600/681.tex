@@ -1,0 +1,203 @@
+\section{681 --- Next Closest Time}
+Given a time represented in the format \lstinline[language=Java, basicstyle=\small\ttfamily, keywordstyle=\bfseries\color{green!40!black}]|"HH:MM"|, form the next closest time by reusing the current digits. There is no limit on how many times a digit can be reused.
+
+You may assume the given input string is always valid. For example, \lstinline[language=Java, basicstyle=\small\ttfamily, keywordstyle=\bfseries\color{green!40!black}]|"01:34"|, \lstinline[language=Java, basicstyle=\small\ttfamily, keywordstyle=\bfseries\color{green!40!black}]|"12:09"| are all valid. \lstinline[language=Java, basicstyle=\small\ttfamily, keywordstyle=\bfseries\color{green!40!black}]|"1:34"|, \lstinline[language=Java, basicstyle=\small\ttfamily, keywordstyle=\bfseries\color{green!40!black}]|"12:9"| are all invalid.
+
+\section{Example 1:}
+
+\begin{flushleft}
+
+\textbf{Input}: \lstinline[language=Java, basicstyle=\small\ttfamily, keywordstyle=\bfseries\color{green!40!black}]|"19:34"|
+
+\textbf{Output}: \lstinline[language=Java, basicstyle=\small\ttfamily, keywordstyle=\bfseries\color{green!40!black}]|"19:39"|
+
+\textbf{Explanation}: 
+
+The next closest time choosing from digits 1, 9, 3, 4, is \lstinline[language=Java, basicstyle=\small\ttfamily, keywordstyle=\bfseries\color{green!40!black}]|"19:39"|, which occurs 5 minutes later.  It is not 19:33, because this occurs 23 hours and 59 minutes later.
+
+\end{flushleft}
+
+\paragraph{Example 2:}
+
+\begin{flushleft}
+\textbf{Input}: \lstinline[language=Java, basicstyle=\small\ttfamily, keywordstyle=\bfseries\color{green!40!black}]|"23:59"|
+
+\textbf{Output}: \lstinline[language=Java, basicstyle=\small\ttfamily, keywordstyle=\bfseries\color{green!40!black}]|"22:22"|
+
+\textbf{Explanation}: 
+
+The next closest time choosing from digits 2, 3, 5, 9, is \lstinline[language=Java, basicstyle=\small\ttfamily, keywordstyle=\bfseries\color{green!40!black}]|"22:22"|. It may be assumed that the returned time is next day's time since it is smaller than the input time numerically.
+
+\end{flushleft}
+
+\subsection{Simulation}
+Since there are $24 \times 60-1=1339$ possible minute from current time, we can try each minute and comparing the digits to the input time string.
+
+\setcounter{lstlisting}{0}
+\begin{lstlisting}[style=customc, caption={Simulation}]
+string nextClosestTime( string time )
+{
+    int m[10] =  {0};
+
+    for( auto c : time )
+    {
+        if( c != ':' )
+        {
+            m[c - '0'] = 1;
+        }
+    }
+    int hour = ( time[0] - '0' ) * 10 + ( time[1] - '0' );
+    int minute = ( time[3] - '0' ) * 10 + ( time[4] - '0' );
+
+    int total_minute = hour * 60 + minute;
+
+    int tm[4];
+
+
+    for( int i = 1; i < 24 * 60; ++i )
+    {
+        ++total_minute;
+
+        //important: we have to
+        //make sure the minutes
+        //are in one day
+        if( total_minute > 24 * 60 )
+        {
+            total_minute -= 24 * 60;
+        }
+
+        hour = total_minute / 60;
+        minute = total_minute - 60 * hour;
+
+        tm[0] = hour / 10;
+        tm[1] = hour - 10 * tm[0];
+
+        tm[2] = minute / 10;
+        tm[3] = minute - 10 * tm[2];
+
+        bool flag = true;
+        for( int t : tm )
+        {
+            if( m[t] == 0 )
+            {
+                flag = false;
+                break;
+            }
+        }
+
+        if( flag )
+        {
+            //this is the closest time
+            //share digits from the input
+            string fmt( "00:00" );
+            fmt[0] = tm[0] + '0';
+            fmt[1] = tm[1] + '0';
+
+            fmt[3] = tm[2] + '0';
+            fmt[4] = tm[3] + '0';
+
+            return fmt;
+        }
+    }
+
+    return time;
+}
+\end{lstlisting}
+
+\subsection{Try All Possible Combinations}
+We have up to 4 different allowed digits, which naively gives us $4^4=256$ possible times. For each possible time, let's check that it can be displayed on a clock: ie., hours is less than 24 and minutes less than 60. The best possible time $t$ which is not equal to start is the one with the smallest $ (t - s)\bmod  (24 \times 60)$, as this represents the time that has elapsed since start, and where the modulo operation is taken to be always non-negative. Notice when $t < s$, we need to add $24\times 60$ to $t$ to represent the time in the next day.
+
+\begin{lstlisting}[style=customc, caption={Try Every Given Digit}]
+string nextClosestTime( string time )
+{
+    int m[10] =  {0};
+
+    for( auto c : time )
+    {
+        if( c != ':' )
+        {
+            m[c - '0'] = 1;
+        }
+    }
+    int hour = ( time[0] - '0' ) * 10 + ( time[1] - '0' );
+    int minute = ( time[3] - '0' ) * 10 + ( time[4] - '0' );
+
+    int start = hour * 60 + minute;
+
+    int min_diff = 24 * 60;
+
+    int ans = start;
+
+    //try all possible combinations
+    //from the digits in the given time string
+    for( int i = 0; i < 10; ++i )
+    {
+        for( int j = 0; j < 10; ++j )
+        {
+            if( !m[i] || !m[j] )
+            {
+                continue;
+            }
+
+            hour = i * 10 + j;
+
+            if( hour >= 24 )
+            {
+                continue;
+            }
+
+            for( int x = 0; x < 10; ++x )
+            {
+                for( int y = 0; y < 10; ++y )
+                {
+                    if( !m[x] || !m[y] )
+                    {
+                        continue;
+                    }
+
+
+                    minute = x * 10 + y;
+
+                    if( minute >= 60 )
+                    {
+                        continue;
+                    }
+
+                    int cur = hour * 60 + minute;
+
+                    int diff = cur - start;
+
+                    if( diff < 0 )
+                    {
+                        //we will treat this time
+                        //as next day's time
+                        diff += 24 * 60;
+                    }
+
+
+                    if( ( diff > 0 ) && ( diff < min_diff ) )
+                    {
+                        //record minimum difference
+                        min_diff = diff;
+                        ans = cur;
+                    }
+                }
+            }
+        }
+    }
+
+
+    //change to string
+    string fmt( "00:00" );
+    hour = ans  / 60;
+    minute = ans -  60 * hour;
+
+    fmt[0] = hour / 10 + '0';
+    fmt[1] = hour % 10 + '0';
+
+    fmt[3] = minute / 10 + '0';
+    fmt[4] = ( minute % 10 ) + '0';
+
+    return fmt;
+}
+\end{lstlisting}

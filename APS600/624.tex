@@ -1,0 +1,36 @@
+\section{624 --- Maximum Distance in Arrays}
+Given $m$ arrays, and each array is sorted in ascending order. Now you can pick up two integers from two different arrays (each array picks one) and calculate the distance. We define the distance between two integers $a$ and $b$ to be their absolute difference $\lvert a-b\rvert$. Your task is to find the maximum distance.
+
+\paragraph{Example 1:}
+
+\begin{flushleft}
+\textbf{Input}:
+
+$\begin{bmatrix}
+1 & 2 & 3\\
+4 & 5 & \emptyset\\
+1 & 2 & 3
+\end{bmatrix}$
+
+\textbf{Output}: 4
+
+\textbf{Explanation}:
+ 
+One way to reach the maximum distance 4 is to pick 1 in the first or third array and pick 5 in the second array.
+\end{flushleft}
+
+\paragraph{Note:}
+
+\begin{itemize}
+\item Each given array will have at least 1 number. There will be at least two non-empty arrays.
+\item The total number of the integers in all the m arrays will be in the range of $[2, 10000]$.
+\item The integers in the $m$ arrays will be in the range of $[-10000, 10000]$.
+\end{itemize}
+
+\subsection{Single Scan}
+\begin{itemize}
+\item If we consider two arrays: $A$ and $B$, we can just find the maximum out of $A[n−1]-B[0]$ and $B[m−1]-A[0]$ to find the larger distance. Here, $n$ and $m$ refer to the lengths of arrays $A$ and $B$ respectively. 
+
+\item We keep a track of the element with minimum value, $x$, and the one with maximum value, $y$, found so far. Thus, now these extreme values can be treated as if they represent the extreme points of a cumulative array of all the arrays that have been considered until now.
+\item For every new array, $T$, we find the distance $T[n−1] - x$ and $y-T[0]$ to compare with the maximum distance found so far. Here, $n$ refers to the number of elements in the current array, $T$. Note that the maximum distance found until now needs not always be contributed by the end points of the distance being maximum value, $y$, and minimum value, $x$.
+\end{itemize}

@@ -1,0 +1,101 @@
+\section{642 --- Design Search Autocomplete System}
+Design a search autocomplete system for a search engine. Users may input a sentence (at least one word and end with a special character \#). For \textbf{each character} they type \textbf{except} \#, you need to return the \textbf{top 3} historical hot sentences that have prefix the same as the part of sentence already typed. Here are the specific rules:
+
+\begin{enumerate}
+\item The hot degree for a sentence is defined as the number of times a user typed the exactly same sentence before.
+\item The returned top 3 hot sentences should be sorted by hot degree (The first is the hottest one). If several sentences have the same degree of hot, you need to use ASCII-code order (smaller one appears first).
+\item If less than 3 hot sentences exist, then just return as many as you can.
+\item When the input is a special character, it means the sentence ends, and in this case, you need to return an empty list.
+\end{enumerate}
+
+Your job is to implement the following functions:
+
+The constructor function:
+
+\lstinline[language=Java, basicstyle=\small\ttfamily, keywordstyle=\bfseries\color{green!40!black}]|AutocompleteSystem(String[] sentences, int[] times)|: This is the constructor. The input is \textbf{historical data}. \texttt{Sentences} is a string array consists of previously typed sentences. \texttt{Times} is the corresponding times a sentence has been typed. Your system should record these historical data.
+
+Now, the user wants to input a new sentence. The following function will provide the next character the user types:
+
+\lstinline[language=Java, basicstyle=\small\ttfamily, keywordstyle=\bfseries\color{green!40!black}]|List<String> input(char c)|: The input \texttt{c} is the next character typed by the user. The character will only be lower-case letters (\texttt{a} to \texttt{z}), blank space or a special character (\#). Also, the previously typed sentence should be recorded in your system. The output will be the \textbf{top 3} historical hot sentences that have prefix the same as the part of sentence already typed.
+ 
+
+\paragraph{Example:}
+
+\begin{flushleft}
+
+\textbf{Operation}:
+ \lstinline[language=Java, basicstyle=\small\ttfamily, keywordstyle=\bfseries\color{green!40!black}]|AutocompleteSystem(["i love you", "island", "ironman", "i love leetcode"],[5, 3, 2, 2])|
+
+The system have already tracked down the following sentences and their corresponding times:
+
+\lstinline[language=Java, basicstyle=\small\ttfamily, keywordstyle=\bfseries\color{green!40!black}]|"i love you"| : 5 times
+
+\lstinline[language=Java, basicstyle=\small\ttfamily, keywordstyle=\bfseries\color{green!40!black}]|"island"| : 3 times
+
+\lstinline[language=Java, basicstyle=\small\ttfamily, keywordstyle=\bfseries\color{green!40!black}]|"ironman"| : 2 times
+
+\lstinline[language=Java, basicstyle=\small\ttfamily, keywordstyle=\bfseries\color{green!40!black}]|"i love leetcode"| : 2 times
+
+Now, the user begins another search:
+
+\textbf{Operation}: \lstinline[language=Java, basicstyle=\small\ttfamily, keywordstyle=\bfseries\color{green!40!black}]|input('i')|
+
+\textbf{Output}: \lstinline[language=Java, basicstyle=\small\ttfamily, keywordstyle=\bfseries\color{green!40!black}]|["i love you", "island", "i love leetcode"]|
+
+\textbf{Explanation}:
+
+There are four sentences that have prefix \texttt{i} . Among them, \lstinline[language=Java, basicstyle=\small\ttfamily, keywordstyle=\bfseries\color{green!40!black}]|"ironman"| and \lstinline[language=Java, basicstyle=\small\ttfamily, keywordstyle=\bfseries\color{green!40!black}]|"i love leetcode"| have same hot degree. Since letter \lstinline[language=Java, basicstyle=\small\ttfamily, keywordstyle=\bfseries\color{green!40!black}]|' '| has ASCII code 32 and \lstinline[language=Java, basicstyle=\small\ttfamily, keywordstyle=\bfseries\color{green!40!black}]|'r'| has ASCII code 114, \lstinline[language=Java, basicstyle=\small\ttfamily, keywordstyle=\bfseries\color{green!40!black}]|"i love leetcode"| should be in front of \lstinline[language=Java, basicstyle=\small\ttfamily, keywordstyle=\bfseries\color{green!40!black}]|"ironman"|. Also we only need to output top 3 hot sentences, so \lstinline[language=Java, basicstyle=\small\ttfamily, keywordstyle=\bfseries\color{green!40!black}]|"ironman"| will be ignored.
+
+\textbf{Operation}: \lstinline[language=Java, basicstyle=\small\ttfamily, keywordstyle=\bfseries\color{green!40!black}]|input(' ')|
+
+\textbf{Output}: \lstinline[language=Java, basicstyle=\small\ttfamily, keywordstyle=\bfseries\color{green!40!black}]|["i love you", "i love leetcode"]|
+
+\textbf{Explanation}:
+
+There are only two sentences that have prefix \lstinline[language=Java, basicstyle=\small\ttfamily, keywordstyle=\bfseries\color{green!40!black}]|"i "|
+
+\textbf{Operation}: \lstinline[language=Java, basicstyle=\small\ttfamily, keywordstyle=\bfseries\color{green!40!black}]|input('a')|
+
+\textbf{Output}: \lstinline[language=Java, basicstyle=\small\ttfamily, keywordstyle=\bfseries\color{green!40!black}]|[]|
+
+\textbf{Explanation}:
+
+There are no sentences that have prefix \lstinline[language=Java, basicstyle=\small\ttfamily, keywordstyle=\bfseries\color{green!40!black}]|"i a"|.
+
+\textbf{Operation}: \lstinline[language=Java, basicstyle=\small\ttfamily, keywordstyle=\bfseries\color{green!40!black}]|input('#')|
+
+\textbf{Output}: \lstinline[language=Java, basicstyle=\small\ttfamily, keywordstyle=\bfseries\color{green!40!black}]|[]|
+
+\textbf{Explanation}:
+
+The user finished the input, the sentence \lstinline[language=Java, basicstyle=\small\ttfamily, keywordstyle=\bfseries\color{green!40!black}]|"i a"| should be saved as a historical sentence in system. And the following input will be counted as a new search.
+ 
+
+\end{flushleft}
+
+\paragraph{Note:}
+
+\begin{itemize}
+\item The input sentence will always start with a letter and end with \#, and only one blank space will exist between two words.
+\item The number of complete sentences that to be searched won't exceed 100. The length of each sentence including those in the historical data won't exceed 100.
+\item Please use double-quote instead of single-quote when you write test cases even for a character input.
+\end{itemize}
+
+\subsection{Brute Force}
+We make use of a hash map $M$ to store entries in the form $(S[i], T[i])$. Here, $T[i]$ is the number of times the sentence $S[i]$​ has been typed earlier.
+
+\begin{itemize}
+\item \lstinline[language=Java, basicstyle=\small\ttfamily, keywordstyle=\bfseries\color{green!40!black}]|AutocompleteSystem|: We pick up each sentence  and their corresponding times from the given inputs, and add to $M$.
+
+\item \lstinline[language=Java, basicstyle=\small\ttfamily, keywordstyle=\bfseries\color{green!40!black}]|input(c)|: We make use of a variable, $x$ to store the sentence entered till now as the input. For current input character $c$, we append it to $x$ and then iterate over all the keys of $M$ to check if a key exists whose initial characters match with $x$ (In C++, we can use function \lstinline[language=Java, basicstyle=\small\ttfamily, keywordstyle=\bfseries\color{green!40!black}]|compare| to check if a key starts with $x$). We add all such keys to a list, $\ell$. Then, we sort $\ell$ as per our requirements, and obtain the first three values from it.
+\end{itemize}
+
+\subsection{Two Levels Hash Map}
+Brute force is not an optimal one. To improve the efficiency, we instead make use of a two level hash map, i.e., an array, $A$, with each element as a hash map. The array's size is 26. For example, $A[0]$ is a hash map which stores the sentences starting with letter \texttt{a}.
+
+The process remains the same as in the brute force approach, except the one level indexing of $A$ which needs to be done prior to accessing the required hash map.
+
+\subsection{Trie}
+Using Trie is very straight forward. We build a trie tree from the input sentences. We store the times and the string into the leaf node of the tree. 
+
+Then for each input, we traverse the tree until a start node. Then from this node, we collect all reachable leaf nodes, put the times and string into a tree map to automatically sort by the times. The value of each node in the tree map is a tree set so that we can sort the strings with same times automatically. 

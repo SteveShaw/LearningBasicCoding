@@ -1,0 +1,65 @@
+\section{640 --- Solve the Equation}
+Solve a given equation and return the value of $x$ in the form of string $x=n$. The equation contains only plus, minus operation, the variable $x$ and its coefficient.
+
+If there is no solution for the equation, return \textbf{No solution}.
+
+If there are infinite solutions for the equation, return \textbf{Infinite solutions}.
+
+If there is exactly one solution for the equation, we ensure that the value of $x$ is an integer.
+
+\paragraph{Example 1:}
+
+\begin{flushleft}
+\textbf{Input}: $x+5-3+x=6+x-2$
+
+\textbf{Output}: $x=2$
+
+\end{flushleft}
+
+\paragraph{Example 2:}
+
+\begin{flushleft}
+\textbf{Input}: $x=x$
+
+\textbf{Output}: \textbf{Infinite solutions}
+
+\end{flushleft}
+
+\paragraph{Example 3:}
+
+\begin{flushleft}
+Input: $2x=x$
+
+Output: $x=0$
+
+\end{flushleft}
+
+\paragraph{Example 4:}
+
+\begin{flushleft}
+\textbf{Input}: $2x+3x-6x=x+2$
+
+\textbf{Output}: $x=-1$
+
+\end{flushleft}
+
+\paragraph{Example 5:}
+
+\begin{flushleft}
+\textbf{Input}: $x=x+2$
+
+\textbf{Output}: \textbf{No solution}
+
+\end{flushleft}
+
+\subsection{Group Coefficients}
+\begin{itemize}
+\item Split the function per the equal sign.
+\item Parse two expressions split by the equal sign.
+\item Iterating the expression, whenever a plus or minus sign is met
+\begin{enumerate}
+\item Accumulate the coefficients of $x$ by checking if last letter is $x$.
+\item If it is not, accumulate the values.
+\end{enumerate}
+\item To dealing with $0\times x$, we set the starting number as $-1$ to indicate whether a $x$ has a coefficient or not.
+\end{itemize}

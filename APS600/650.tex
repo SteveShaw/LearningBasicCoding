@@ -1,0 +1,49 @@
+\section{650 --- 2 Keys Keyboard}
+Initially on a notepad only one character \lstinline[language=Java, basicstyle=\small\ttfamily, keywordstyle=\bfseries\color{green!40!black}]|'A'| is present. You can perform two operations on this notepad for each step:
+
+\begin{enumerate}
+\item \textbf{Copy All}: You can copy all the characters present on the notepad (partial copy is not allowed).
+\item \textbf{Paste}: You can paste the characters which are copied \textbf{last time}.
+
+\end{enumerate}
+ 
+Given a number $n$. You have to get exactly $n$ \lstinline[language=Java, basicstyle=\small\ttfamily, keywordstyle=\bfseries\color{green!40!black}]|'A'| on the notepad by performing the minimum number of steps permitted. Output the minimum number of steps to get $n$ \lstinline[language=Java, basicstyle=\small\ttfamily, keywordstyle=\bfseries\color{green!40!black}]|'A'|.
+
+\paragraph{Example 1:}
+
+\begin{flushleft}
+\textbf{Input}: 3
+
+\textbf{Output}: 3
+
+\textbf{Explanation}:
+
+Initially, we have one character \lstinline[language=Java, basicstyle=\small\ttfamily, keywordstyle=\bfseries\color{green!40!black}]|'A'|.
+
+In step 1, we use Copy All operation.
+
+In step 2, we use Paste operation to get \lstinline[language=Java, basicstyle=\small\ttfamily, keywordstyle=\bfseries\color{green!40!black}]|'AA'|.
+
+In step 3, we use Paste operation to get \lstinline[language=Java, basicstyle=\small\ttfamily, keywordstyle=\bfseries\color{green!40!black}]|'AAA'|.
+
+\end{flushleft}
+
+\subsection{Prime Factorization}
+We can break the moves into groups of (copy, paste, \textellipsis, paste). Let $C$ denote copying and $P$ denote pasting. For example, in the sequence of moves $CPPCPPPPCP$, the groups would be $[CPP]$, $[CPPPP]$, and $[CP]$.
+
+Suppose we have $n$ such groups with lengths $g_1$, $g_2$, $\ldots$, $g_n$ respectively. After parsing the first group, there are $g_1$ \lstinline[language=Java, basicstyle=\small\ttfamily, keywordstyle=\bfseries\color{green!40!black}]|'A'|. After parsing the second group, there are $g_1 \times g_2$ \lstinline[language=Java, basicstyle=\small\ttfamily, keywordstyle=\bfseries\color{green!40!black}]|'A'|s, and so on. At the end, there are $g_1 \times g_2 \times g_n$ \lstinline[language=Java, basicstyle=\small\ttfamily, keywordstyle=\bfseries\color{green!40!black}]|'A'|.
+
+Suppose the given $N = g_1 \times g_2\times \ldots g_k$. If any of the $g_i$ are composite, i.e., $g_i = p \times q$, we can split this group with length $g_i$ into two groups (the first of which has one \textbf{copy} followed by $p-1$ \textbf{pastes}, while the second group having one \textbf{copy} and $q-1$ \textbf{pastes}).
+
+Such a split is the minimum moves we can get for getting $g_i$ \lstinline[language=Java, basicstyle=\small\ttfamily, keywordstyle=\bfseries\color{green!40!black}]|'A'|, because there are  $p+q$ compared with $p\times q$ operations. Based on inequality formula, $p+q \leq p\times q$ when $p\geq 2$ and $q\geq 2$..
+
+Thus, the minimum operations for getting $N$ \lstinline[language=Java, basicstyle=\small\ttfamily, keywordstyle=\bfseries\color{green!40!black}]|'A'|, we just do the prime factorization of $N$, and the summation of these factors are the answer.
+
+To find the prime factorization, we don't need to test each prime number.  We can 
+\begin{enumerate}
+\item start by testing the factor $x=2$, 
+\item keep dividing $N$ by current factor $x$ until $N$ cannot be divided by $x$. 
+\item Increments $x$
+\item Go to step 2
+\item If $N$ is 1, stop the process
+\end{enumerate}

@@ -1,0 +1,35 @@
+\section{657. Robot Return to Origin}
+There is a robot starting at position \lstinline[language=C++, basicstyle=\small\ttfamily, keywordstyle=\bfseries\color{green!40!black}]|(0, 0)|, the origin, on a 2D plane. Given a sequence of its moves, judge if this robot \textbf{ends up at} \lstinline[language=C++, basicstyle=\small\ttfamily, keywordstyle=\bfseries\color{green!40!black}]|(0, 0)| after it completes its moves.
+
+The move sequence is represented by a string, and the character \lstinline[language=C++, basicstyle=\small\ttfamily, keywordstyle=\bfseries\color{green!40!black}]|moves[i]| represents its $i$-th move. Valid moves are \lstinline[language=Java, basicstyle=\small\ttfamily, keywordstyle=\bfseries\color{green!40!black}]|R| (right), \lstinline[language=Java, basicstyle=\small\ttfamily, keywordstyle=\bfseries\color{green!40!black}]|L| (left), \lstinline[language=Java, basicstyle=\small\ttfamily, keywordstyle=\bfseries\color{green!40!black}]|U| (up), and \lstinline[language=Java, basicstyle=\small\ttfamily, keywordstyle=\bfseries\color{green!40!black}]|D| (down). If the robot returns to the origin after it finishes all of its moves, return \lstinline[language=C++, basicstyle=\small\ttfamily, keywordstyle=\bfseries\color{green!40!black}]|true|. Otherwise, return \lstinline[language=C++, basicstyle=\small\ttfamily, keywordstyle=\bfseries\color{green!40!black}]|false|.
+
+\paragraph{Note:} 
+\begin{itemize}
+\item The way that the robot is \lstinline[language=Java, basicstyle=\small\ttfamily, keywordstyle=\bfseries\color{green!40!black}]|"facing"| is irrelevant. \lstinline[language=C++, basicstyle=\small\ttfamily, keywordstyle=\bfseries\color{green!40!black}]|"R"| will always make the robot move to the right once, \lstinline[language=C++, basicstyle=\small\ttfamily, keywordstyle=\bfseries\color{green!40!black}]|"L"| will always make it move left, etc. Also, assume that the magnitude of the robot's movement is the same for each move.
+
+\end{itemize}
+
+\paragraph{Example 1:}
+
+\begin{flushleft}
+\textbf{Input}: \lstinline[language=C++, basicstyle=\small\ttfamily, keywordstyle=\bfseries\color{green!40!black}]|"UD"|
+
+\textbf{Output}: \lstinline[language=C++, basicstyle=\small\ttfamily, keywordstyle=\bfseries\color{green!40!black}]|true|
+
+\textbf{Explanation}: The robot moves up once, and then down once. All moves have the same magnitude, so it ended up at the origin where it started. Therefore, we return \lstinline[language=C++, basicstyle=\small\ttfamily, keywordstyle=\bfseries\color{green!40!black}]|true|.
+
+\end{flushleft}
+ 
+
+\paragraph{Example 2:}
+
+\begin{flushleft}
+\textbf{Input}: \lstinline[language=C++, basicstyle=\small\ttfamily, keywordstyle=\bfseries\color{green!40!black}]|"LL"|
+
+\textbf{Output}: \lstinline[language=C++, basicstyle=\small\ttfamily, keywordstyle=\bfseries\color{green!40!black}]|false|
+
+\textbf{Explanation}: The robot moves left twice. It ends up two \lstinline[language=C++, basicstyle=\small\ttfamily, keywordstyle=\bfseries\color{green!40!black}]|"moves"| to the left of the origin. We return \lstinline[language=C++, basicstyle=\small\ttfamily, keywordstyle=\bfseries\color{green!40!black}]|false| because it is not at the origin at the end of its moves.
+\end{flushleft}
+
+\subsection{Simulation}
+A very easy problem. Just simulate the coordinate changes for each direction.

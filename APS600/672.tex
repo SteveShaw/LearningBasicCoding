@@ -1,0 +1,157 @@
+\section{672 --- Bulb Switcher II}
+There is a room with $n$ lights which are turned on initially and 4 buttons on the wall. After performing exactly $m$ unknown operations towards buttons, you need to return how many different kinds of status of the $n$ lights could be.
+
+Suppose $n$ lights are labeled as number $[1, 2, 3, \ldots, n]$, function of these 4 buttons are given below:
+
+\begin{enumerate}
+\item Flip all the lights.
+\item Flip lights with even numbers.
+\item Flip lights with odd numbers.
+\item Flip lights with $(3k + 1)$ numbers, $k = 0, 1, 2, \ldots$
+
+\end{enumerate}
+ 
+
+\paragraph{Example 1:}
+\begin{flushleft}
+
+\textbf{Input}: $n = 1$, $m = 1$.
+
+\textbf{Output}: 2
+
+\textbf{Explanation}: Status can be: \lstinline[language=Java, basicstyle=\small\ttfamily, keywordstyle=\bfseries\color{green!40!black}]|[on], [off]|
+\end{flushleft}
+ 
+
+\paragraph{Example 2:}
+\begin{flushleft}
+
+\textbf{Input}: $n = 2$, $m = 1$.
+
+\textbf{Output}: 3
+
+\textbf{Explanation}: Status can be: \lstinline[language=Java, basicstyle=\small\ttfamily, keywordstyle=\bfseries\color{green!40!black}]|[on, off], [off, on], [off, off]|
+\end{flushleft}
+ 
+
+\paragraph{Example 3:}
+
+\begin{flushleft}
+
+
+\textbf{Input}: $n = 3$, $m = 1$.
+
+\textbf{Output}: 4
+
+\textbf{Explanation}: 
+
+Status can be: \lstinline[language=Java, basicstyle=\small\ttfamily, keywordstyle=\bfseries\color{green!40!black}]|[off, on, off], [on, off, on], [off, off, off], [off, on, on]|.
+\end{flushleft}
+
+\paragraph{Note:} 
+\begin{itemize}
+\item $n$ and $m$ both fit in range \lstinline[language=Java, basicstyle=\small\ttfamily, keywordstyle=\bfseries\color{green!40!black}]|[0, 1000]|.
+\end{itemize}
+
+\subsection{Reduce Search Space}
+Give the conditions, we know the search space is very large: there will be $2^N$ states of lights and $4^M$ operation sequences. Reducing the search space must be done first.
+
+Actually, the first 6 lights uniquely determine the rest of the lights. This is because every operation that modifies the $x$-th light also changes the $(x+6)$-th light.
+
+Regarding to operations: 
+
+\begin{itemize}
+\item operations are commutative: doing operation $A$ followed by $B$ is the same as doing operation $B$ followed by $A$. So we can assume we do all the operations in order. 
+\item Doing the same operation twice in a row is the same as doing nothing. Hence, we can mark the operation state as 1 when it is running odd times and 0 for even times. For example, if current operation state is $9$ (\lstinline[language=C++, basicstyle=\small\ttfamily, keywordstyle=\bfseries\color{green!40!black}]|0b1001|), the operation 1 and 4 will perform odd times.
+
+For the four operations, we will have total $2^4=16$ operation states by treating each operation as a bit position in a integer. Thus if $m > 4$, the results will repeat the results from $m \leq 4$. 
+\end{itemize}
+
+Now, given $m$, we will try all 16 operation states to see if a state is possible to make $m$ operations. In each state, we firstly check how many operations will be taken by odd times, say the result is $x$.
+\begin{itemize}
+\item If $x > m$, we will skip this state.
+\item If $x \leq m$, this state is possible only if $\bmod(x, 2)=\bmod(m,2)$. The reason is that: in this case, we need to perform $x$ operations odd times. If $x$ is odd number, the total number of operations would be odd. Conversely, if $x$ is even number, total number of operations must be even.  
+
+
+\item For each possible state, since the first 6 lights uniquely determine the rest of the digits, we can make use of 6-bits in a integer to record the states of the bulbs. Put these states into a hash set. Finally, the number of elements in this hash set will be the answer
+\end{itemize}
+
+\setcounter{lstlisting}{0}
+\begin{lstlisting}[style=customc, caption={Reduce Search Space}]
+int flipLights( int n, int m )
+{
+    n = ( min )( n, 6 );
+
+    auto get_ones = []( int n )
+    {
+        int ones = 0;
+        while( n )
+        {
+            ++ones;
+            n = n & ( n - 1 );
+        }
+
+        return ones;
+    };
+
+    //n may be less than 6
+    //in this case, we don't need
+    //6 bits, we only n bits
+    int shift = ( max )( 0, 6 - n );
+
+    int parity = ( m & 1 );
+
+    unordered_set<int> l_states;
+
+    for( int state = 0; state < 16; ++state )
+    {
+        int odd_opers = get_ones( state );
+
+        //the number of odd operations should less than m
+        //and the odd/even should is same as m
+        if( ( odd_opers <= m ) && ( ( odd_opers & 1 ) == parity ) )
+        {
+            int mask = 1;
+
+            int lights = 0;
+
+            if( mask & state )
+            {
+                //do operation 1: 111111
+                lights ^= ( 63 >> shift );
+            }
+
+            mask <<= 1;
+
+            if( mask & state )
+            {
+                //do operation 2: 010101
+                lights ^= ( 21 >> shift );
+            }
+
+            mask <<= 1;
+
+            if( mask & state )
+            {
+                //do operation 3: 101010
+                lights ^= ( 42 >> shift );
+            }
+
+            mask <<= 1;
+
+            if( mask & state )
+            {
+                //do operation 4: 100100
+                lights ^= ( 36 >> shift );
+            }
+
+            l_states.insert( lights );
+        }
+
+    }
+
+    return static_cast< int >( l_states.size() );
+}
+\end{lstlisting}
+
+

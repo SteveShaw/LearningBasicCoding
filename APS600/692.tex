@@ -1,0 +1,130 @@
+\section{692 --- Top K Frequent Words}
+Given a non-empty list of words, return the $k$ most frequent elements.
+
+Your answer should be sorted by frequency from highest to lowest. If two words have the same frequency, then the word with the lower alphabetical order comes first.
+
+\paragraph{Example 1:}
+
+\begin{flushleft}
+\textbf{Input}: 
+
+\fcc{["i", "love", "leetcode", "i", "love", "coding"]}, 
+
+$k = 2$
+
+\textbf{Output}: \fcc{["i", "love"]}
+
+\textbf{Explanation}: \fcc{"i"} and \fcc{"love"} are the two most frequent words.
+
+Note that \fcc{"i"} comes before \fcc{"love"} due to a lower alphabetical order.
+\end{flushleft}
+
+\paragraph{Example 2:}
+
+\begin{flushleft}
+\textbf{Input}: 
+
+\fcc{["the", "day", "is", "sunny", "the", "the", "the", "sunny", "is", "is"]}, 
+
+$k = 4$
+
+\textbf{Output}: \fcc{["the", "is", "sunny", "day"]}
+
+\textbf{Explanation}: 
+
+\fcc{"the"}, \fcc{"is"}, \fcc{"sunny"} and \fcc{"day"} are the four most frequent words, with the number of occurrence being 4, 3, 2 and 1 respectively.
+\end{flushleft}
+
+\paragraph{Note:}
+
+\begin{itemize}
+\item You may assume $ k $ is always valid, $1 \leq k \leq N$, where $N$ is number of unique elements.
+\item Input words contain only lowercase letters.
+\end{itemize}
+
+\paragraph{Follow up:}
+
+\begin{itemize}
+\item Try to solve it in $ O(n log k) $ time and $ O(n) $ extra space.
+\end{itemize}
+
+\subsection{Heap}
+This is a typical heap structure (priority queue) usage problem. When using \fcc{"C++ priority_queue"}, the ordering is defined as below
+\begin{itemize}
+\item The word with less appearances are put on the top of the queue.
+\item If two words have same appearances, put the higher alphabetical order word on the top of the queue
+\end{itemize}
+
+We can lower the memory usage by using 
+
+\fcc{"class string_view"}, 
+
+and we can directly use the \fcc{"iterator"} of the hash map as the element of the queue.
+
+\setcounter{lstlisting}{0}
+\begin{lstlisting}[style=customc, caption={Heap}]
+vector<string> topKFrequent( vector<string>& words, int k )
+{
+    using dict_type = unordered_map<string_view, int>;
+
+    dict_type dict;
+
+    //first count the appearances of each word
+    for( const auto& word : words )
+    {
+        string_view sv( word );
+
+        dict[word] += 1;
+    }
+
+    auto cmp = []( dict_type::iterator it1, dict_type::iterator it2 )
+    {
+        if( it1->second > it2->second )
+        {
+            //the less appearances will
+            //on the top
+            return true;
+        }
+
+        if( it1->second == it2->second )
+        {
+            //the higher alphabetical order word
+            //will on the top
+            return it1->first < it2->first;
+        }
+
+        return false;
+    };
+
+    //use iterator as the element of the queue
+    priority_queue<dict_type::iterator, vector<dict_type::iterator>, decltype( cmp )> pq( cmp );
+
+    for( auto it = dict.begin(); it != dict.end(); ++it )
+    {
+        pq.push( it );
+
+        int n = static_cast< int >( pq.size() );
+
+        if( n > k )
+        {
+            //remove the top
+            pq.pop();
+        }
+    }
+
+    vector<string> ans;
+    ans.reserve( k );
+
+    while( !pq.empty() )
+    {
+        auto it = pq.top();
+        ans.emplace_back( it->first );
+        pq.pop();
+    }
+
+    //since high alphabetical word is added first
+    //we will reverse the result
+    reverse( begin( ans ), end( ans ) );
+    return ans;
+}
+\end{lstlisting}

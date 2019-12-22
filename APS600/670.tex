@@ -1,0 +1,37 @@
+\section{670 --- Maximum Swap}
+Given a non-negative integer, $x$, you could swap two digits at most once to get the maximum valued number. Return the maximum valued number you could get.
+
+\paragraph{Example 1:}
+
+\begin{flushleft}
+\textbf{Input}: 2736
+
+\textbf{Output}: 7236
+
+\textbf{Explanation}: Swap the number 2 and the number 7.
+
+\end{flushleft}
+
+\paragraph{Example 2:}
+
+\begin{flushleft}
+\textbf{Input}: 9973
+
+\textbf{Output}: 9973
+
+\textbf{Explanation}: No swap.
+\end{flushleft}
+
+\paragraph{Note:}
+
+\begin{itemize}
+\item  The given number is in the range $[0, 10^8]$
+\end{itemize}
+
+\subsection{Maximum/Minimum Prefix}
+\begin{itemize}
+\item 因为最多只能交换一次，所以必须找到从左向右的最小值和从右向左的最大值在从左至右的第一个交会点。这样交换才能使获得的数字最大化。
+\item 比如数字$2736$，从左向右的最小值分别为$2,2,2,2$，而从右向左的最大值分别为$7,7,6,6$，可见在第一个位置两个值就不相同了，所以交换该位置的最小值和最大值得到的数为$7236$。
+\item 又比如数字$9973$,从左向右的最小值分别为$9,9,7,3$，而从右向左的最大值分别为$9,9,7,3$。没有一个位置处，这两个值是不相同的，所以无法交换，最大的数仍然为其本身。
+\item 在实现的时候，不仅需要知道最小值和最大值的大小，还需要知道其位置，所以数组的每个元素存放的是最小和最大值在数组中的位置。
+\end{itemize}

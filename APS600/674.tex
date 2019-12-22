@@ -1,0 +1,69 @@
+\section{674 --- Longest Continuous Increasing Subsequence}
+Given an unsorted array of integers, $A$, find the length of longest continuous increasing subsequence (subarray).
+
+\paragraph{Example 1:}
+\begin{flushleft}
+
+
+\textbf{Input}: \lstinline[language=Java, basicstyle=\small\ttfamily, keywordstyle=\bfseries\color{green!40!black}]|[1,3,5,4,7]|
+
+\textbf{Output}: 3
+
+\textbf{Explanation}: 
+
+The longest continuous increasing subsequence is \lstinline[language=Java, basicstyle=\small\ttfamily, keywordstyle=\bfseries\color{green!40!black}]|[1,3,5]|, its length is 3.
+ 
+Even though \lstinline[language=Java, basicstyle=\small\ttfamily, keywordstyle=\bfseries\color{green!40!black}]|[1,3,5,7]| is also an increasing subsequence, it's not a continuous one where 5 and 7 are separated by 4. 
+\end{flushleft}
+
+\paragraph{Example 2:}
+
+\begin{flushleft}
+\textbf{Input}: \lstinline[language=Java, basicstyle=\small\ttfamily, keywordstyle=\bfseries\color{green!40!black}]|[2,2,2,2,2]|
+
+\textbf{Output}: 1
+
+Explanation: The longest continuous increasing subsequence is \lstinline[language=Java, basicstyle=\small\ttfamily, keywordstyle=\bfseries\color{green!40!black}]|[2]|, its length is 1. 
+\end{flushleft}
+
+\subsection{Sliding Window}
+This question is asking for continuous sub-sequence. We maintain $x$ to record current increasing continuous sub-sequence length. When the sub-sequence is broken, update the global maximum length by $x$ and then reset $x$ to 1. 
+
+\setcounter{lstlisting}{0}
+\begin{lstlisting}[style=customc, caption={Sliding Window}]
+int findLengthOfLCIS( vector<int>& nums )
+{
+    if( nums.empty() )
+    {
+        return 0;
+    }
+
+    //current length of increasing continuous subsequence
+    int len = 1;
+
+    //global maximum length
+    int best = 1;
+
+    for( size_t i = 1; i < nums.size(); ++i )
+    {
+        if( nums[i] > nums[i - 1] )
+        {
+            ++len;
+        }
+        else
+        {
+            //current continuous subsequence is broken
+            //update global maximum length and
+            //reset length to 1
+            best = ( max )( len, best );
+            len = 1;
+        }
+    }
+
+    //To update for the subsequence ending with last element
+    best = ( max )( len, best );
+
+    return best;
+}
+q
+\end{lstlisting}

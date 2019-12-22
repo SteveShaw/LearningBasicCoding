@@ -1,0 +1,55 @@
+\section{664 --- Strange Printer}
+There is a strange printer with the following two special requirements:
+
+\begin{enumerate}
+\item The printer can only print a sequence of the same character each time.
+\item At each turn, the printer can print new characters starting from and ending at any places, and will cover the original existing characters.
+\end{enumerate}
+
+Given a string consists of lower English letters only, your job is to count the minimum number of turns the printer needed in order to print it.
+
+\paragraph{Example 1:}
+
+\begin{flushleft}
+
+
+\textbf{Input}:  \lstinline[language=C++, basicstyle=\small\ttfamily, keywordstyle=\bfseries\color{green!40!black}]|"aaabbb"|
+
+\textbf{Output}: 2
+
+\textbf{Explanation}: Print  \lstinline[language=C++, basicstyle=\small\ttfamily, keywordstyle=\bfseries\color{green!40!black}]|"aaa"| first and then print  \lstinline[language=C++, basicstyle=\small\ttfamily, keywordstyle=\bfseries\color{green!40!black}]|"bbb"|.
+
+\end{flushleft}
+
+\paragraph{Example 2:}
+
+\begin{flushleft}
+
+\textbf{Input}:  \lstinline[language=C++, basicstyle=\small\ttfamily, keywordstyle=\bfseries\color{green!40!black}]|"aba"|
+
+\textbf{Output}: 2
+
+\textbf{Explanation}: Print  \lstinline[language=C++, basicstyle=\small\ttfamily, keywordstyle=\bfseries\color{green!40!black}]|"aaa"| first and then print  \lstinline[language=C++, basicstyle=\small\ttfamily, keywordstyle=\bfseries\color{green!40!black}]|"b"| from the second place of the string, which will cover the existing character  \lstinline[language=C++, basicstyle=\small\ttfamily, keywordstyle=\bfseries\color{green!40!black}]|'a'|.
+
+\end{flushleft}
+
+\paragraph{Hint:} 
+\begin{itemize}
+\item Length of the given string will not exceed 100.
+\end{itemize}
+
+\subsection{Dynamic Programming}
+Suppose $F[i][j]$ is the minimum number of turns the printers needs in order to print $S[i, j]$. 
+
+The base cases are direct
+
+\begin{enumerate}
+\item $i=j$: $F[i][i]:=1$
+\item $j=i+1$: $F[i][i+1]$ depends on if $S[i]=S[i+1]$.When $S[i]=S[i+1]$, $F[i][i+1]:=1$. Otherwise, $F[i][i+1]:=2$.
+\end{enumerate}
+
+Next, we iterate the sub-string length from $3$ to $\ell$. $\ell$ is the length of $s$. For any sub-string $S[i,j]$, the initial value of $F[i][j]$ can be set to $1+F[i+1][j]$ since we can print $S[i]$ first and then print $s[i+1,j]$.
+
+Then, we check each index $k$ from $i+1$ to $j$. The total turns for printing $s[i,j]$ will be $F[i,k-1]+F[k, j]$. However, if $s[i]=s[k]$, we don't need to print $s[k]$ separately. We can print $s[i]$ with $s[k]$ in one turn. Thus the total turns can be decreased by one time, i.e. $F[i,k-1]+F[k, j]-1$.
+
+We choose the minimum turns from above as the result for $F[i][j]$. Finally, $F[0][\ell-1]$ gives the result for $s$.

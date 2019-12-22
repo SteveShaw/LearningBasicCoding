@@ -41,6 +41,7 @@ Ugly numbers are positive numbers whose prime factors only include 2, 3, 5.
 \item 1 is typically treated as an ugly number.
 \item Input is within the 32-bit signed integer range: $[−2^{31},  2^{31} − 1]$.
 \end{itemize}
+\subsection{Prime Factors}
 根据定义，用$n$除以2，3，5一直到不能被这三个数整除。看最后$n$是不是为1。
 \setcounter{lstlisting}{0}
 \begin{lstlisting}[style=customc, caption={Divide}]
@@ -68,3 +69,9 @@ bool isUgly( int num )
     return num == 1;
 }
 \end{lstlisting}
+
+\paragraph{Related Problems}
+\begin{itemize}
+\item \textbf{279. Perfect Squares}
+
+\end{itemize}

@@ -208,55 +208,57 @@ bool validTree( int n, vector<pair<int, int>>& edges )
 \item 初始化一个size为$n$的parents数组，其中$\texttt{parents}[i]=i$，即每个节点的parent就是其自身
 \item 遍历edges，分别查找edges两边的node的parent，如果发现这两个node的parent相同，表明存在cycle，直接返回\texttt{false}。
 \item 如果不相同，将其中一个node的parent设为另外一个node。
-\item 最后遍历parents数组，看数组中每个元素的parent是不是都相同，如果有不同的，表明graph是disjointed，返回\texttt{false}。
+\item 最后检查edge的个数是不是$n-1$.
 \end{itemize}
 \begin{lstlisting}[style=customc, caption={Union Find}]
-bool validTree( int n, vector<pair<int, int>>& edges )
+bool validTree( int n, vector<vector<int>>& edges )
 {
-    vector<int> parents( n, 0 );
+    vector<int> parents( n, -1 );
     for( int i = 0; i < n; ++i )
     {
         parents[i] = i;
     }
-
-    for( const auto& e : edges )
+    vector<int> ranks( n, 1 );
+    for( const auto& edge : edges )
     {
-        int p1 = find_parent( parents, e.first );
-        int p2 = find_parent( parents, e.second );
-
-        //There is a cycle
-        if( p1 == p2 )
+        int px = find( edge[0], parents );
+        int py = find( edge[1], parents );
+        if( px == py )
         {
+            //there exists a circle
             return false;
         }
-
-        parents[p2] = p1;
+        set_union( px, py, parents, ranks );
     }
-
-    //check if there is more than 1 parents
-    //more than 1 parents means the graph is disjointed
-    int p0 = find_parent( parents, 0 );
-
-    for( int i = 0; i < n; ++i )
-    {
-        int pi = find_parent( parents, i );
-
-        if( pi != p0 )
-        {
-            return false;
-        }
-    }
-
-    return true;
+    //any two nodes of a tree only one edge connected
+    return ( int )( edges.size() ) == n - 1;
 }
-
-int find_parent( vector<int>& parents, int i )
+//find parent
+int find( int x, vector<int>& parents )
 {
-    while( parents[i] != i )
+    while( x != parents[x] )
     {
-        i = parents[i];
+        x = parents[x];
     }
-
-    return i;
+    return x;
+}
+//union two nodes
+void set_union( int x, int y, vector<int>& parents, vector<int>& ranks )
+{
+    if( ranks[x] > ranks[y] )
+    {
+        swap( x, y );
+    }
+    else if( ranks[x] == ranks[y] )
+    {
+        ranks[x]++;
+    }
+    parents[y] = x;
 }
 \end{lstlisting}
+
+\paragraph{Similar Questions}
+\begin{itemize}
+\item \textbf{207. Course Schedule}
+\item \textbf{323. Number of Connected Components in an Undirected Graph}
+\end{itemize}

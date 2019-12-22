@@ -1,0 +1,114 @@
+\section{695 --- Max Area of Island}
+Given a non-empty 2D array grid of 0's and 1's, an island is a group of 1's (representing land) connected 4-direction (horizontal or vertical.) You may assume all four edges of the grid are surrounded by water.
+\par
+Find the \textbf{maximum area} of an island in the given 2D array. (If there is no island, the maximum area is 0.)
+\paragraph{Example 1:}
+\begin{flushleft}
+\begin{figure}[H]
+\centering
+\begin{tikzpicture} 
+\matrix (m) [matrix of nodes]
+{
+0 & 0 & 1 & 0 & 0 & 0 & 0 & 1 & 0 & 0 & 0 & 0 & 0 \\
+0 & 0 & 0 & 0 & 0 & 0 & 0 & 1 & 1 & 1 & 0 & 0 & 0 \\
+0 & 1 & 1 & 0 & 1 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 \\
+0 & 1 & 0 & 0 & 1 & 1 & 0 & 0 & 1 & 0 & 1 & 0 & 0 \\
+0 & 1 & 0 & 0 & 1 & 1 & 0 & 0 & 1 & 1 & 1 & 0 & 0 \\
+0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 1 & 0 & 0 \\
+0 & 0 & 0 & 0 & 0 & 0 & 0 & 1 & 1 & 1 & 0 & 0 & 0 \\
+0 & 0 & 0 & 0 & 0 & 0 & 0 & 1 & 1 & 0 & 0 & 0 & 0 \\
+};
+\draw [color=green](m-1-8.north west)--(m-2-8.south west)--(m-2-10.south east)--(m-2-10.north east)--(m-2-8.north east)--(m-1-8.north east)--cycle;
+\draw [color=green](m-3-2.north west)--(m-5-2.south west)--(m-5-2.south east)--(m-3-2.south east)--(m-3-3.south east)--(m-3-3.north east)--cycle;
+\draw [color=green](m-3-5.north west)--(m-5-5.south west)--(m-5-6.south east)--(m-4-6.north east)--(m-4-5.north east)--(m-3-5.north east)--cycle;
+\draw [color=red](m-4-9.north west)--(m-5-9.south west)--(m-5-11.south west)--(m-6-11.south west)--(m-6-11.south east)--(m-4-11.north east)--cycle;
+\draw [color=green](m-7-8.north west)--(m-8-8.south west)--(m-8-9.south east)--(m-7-9.south east)--(m-7-10.south east)--(m-7-10.north east)--cycle;
+\draw [color=blue](m-1-3.north west)--(m-1-3.south west)--(m-1-3.south east)--(m-1-3.north east)--cycle;
+\end{tikzpicture}
+\end{figure}
+
+Given the above grid, return 6. 
+
+Note the answer is not 11, because the island must be connected 4-direction.
+\end{flushleft}
+
+\paragraph{Example 2:}
+\begin{flushleft}
+\[
+\begin{bmatrix}
+0 & 0 & 0 & 0 & 0 & 0 & 0 & 0
+\end{bmatrix}
+\]
+
+Given the above grid, return 0.
+\end{flushleft}
+
+\paragraph{Note:}
+\begin{itemize}
+\item The length of each dimension in the given grid does not exceed 50.
+\end{itemize}
+
+\subsection{DFS}
+
+很显然这时寻找四连通区域，在每一个1处进行DFS搜索，搜索完成后，即可获得当前连通区域中1的个数，也就是area大小。这里的一个技巧是，可以把访问到的元素设为$-1$，这样避免了使用额外的二维数组来记录是否访问过。
+
+\setcounter{lstlisting}{0}
+\begin{lstlisting}[style=customc, caption={DFS}]
+int maxAreaOfIsland( vector<vector<int>>& grid )
+{
+    int M = static_cast< int >( grid.size() );
+    int N = static_cast< int >( grid[0].size() );
+
+    int best = 0;
+
+    for( int r = 0; r < M; ++r )
+    {
+        for( int c = 0; c < N; ++c )
+        {
+            if( grid[r][c] == 1 )
+            {
+                int area = 0;
+
+                dfs( grid, r, c, area );
+
+                best = ( max )( area, best );
+            }
+        }
+    }
+
+    return best;
+}
+
+void dfs( vector<vector<int>>& G, int r, int c, int& area )
+{
+    if( G[r][c] != 1 )
+    {
+        return;
+    }
+
+    //this is a point we have not seen
+    //and also belong to an island
+    //increment the area
+    ++area;
+
+    //mark it as visited
+    G[r][c] = 2;
+
+    int dr[] = { -1, 0, 1, 0 };
+    int dc[] = { 0, -1, 0, 1 };
+
+    int M = static_cast< int >( G.size() );
+    int N = static_cast< int >( G[0].size() );
+
+    for( int i = 0; i < 4; ++i )
+    {
+        int nr = r + dr[i];
+        int nc = c + dc[i];
+
+        if( ( nr >= 0 ) && ( nr < M ) && ( nc >= 0 ) && ( nc < N ) )
+        {
+            dfs( G, nr, nc, area );
+        }
+    }
+}
+\end{lstlisting}

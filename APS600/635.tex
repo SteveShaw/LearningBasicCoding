@@ -1,0 +1,49 @@
+\section{635 --- Design Log Storage System}
+You are given several logs that each log contains a unique id and timestamp. Timestamp is a string that has the following format: Year:Month:Day:Hour:Minute:Second, for example, 2017:01:01:23:59:59. All domains are zero-padded decimal numbers.
+
+Design a log storage system to implement the following functions:
+
+\begin{itemize}
+\item \lstinline[language=Java, basicstyle=\small\ttfamily, keywordstyle=\bfseries\color{green!40!black}]|void Put(int id, string timestamp)|: Given a log's unique id and timestamp, store the log in your storage system.
+
+\item \lstinline[language=Java, basicstyle=\small\ttfamily, keywordstyle=\bfseries\color{green!40!black}]|int[] Retrieve(String start, String end, String granularity)|: Return the id of logs whose timestamps are within the range from \texttt{start} to \texttt{end}. \texttt{Start} and \texttt{end} all have the same format as timestamp. However, granularity means the time level for consideration. For example, \texttt{start}: \textcolor{red}{2017:01:01:23:59:59}, \texttt{end}: \textcolor{red}{2017:01:02:23:59:59}, \texttt{granularity}: \textcolor{red}{Day}, it means that we need to find the logs within the range from Jan. 1st 2017 to Jan. 2nd 2017.
+\end{itemize}
+
+\paragraph{Example 1:}
+
+\begin{lstlisting}[style=customc]
+put( 1, "2017:01:01:23:59:59" );
+put( 2, "2017:01:01:22:59:59" );
+put( 3, "2016:01:01:00:00:00" );
+
+// return [1,2,3], because you need to return all
+// logs within 2016 and 2017.
+retrieve( "2016:01:01:01:01:01", "2017:01:01:23:00:00", "Year" );
+
+
+// return [1,2], because you need to return all logs
+// start from 2016:01:01:01 to 2017:01:01:23,
+// where log 3 is left outside the range.
+retrieve( "2016:01:01:01:01:01", "2017:01:01:23:00:00", "Hour" );
+\end{lstlisting}
+
+
+\paragraph{Note:}
+
+\begin{itemize}
+\item There will be at most 300 operations of \texttt{Put} or \texttt{Retrieve}.
+\item Year ranges from $[2000,2017]$. Hour ranges from $[00,23]$.
+\item Output for Retrieve has no order required.
+\end{itemize}
+
+\subsection{Transform}
+\begin{itemize}
+\item Since the year is in $[2000,2017]$, we can use 1999 as the base to transform the input timestamp into seconds from 1999.
+\item Use a tree map as the underlying data structure because it can automatically sort the logs per their timestamps (seconds).
+\item In order to retrieve the logs' ids lying within the given timestamp ranges, $s$ and $e$, and a granularity $g$. firstly, we need to convert the given timestamps into seconds. Before doing the conversion, we need to consider the effect of granularity.
+ \begin{enumerate}
+\item Granularity defines the precision of the results. For example, for a granularity corresponding to a \texttt{Day}, we only need to consider the portion of the timestamp up to \texttt{Day} section only. The rest of the fields can be assumed to be all zeros. 
+\item After doing this for both the start and end timestamp, we do the conversion of the timestamp with the required precision into seconds. Once this has been done, we can use binary search to find the first item that is no less than the start and the last item that is no larger than the end.
+\item There is a trick: to convert end timestamp to seconds, we can increment the value in the position of specified granularity. Therefore, we are looking for a half open range when doing the search.
+\end{enumerate}
+\end{itemize}

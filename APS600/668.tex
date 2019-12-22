@@ -1,0 +1,65 @@
+\section{668 --- Kth Smallest Number in Multiplication Table}
+Nearly every one have used the Multiplication Table. But could you find out the $k$-th smallest number quickly from the multiplication table?
+
+Given the height $m$ and the length $n$ of a $m \times n$ Multiplication Table, and a positive integer $k$, you need to return the $k$-th smallest number in this table.
+
+\paragraph{Example 1:}
+
+\begin{flushleft}
+
+\textbf{Input}: $m = 3$, $n = 3$, $k = 5$
+
+\textbf{Output}: 3
+
+\textbf{Explanation}: 
+
+The Multiplication Table:
+\[
+\begin{bmatrix}
+1 & 2 & 3 \\
+2 & 4 & 6 \\
+3 & 6 & 9
+\end{bmatrix}
+\]
+
+The 5-th smallest number is 3 \lstinline[language=C++, basicstyle=\small\ttfamily, keywordstyle=\bfseries\color{green!40!black}]|(1, 2, 2, 3, 3)|.
+
+\end{flushleft}
+
+\paragraph{Example 2:}
+
+\begin{flushleft}
+
+\textbf{Input}: $m = 2$, $n = 3$, $k = 6$
+
+\textbf{Output}: 6
+
+\textbf{Explanation}: 
+
+The Multiplication Table:
+
+\[
+\begin{bmatrix}
+1 & 2 & 3 \\
+2 & 4 & 6
+\end{bmatrix}
+\]
+The 6-th smallest number is 6 \lstinline[language=C++, basicstyle=\small\ttfamily, keywordstyle=\bfseries\color{green!40!black}]|(1, 2, 2, 3, 4, 6)|.
+
+\end{flushleft}
+
+\paragraph{Note:}
+
+\begin{itemize}
+\item The $m$ and $n$ will be in the range \lstinline[language=C++, basicstyle=\small\ttfamily, keywordstyle=\bfseries\color{green!40!black}]|[1, 30000]|.
+\item The $k$ will be in the range $[1, m\times n]$.
+\end{itemize}
+
+\subsection{Binary Search}
+$m \times n$的乘法表中，最小的数为\textbf{1}， 最大的数为$m\times n$.
+\begin{itemize}
+\item 对于每个候选值，在乘法表中寻找不大于该数的数有多少个，如果个数小于$k$，就跳到后半区，否则在前半区。
+\item 在乘法表中，行$i$的最大数为$ i \times n$。所以在这行中，小于目标数$T$的个数为$ T / i$，但是由于有$n$的限制，所以应该取较小的那个，也就是$\min(T/i, n)$。
+\item To count how many numbers are no larger than the target number, we iterate from 1 to $m$, and accumulate $\min(T/i, n)$ for row $i$.
+\item 这里使用的二分法查找采用的是找\textbf{leftmost}的算法。
+\end{itemize}

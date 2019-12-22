@@ -1,0 +1,41 @@
+\section{630 --- Course Schedule III}
+There are $n$ different online courses numbered from 1 to $n$. Each course has some duration (course length) $t$ and closed on $d$-th day. A course should be taken continuously for $t$ days and must be finished before or on the $d$-th day. You will start at the 1st day.
+
+Given $n$ online courses represented by pairs $(t,d)$, your task is to find the maximal number of courses that can be taken.
+
+\paragraph{Example:}
+\begin{flushleft}
+
+\textbf{Input}: $[[100, 200], [200, 1300], [1000, 1250], [2000, 3200]]$
+
+\textbf{Output}: 3
+
+\textbf{Explanation}: 
+
+There are totally 4 courses, but you can take 3 courses at most:
+
+First, take the 1st course, it costs 100 days so you will finish it on the 100th day, and ready to take the next course on the 101st day.
+
+Second, take the 3rd course, it costs 1000 days so you will finish it on the 1100th day, and ready to take the next course on the 1101st day. 
+
+Third, take the 2nd course, it costs 200 days so you will finish it on the 1300th day.
+ 
+The 4th course cannot be taken now, since you will finish it on the 3300th day, which exceeds the closed date.
+
+\end{flushleft}
+
+\paragraph{Note:}
+
+\begin{itemize}
+\item The integer $1 \leq d, t, n \leq 10000$.
+\item You can't take two courses simultaneously.
+\end{itemize}
+
+\subsection{Greedy}
+\begin{itemize}
+\item Sort the input per the end time of the course.
+\item Maintain a variable $t$ to indicate current start time.
+\item Go over the sorted array, if current course $c$ can be taken, i.e. $t + d_c \leq e_c$ ($d_c$ is the duration of course $c$ and $e_c$ is the day that $c$ has to be finished). We add $c$'s duration into a maximum priority queue (i.e., the top of the queue is the maximum one). 
+\item If current course $c$ cannot be taken, we need to replace the largest duration from the priority queue with current course. At the same time, we have adjust start time $t$ by subtracting the largest duration from the queue because we don't take this lesson and adding $c$'s duration to $t$. Also, we need to push $c$'s duration into the queue.
+\item Finally, the number of items in the queue gives us the answer.
+\end{itemize}

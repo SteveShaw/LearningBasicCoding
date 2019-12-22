@@ -1,0 +1,51 @@
+\section{665 --- Non-decreasing Array}
+Given an array with $n$ integers, your task is to check if it could become non-decreasing by modifying at most 1 element.
+
+We define an array, $A$, is non-decreasing if $A[i] \leq A[i + 1]$ holds for every $i$ ($1 \leq i < n$).
+
+\paragraph{Example 1:}
+
+\begin{flushleft}
+
+\textbf{Input}: \lstinline[language=C++, basicstyle=\small\ttfamily, keywordstyle=\bfseries\color{green!40!black}]|[4,2,3]|
+
+\textbf{Output}: \lstinline[language=C++, basicstyle=\small\ttfamily, keywordstyle=\bfseries\color{green!40!black}]|true|
+
+\textbf{Explanation}: You could modify the first 4 to 1 to get a non-decreasing array.
+
+\end{flushleft}
+
+\paragraph{Example 2:}
+
+\begin{flushleft}
+
+\textbf{Input}: \lstinline[language=C++, basicstyle=\small\ttfamily, keywordstyle=\bfseries\color{green!40!black}]|[4,2,1]|
+
+\textbf{Output}: \lstinline[language=C++, basicstyle=\small\ttfamily, keywordstyle=\bfseries\color{green!40!black}]|false|
+
+\textbf{Explanation}: You can't get a non-decreasing array by modify at most one element.
+
+\end{flushleft}
+
+
+\paragraph{Note:} 
+
+\begin{itemize}
+\item The $n$ belongs to \lstinline[language=C++, basicstyle=\small\ttfamily, keywordstyle=\bfseries\color{green!40!black}]|[1, 10,000]|. 
+\end{itemize}
+
+\subsection{Analyze Index}
+\begin{itemize}
+\item 如果找到两个位置出现 $A[i] > A[i+1]$， 很显然是不能做到的。返回\texttt{false}。
+\item 假设在唯一的位置$P$出现$A[P] > A[P+1]$。
+\begin{enumerate}
+\item 如果$P=0$，把$A[0]$换成任何一个小于$A[1]$的数即可。
+\item 如果$P=L-2$，把$A[L-1]$换成$A[L-2]$即可。有没有可能$A[L-3]$大于$A[L-1]$呢？即使出现这种情况，由于我们已经把$A[L-1]$替换为$A[L-2]$了，那么替换后$A[L-1] \geq A[L-3]$。至于$A[L-3]$之前有没有可能大于$A[L-1]$，就没必要分析了，因为这些数必然小于$A[L-3]$，因为$P$是唯一出现$A[P] > A[P+1]$的位置。
+\end{enumerate}
+\item 如果$P$不是上述两个边界位置，那么需要考虑$A[P-1]$, $A[P]$, $A[P+1]$以及$A[P+2]$这四个 number。这四个的关系是$A[P-1] \leq A[P] > A[P+1] \leq A[P+2]$
+\begin{enumerate}
+\item 如果$A[P-1] > A[P+1]$，$A[P-1]$之前的就不用分析了，因为都不大于$A[P-1]$。如果将$A[P+1]$修改为$A[P]$就可以使得$A[P-1] \leq A[P+1]$了，因为$A[P-1]\leq A[P]$。这时候四个数关系变为$A[P-1] \leq A[P] = A[P+1] ? A[P+2]$。因为$A[P+1] \gets A[P]$，所以$A[P+1]$与 $A[P+2]$的大小关系未知，如果需要满足题目要求最多改动一个位置，那么必然要求$A[P] \leq A[P+2]$。
+\item 如果$A[P] > A[P+2]$，那么需要把$A[P]$换成$A[P+1]$，这样就有$A[P-1] ? A[P] = A[P+1] \leq A[P+2]$，因为$A[P] \gets A[P+1]$， 所以$A[P-1]$与 $A[P]$的大小关系未知。，如果需要满足题目要求最多改动一个位置，那么必然要求$A[P-1] \leq A[P+1]$
+\end{enumerate}
+\item 综合以上分析，可以得出结论，如果$A[P-1] > A[P+1]$ 并且 $A[P] > A[P+2]$，肯定不能只移动一个位置，反之，则是可以的
+\end{itemize}

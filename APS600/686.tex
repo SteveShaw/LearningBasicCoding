@@ -1,0 +1,166 @@
+\section{686 --- Repeated String Match}
+Given two strings $A$ and $B$, find the minimum number of times $A$ has to be repeated such that $B$ is a substring of it. If no such solution, return $-1$.
+
+For example, with \lstinline[language=C++, basicstyle=\small\ttfamily, keywordstyle=\bfseries\color{green!40!black}]|A = "abcd"| and \lstinline[language=C++, basicstyle=\small\ttfamily, keywordstyle=\bfseries\color{green!40!black}]|B = "cdabcdab"|.
+
+Return 3, because by repeating $A$ three times (\lstinline[language=C++, basicstyle=\small\ttfamily, keywordstyle=\bfseries\color{green!40!black}]|"abcdabcdabcd"|), $B$ is a substring of it; and $B$ is not a substring of $A$ repeated two times (\lstinline[language=C++, basicstyle=\small\ttfamily, keywordstyle=\bfseries\color{green!40!black}]|"abcdabcd"|).
+
+\paragraph{Note:}
+
+\begin{itemize}
+\item The length of $ A $ and $ B $ will be between 1 and 10000.
+\end{itemize}
+
+\subsection{Sliding Window}
+We keep track of index $i$ and $j$ for $A$ and $B$, then compare $A[i]$ with $B[j]$. Since $A$ can repeat, the index that we will scanning in $A$ will be $\bmod(i+j, L_A)$ where $L_A$ is the length of $A$.
+
+We increments $j$ whenever $A[\bmod(i+j, L_A)]=B[j]$ until the end of $B$. If $j=L_B$ ($L_B$ is the length of $B$), we know $B$ will appear as a substring in a string with repeated $A$. The count of repeat will be $(i+j-1)/L_A+1$. The reason is when $i+j=L_A$, the count of repeating $A$ is 1.
+
+\setcounter{lstlisting}{0}
+\begin{lstlisting}[style=customc, caption={Sliding Window}]
+int repeatedStringMatch( string A, string B )
+{
+    size_t LA = A.size();
+
+    size_t LB = B.size();
+
+    for( size_t i = 0; i < LA; ++i )
+    {
+        size_t  j = 0;
+
+        while( j < LB )
+        {
+            //we start from (i+j) % LA
+            auto k = ( i + j ) % LA;
+
+            if( A[k] == B[j] )
+            {
+                ++j;
+            }
+            else
+            {
+                break;
+            }
+        }
+
+        //all are matched
+        //LB is the substring
+        if( j == LB )
+        {
+            return ( i + j - 1 ) / LA + 1;
+        }
+    }
+
+    return -1;
+}
+\end{lstlisting}
+
+\subsection{KMP}
+We build a KMP table $T$ for string $B$. The comparing scheme is same as the sliding window approach, i.e.
+
+\begin{lstlisting}[style=customc, caption={Scanning Scheme}]
+while( j < LB )
+{
+    //we start from (i+j) % LA
+    //when j is incremented
+    //i+j is also incremented
+    //because i is fixed.
+    auto k = ( i + j ) % LA;
+
+    if( A[k] == B[j] )
+    {
+        ++j;
+    }
+    else
+    {
+        break;
+    }
+}
+\end{lstlisting}
+
+When the matching is failed at some index $j$, we will utilize the KMP table to find the next matching index. In this problem, since the index to scan in $A$, $i$, is fixed when comparing, $i$ will be changed to $i + j - T[j-1]$. (In the normal string matching KMP, the scanning index $i$ in the string to be searched is incremented when matched).
+
+
+\begin{lstlisting}[style=customc, caption={KMP}]
+int repeatedStringMatch( string A, string B )
+{
+    auto LA = static_cast< int >( A.size() );
+    auto LB = static_cast< int >( B.size() );
+
+    //build KMP table
+    vector<int> F( B.size(), 0 );
+    int t = 0;
+    for( int i = 1; i < LB; ++i )
+    {
+        t = F[i - 1];
+
+        while( ( t > 0 ) && ( B[i] != B[t] ) )
+        {
+            t = F[t - 1];
+
+        }
+
+        if( B[i] == B[t] )
+        {
+            t = t + 1;
+        }
+
+        F[i] = t;
+    }
+
+    int i = 0; //index in A
+    int j = 0; //index in B
+
+    while( i < LA )
+    {
+        while( j < LB )
+        {
+            //during this process
+            //i is fixed
+            //(i+j) is incremented
+
+            auto k = ( i + j ) % LA;
+            if( A[k] == B[j] )
+            {
+                ++j;
+
+            }
+            else
+            {
+                break;
+            }
+        }
+
+
+        if( j == LB )
+        {
+            //found match
+            return ( i + j - 1 ) / LA + 1;
+        }
+
+
+        if( j > 0 )
+        {
+            //since i is fixed during comparing
+            //we need to advance i to the
+            //first index that does not match
+            //which is i + j - F[j-1]
+
+            //In normal KMP, since i is
+            //incremented during comparing
+            //the following is not needed
+            i += j - F[j - 1];
+
+            //normal KMP operation
+            j = F[j - 1];
+        }
+        else
+        {
+            //same as normal KMP operation
+            ++i;
+        }
+
+    }
+    return -1;
+}
+\end{lstlisting}

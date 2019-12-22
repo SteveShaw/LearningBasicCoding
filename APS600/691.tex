@@ -1,0 +1,131 @@
+\section{691 --- Stickers to Spell Word}
+We are given $N$ different types of \textbf{stickers}. Each sticker has a \textbf{lowercase} English word on it.
+\par
+You would like to spell out the given \textbf{target} string $T$ by cutting individual letters from your collection of stickers and rearranging them.
+\par
+You can use each sticker more than once if you want, and you have infinite quantities of each sticker.
+\par
+What is the minimum number of stickers that you need to spell out the target? If the task is impossible, return -1.
+\paragraph{Example 1:}
+\begin{flushleft}
+\textbf{Input:}
+
+\lstinline[language=C++, basicstyle=\small\ttfamily, keywordstyle=\bfseries\color{green!40!black}]|stickers = ["with", "example", "science"]|, \lstinline[language=C++, basicstyle=\small\ttfamily, keywordstyle=\bfseries\color{green!40!black}]|target = "thehat"|.
+
+\textbf{Output}: 3
+
+\textbf{Explanation}:
+
+We can use 2 \lstinline[language=C++, basicstyle=\small\ttfamily, keywordstyle=\bfseries\color{green!40!black}]|"with"| stickers, and 1 \lstinline[language=C++, basicstyle=\small\ttfamily, keywordstyle=\bfseries\color{green!40!black}]|"example"| sticker.
+
+After cutting and rearrange the letters of those stickers, we can form the target \lstinline[language=C++, basicstyle=\small\ttfamily, keywordstyle=\bfseries\color{green!40!black}]|"thehat"|.
+
+Also, this is the minimum number of stickers necessary to form the target string.
+\end{flushleft}
+
+\paragraph{Example 2:}
+\begin{flushleft}
+\textbf{Input}:
+
+\lstinline[language=C++, basicstyle=\small\ttfamily, keywordstyle=\bfseries\color{green!40!black}]|stickers=["notice", "possible"]|, \lstinline[language=C++, basicstyle=\small\ttfamily, keywordstyle=\bfseries\color{green!40!black}]|target = "basicbasic"|
+
+\textbf{Output}: $-1$
+
+\textbf{Explanation}:
+
+We can't form the target \lstinline[language=C++, basicstyle=\small\ttfamily, keywordstyle=\bfseries\color{green!40!black}]|"basicbasic"| from cutting letters from the given stickers.
+\end{flushleft}
+
+
+\paragraph{Note:}
+\begin{itemize}
+\item \textbf{stickers} has length in the range $[1, 50]$.
+\item \textbf{stickers} consists of \textbf{lowercase} English words (without apostrophes).
+\item \textbf{target} has length in the range $[1, 15]$, and consists of \textbf{lowercase} English letters.
+\item In all test cases, all words were chosen randomly from the 1000 most common US English words, and the target was chosen as a concatenation of two random words.
+\item The time limit may be more challenging than usual. It is expected that a 50 sticker test case can be solved within 35ms on average.
+\end{itemize}
+
+\subsection{Dynamic Programming}
+In this approach, suppose the length of $T$ is $L$. Since the given $L$ is no large than 15, we can make use of a integer $s$  such that if the $i$--th bit of $s$ is 1, it means $T[i]$ can be spelled by the sticker. 
+
+
+For each state $s$, we look at what happens to it after applying a sticker. For each letter in the sticker that can satisfy an unset bit of $s$, we set the bit. At the end, we know now is the result of applying that sticker to state. 
+
+Thus, we make use of an array $F$. For each state $s$, $F[s]$ gives the minimum number of stickers such that: for each set bit $i$ in $s$, $T[i]$ can be spelled by the stickers. 
+
+We starting from zero state. For each current state $s$, we apply a sticker and will get next state $s_1$. Then $F[s_1]=\min(F[s_1], F[s]+1)$. After checking all $2^L$ states, $F[2^L-1]$ is the answer.
+
+\subsubsection{Algorithm}
+The inputs of the following procedure are
+\begin{itemize}
+    \item $S$ --- The input sticker array
+    \item $N$ --- The length of $S$
+    \item $T$ --- The target string
+    \item $L$ --- The length of $T$
+\end{itemize}
+
+\setcounter{lstlisting}{0}
+\begin{lstlisting}[style=customc, caption={Dynamic Progamming}]
+int minStickers( vector<string>& stickers, string target )
+{
+    int L = static_cast<int>( target.size() );
+    //the space of states
+    int NS = ( 1 << L );
+
+    vector<int> F( NS, -1 );
+    //at start, all bits are 0
+    //no any sticker is needed
+    F[0] = 0;
+
+    //try each state
+    for( int state = 0; state < NS; ++state )
+    {
+        if( F[state] < 0 )
+        {
+            //this state cannot
+            //be reached
+            continue;
+        }
+
+        for( const auto& sticker : stickers )
+        {
+            //apply one sticker to
+            //current state
+            //to get next_state
+            int next_state = state;
+
+            for( auto ch : sticker )
+            {
+                for( size_t i = 0; i < target.size(); ++i )
+                {
+                    if( next_state & ( 1 << i ) )
+                    {
+                        //we already spell out target[i]
+                        continue;
+                    }
+                    if( target[i] == ch )
+                    {
+                        //we can spell letter target[i]
+                        next_state |= ( 1 << i );
+                        //we try next letter in the sticker
+                        break;
+                    }
+                }//loop target
+            }//loop letter in sticker
+
+            //now next_state is the result of applying the sticker
+            if( ( F[next_state] < 0 ) || ( F[next_state] > F[state] + 1 ) )
+            {
+                //the number of stickers
+                //for reach next_state
+                //is the number of stickers
+                //to reach state plus 1
+                F[next_state] = F[state] + 1;
+            }
+        }// loop stickers
+    }//loop state
+
+    return F.back();
+}
+\end{lstlisting}

@@ -1,0 +1,51 @@
+\section{641 --- Design Circular Deque}
+Design your implementation of the circular double-ended queue (deque).
+
+Your implementation should support following operations:
+
+\begin{itemize}
+\item \lstinline[language=Java, basicstyle=\small\ttfamily, keywordstyle=\bfseries\color{green!40!black}]|MyCircularDeque(k)|: Constructor, set the size of the deque to be $k$.
+\item \lstinline[language=Java, basicstyle=\small\ttfamily, keywordstyle=\bfseries\color{green!40!black}]|insertFront()|: Adds an item at the front of Deque. Return true if the operation is successful.
+\item \lstinline[language=Java, basicstyle=\small\ttfamily, keywordstyle=\bfseries\color{green!40!black}]|insertLast()|: Adds an item at the rear of Deque. Return true if the operation is successful.
+\item \lstinline[language=Java, basicstyle=\small\ttfamily, keywordstyle=\bfseries\color{green!40!black}]|deleteFront()|: Deletes an item from the front of Deque. Return true if the operation is successful.
+\item \lstinline[language=Java, basicstyle=\small\ttfamily, keywordstyle=\bfseries\color{green!40!black}]|deleteLast()|: Deletes an item from the rear of Deque. Return true if the operation is successful.
+\item \lstinline[language=Java, basicstyle=\small\ttfamily, keywordstyle=\bfseries\color{green!40!black}]|getFront()|: Gets the front item from the Deque. If the deque is empty, return $-1$.
+\item \lstinline[language=Java, basicstyle=\small\ttfamily, keywordstyle=\bfseries\color{green!40!black}]|getRear()|: Gets the last item from Deque. If the deque is empty, return $-1$.
+\item \lstinline[language=Java, basicstyle=\small\ttfamily, keywordstyle=\bfseries\color{green!40!black}]|isEmpty()|: Checks whether Deque is empty or not. 
+\item \lstinline[language=Java, basicstyle=\small\ttfamily, keywordstyle=\bfseries\color{green!40!black}]|isFull()|: Checks whether Deque is full or not.
+\end{itemize} 
+
+\paragraph{Example:}
+
+\begin{lstlisting}[style=customc]
+MyCircularDeque circularDeque = new MycircularDeque( 3 ); // set the size to be 3
+circularDeque.insertLast( 1 );			// return true
+circularDeque.insertLast( 2 );			// return true
+circularDeque.insertFront( 3 );			// return true
+circularDeque.insertFront( 4 );			// return false, the queue is full
+circularDeque.getRear();  			// return 2
+circularDeque.isFull();				// return true
+circularDeque.deleteLast();			// return true
+circularDeque.insertFront( 4 );			// return true
+circularDeque.getFront();			// return 4
+\end{lstlisting}
+ 
+
+\paragraph{Note:}
+
+\begin{itemize}
+\item All values will be in the range of [0, 1000].
+\item The number of operations will be in the range of [1, 1000].
+\item Please do not use the built-in Deque library.
+\end{itemize}
+
+\subsection{Two Pointers/Indexes}
+\begin{itemize}
+\item We make use of two pointers/ indexes: front and rear to track current begin and end of queue.
+\item To simply the task, we also maintains a variable, say $z$, to track number of items in the queue.
+\item At start, front is set to zero and rear to the last index ($k-1$) of the underlying array.
+\item When insert into front, we set current slot of array at the index \texttt{front} to the given value, and then increments \texttt{front}. Also, we increment the number of items in the queue. 
+\item Similarly, when insert into rear, set current lot at the index \texttt{rear} as the given value, and then decrements \texttt{rear}. We also increment the number of items in the queue.
+\item For delete front and rear, the operation is reverse of insert. 
+\item Since we maintain the number of items in the queue, it is easy to check if the queue is empty ($z=0$) or full ($z=k$).
+\end{itemize}

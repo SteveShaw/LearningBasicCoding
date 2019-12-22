@@ -1,0 +1,121 @@
+\section{677 --- Map Sum Pairs}
+Implement a \lstinline[language=Java, basicstyle=\small\ttfamily, keywordstyle=\bfseries\color{green!40!black}]|MapSum| class with \lstinline[language=Java, basicstyle=\small\ttfamily, keywordstyle=\bfseries\color{green!40!black}]|insert|, and \lstinline[language=Java, basicstyle=\small\ttfamily, keywordstyle=\bfseries\color{green!40!black}]|sum| methods.
+
+For the method \lstinline[language=Java, basicstyle=\small\ttfamily, keywordstyle=\bfseries\color{green!40!black}]|insert|, you'll be given a pair of \lstinline[language=Java, basicstyle=\small\ttfamily, keywordstyle=\bfseries\color{green!40!black}]|(string, integer)|. The \lstinline[language=Java, basicstyle=\small\ttfamily, keywordstyle=\bfseries\color{green!40!black}]|string| represents the key and the \lstinline[language=Java, basicstyle=\small\ttfamily, keywordstyle=\bfseries\color{green!40!black}]|integer| represents the value. If the key already existed, then the original key-value pair will be overridden to the new one.
+
+For the method \lstinline[language=Java, basicstyle=\small\ttfamily, keywordstyle=\bfseries\color{green!40!black}]|sum|, you'll be given a string representing the prefix, and you need to return the sum of all the pairs' value whose key starts with the prefix.
+
+\paragraph{Example 1:}
+
+\begin{flushleft}
+
+
+\textbf{Input}: \lstinline[language=Java, basicstyle=\small\ttfamily, keywordstyle=\bfseries\color{green!40!black}]|insert("apple", 3)|, \textbf{Output}: \lstinline[language=Java, basicstyle=\small\ttfamily, keywordstyle=\bfseries\color{green!40!black}]|Null|
+
+\textbf{Input}: \lstinline[language=Java, basicstyle=\small\ttfamily, keywordstyle=\bfseries\color{green!40!black}]|sum("ap")|, \textbf{Output}: 3
+
+\textbf{Input}: \lstinline[language=Java, basicstyle=\small\ttfamily, keywordstyle=\bfseries\color{green!40!black}]|insert("app", 2)|, Output: \lstinline[language=Java, basicstyle=\small\ttfamily, keywordstyle=\bfseries\color{green!40!black}]|Null|
+
+\textbf{Input}: \lstinline[language=Java, basicstyle=\small\ttfamily, keywordstyle=\bfseries\color{green!40!black}]|sum("ap")|, Output: 5
+
+\end{flushleft}
+
+\subsection{Trie}
+Since this is for prefix searching, Trie structure is the natural way. For \lstinline[language=Java, basicstyle=\small\ttfamily, keywordstyle=\bfseries\color{green!40!black}]|sum| function, we need a depth first search approach to get the total of all the trie nodes each represents a key.
+
+\setcounter{lstlisting}{0}
+\begin{lstlisting}[style=customc, caption={Trie}]
+class MapSum
+{
+public:
+    /** Initialize your data structure here. */
+    MapSum()
+    {
+    }
+
+    void insert( string key, int val )
+    {
+        add( key, val );
+    }
+
+    int sum( string prefix )
+    {
+        int ans = 0;
+
+        auto node = m_root;
+
+        //go to the end node of prefix
+        for( const auto c : prefix )
+        {
+            auto it = node->children.find( c );
+            if( it == node->children.end() )
+            {
+                return 0;
+            }
+
+            node = it->second;
+        }
+
+        //using dfs to sum all the values
+        dfs( node, ans );
+
+        return ans;
+    }
+
+private:
+
+    struct Trie
+    {
+        unordered_map<char, Trie*> children;
+        int val = 0;
+        unsigned char flag = 0;
+    };
+
+    Trie* m_root = new Trie;
+    void add( const string& s, int val )
+    {
+        auto node = m_root;
+
+        for( auto c : s )
+        {
+            auto it = node->children.find( c );
+            if( it == node->children.end() )
+            {
+                it = node->children.emplace( c, new Trie ).first;
+            }
+            node = it->second;
+        }
+
+        node->flag = 1;
+        node->val = val;
+    }
+
+    void dfs( Trie* trie, int& total )
+    {
+        if( !trie )
+        {
+            return;
+        }
+
+        if( trie->flag )
+        {
+            //add the value
+            // of this key to total
+            total += trie->val;
+        }
+
+        for( const auto& p : trie->children )
+        {
+            //recursively deeper into the children
+            dfs( p.second, total );
+        }
+    }
+};
+
+/**
+ * Your MapSum object will be instantiated and called as such:
+ * MapSum* obj = new MapSum();
+ * obj->insert(key,val);
+ * int param_2 = obj->sum(prefix);
+ */
+\end{lstlisting}

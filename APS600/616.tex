@@ -1,0 +1,56 @@
+\section{616 --- Add Bold Tag in String}
+Given a string $s$ and a list of strings $D$, you need to add a closed pair of bold tag \texttt{<b>} and \texttt{</b>} to wrap the substrings in $s$ that exist in $D$. If two such substrings overlap, you need to wrap them together by only one pair of closed bold tag. Also, if two substrings wrapped by bold tags are consecutive, you need to combine them.
+
+\paragraph{Example 1:}
+
+\begin{flushleft}
+\textbf{Input}:
+ 
+$s$: \texttt{abcxyz123}, $D$: [\texttt{abc},\texttt{123}]
+
+\textbf{Output}:
+
+\path{<b>abc</b>xyz<b>123</b>}
+
+\end{flushleft}
+
+\paragraph{Example 2:}
+
+\begin{flushleft}
+\textbf{Input}:
+ 
+$s$: \texttt{aaabbcc}, $D$: [\texttt{aaa}, \texttt{aab}, \texttt{bc}]
+
+\textbf{Output}:
+
+\path{<b>aaabbc</b>c}
+\end{flushleft}
+
+\paragraph{Note:}
+
+\begin{itemize}
+\item The given list of string $D$ won't contain duplicates, and its length won't exceed 100.
+\item All the strings in input have length in range [1, 1000].
+\end{itemize}
+
+\subsection{Brute Force}
+Check for all all occurrences of each word and mark the corresponding letters bold.
+
+\begin{itemize}
+\item Maintain a boolean array $B$, where $B[i]$ indicate if letter $S[i]$ is belongs to a word in the given dictionary.
+\item Iterate over $S$, at index $i$, for each word, $W$, if $S[i]$ starts with $W$, then $B[i, i+\lvert W\rvert-1]$ will be set to 1.
+\item With the filled $B$, the position to insert the start and end bold tags are known.
+\begin{enumerate}
+\item for the start boild tag, if $B[i]=1$ and $B[i-1]=0$, we will insert begin tag before $S[i]$. The edge case is $i=0$. If $B[0]=1$, we directly insert begin tag before $S[0]$.
+\item for the end bold tag, if $B[i]=1$ and $B[i+1]=0$, we will insert end tag after $S[i]$. The edge case is $i=L-1$ where $L$ is the length of $s$. If $B[L-1]=1$, we directly insert end tag after $S[L-1]$.
+\end{enumerate}
+\end{itemize}
+
+
+\subsection{Merge Interval}
+\begin{itemize}
+\item Find every index $i$ in $S$ such that $S[i]$ is starting with a word in the given dictionary, and record each starting and ending index as an interval.
+\item Then we merge the intervals from previous step. 
+\item Finally, we insert begin and end bold tag per each merged interval.
+\end{itemize}
+

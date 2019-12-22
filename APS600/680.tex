@@ -1,0 +1,77 @@
+\section{680 --- Valid Palindrome II}
+Given a non-empty string $s$, you may delete at most one character. Judge whether you can make it a palindrome.
+
+\paragraph{Example 1:}
+
+\begin{flushleft}
+\textbf{Input}: \lstinline[language=Java, basicstyle=\small\ttfamily, keywordstyle=\bfseries\color{green!40!black}]|"aba"|
+
+\textbf{Output}: \lstinline[language=Java, basicstyle=\small\ttfamily, keywordstyle=\bfseries\color{green!40!black}]|True|
+
+\end{flushleft}
+
+\section{Example 2:}
+
+\begin{flushleft}
+\textbf{Input}: \lstinline[language=Java, basicstyle=\small\ttfamily, keywordstyle=\bfseries\color{green!40!black}]|"abca"|
+
+\textbf{Output}: \lstinline[language=Java, basicstyle=\small\ttfamily, keywordstyle=\bfseries\color{green!40!black}]|True|
+
+\textbf{Explanation}: You could delete the character \lstinline[language=Java, basicstyle=\small\ttfamily, keywordstyle=\bfseries\color{green!40!black}]|'c'|.
+
+\end{flushleft}
+
+\paragraph{Note:}
+
+\begin{itemize}
+\item  The string will only contain lowercase characters \textbf{a} to \textbf{z}. The maximum length of the string is 50000.
+\end{itemize}
+
+\subsection{Greedy}
+Starting with $l=0$ and $r = \left|s\right|-1$. When $s[l]\neq s[r]$, we check if $s[l+1, r]$ or $s[l, r-1]$ is palindrome. If any of the two is palindrome, we can be sure that the string can be made palindrome by either delete $s[l]$ or $s[r]$. 
+
+\setcounter{lstlisting}{0}
+\begin{lstlisting}[style=customc, caption={Greedy}]
+bool validPalindrome( string s )
+{
+
+    //helper function to check if s[start,end] is a palindrome
+    auto is_pal = []( const string & s, size_t start, size_t end )
+    {
+        auto left = start;
+        auto right = end;
+
+        while( left < right )
+        {
+            if( s[left] != s[right] )
+            {
+                return false;
+            }
+
+            ++left;
+            --right;
+
+        }
+
+        return true;
+    };
+
+    size_t l = 0;
+    size_t r = s.size() - 1;
+
+    while( l < r )
+    {
+        if( s[l] != s[r] )
+        {
+            //we check if we can delete s[l] or s[r]
+            //to make s as a palindrome
+            return is_pal( s, l + 1, r ) || is_pal( s, l, r - 1 );
+        }
+
+        ++l;
+        --r;
+    }
+
+    return true;
+}
+\end{lstlisting} 

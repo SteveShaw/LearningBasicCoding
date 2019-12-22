@@ -1,0 +1,62 @@
+\section{633 --- Sum of Square Numbers}
+Given a non-negative integer $c$, your task is to decide whether there are two integers $a$ and $b$ such that $a^2 + b^2 = c$.
+
+\paragraph{Example 1:}
+
+\begin{flushleft}
+\textbf{Input}: 5
+
+\textbf{Output} True
+
+\textbf{Explanation}: $1 \times 1 + 2 \times 2 = 5$
+
+\end{flushleft}
+ 
+
+\paragraph{Example 2:}
+
+\begin{flushleft}
+\textbf{Input}: 3
+
+\textbf{Output}: False
+
+\end{flushleft}
+
+\subsection{Try From Both Ends}
+$a$ and $b$ must be in the range $[0, \sqrt{c}]$. Thus, we can suppose $a\leq b$ and
+\begin{enumerate}
+\item test $a$ from 0 to $\sqrt{c}$
+\item and test $b$ from $\sqrt{c}$ down to zero
+\end{enumerate}
+
+Then we repeat the following process
+
+\begin{itemize}
+\item $a^2+b^2=c$: we just directly return \texttt{True}. 
+
+\item $a^2+b^2<c$: increments $a$.
+
+\item $a^2+b^2>c$: decrements $b$.
+
+\end{itemize}
+The above process will end when $a > b$.
+
+We also need to take care of data type overflow. We may need to use \texttt{long long} type during whole computation.
+
+
+\subsection{Fermat Theorem}
+
+This approach is based on the following statement, which is based on Fermat's Theorem:
+
+\begin{quote}
+    Any positive number $n$ is expressible as a sum of two squares if and only if the prime factorization of $n$, every prime of the form $(4k+3)$ occurs an even number of times.
+
+\end{quote}
+
+By making use of the above theorem, we find all the prime factors of the given number $c$, which could range from $[2,\sqrt{c}]$ along with the count of those factors, by repeated division. 
+
+If at any step, we find out that the counts of any prime factor of the form $(4k+3)$ occurs an odd number of times, we can return a \texttt{False} value.
+
+If $c$ itself is a prime number, it won't be divisible by any of the primes in the $[2,\sqrt{c}]$. Thus, we need to check if $c$ can be expressed in the form of $4k+3$. If so, we need to return a \texttt{False} value, indicating that this prime occurs an odd number(1) of times.
+
+Otherwise, we can return a \texttt{True} value.

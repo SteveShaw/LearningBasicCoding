@@ -1,0 +1,43 @@
+\section{647 --- Palindromic Substrings}
+
+Given a string, $S$, your task is to count how many palindromic substrings in this string.
+
+The substrings with different start indexes or end indexes are counted as different substrings even they consist of same characters.
+
+\paragraph{Example 1:}
+\begin{flushleft}
+\textbf{Input}: \lstinline[language=C++, basicstyle=\small\ttfamily, keywordstyle=\bfseries\color{green!40!black}]|"abc"|
+
+\textbf{Output}: 3
+
+\textbf{Explanation}: Three palindromic strings: \lstinline[language=C++, basicstyle=\small\ttfamily, keywordstyle=\bfseries\color{green!40!black}]|"a", "b", "c"|.
+\end{flushleft}
+ 
+
+\section{Example 2:}
+\begin{flushleft}
+\textbf{Input}: \lstinline[language=C++, basicstyle=\small\ttfamily, keywordstyle=\bfseries\color{green!40!black}]|"aaa"|
+
+\textbf{Output}: 6
+
+\textbf{Explanation}: Six palindromic strings: \lstinline[language=C++, basicstyle=\small\ttfamily, keywordstyle=\bfseries\color{green!40!black}]|"a", "a", "a", "aa", "aa", "aaa"|.
+\end{flushleft}
+ 
+
+\paragraph{Note:}
+\begin{itemize}
+    \item The input string length won't exceed 1000.
+\end{itemize}
+
+\subsection{Dynamic Programming}
+We can make use of 2-d dynamic programming with an 2-d array $F[i][j]$ to indicate if sub-string $s[i,j]$ is a palindrome or not. If it is, we increments the results.
+
+\subsection{Expand Around Center}
+We can also use $O(1)$ memory space. In this approach, Let $\ell$ be the length of the string. The middle of the palindrome could be in one of $2\ell - 1$ positions: \begin{itemize}
+\item either at each letter: we have $\ell$ letters as centers for odd length palindromes.
+\item or between two letters: we have $\ell$-1 positions between two consecutive letters for even length palindromes.
+\end{itemize}
+
+Count all the palindromes around each center. Notice that if $s[i, j]$ is a palindromic sub-string, then $s[i+1, j-1]$ is a palindrome too.
+
+

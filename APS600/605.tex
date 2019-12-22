@@ -1,0 +1,47 @@
+\section{605 --- Can Place Flowers}
+Suppose you have a long flowerbed in which some of the plots are planted and some are not. However, flowers cannot be planted in adjacent plots -- they would compete for water and both would die.
+
+Given a flowerbed (represented as an array, $A$, containing $0$ and $1$, where $0$ means empty and $1$ means not empty), and a number $n$, return if $n$ new flowers can be planted in it without violating the \textbf{no-adjacent-flower}s rule.
+
+\paragraph{Example 1:}
+
+\begin{flushleft}
+
+\textbf{Input}: 
+
+flowerbed: $[1,0,0,0,1]$, $n = 1$
+
+\textbf{Output}: \texttt{True}
+
+\end{flushleft}
+
+\paragraph{Example 2:}
+
+\begin{flushleft}
+\textbf{Input}: 
+
+flowerbed: $[1,0,0,0,1]$, $n = 2$
+
+\textbf{Output}: \texttt{False}
+
+\end{flushleft}
+
+\paragraph{Note:}
+
+\begin{itemize}
+\item The input array won't violate \textbf{no-adjacent-flowers} rule.
+\item The input array size is in the range of $[1, 20000]$.
+\item $n$ is a non-negative integer which won't exceed the input array size.
+\end{itemize}
+
+\subsection{Simulation}
+\begin{itemize}
+    \item Between two 1s, suppose the number of zeros is $z$. We cannot plant at the place immediately right to the first 1 and immediately left to the right 1. Therefore, the total zeros that can be used to plant is $z-2$. 
+    \item However, we have to plant every two zeros to avoid adjacent flowers. Therefore, we can plant at most $(z-2+1)/2$.
+    \item However, if a plant is not plant at the beginning, and $z$ is the number of zeros from index 0 to the first 1 we meet. In this case, we cannot plant immediately to the position of this 1. We can plant at mose $(z-1+1)/2 = z/2$
+\end{itemize}
+
+Based on the above discussion, the algorithm steps include
+\begin{enumerate}
+    \item Iterate the input array, 
+\end{enumerate}

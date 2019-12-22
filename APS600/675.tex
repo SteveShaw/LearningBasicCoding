@@ -1,0 +1,72 @@
+\section{675 --- Cut Off Trees for Golf Event}
+You are asked to cut off trees in a forest for a golf event. The forest is represented as a non-negative 2D map, in this map:
+
+\begin{itemize}
+\item 0 represents the \textbf{obstacle} can't be reached.
+\item 1 represents the \textbf{ground} can be walked through.
+\item \textbf{The place with number bigger than 1} represents a \textbf{tree} can be walked through, and this positive number represents the tree's height.
+\end{itemize}
+ 
+
+You are asked to cut off all the trees in this forest in the order of tree's height - always cut off the tree with lowest height first. And after cutting, the original place has the tree will become a grass (value 1).
+
+You will start from the point (0, 0) and you should output the minimum steps you need to walk to cut off all the trees. If you can't cut off all the trees, output $-1$ in that situation.
+
+You are guaranteed that no two trees have the same height and there is at least one tree needs to be cut off.
+
+\paragraph{Example 1:}
+
+\begin{flushleft}
+\textbf{Input}:
+\[
+\begin{bmatrix}
+1 & 2 & 3\\
+0 & 0 & 4\\
+7 & 6 & 5
+\end{bmatrix}
+\] 
+
+\textbf{Output}: 6
+
+\end{flushleft}
+ 
+
+\paragraph{Example 2:}
+\begin{flushleft}
+
+\textbf{Input}: 
+
+\[
+\begin{bmatrix}
+1 & 2 & 3\\
+0 & 0 & 0\\
+7 & 6 & 5
+\end{bmatrix}
+\] 
+
+\textbf{Output}: $-1$
+ 
+
+\end{flushleft}
+
+\paragraph{Example 3:}
+\begin{flushleft}
+
+
+\textbf{Input}: 
+\[
+\begin{bmatrix}
+2 & 3 & 4\\
+0 & 0 & 5\\
+8 & 7 & 6
+\end{bmatrix}
+\]
+
+\textbf{Output}: 6
+
+\textbf{Explanation}: 
+
+You started from the point \lstinline[language=Java, basicstyle=\small\ttfamily, keywordstyle=\bfseries\color{green!40!black}]|(0,0)| and you can cut off the tree in \lstinline[language=Java, basicstyle=\small\ttfamily, keywordstyle=\bfseries\color{green!40!black}]|(0,0)| directly without walking.
+\end{flushleft}
+
+\subsection{Finding Shortest Path}

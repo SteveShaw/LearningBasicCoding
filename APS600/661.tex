@@ -1,0 +1,46 @@
+\section{661 --- Image Smoother}
+Given a 2D integer matrix $M$ representing the gray scale of an image, you need to design a smoother to make the gray scale of each cell becomes the average gray scale (rounding down) of all the 8 surrounding cells and itself. If a cell has less than 8 surrounding cells, then use as many as you can.
+
+\paragraph{Example 1:}
+\begin{flushleft}
+
+\textbf{Input}:
+
+\[
+\begin{Bmatrix}
+1 & 1 & 1\\
+1 & 0 & 1\\
+1 & 1 & 1
+\end{Bmatrix}
+\]
+
+\textbf{Output}:
+
+\[
+\begin{Bmatrix}
+0 & 0 & 0\\
+0 & 0 & 0\\
+0 & 0 & 0
+\end{Bmatrix}
+\]
+
+\textbf{Explanation}:
+
+For the point \lstinline[language=Java, basicstyle=\small\ttfamily, keywordstyle=\bfseries\color{green!40!black}]|(0,0), (0,2), (2,0), (2,2)|: $\lfloor3/4\rfloor = \lfloor0.75\rfloor = 0$
+
+For the point \lstinline[language=Java, basicstyle=\small\ttfamily, keywordstyle=\bfseries\color{green!40!black}]|(0,1), (1,0), (1,2), (2,1)|: $\lfloor5/6\rfloor = \lfloor0.83333333\rfloor = 0$
+
+For the point \lstinline[language=Java, basicstyle=\small\ttfamily, keywordstyle=\bfseries\color{green!40!black}]|(1,1)|: $\lfloor 8/9 \rfloor = \lfloor 0.88888889\rfloor = 0$
+
+\end{flushleft}
+
+\paragraph{Note:}
+\begin{itemize}
+\item The value in the given matrix is in the range of \lstinline[language=Java, basicstyle=\small\ttfamily, keywordstyle=\bfseries\color{green!40!black}]|[0, 255]|.
+\item The length and width of the given matrix are in the range of \lstinline[language=Java, basicstyle=\small\ttfamily, keywordstyle=\bfseries\color{green!40!black}]|[1, 150]|.
+\end{itemize}
+
+\subsection{Encode Average Value}
+Since each pixel in the image has value in \lstinline[language=Java, basicstyle=\small\ttfamily, keywordstyle=\bfseries\color{green!40!black}]|[0, 255]|, we can use the additional bits to record the average value for current pixel. For example, we may use bit 15 to bit 8 to save the average value.
+
+After getting all the average values, we will iterate the image again to get the average value for each pixel.

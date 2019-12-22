@@ -1,0 +1,61 @@
+\section{600 --- Non-negative Integers without Consecutive Ones}
+Given a positive integer $n$, find the number of non-negative integers less than or equal to $n$, whose binary representations do NOT contain consecutive ones.
+
+\paragraph{Example 1:}
+
+\begin{flushleft}
+\textbf{Input}: 5
+
+\textbf{Output}: 5
+
+\textbf{Explanation}: 
+
+Here are the non-negative integers $\leq$ 5 with their corresponding binary representations:
+
+0 : 0
+
+1 : 1
+
+2 : 10
+
+3 : 11
+
+4 : 100
+
+5 : 101
+
+Among them, only integer 3 disobeys the rule (two consecutive ones) and the other 5 satisfy the rule.
+\end{flushleft} 
+
+\paragraph{Note:} 
+\begin{itemize}
+\item $1 \leq n \leq 10^9$
+\end{itemize}
+
+\subsection{Bit Manipulation}
+Suppose $F[n]$ is the count of binary numbers with $n$ bits such that these numbers don't contain consecutive 1's. 
+
+If we know the value of $F[n−1]$ and $F[n-2]$, in order to generate the required binary numbers with $n$ bits, 
+\begin{itemize}
+\item we can append a 0 to all the binary numbers with $n-1$ bits without creating an invalid number. These numbers give a number of $F[n−1]$ to be included in $F[n]$.
+\item But, we can't append a 1 to all these numbers with $n-1$ bits, since it could lead to the presence of two consecutive ones. We can only append 1 to all the numbers with $n-2$ bits ending with $01$. This gives a number of $F[n−2]$ to be included in $F[n]$. 
+\item Thus, in total, $F[n]=F[n−1]+F[n−2]$.
+\end{itemize}
+Based on $F$, the approach to find the count of non-negative integers less than given number $x$ is demonstrated by an example as below:
+\begin{itemize}
+\item Suppose $x=1010100$ which is a 7-bit number. Starting with MSB of $x$. If we fix a 0 at the MSB position, and find out the count of 6 bit numbers with no two consecutive 1's, these 6-bit numbers will lie in the range $0000000 \longrightarrow 0111111$. The count of these numbers is actually $F[6]$.
+\item But, if we try to fix 1 at the MSB, the numbers considered will lie in the range $1000000 \longrightarrow 1111111$. But the integers no larger than $x$ is from $1000000 \longrightarrow 1010100$. Hence, if fix 1 at MSB only, we will include numbers that may larger than $x$. Therefor, we can't fix 1 at the MSB and consider all the 6-bit numbers at the LSBs. We need to go forward to the next bit.
+\item To do that, fix 1 at the MSB, and move forward to proceed to the next bit. Since the bit is zero, we can't substitute a 1 here, since doing so will lead to generation of numbers exceeding $x$. Thus, the only option left here is to keep 0 at this bit position.
+\item However, by starting with $10$, the numbers in the range $1000000 \longrightarrow 1011111$ can still lead to number exceeding $x$. Thus, we cannot only keep 0 at the second bit position, and we have to proceed further.
+\item Now, the 3rd bit position is 1. Now, we can fix 0 at this position and find out the count of 4-bit consecutive numbers with no two consecutive 1's, which is $F[4]$. This will cover the range $1000000\longrightarrow 1001111$.
+\item Based on the above discussion
+\begin{enumerate}
+\item Fix 1 at the 3rd bit position, and proceed with the 4th bit, which is 0.
+\item Fix 0 at the 4th bit position, and proceed with the 5th bit, which is 1.
+\item We fix 0 here and find out the count of 2-bit consecutive numbers with no two consecutive 1's, which is $F[2]$. Then proceed with the 6th bit, which is 0.
+\item Fix 0 at the 6th bit position, and proceed to the 7th bit, which is 0.
+\item Fix 0 at the 7th bit position.
+\end{enumerate}
+\item Now, we can see, that based on the above procedure, the numbers in the range $1000000\longrightarrow 1111111$, $1000000\longrightarrow1111111$, $1000000\longrightarrow1001111$ have been considered and the counts for these ranges have been obtained as $F[6]$, $F[4]$ and $F[2]$ respectively. Now, only $1010100$ is pending to be considered in the required count. Since, it doesn't contain any consecutive 1's, we add a 1 to the total count obtained till now to consider this number. Thus, the result returned is $F[6]+F[4]+F[2]+1$.
+\item When scanning the input number $x$, if we meet two consecutive 1's at $b$-th and $(b-1)$th bit, we know that we cannot append either 0 or 1 after $(b-1)$th bit. Therefore, the process of scanning will be stopped.
+\end{itemize}

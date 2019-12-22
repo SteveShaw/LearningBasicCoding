@@ -1,0 +1,32 @@
+\section{628 --- Maximum Product of Three Numbers}
+Given an integer array, $A$, find three numbers whose product is maximum and output the maximum product.
+
+\paragraph{Example 1:}
+\begin{flushleft}
+
+
+\textbf{Input}: $[1,2,3]$
+
+\textbf{Output}: 6
+ 
+\end{flushleft}
+
+\paragraph{Example 2:}
+
+\begin{flushleft}
+\textbf{Input}: $[1,2,3,4]$
+
+\textbf{Output}: 24
+\end{flushleft} 
+
+\paragraph{Note:}
+\begin{itemize}
+    \item The length of the given array will be in range $[3,10^4]$ and all elements are in the range $[-1000, 1000]$.
+    \item Multiplication of any three numbers in the input won't exceed the range of 32-bit signed integer.
+\end{itemize}
+
+\subsection{Single Scan}
+\begin{itemize}
+    \item To deal with negative and positive values, we require to find 2 smallest values, $x$ and $y$ ($x\leq y$), and the three largest values, $s$, $t$ and $u$ ($s\leq t\leq u$) in the give array $A$, by iterating over $A$ array only once.
+    \item At the end, again we can find out the larger value out of $x\times y \times u$ and $s\times t\times u$ to find the required maximum product.
+\end{itemize}

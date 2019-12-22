@@ -1,0 +1,33 @@
+\section{634 --- Find the Derangement of An Array}
+In combinatorial mathematics, a derangement is a permutation of the elements of a set, such that no element appears in its original position.
+
+There's originally an array consisting of $n$ integers from 1 to $n$ in ascending order, you need to find the number of derangement it can generate.
+
+Also, since the answer may be very large, you should return the output mod $10^9 + 7$.
+
+\paragraph{Example 1:}
+
+\begin{flushleft}
+Input: 3
+
+Output: 2
+
+Explanation: The original array is $ [1,2,3] $. The two derangements are $[2,3,1]$ and $[3,1,2]$.
+\end{flushleft}
+\paragraph{Note:}
+\begin{itemize}
+\item $n$ is in the range of $[1, 10^6]$. 
+\end{itemize}
+
+\subsection{Dynamic Programming}
+Suppose the original array is $[1,2,\ldots, n]$. At first, we move the first number 1 to another index, say $p$. We have $n-1$ ways to choose $p$, i.e. from $1$ to $n-1$. Since number $p$ at index $p$ is replaced by 1, we have to find another index to place it. We have two options:
+
+\begin{enumerate}
+\item We place $p$ at the index of $1$, i.e, at index 0. Thus, the problem reduces to find the derangements of remaining $n-2$ numbers. The reason is, $p$ and $1$ are fixed, and we are left with $n-2$ indices to place $n-2$ numbers, and each number $i$ cannot be placed at index $i-1$.
+\item We don't place $p$ at the index of $1$. In this case, the problem reduces to find the derangements of $n-1$ numbers. The reason is only $1$ is fixed, and we are left with $n-1$ indices to place $n-1$ numbers, and each number $i$ cannot be placed at index $i-1$.
+\end{enumerate} 
+
+Thus, let $F(n)$ is the number of derangements for array $[1,2,\ldots, n]$. Based on above analysis, we have:
+\[
+F(n) = (n-1)\times(F(n-1)+F(n-2))
+\]

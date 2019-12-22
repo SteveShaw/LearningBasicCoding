@@ -1,0 +1,96 @@
+\section{629 --- K Inverse Pairs Array}
+Given two integers $n$ and $k$, find how many different arrays consist of numbers from 1 to $n$ such that there are exactly $k$ inverse pairs.
+
+We define an inverse pair as following: For $i$th and $j$th element in the array, if $i < j$ and $a[i] > a[j]$ then it's an inverse pair; Otherwise, it's not.
+
+Since the answer may be very large, the answer should be modulo $10^9 + 7$.
+
+\paragraph{Example 1:}
+\begin{flushleft}
+
+\textbf{Input}: $n = 3$, $k = 0$
+
+\textbf{Output}: 1
+
+Explanation: 
+
+Only the array $[1,2,3]$ which consists of numbers from 1 to 3 has exactly 0 inverse pair.
+
+
+\end{flushleft} 
+
+\paragraph{Example 2:}
+
+\begin{flushleft}
+
+\textbf{Input}: $n = 3$, $k = 1$
+
+\textbf{Output}: 2
+
+\textbf{Explanation}: 
+
+The array $[1,3,2]$ and $[2,1,3]$ have exactly 1 inverse pair.
+
+\end{flushleft} 
+
+\paragraph{Note:}
+
+\begin{itemize}
+\item The integer $n$ is in the range $[1, 1000]$ and $k$ is in the range $[0, 1000]$.
+\end{itemize}
+\subsection{Dynamic Programming With 2D Array}
+
+
+\begin{itemize}
+\item Suppose $A=​ [2,4,1,3]$ which has $k=3$ inverse pairs ( $(2,1)$, $(4,1)$ and $(4,3)$). If a new number 5 is added to the end of $A$, the new array , say, $B$, is $[2,4,1,3,5]$. Because 5 is added at the end, it doesn't add any new inverse pair to the total number of inverse pairs from $A_1$.
+\item Similarly, if we add 5 at $y$ position from the right end of $A$, then $y$ numbers smaller than 5 will be right to 5. Thus, this adds a total of $y$ inverse pairs to the total counts of inverse pairs in $A$. So, $B$ will have $3+y$ inverse pairs.
+
+\item From the above example, if we know the number of inverse pairs, say $z$, in an array with elements from 1 to $n$, We can add a new element $n+1$ to this array at $p$ position from the right end. The total inverse pairs for the new generated array will be $z+p$.
+
+\item In all, to generate the arrangements with exactly $k$ inverse pairs and $n$ elements, we can 
+
+\begin{itemize}
+\item Add the new number $n$ at the end of array with elements from 1 to $n-1$ and $k$ inverse pairs. 
+\item Add $n$ at a position 1 step from the right end of array with elements from 1 to $n-1$ and $k-1$ inverse pairs.
+\item $\ldots$
+\item Add $n$ at a position $i$ steps from the right end of array with elements from 1 to $n-1$ and $k-i$ inverse pairs.
+\end{itemize}
+\item The above recursive relationship suggests a dynamic programming approach. Suppose $F(x,y)$ represents the number of arrangements with $x$ elements (from 1 to $x$) and exactly $y$ inverse pairs.
+
+\begin{enumerate}
+\item If $x=0$, no inverse pairs exist. Thus, $F(0, y)=0$.
+
+\item If $y=0$, only one arrangement is possible, which is all numbers sorted in ascending order. Thus, $F(x,0)=1$.
+
+\item Otherwise, $F(x,y)=\sum\limits_{i=0}^{\min(y, x-1)}F(x−1,y−i)$.
+\end{enumerate}
+
+Note that the upper limit on the summation is $\min(y,x−1)$. This is because for $i>y$, $y−i<0$. No arrangement exists with negative number of inverse pairs. The reason for the other factor can be seen as follows.
+
+\item Next, we can simplify the above recursion formula:
+
+\[F(x,y) = F(x-1,y) + F(x-1, y-1) + \ldots + F(x-1, y-i) + \ldots + F(x-1, y-(x-1))\]
+
+Then 
+
+\begin{align*}
+F(x,y+1) &= F(x-1, y+1) + F(x-1, y) + \ldots \\
+&+ F(x-1, y+1-i) + F(x-1, y-i) + \ldots + F(x-1, y+1-(x-1)) \\
+  &= F(x-1, y+1) + F(x, y) - F(x-1, y-(x-1)) 
+\end{align*}
+
+replace $y+1$ by $y$ again in the above equation, we got
+
+\[ F(x,y) = F(x, y-1) + F(x-1, y) - F(x-1, y-x) \]
+
+The last item $F(x-1, y-x)$ only works for $y \geq x$.
+
+\item Finally, $F(n, k)$ gives the result.
+\end{itemize}
+
+\subsection{Dynamic Programming With 1-D Array}
+By observing the recursive formula:
+\[ F(x,y) = F(x, y-1) + F(x-1, y) - F(x-1, y-x) \]
+we can find that $F(x,y)$ only depends on previous row. Therefore, we can change the 2-D array to 1-D array. In this approach, $F$ contains all the results of one row, so $F$ size is $k+1$. 
+
+In each iteration, we save $F$ to a temporary array $T$, i.e., $T$ contains all the results of previous row. Then, we update $F$ as $F(y)\gets F(y-1) + T(y) - T(y-1)$ for $1\leq y\leq n$ and $F(0)=1$.

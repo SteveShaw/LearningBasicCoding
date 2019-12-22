@@ -113,15 +113,11 @@ The idea is to simply use \textbf{Topological Sorting}
 \begin{lstlisting}[style=customc, caption={BFS}]
 bool canFinish( int numCourses, vector<pair<int, int>>& prerequisites )
 {
-
     vector<int> idg( numCourses, 0 );
-
     unordered_map<int, unordered_set<int>> g;
-
     for( const auto& p : prerequisites )
     {
         ++idg[p.first];
-
         auto it = g.find( p.second );
         if( it == g.end() )
         {
@@ -132,11 +128,8 @@ bool canFinish( int numCourses, vector<pair<int, int>>& prerequisites )
             it->second.insert( p.first );
         }
     }
-
     queue<int> q;
-
     int num_visited = 0;
-
     for( int i = 0; i < numCourses; ++i )
     {
         if( idg[i] == 0 )
@@ -144,22 +137,17 @@ bool canFinish( int numCourses, vector<pair<int, int>>& prerequisites )
             q.push( i );
         }
     }
-
     while( !q.empty() )
     {
         int node = q.front();
         q.pop();
-
         ++num_visited;
-
         auto it = g.find( node );
-
         if( it == g.end() )
         {
             //node does not have any node connected
             continue;
         }
-
         for( int t : it->second )
         {
             if( idg[t] > 0 )
@@ -173,8 +161,6 @@ bool canFinish( int numCourses, vector<pair<int, int>>& prerequisites )
             }
         }
     }
-
     return num_visited == numCourses;
-
 }
 \end{lstlisting}

@@ -1,0 +1,65 @@
+\section{622 --- Design Circular Queue}
+Design your implementation of the circular queue. The circular queue is a linear data structure in which the operations are performed based on FIFO (First In First Out) principle and the last position is connected back to the first position to make a circle. It is also called "Ring Buffer".
+
+One of the benefits of the circular queue is that we can make use of the spaces in front of the queue. In a normal queue, once the queue becomes full, we cannot insert the next element even if there is a space in front of the queue. But using the circular queue, we can use the space to store new values.
+
+Your implementation should support following operations:
+
+\begin{lstlisting}[style=customc]
+MyCircularQueue( k ); //Constructor, set the size of the queue to be k.
+
+Front(); // Get the front item from the queue. If the queue is empty, return -1.
+
+Rear(); //Get the last item from the queue. If the queue is empty, return -1.
+
+enQueue( value ); //Insert an element into the circular queue. Return true if the operation is successful.
+
+deQueue(); //Delete an element from the circular queue. Return true if the operation is successful.
+
+isEmpty(); //Checks whether the circular queue is empty or not.
+
+isFull(); //Checks whether the circular queue is full or not.
+\end{lstlisting}
+
+ 
+
+\paragraph{Example:}
+
+\begin{lstlisting}[style=customc]
+MyCircularQueue circularQueue = new MyCircularQueue( 3 ); // set the size to be 3
+circularQueue.enQueue( 1 ); // return true
+circularQueue.enQueue( 2 ); // return true
+circularQueue.enQueue( 3 ); // return true
+circularQueue.enQueue( 4 ); // return false, the queue is full
+circularQueue.Rear();  // return 3
+circularQueue.isFull();  // return true
+circularQueue.deQueue();  // return true
+circularQueue.enQueue( 4 ); // return true
+circularQueue.Rear();  // return 4
+\end{lstlisting}
+
+ 
+
+\paragraph{Note:}
+
+\begin{itemize}
+\item  All values will be in the range of $[0, 1000]$.
+\item The number of operations will be in the range of $[1, 1000]$.
+\item Please do not use the built-in Queue library.
+\end{itemize}
+
+\subsection{Head and Tail Indexes}
+\begin{itemize}
+\item If the internal array is full utilized, we cannot differentiate between empty and full for a circular buffer because head is equal to tail in both cases.
+\item One way to overcome this issue is to let the internal array has $k+1$ items where $k$ is the maximum capacity of the circular buffer. In this approach, when head is equal to tail, the buffer is empty. Instead, when tail is one less than head, the buffer is full.
+\item Denote head and tail indexes are $x$ and $y$ respectively.
+\begin{enumerate}
+\item At start, $x=y=0$.
+\item When push to the queue, first check if the queue is full. If not full, put the data at $y$ and then increments $y$ as $y\gets (y+1) \bmod L$. Here $L$ is the size of the internal vector which is one more than the capacity of the queue.
+\item For dequeue operation, first check if the queue is empty. If not empty, increments the head index $x$ as $x\gets (x+1) \bmod L$.
+\item To get the front of queue, simply returns element at head index $x$.
+\item To get the rear of queue, since tail has incremented for each push operation, we need to get element at the index that is before the tail, i.e., $(x-1+L)\bmod(L)$.
+\item If $x=y$, queue is empty.
+\item If $(y+1)\bmod L = x$, queue is full.
+\end{enumerate}
+\end{itemize}

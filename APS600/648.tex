@@ -1,0 +1,33 @@
+\section{648 --- Replace Words}
+In English, we have a concept called \textbf{root}, which can be followed by some other words to form another longer word - let's call this word \textbf{successor}. For example, the root \textbf{an}, followed by \textbf{other}, which can form another word \textbf{another}.
+
+Now, given a dictionary consisting of many roots and a sentence. You need to replace all the successor in the sentence with the root forming it. If a successor has many roots can form it, replace it with the root with the shortest length.
+
+You need to output the sentence after the replacement.
+
+\paragraph{Example 1:}
+
+\begin{flushleft}
+\textbf{Input}: 
+
+\lstinline[language=Java, basicstyle=\small\ttfamily, keywordstyle=\bfseries\color{green!40!black}]|dict = ["cat", "bat", "rat"]|
+
+\lstinline[language=Java, basicstyle=\small\ttfamily, keywordstyle=\bfseries\color{green!40!black}]|sentence = "the cattle was rattled by the battery"|
+
+\textbf{Output}: \lstinline[language=Java, basicstyle=\small\ttfamily, keywordstyle=\bfseries\color{green!40!black}]|"the cat was rat by the bat"|
+
+\end{flushleft}
+ 
+
+\paragraph{Note:}
+
+\begin{itemize}
+\item The input will only have lower-case letters.
+\item $1 \leq W \leq 1000$, where $W$ is the number of dict words.
+\item $1 \leq S \leq 1000$, where $S$ is the number of sentence words.
+\item $1 \leq R \leq 100$, where $R$ is the length of root.
+\item $1 \leq L \leq 1000$, where $L$ is the length of each sentence word.
+\end{itemize}
+
+\subsection{Trie}
+This coding question is a typical application of trie tree.

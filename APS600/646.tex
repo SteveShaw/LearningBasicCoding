@@ -1,0 +1,32 @@
+\section{646 --- Maximum Length of Pair Chain}
+You are given $n$ pairs of numbers. In every pair, the first number is always smaller than the second number.
+
+Now, we define a pair $(c, d)$ can follow another pair $(a, b)$ if and only if $b < c$. Chain of pairs can be formed in this fashion.
+
+Given a set of pairs, find the length longest chain which can be formed. You needn't use up all the given pairs. You can select pairs in any order.
+
+\paragraph{Example 1:}
+
+\begin{flushleft}
+\textbf{Input}: [[1,2], [2,3], [3,4]]
+
+\textbf{Output}: 2
+
+\textbf{Explanation}: The longest chain is [1,2] $\longrightarrow$ [3,4]
+
+\end{flushleft}
+
+\paragraph{Note:}
+
+\begin{itemize}
+\item The number of given pairs will be in the range [1, 1000].
+\end{itemize}
+
+\subsection{Dynamic Programming}
+If a chain of length $k$ ends at some \lstinline[language=C++, basicstyle=\small\ttfamily, keywordstyle=\bfseries\color{green!40!black}]|pairs[i]|, and \lstinline[language=C++, basicstyle=\small\ttfamily, keywordstyle=\bfseries\color{green!40!black}]|pairs[i][1] < pairs[j][0]|, we can extend this chain to a chain of length $k+1$. This is same approach as finding longest increasing subsequence. Note that we needs to sort the input pairs first.
+
+\subsection{Greedy}
+If we view these pairs as ranges with start and end time, this problem will be same as find maximum non-overlap ranges. In this approach, we sort the input pairs array per the end time (second element). Maintain a variable to record current range's end. If a range has a start time larger than current end time, we know we find a new  non-overlapped range, so increments the result.
+
+
+

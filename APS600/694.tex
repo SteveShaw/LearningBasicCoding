@@ -1,0 +1,145 @@
+\section{694 --- Number of Distinct Islands}
+Given a non-empty 2D array grid of 0's and 1's, an island is a group of 1's (representing land) connected 4-directionally (horizontal or vertical.) You may assume all four edges of the grid are surrounded by water.
+
+Count the number of distinct islands. An island is considered to be the same as another if and only if one island can be translated (and not rotated or reflected) to equal the other.
+
+\paragraph{Example 1:}
+
+\begin{flushleft}
+\[
+\begin{bmatrix}
+1 & 1 & 0 & 0 & 0 \\
+1 & 1 & 0 & 0 & 0 \\
+0 & 0 & 0 & 1 & 1 \\
+0 & 0 & 0 & 1 & 1
+\end{bmatrix}
+\]
+
+
+Given the above grid map, return 1.
+
+\end{flushleft}
+
+\paragraph{Example 2:}
+
+\begin{flushleft}
+\[
+\begin{bmatrix}
+1 & 1 & 0 & 1 & 1\\
+1 & 0 & 0 & 0 & 0\\
+0 & 0 & 0 & 0 & 1\\
+1 & 1 & 0 & 1 & 1
+\end{bmatrix}
+\]
+
+
+Given the above grid map, return 3.
+
+\end{flushleft}
+
+\begin{flushleft}
+Notice that:
+
+\[
+\begin{bmatrix}
+1 & 1\\
+1 &
+\end{bmatrix}
+\]
+
+and
+
+\[
+\begin{bmatrix}
+1 & \\
+1 & 1\\
+\end{bmatrix}
+\]
+\end{flushleft}
+
+are considered different island shapes, because we do not consider reflection / rotation.
+
+\paragraph{Note:} 
+
+\begin{itemize}
+\item The length of each dimension in the given grid does not exceed 50.
+\end{itemize}
+
+\subsection{Record Path Signature}
+
+At the beginning, we need to find every island, which we can do using a straightforward depth-first search. 
+
+Since two islands are the same if one can be translated to match another, let's translate every island so the top-left corner is \fcc{(0, 0)} For example, if an island is made from squares \fcc{[(2, 3), (2, 4), (3, 4)]}, we can think of this shape as \fcc{[(0, 0), (0, 1), (1, 1)]} when anchored at the top-left corner.
+
+We can recording the path during the depth first search process and put it into a tree set.
+
+As long as two regions are same, the offset coordinates for the points along the path will have same sequence when using same search directions. 
+
+\setcounter{lstlisting}{0}
+\begin{lstlisting}[style=customc, caption={Record Path}]
+int numDistinctIslands( vector<vector<int>>& grid )
+{
+    auto M = grid.size();
+    auto N = grid[0].size();
+
+    int ans = 0;
+
+    set<vector<int>> shapes;
+
+    for( size_t r = 0; r < M; ++r )
+    {
+        for( size_t c = 0; c < N; ++c )
+        {
+            if( grid[r][c] == 1 )
+            {
+                //shape  record the path
+                //during depth first search
+                vector<int> shape;
+
+                dfs( grid, r, c, r, c, shape );
+
+                //add to set
+                shapes.insert( shape );
+            }
+        }
+    }
+
+    return shapes.size();
+}
+
+//(r0,c0) is the starting point to depth first search
+//which is the top left corner
+//(because we can from top to bottom and left to right)
+void dfs( vector<vector<int>>& G, int r0, int c0, int r, int c, vector<int>& shape )
+{
+    if( ( G[r][c] == 2 ) || ( G[r][c] == 0 ) )
+    {
+        return;
+    }
+
+
+    G[r][c] = 2;
+
+
+    auto M = static_cast< int >( G.size() );
+    auto N = static_cast< int >( G[0].size() );
+
+    //get the offset per the left up corner (r0,c0)
+    shape.push_back( ( r - r0 ) * N + ( c - c0 ) );
+
+    int dr[] = { -1, 0, 1, 0 };
+    int dc[] = { 0, -1, 0, 1 };
+
+    for( int i = 0; i < 4; ++i )
+    {
+        int nr = r + dr[i];
+        int nc = c + dc[i];
+
+        if( ( nr >= 0 ) && ( nr < M ) && ( nc >= 0 ) && ( nc < N ) )
+        {
+            dfs( G, r0, c0, nr, nc, shape );
+        }
+    }
+}
+\end{lstlisting}
+

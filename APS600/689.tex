@@ -1,0 +1,127 @@
+\section{689 --- Maximum Sum of 3 Non-Overlapping Subarrays}
+In a given array $A$ of positive integers, find three non-overlapping subarrays with maximum sum.
+
+Each subarray will be of size $k$, and we want to maximize the sum of all $3k$ entries.
+
+Return the result as a list of indices representing the starting position of each interval (0-indexed). If there are multiple answers, return the lexicographically smallest one.
+
+\paragraph{Example:}
+
+\begin{flushleft}
+\textbf{Input}: \lstinline[language=C++, basicstyle=\small\ttfamily, keywordstyle=\bfseries\color{green!40!black}]|[1,2,1,2,6,7,5,1]|,  $k=2$
+
+\textbf{Output}: \lstinline[language=C++, basicstyle=\small\ttfamily, keywordstyle=\bfseries\color{green!40!black}]|[0, 3, 5]|
+
+Explanation: Subarrays \lstinline[language=C++, basicstyle=\small\ttfamily, keywordstyle=\bfseries\color{green!40!black}]|[1, 2], [2, 6], [7, 5]| correspond to the starting indices \lstinline[language=C++, basicstyle=\small\ttfamily, keywordstyle=\bfseries\color{green!40!black}]|[0, 3, 5]|.
+
+We could have also taken \lstinline[language=C++, basicstyle=\small\ttfamily, keywordstyle=\bfseries\color{green!40!black}]|[2, 1]|, but an answer of \lstinline[language=C++, basicstyle=\small\ttfamily, keywordstyle=\bfseries\color{green!40!black}]|[1, 3, 5]| would be lexicographically larger.
+\end{flushleft}
+ 
+
+\paragraph{Note:}
+
+\begin{itemize}
+\item Size of $A$ will be between 1 and 20000.
+\item $A[i]$ will be between 1 and 65535.
+\item $k$ will be between 1 and $\lfloor \lvert A\rvert\ /3 \rfloor$.
+\end{itemize}
+
+\subsection{Dynamic Programming}
+Suppose we have an array $W$, where each $W[s]$ represents sum of interval $A[s, s+K-1]$. To create $W$, we can either use prefix sums, or manage the sum of the interval as a window slides along the array.
+
+Then, we have a reduced problem: Given array $W$ and an integer $K$, what is the lexicographically smallest tuple of indices $(x, y, z)$ with $x + K <\leq y$ and $y + K \leq z$ that maximizes $W[x] + W[y] + W[z]$ ?
+
+Suppose we fixed $y$. We would like to know on the intervals $x \in [0, y-K]$ and $z \in [j+K, \lvert W\rvert-1$, where the largest value of $W[x]$ (and respectively $W[z]$) occurs first. (Here, \textbf{first} means the smaller index.)
+
+We can solve these problems with dynamic programming. We make use of two arrays $B$ and $E$ where
+
+\begin{enumerate}
+\item Each $B[i]$ stores the first index of the largest of $W[x]$ for $x \in [0, i]$, and 
+\item Each $E[j]$ stores the first index of the largest of $W[z]$ for $z \in [j, \lvert W\rvert - 1]$.
+\end{enumerate}
+
+This means that for some choice $y$, the candidate must be $(B[y-K], y, E[j+K])$. We take the candidate that produces the maximum $W[x] + W[y] + W[z]$.
+
+\setcounter{lstlisting}{0}
+\begin{lstlisting}[style=customc, caption={Dynamic Programming}]
+vector<int> maxSumOfThreeSubarrays( vector<int>& nums, int k )
+{
+    //fill S that record each interval's sum
+    int N = static_cast<int>( nums.size() );
+
+    vector<int> S( N - k + 1, 0 );
+
+    int sum = 0;
+
+    for( int i = 0; i < N; ++i )
+    {
+        sum += nums[i];
+
+        if( i >= k )
+        {
+            sum -= nums[i - k];
+        }
+
+        if( i >= k - 1 )
+        {
+            S[i - k + 1] = sum;
+        }
+    }
+
+    //make array B
+    //which records the first index
+    //of maximum S from left to right
+    int nS = N - k + 1;
+    int best = 0;
+    vector<int> B( nS );
+    for( int x = 0; x < nS; ++x )
+    {
+        if( S[x] > S[best] )
+        {
+            best = x;
+        }
+
+        B[x] = best;
+    }
+
+    //make array E
+    //which record the first index
+    //of maximum S from right to left
+
+    best = nS - 1;
+    vector<int> E( nS );
+    for( int z = nS - 1; z >= 0; --z )
+    {
+        //since this is from right to left
+        //and we need first occurence
+        //we also need update when the S[z] = S[best]
+        if( S[z] >= S[best] )
+        {
+            best = z;
+        }
+
+        E[z] = best;
+    }
+
+    //find out best tuple (x,y,z) which can make
+    //largest S[x]+S[y]+S[z]
+
+    vector<int> ans {0, k, k + k};
+    int max3S = S[ans[0]] + S[ans[1]] + S[ans[2]];
+    for( int y = k; y < nS - k; ++y )
+    {
+        int x = B[y - k]; //x <=y-k
+        int z = E[y + k]; //z >= y+k
+
+        int total = S[x] + S[y] + S[z];
+
+        if( total > max3S )
+        {
+            ans.assign( {x, y, z} );
+            max3S = total;
+        }
+    }
+
+    return ans;
+}
+\end{lstlisting}

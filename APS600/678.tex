@@ -1,0 +1,272 @@
+\section{678 --- Valid Parenthesis String}
+Given a string, $s$, containing only three types of characters: \lstinline[language=Java, basicstyle=\small\ttfamily, keywordstyle=\bfseries\color{green!40!black}]|'('|, \lstinline[language=Java, basicstyle=\small\ttfamily, keywordstyle=\bfseries\color{green!40!black}]|')'| and \lstinline[language=Java, basicstyle=\small\ttfamily, keywordstyle=\bfseries\color{green!40!black}]|'*'|, write a function to check whether this string is valid. We define the validity of a string by these rules:
+
+\begin{enumerate}
+\item Any left parenthesis \lstinline[language=Java, basicstyle=\small\ttfamily, keywordstyle=\bfseries\color{green!40!black}]|'('| must have a corresponding right parenthesis \lstinline[language=Java, basicstyle=\small\ttfamily, keywordstyle=\bfseries\color{green!40!black}]|')'|.
+\item Any right parenthesis \lstinline[language=Java, basicstyle=\small\ttfamily, keywordstyle=\bfseries\color{green!40!black}]|')'| must have a corresponding left parenthesis \lstinline[language=Java, basicstyle=\small\ttfamily, keywordstyle=\bfseries\color{green!40!black}]|'('|.
+\item Left parenthesis \lstinline[language=Java, basicstyle=\small\ttfamily, keywordstyle=\bfseries\color{green!40!black}]|'('| must go before the corresponding right parenthesis \lstinline[language=Java, basicstyle=\small\ttfamily, keywordstyle=\bfseries\color{green!40!black}]|')'|.
+\item \lstinline[language=Java, basicstyle=\small\ttfamily, keywordstyle=\bfseries\color{green!40!black}]|'*'| could be treated as a single right parenthesis \lstinline[language=Java, basicstyle=\small\ttfamily, keywordstyle=\bfseries\color{green!40!black}]|')'| or a single left parenthesis \lstinline[language=Java, basicstyle=\small\ttfamily, keywordstyle=\bfseries\color{green!40!black}]|'('| or an empty string.
+\item An empty string is also valid.
+\end{enumerate}
+
+\paragraph{Example 1:}
+
+\begin{flushleft}
+\textbf{Input}: \lstinline[language=Java, basicstyle=\small\ttfamily, keywordstyle=\bfseries\color{green!40!black}]|"()"|
+
+\textbf{Output}: \lstinline[language=Java, basicstyle=\small\ttfamily, keywordstyle=\bfseries\color{green!40!black}]|True|
+
+\end{flushleft}
+
+\paragraph{Example 2:}
+
+\begin{flushleft}
+\textbf{Input}: \lstinline[language=Java, basicstyle=\small\ttfamily, keywordstyle=\bfseries\color{green!40!black}]|"(*)"|
+
+\textbf{Output}: \lstinline[language=Java, basicstyle=\small\ttfamily, keywordstyle=\bfseries\color{green!40!black}]|True|
+\end{flushleft}
+
+\paragraph{Example 3:}
+
+\begin{flushleft}
+\textbf{Input}: \lstinline[language=Java, basicstyle=\small\ttfamily, keywordstyle=\bfseries\color{green!40!black}]|"(*))"|
+
+\textbf{Output}: \lstinline[language=Java, basicstyle=\small\ttfamily, keywordstyle=\bfseries\color{green!40!black}]|True|
+\end{flushleft}
+
+\paragraph{Note:}
+
+\begin{itemize}
+\item The string size will be in the range \lstinline[language=Java, basicstyle=\small\ttfamily, keywordstyle=\bfseries\color{green!40!black}]|[1, 100]|.
+\end{itemize}
+
+
+\subsection{Greedy}
+When checking whether the string is valid, we only cared about the number of extra open left parenthesis as parsing through the string. 
+
+For example, when checking whether \lstinline[language=Java, basicstyle=\small\ttfamily, keywordstyle=\bfseries\color{green!40!black}]|'(()())'| is valid, we had a number of extra left parenthesis of \lstinline[language=Java, basicstyle=\small\ttfamily, keywordstyle=\bfseries\color{green!40!black}]|[1, 2, 1, 2, 1, 0]| as we parse through the string: \lstinline[language=Java, basicstyle=\small\ttfamily, keywordstyle=\bfseries\color{green!40!black}]|(| has 1 left bracket, \lstinline[language=Java, basicstyle=\small\ttfamily, keywordstyle=\bfseries\color{green!40!black}]|'(('| has 2, \lstinline[language=Java, basicstyle=\small\ttfamily, keywordstyle=\bfseries\color{green!40!black}]|'(()'| has 1, and so on. This means that after parsing the first $x$ symbols, (which may include asterisks,) we only need to keep track of how many there could have extra left parenthesis.
+
+For example, if we have string \lstinline[language=Java, basicstyle=\small\ttfamily, keywordstyle=\bfseries\color{green!40!black}]|'(***)'|, then as we parse each symbol, the set of possible values for the balance is
+\begin{itemize}
+\item \lstinline[language=Java, basicstyle=\small\ttfamily, keywordstyle=\bfseries\color{green!40!black}]|[1]| for \lstinline[language=Java, basicstyle=\small\ttfamily, keywordstyle=\bfseries\color{green!40!black}]|'('|;
+\item \lstinline[language=Java, basicstyle=\small\ttfamily, keywordstyle=\bfseries\color{green!40!black}]|[0, 1, 2]| for \lstinline[language=Java, basicstyle=\small\ttfamily, keywordstyle=\bfseries\color{green!40!black}]|'(*'|;
+\item \lstinline[language=Java, basicstyle=\small\ttfamily, keywordstyle=\bfseries\color{green!40!black}]|[0, 1, 2, 3]| for \lstinline[language=Java, basicstyle=\small\ttfamily, keywordstyle=\bfseries\color{green!40!black}]|'(**'|;
+\item \lstinline[language=Java, basicstyle=\small\ttfamily, keywordstyle=\bfseries\color{green!40!black}]|[0, 1, 2, 3, 4]| for \lstinline[language=Java, basicstyle=\small\ttfamily, keywordstyle=\bfseries\color{green!40!black}]|'(***'|, 
+\item and \lstinline[language=Java, basicstyle=\small\ttfamily, keywordstyle=\bfseries\color{green!40!black}]|[0, 1, 2, 3]| for \lstinline[language=Java, basicstyle=\small\ttfamily, keywordstyle=\bfseries\color{green!40!black}]|'(***)'|.
+
+\end{itemize}
+Furthermore, we can prove these states always form a contiguous interval. Thus, we only need to know the left and right bounds of this interval. That is, we would keep those intermediate states described above as 
+
+\lstinline[language=Java, basicstyle=\small\ttfamily, keywordstyle=\bfseries\color{green!40!black}]|[lo, hi] = [1, 1], [0, 2], [0, 3], [0, 4], [0, 3]|.
+
+\paragraph{Algorithm}
+
+We maintain two varaibles $l$ and $h$ where 
+
+\begin{enumerate}
+\item $l$ 表示在有左括号的情况下，将星号当作右括号时左括号的个数(这样做的原因是尽量不多增加右括号的个数)
+\item $h$ 表示将星号当作左括号时左括号的个数
+\end{enumerate}
+
+When iterating over the string
+\begin{itemize}
+\item 当遇到左括号时，$l\gets l+1$ and $h\gets h+1$
+\item 当遇到右括号时，$l\gets l-1$ only when $l >0$ to make sure $l\geq 0$, and $h\gets h-1$
+\item 当遇到星号时，$l\gets l-1$ only when $l >0$ to make sure $l\geq 0$, and $h\gets h+1$ because we treat asterisk as left parenthesis.
+\item When $h<0$, 说明就算把星号都当作左括号了，还是不够抵消右括号，直接返回\lstinline[language=C++, basicstyle=\small\ttfamily, keywordstyle=\bfseries\color{green!40!black}]|false|.
+\end{itemize}
+
+At the end, we check if $l=0$.
+
+\setcounter{lstlisting}{0}
+\begin{lstlisting}[style=customc, caption={Greedy}]
+bool checkValidString( string s )
+{
+    //the number of actual parenthesis
+    int l = 0;
+
+    //the number of left parenthesis
+    //including asterisks treated as left parenthesis
+    int h = 0;
+
+    for( auto c : s )
+    {
+        if( c == '(' )
+        {
+            ++l;
+            ++h;
+        }
+        else if( c == ')' )
+        {
+            //make sure l always
+            //no less than 0
+            if( l > 0 )
+            {
+                --l;
+            }
+
+            --h;
+        }
+        else
+        {
+            if( l > 0 )
+            {
+                --l;
+            }
+
+            //we can treat asterisk
+            //as asterisk
+            ++h;
+        }
+
+        if( h < 0 )
+        {
+            //too many right parenthesis
+            //even if we treat asterisks as
+            //left parenthesis
+            return false;
+        }
+    }
+
+    //only valid when
+    //actual left parenthesis
+    //are complete offset
+    //by right parenthesis and
+    //asterisk
+    return l == 0;
+}
+\end{lstlisting}
+
+\subsection{Two Stacks}
+We can make use of two stacks, $\alpha$ and $\beta$ to track left parenthesis and asterisks. Since the positions are critical, we push each index of left parenthesis and asterisk into corresponding stack.
+
+While iterating 
+\begin{enumerate}
+\item If it is \lstinline[language=C++, basicstyle=\small\ttfamily, keywordstyle=\bfseries\color{green!40!black}]|')'|, push the index into $\alpha$
+\item If it is \lstinline[language=C++, basicstyle=\small\ttfamily, keywordstyle=\bfseries\color{green!40!black}]|'*'|, push the index into $\beta$
+\item Otherwise, it is \lstinline[language=C++, basicstyle=\small\ttfamily, keywordstyle=\bfseries\color{green!40!black}]|')'|, we choose to pop from $\alpha$. If $\alpha$ is empty, pop from $\beta$. If both stacks are empty, the expression contains too many \lstinline[language=C++, basicstyle=\small\ttfamily, keywordstyle=\bfseries\color{green!40!black}]|')'|, just return \lstinline[language=C++, basicstyle=\small\ttfamily, keywordstyle=\bfseries\color{green!40!black}]|false|.
+\end{enumerate}
+
+After iterations, we may have remaining unmatched \lstinline[language=C++, basicstyle=\small\ttfamily, keywordstyle=\bfseries\color{green!40!black}]|')'|. We need to check if they can be matched by \lstinline[language=C++, basicstyle=\small\ttfamily, keywordstyle=\bfseries\color{green!40!black}]|'*'|. Thus, we iterate $\alpha$ and $\beta$. If we find that a asterisk appears before a left parenthesis, the expression is invalid. 
+
+At the end, check if $\alpha$ is empty. 
+
+\begin{lstlisting}[style=customc, caption={Two Stacks}]
+bool checkValidString( string s )
+{
+    //record index of '('
+    stack<size_t> left;
+    //record index of '*'
+    stack<size_t> ast;
+
+    for( size_t i = 0; i < s.size(); ++i )
+    {
+        if( s[i] == '(' )
+        {
+            left.push( i );
+        }
+        else if( s[i] == '*' )
+        {
+            ast.push( i );
+        }
+        else
+        {
+            if( !left.empty() )
+            {
+                //match a '('
+                left.pop();
+            }
+            else if( !ast.empty() )
+            {
+                //match a '*'
+                ast.pop();
+            }
+            else
+            {
+                //too many ')'
+                return false;
+            }
+        }
+    }
+
+    while( !left.empty() && !ast.empty() )
+    {
+        if( left.top() < ast.top() )
+        {
+            //match a '(' with '*'
+            left.pop();
+            ast.pop();
+        }
+        else
+        {
+            //'(' cannot be matched
+            return false;
+        }
+    }
+
+    //check if all '(' are matched
+    return left.empty();
+}
+\end{lstlisting}
+
+\subsection{Scan Twice}
+We scan the input string $s$ twice
+
+When scan from left to right, we treat \lstinline[language=C++, basicstyle=\small\ttfamily, keywordstyle=\bfseries\color{green!40!black}]|'*'| as \lstinline[language=C++, basicstyle=\small\ttfamily, keywordstyle=\bfseries\color{green!40!black}]|'('|. We make use of a counter $\delta$ to count \lstinline[language=C++, basicstyle=\small\ttfamily, keywordstyle=\bfseries\color{green!40!black}]|'('|. For each \lstinline[language=C++, basicstyle=\small\ttfamily, keywordstyle=\bfseries\color{green!40!black}]|'('| or \lstinline[language=C++, basicstyle=\small\ttfamily, keywordstyle=\bfseries\color{green!40!black}]|'*'|, increments $\delta$. Otherwise, $\delta\gets\delta-1$. Whenever $\delta < 0$, just return \lstinline[language=C++, basicstyle=\small\ttfamily, keywordstyle=\bfseries\color{green!40!black}]|false| because it is showing that there are excess \lstinline[language=C++, basicstyle=\small\ttfamily, keywordstyle=\bfseries\color{green!40!black}]|')'|.  When $\delta=0$, just return \lstinline[language=C++, basicstyle=\small\ttfamily, keywordstyle=\bfseries\color{green!40!black}]|true| because all opening and closing parenthesis are matched.
+
+Otherwise, we scan $s$ again from right to left. At this time, we treat \lstinline[language=C++, basicstyle=\small\ttfamily, keywordstyle=\bfseries\color{green!40!black}]|'*'| as \lstinline[language=C++, basicstyle=\small\ttfamily, keywordstyle=\bfseries\color{green!40!black}]|')'|. We make use of another counter $x$ to count \lstinline[language=C++, basicstyle=\small\ttfamily, keywordstyle=\bfseries\color{green!40!black}]|')'|. For each \lstinline[language=C++, basicstyle=\small\ttfamily, keywordstyle=\bfseries\color{green!40!black}]|')'| or \lstinline[language=C++, basicstyle=\small\ttfamily, keywordstyle=\bfseries\color{green!40!black}]|'*'|, increments $x$. Otherwise, $x\gets x-1$. When $x<0$, just return \lstinline[language=C++, basicstyle=\small\ttfamily, keywordstyle=\bfseries\color{green!40!black}]|false| because $s$ contains excess \lstinline[language=C++, basicstyle=\small\ttfamily, keywordstyle=\bfseries\color{green!40!black}]|'('|. At the end, as long as $x\geq 0$, return \lstinline[language=C++, basicstyle=\small\ttfamily, keywordstyle=\bfseries\color{green!40!black}]|true|. $x=0$ is apparent. For $x>0$, since we treat \lstinline[language=C++, basicstyle=\small\ttfamily, keywordstyle=\bfseries\color{green!40!black}]|'*'| as \lstinline[language=C++, basicstyle=\small\ttfamily, keywordstyle=\bfseries\color{green!40!black}]|')'|, we can reverse some of asterisks to represent \lstinline[language=C++, basicstyle=\small\ttfamily, keywordstyle=\bfseries\color{green!40!black}]|'('|. If there are no enough \lstinline[language=C++, basicstyle=\small\ttfamily, keywordstyle=\bfseries\color{green!40!black}]|'*'| to match \lstinline[language=C++, basicstyle=\small\ttfamily, keywordstyle=\bfseries\color{green!40!black}]|')'|, it should already be detected by $x<0$.
+
+\begin{lstlisting}[style=customc, caption={Scan Twice}]
+bool checkValidString( string s )
+{
+    int x = 0;
+
+    for( auto c : s )
+    {
+        if( ( c == '(' ) || ( c == '*' ) )
+        {
+            ++x;
+        }
+        else
+        {
+            --x;
+        }
+
+        if( x < 0 )
+        {
+            //there are excess '('
+            return false;
+        }
+    }
+
+    if( x == 0 )
+    {
+        //all '(' and ')' are matched
+        return true;
+    }
+
+    x = 0;
+
+    for( size_t i = s.size(); i >= 1; --i )
+    {
+        auto c = s[i - 1];
+
+        if( ( c == ')' ) || ( c == '*' ) )
+        {
+            ++x;
+        }
+        else
+        {
+            --x;
+        }
+
+        if( x < 0 )
+        {
+            //there are excess '('
+            return false;
+        }
+    }
+    //all can be matched.
+    return true;
+}
+\end{lstlisting}

@@ -1,0 +1,41 @@
+\section{658 --- Find K Closest Elements}
+Given a sorted array, $A$, two integers $k$ and $x$, find the $k$ closest elements to $x$ in the array. The result should also be sorted in ascending order. If there is a tie, the smaller elements are always preferred.
+
+\paragraph{Example 1:}
+
+\begin{flushleft}
+\textbf{Input}: \lstinline[language=C++, basicstyle=\small\ttfamily, keywordstyle=\bfseries\color{green!40!black}]|[1,2,3,4,5]|, $k=4$, $x=3$
+
+\textbf{Output}: \lstinline[language=C++, basicstyle=\small\ttfamily, keywordstyle=\bfseries\color{green!40!black}]|[1,2,3,4]|
+\end{flushleft}
+
+\paragraph{Example 2:}
+
+\begin{flushleft}
+\textbf{Input}: \lstinline[language=C++, basicstyle=\small\ttfamily, keywordstyle=\bfseries\color{green!40!black}]|[1,2,3,4,5]|, $k=4$, $x=-1$
+
+\textbf{Output}: \lstinline[language=C++, basicstyle=\small\ttfamily, keywordstyle=\bfseries\color{green!40!black}]|[1,2,3,4]|
+\end{flushleft}
+
+\paragraph{Note:}
+
+\begin{itemize}
+\item The value $k$ is positive and will always be smaller than the length of the sorted array.
+\item Length of the given array is positive and will not exceed $10^4$
+\item Absolute value of elements in the array and $x$ will not exceed $10^4$
+\end{itemize}
+
+\subsection{Binary Search} 
+Since the given array is sorted, we can make use of binary search to find the start index of the these $k$ closest elements.
+
+If current midpoint index is $m$, we need to determine whether we will search in upper half or lower half range based on some condition.
+
+The condition is given by comparing $x - A[m]$ and $A[m+k] - x$.
+
+\begin{itemize}
+\item If $x-A[m] > A[m+k] - x$, this means $k$ elements from $A[m+1, m+k]$ closer to $x$ than those from $A[m, m+k-1]$. The reason is that $A[m+1, m+k]$ and $A[m, m+k-1]$ share $k-1$ same elements that are $A[m+1,m+k-1]$, the only difference is $A[m]$ and $A[m+k]$. In this case, we will search in the upper half, i.e., $l\gets m+1$.
+\item Otherwise, based on the same reasoning, we will search in the lower half, i.e., $r\gets mid$. (Leftmost binary search)
+\end{itemize}
+
+Notice that we do not use the absolute value of $x-A[m]$ and $A[m+k]-x$ to compare. For example, when $A[m+k]< x$, we may try next in the upper half range. If we compare based on absolute value, it may still try next in the lower half range, and we will get larger gap to $x$.
+

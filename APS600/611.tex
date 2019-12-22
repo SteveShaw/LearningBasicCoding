@@ -1,0 +1,74 @@
+\section{611 --- Valid Triangle Number}
+Given an array consists of non-negative integers,  $A$, your task is to count the number of triplets chosen from the array that can make triangles if we take them as side lengths of a triangle.
+
+\paragraph{Example 1:}
+
+\begin{flushleft}
+\item \textbf{Input}: $[2,2,3,4]$
+
+\textbf{Output}: 3
+
+\textbf{Explanation}:
+
+Valid combinations are: 
+
+$2,3,4$ (using the first 2)
+
+$2,3,4$ (using the second 2)
+
+$2,2,3$
+
+\end{flushleft}
+
+\paragraph{Note:}
+
+\begin{itemize}
+\item The length of the given array won't exceed 1000.
+\item The integers in the given array are in the range of $[0, 1000]$.
+\end{itemize}
+
+\subsection{Two Pointers}
+Sort given array, and then iterate the array from end to beginning.
+
+for each index $i$, we check with two index $l$ and $r$ where $l=0$ and $r=i-1$ at start. 
+
+If \fcj{nums[l]+nums[r] > nums[i]}, then from $(l, r, i)$, $(l+1,r,i)$, $\ldots$, $(r-1,r,i)$ are all valid triangle numbers. The count is therefore $r-1-l+1=r-l$, and decrement $r$.
+
+Otherwise, we just increment $l$ to test next number.
+
+\setcounter{lstlisting}{0}
+\begin{lstlisting}[style=customc, caption={Two Pointers}]
+int triangleNumber( vector<int>& nums )
+{
+    sort( nums.begin(), nums.end() );
+    long len = ( long )( nums.size() );
+    int ans = 0;
+    for( long i = len - 1; i >= 2 ; --i )
+    {
+        auto l = 0;
+        auto r = i - 1;
+        while( l < r )
+        {
+            if( nums[l] + nums[r] > nums[i] )
+            {
+                //(l,r,i), (l+1,r,i), ...(r-1, r, i)
+                //all can form triangle numbers
+                //total is (r-1-l+1=r-l)
+                ans += ( r - l );
+                --r;
+            }
+            else
+            {
+                ++l;
+            }
+        }
+    }
+    return ans;
+}
+\end{lstlisting}
+
+\paragraph{Similar Problems}
+\begin{itemize}
+\item \textbf{259. 3Sum Smaller}
+\end{itemize}
+

@@ -1,0 +1,182 @@
+\section{698 --- Partition to K Equal Sum Subsets}
+Given an array of integers $A$ and a positive integer $k$, find whether it is possible to divide this array into $k$ non-empty subsets whose sums are all equal.
+\paragraph{Example 1:}
+\begin{flushleft}
+\textbf{Input}:
+
+$A$:  \fcc{[4, 3, 2, 3, 5, 2, 1]}, $k = 4$
+
+\textbf{Output}: \fcc{true}
+
+\textbf{Explanation}: It is possible to divide it into 4 subsets $(5)$, $(1, 4)$, $(2,3)$, $(2,3)$ with equal sums.
+
+\end{flushleft}
+
+
+\paragraph{Note:}
+
+\begin{itemize}
+
+\item $1 \leq k \leq |A| <= 16$
+\item $0 < A[i] < 10000$
+\end{itemize}
+
+\subsection{Recursion}
+
+This problem is almost same as \textbf{473 --- Matchsticks to Square}. Two approaches are available: recursion and dynamic programming with memorization.
+
+In recursion approach, we make use of an array $S$ with size equal to $k$ where $S[i]$ is the accumulate sum of each possible set. In the recursion function, for current number $A[i]$, we test each $S[j]$ to see if $A[i]+S[j]\leq T$ where $T=\lvert A\rvert/k$. If we can, update $S[j]$ as $S[j] +A[i]$ and recursively from $A[i+1]$. When reach the end of $A$, we check if each $S[j]$ is equal to $T$. 
+
+To speed up, we need to sort the input array by descending order.
+\setcounter{lstlisting}{0}
+\begin{lstlisting}[style=customc, caption={Recursion}]
+bool canPartitionKSubsets( vector<int>& nums, int k )
+{
+
+    int total = accumulate( begin( nums ), end( nums ), 0 );
+
+    if( total % k )
+    {
+        return false;
+    }
+
+    int subset_sum = total / k ;
+
+    //speed up: sort by descending order
+    sort( begin( nums ), end( nums ), greater<int>() );
+
+    vector<int> S( k, 0 );
+
+    return dfs( nums, 0, subset_sum, S );
+}
+
+bool dfs( vector<int>& A, size_t start, int T, vector<int>& S )
+{
+    if( start == A.size() )
+    {
+        bool flag = true;
+
+        for( int sum : S )
+        {
+            if( sum != T )
+            {
+                //one subset sum
+                //is not equal to target
+                flag = false;
+                break;
+            }
+        }
+
+        return flag;
+    }
+
+    for( size_t i = 0; i < S.size(); ++i )
+    {
+        if( S[i] + A[start] <= T )
+        {
+            //increment S[i] by A[start]
+            S[i] += A[start];
+
+            if( dfs( A, start + 1, T, S ) )
+            {
+                return true;
+            }
+
+            //backtracking
+            S[i] -= A[start];
+        }
+    }
+
+    return false;
+}
+\end{lstlisting}
+
+\subsection{Dynamic Programming With Memorization}
+In this approach, we will use a integer, say, $U$, as a mask. if $A[i]$ is used, the $i$-th bit of $U$ is set. Same as problem 473, the key for the memorization is current mask along with number of completed set. Since $k$ is less than 16, we can use 20 bits of $U$ with high 16 bits to store the mask and low 4 bits to store the number of completed set.
+
+In the recursion function, we track the number of completed set, say $C$. If $C=k-1$, remaining numbers will be sure form another subset with same total as the other subsets, so we return \fcc{true}. We check what we need to reach the subset sum $T = \lvert A\rvert / k $ and use this value to select remaining elements in $A$.  
+
+In the same manner, we need to sort $A$ by descending order.
+
+\begin{lstlisting}[style=customc, caption={DP With Memorization}]
+bool canPartitionKSubsets( vector<int>& nums, int k )
+{
+
+    int sum = accumulate( begin( nums ), end( nums ), 0 );
+
+    if( sum % k )
+    {
+        return false;
+    }
+
+    unordered_map<int, unsigned char> memo;
+
+    //to speed up
+    sort( begin( nums ), end( nums ), greater<int>() );
+
+    int set_sum = sum / k;
+
+    return dfs( nums, k, set_sum, 0, 0, 0, memo );
+}
+
+bool dfs( vector<int>& A, int k, int set_sum, int mask, int total, int comp_set, unordered_map<int, unsigned char>& memo )
+{
+    //form the key
+    int key = mask;
+    key <<=  4;
+    key |=  comp_set;
+
+    auto it = memo.find( key );
+
+    if( it != memo.end() )
+    {
+        return it->second == 1;
+    }
+
+    //get number of complete set
+    if( ( total > 0 ) && ( ( total % set_sum ) == 0 ) )
+    {
+        ++comp_set;
+    }
+
+    if( comp_set == k - 1 )
+    {
+        //we find k subsets with equal sum
+        memo.emplace( key, 1 );
+        return true;
+    }
+
+    //how much we need to form a required subset sum
+    int needs = ( total / set_sum + 1 ) * set_sum  - total;
+
+    for( size_t i = 0; i < A.size(); ++i )
+    {
+        if( ( 1 << i ) & mask )
+        {
+            //A[i] is selected
+            //continue to next one
+            continue;
+        }
+
+        if( A[i] > needs )
+        {
+            //We cannot use A[i]
+            //as it is larger than what we need
+            continue;
+        }
+
+        if( dfs( A, k, set_sum, ( 1 << i ) | mask, total + A[i], comp_set, memo ) )
+        {
+            //success
+            //directly return here
+            memo.emplace( key, 1 );
+            return true;
+        }
+
+    }
+
+    memo.emplace( key, 0 );
+    return false;
+
+}
+\end{lstlisting}

@@ -1,0 +1,114 @@
+\section{688 --- Knight Probability in Chessboard}
+On an $N\times N$ chessboard, a knight starts at the $r$-th row and $c$-th column and attempts to make exactly $K$ moves. The rows and columns are 0 indexed, so the top-left square is $(0, 0)$, and the bottom-right square is $(N-1, N-1)$.
+
+A chess knight has 8 possible moves it can make. Each move is two squares in a cardinal direction, then one square in an orthogonal direction.
+ 
+Each time the knight is to move, it chooses one of eight possible moves uniformly at random (even if the piece would go off the chessboard) and moves there.
+
+The knight continues moving until it has made exactly K moves or has moved off the chessboard. Return the probability that the knight remains on the board after it has stopped moving.
+ 
+
+\paragraph{Example:}
+
+\begin{flushleft}
+\textbf{Input}: 3, 2, 0, 0
+
+\textbf{Output}: 0.0625
+
+\textbf{Explanation}: 
+
+There are two moves (to \lstinline[language=C++, basicstyle=\small\ttfamily, keywordstyle=\bfseries\color{green!40!black}]|(1,2), (2,1)|) that will keep the knight on the board.
+
+From each of those positions, there are also two moves that will keep the knight on the board.
+
+The total probability the knight stays on the board is 0.0625.
+\end{flushleft}
+
+
+  
+
+\paragraph{Note:}
+
+\begin{itemize}
+\item $N$ will be between 1 and 25.
+
+\item $K$ will be between 0 and 100.
+
+\item The knight always initially starts on the board.
+\end{itemize}
+
+\subsection{Dynamic Programming}
+Suppose $F[i][j][x]$ be the probability of being on square $(i,j)$ after $x$ steps. Based on how a knight moves, we have the following recursion:
+
+$F[i][j][x] = \sum\limits_{i=1}^{8}F[i+\delta_i][j+\delta_j][x-1] / 8$
+
+where $(\delta_i, \delta_j)$ is from one of 
+
+$(2, 1)$, $(2,1)$, $ (2, -1) $, $ (2,−1) $, 
+
+$ (-2, 1) $, $ (−2,1) $, $ (-2, -1) $, $ (−2,−1) $, 
+
+$ (1, 2) $, $ (1,2) $, $ (1, -2) $, $ (1,−2) $, 
+
+$ (-1, 2) $, $ (−1,2) $, $ (-1, -2) $, $ (−1,−2) $.
+
+We can make use of two 2d array: $F_0$ and $F_1$ instead of 3-D array.
+
+\setcounter{lstlisting}{0}
+\begin{lstlisting}[style=customc, caption={Dynamic Programming}]
+double knightProbability( int N, int K, int r, int c )
+{
+    //the next 8 jumps for knight
+    int dr[] = { 2, 2, 1, 1, -1, -1, -2, -2 };
+    int dc[] = { 1, -1, 2, -2, 2, -2, 1, -1 };
+
+    vector<vector<double>> F( N, vector<double>( N, 0 ) );
+    vector<vector<double>> Next( N, vector<double>( N, 0 ) );
+
+    //at start, the probability is one
+    F[r][c] = 1;
+
+    for( int i = 1; i <= K; ++i )
+    {
+        for( int r = 0; r < N; ++r )
+        {
+            for( int c = 0; c < N; ++c )
+            {
+                for( int x = 0; x < 8; ++x )
+                {
+                    int nr = r + dr[x];
+                    int nc = c + dc[x];
+
+                    if( ( nr >= 0 ) && ( nr < N ) && ( nc >= 0 ) && ( nc < N ) )
+                    {
+                        //(nr,nc) is the next square from (r,c)
+                        //it could jump from 7 other squares.
+                        //so we add the probability of F[r][c]/8
+                        Next[nr][nc] += F[r][c] / 8;
+                    }
+                }
+            }//end c
+        }//end r
+
+        swap( F, Next );
+
+        //reset Next to zeros
+        for( auto& v : Next )
+        {
+            fill( v.begin(), v.end(), 0 );
+        }
+
+    }//end i
+
+    //the total sum of F
+    //will be the answer
+    double ans = 0;
+
+    for( const auto& v : F )
+    {
+        ans += accumulate( v.begin(), v.end(), 0.0 );
+    }
+
+    return ans;
+}
+\end{lstlisting}

@@ -1,0 +1,85 @@
+\section{651 --- 4 Keys Keyboard}
+Imagine you have a special keyboard with the following keys:
+
+\begin{itemize}
+\item Key 1: \lstinline[language=Java, basicstyle=\small\ttfamily, keywordstyle=\bfseries\color{green!40!black}]|(A)|: Print one \lstinline[language=Java, basicstyle=\small\ttfamily, keywordstyle=\bfseries\color{green!40!black}]|'A'| on screen.
+
+\item Key 2: \lstinline[language=Java, basicstyle=\small\ttfamily, keywordstyle=\bfseries\color{green!40!black}]|(Ctrl-A)|: Select the whole screen.
+
+\item Key 3: \lstinline[language=Java, basicstyle=\small\ttfamily, keywordstyle=\bfseries\color{green!40!black}]|(Ctrl-C)|: Copy selection to buffer.
+
+\item Key 4: \lstinline[language=Java, basicstyle=\small\ttfamily, keywordstyle=\bfseries\color{green!40!black}]|(Ctrl-V)|: Print buffer on screen appending it after what has already been printed.
+\end{itemize}
+
+Now, you can only press the keyboard for $N$ times (with the above four keys), find out the maximum numbers of \lstinline[language=Java, basicstyle=\small\ttfamily, keywordstyle=\bfseries\color{green!40!black}]|'A'| you can print on screen.
+
+\paragraph{Example 1:}
+
+\begin{flushleft}
+\textbf{Input}: $N = 3$
+
+\textbf{Output}: 3
+
+\textbf{Explanation}: 
+
+We can at most get 3 \lstinline[language=Java, basicstyle=\small\ttfamily, keywordstyle=\bfseries\color{green!40!black}]|A| on screen by pressing following key sequence: \lstinline[language=Java, basicstyle=\small\ttfamily, keywordstyle=\bfseries\color{green!40!black}]|A, A, A|
+\end{flushleft}
+
+\paragraph{Example 2:}
+
+\begin{flushleft}
+\textbf{Input}: $N = 7$
+
+\textbf{Output}: 9
+
+\textbf{Explanation}: 
+
+We can at most get 9 \lstinline[language=Java, basicstyle=\small\ttfamily, keywordstyle=\bfseries\color{green!40!black}]|A| on screen by pressing following key sequence:
+
+\lstinline[language=Java, basicstyle=\small\ttfamily, keywordstyle=\bfseries\color{green!40!black}]|A, A, A, Ctrl A, Ctrl C, Ctrl V, Ctrl V|
+\end{flushleft}
+
+\paragraph{Note:}
+
+\begin{itemize}
+\item $1 \leq N \leq 50$
+\item Answers will be in the range of 32-bit signed integer.
+\end{itemize}
+
+\subsection{Dynamic Programming}
+Suppose $F[k]$ is the largest number of \lstinline[language=Java, basicstyle=\small\ttfamily, keywordstyle=\bfseries\color{green!40!black}]|'A'| after $k$ key presses.
+
+If the last pressed key is 1, then $F[k] = F[k-1]+1$.
+
+Otherwise, if the last pressed key was 4, i.e. paste operation, we will have $F[k-(x+1)] = F[k-(x+1)] \times x$ for some $x < k-1$, where $x$ is the number of \lstinline[language=Java, basicstyle=\small\ttfamily, keywordstyle=\bfseries\color{green!40!black}]|'A'| copied into the memory. Since press key 4 requires one key press, $x$ is acquired before $(k-1)$th key press. We need a loop to find $F[k]$ for index $j$ such that $1\leq j < k-1$.
+
+\subsection{Optimized Dynamic Programming}
+If we multiply by $2\times N$, paying a cost of $2\times N+1$, we could instead multiply by $N$ then 2, paying $N+4$. When $N \geq 3$, we don't pay more by doing it the second way.
+
+Similarly, if we are to multiply by $2\times N+1$ paying $2\times N+2$, we could instead multiply by $N+1$ then 2, paying $N+5$. Again, when $N \geq 3$, we don't pay more doing it the second way.
+
+Thus, we never multiply by more than 5, and then the recursive function $F[k] = \max(F[i-4]\times 3, F[i-5]\times 4)$. We can manually find $F[1]$ to $F[6]$, and use these as the start for $k\geq 7$.
+
+\subsection{Mathematical Way}
+
+When N is arbitrarily large, the long run behavior of multiplying by $k$ repeatedly is to get to the value
+$k^{\dfrac{N}{k+1}}$​. Analyzing the function $k^{\dfrac{1}{k+1}}$ at values $k=2,3,4,5$, it attains a peak at $k=4$. Thus, we should expect that eventually, $F[K] = F[K-5] \times 4$.
+
+A few more deductions can be made
+
+\begin{itemize}
+\item We never add after multiplying: if we add $c$ after multiplying by $k$, we should instead multiply by $k+c$.
+
+\item We never add after 5: If we add 1 then multiply by $k$ to get to $(x+1) \times k = xk + k$, we could instead multiply by $k+1$ to get to $xk + x$. Since $k \leq 5$, we must have $x \leq 5$ for our additions to not be dominated.
+
+\item The number of multiplications by 2, 3, or 5 is bounded.
+
+\item Every time we've multiplied by 2 two times, we prefer to multiply by 4 once for less cost. ($4^1$ for a cost of 5, vs $2^2$ for a cost of 6.)
+\item Every time we've multiplied by 3 five times, we prefer to multiply by 4 four times for the same cost but a larger result. ($4^4 > 3^5$, and cost is 20.)
+
+\item Every time we've multiplied by 5 five times, we prefer to multiply by 4 six times for the same cost but a larger result. ($4^6 > 5^5$, and cost is 30.)
+\end{itemize}
+
+Together, this shows there are at most 5 additions and 9 multiplications by a number that isn't 4.
+
+We can find the first 14 operations on 1 by hand: 1, 2, 3, 4, 5, 6, 9, 12, 16, 20, 27, 36, 48, 64, 81. After that, every subsequent number is achieved by multiplying by 4: i.e., $F[K] = F[K-5] \times 4$.
