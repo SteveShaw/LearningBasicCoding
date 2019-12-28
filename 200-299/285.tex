@@ -64,8 +64,8 @@ There is no in-order successor of the current node, so the answer is \texttt{nul
 \subsection{Iterative}
 maintain一个 flag $b$，初始化为\texttt{false}。然后进行中序遍历，
 \begin{itemize}
-    \item 对于遍历到的节点，首先看检查$b$是否为\texttt{true}。如果是，则说明之前遍历到了$p$，那么当前节点就是$p$的succesor，
-    \item 如果$b$仍为\texttt{false}，则检查遍历到的节点和$p$是否相同，如果相同，则将$b$设为\texttt{true}
+    \item 对于遍历到的节点，首先看检查$b$是否为\fcc{true}。如果是，则说明之前遍历到了$p$，那么当前节点就是$p$的succesor，
+    \item 如果$b$仍为\fcc{false}，则检查遍历到的节点和$p$是否相同，如果相同，则将$b$设为\fcc{true}
 \end{itemize}
 \setcounter{lstlisting}{0}
 \begin{lstlisting}[style=customc, caption={Iterative In-order Traverse}]
@@ -213,3 +213,10 @@ TreeNode* inorderSuccessor( TreeNode* root, TreeNode* p )
     }
 }
 \end{lstlisting}
+
+\paragraph{Related Problems}
+\begin{itemize}
+\item \textbf{94. Binary Tree Inorder Traversal}
+\item \textbf{173. Binary Search Tree Iterator}
+\item \textbf{510. Inorder Successor in BST II}
+\end{itemize}

@@ -1,0 +1,105 @@
+\section{317 --- Shortest Distance from All Buildings}
+
+\textbf{Hard}
+
+You want to build a house on an empty land which reaches all buildings in the shortest amount of distance. You can only move up, down, left and right. You are given a 2D grid of values 0, 1 or 2, where:
+
+\begin{itemize}
+\item Each 0 marks an empty land which you can pass by freely.
+\item Each 1 marks a building which you cannot pass through.
+\item Each 2 marks an obstacle which you cannot pass through.
+\end{itemize}
+
+\paragraph{Example:}
+
+\begin{flushleft}
+\textbf{Input}: \fcj{[[1,0,2,0,1],[0,0,0,0,0],[0,0,1,0,0]]}
+
+
+\textbf{Output}: 7 
+
+\textbf{Explanation}: 
+
+Given three buildings at (0,0), (0,4), (2,2), and an obstacle at (0,2), the point (1,2) is an ideal empty land to build a house, as the total travel distance of $3+3+1=7$ is minimal. So return 7.
+\end{flushleft}
+
+\paragraph{Note:}
+\begin{itemize}
+\item There will be at least one building. 
+\item If it is not possible to build such house according to the above rules, return $-1$.
+\end{itemize}
+
+\subsection{BFS}
+We do BFS starting from each building. Every time, we update the given grid by distance to each building.
+
+To avoid using an array to mark visited cell, we decrement the cell value each time. For example, we search for cell with value of zero and change them to $-1$. Next time, we search for cell with value of $-1$ and change to $-2$. Repeat the same process until all buildings are visited.
+
+\setcounter{lstlisting}{0}
+\begin{lstlisting}[style=customc, caption={BFS}]
+int shortestDistance( vector<vector<int>>& grid )
+{
+    int m = ( int )( grid.size() );
+    int n = ( int )( grid[0].size() );
+    //this sums is used to record
+    //distance to each building
+    //updated each time for each building
+    auto sums( grid );
+    //val is used to indicate visited cell
+    int val = 0;
+    int min_dist = INT_MAX;
+    for( int r = 0; r < m; ++r )
+    {
+        for( int c = 0; c < n; ++c )
+        {
+            if( grid[r][c] == 1 )
+            {
+                auto dist( grid );
+                min_dist = INT_MAX;
+                //start BFS: update distance
+                //to this building at (r,c)
+                queue<int> q;
+                q.push( r * n + c );
+
+                while( !q.empty() )
+                {
+                    int t = q.front();
+                    q.pop();
+                    int x = t / n;
+                    int y = t - n * x;
+                    //update for 4 directions
+                    update( x + 1, y, val, dist[x][y], q, grid, dist, sums, min_dist );
+                    update( x - 1, y, val, dist[x][y], q, grid, dist, sums, min_dist );
+                    update( x, y + 1, val, dist[x][y], q, grid, dist, sums, min_dist );
+                    update( x, y - 1, val, dist[x][y], q, grid, dist, sums, min_dist );
+                }
+                //decrement val
+                --val;
+            }
+        }
+    }
+    return min_dist == INT_MAX ? -1 : min_dist;
+}
+//update dist and total dist
+void update( int r, int c, int val, int d, queue<int>& q,
+             vector<vector<int>>& grid,
+             vector<vector<int>>& dist,
+             vector<vector<int>>& total,
+             int &ans )
+{
+    int m = ( int )( grid.size() );
+    int n = ( int )( grid[0].size() );
+    if( ( r >= 0 ) && ( r < m ) && ( c >= 0 ) && ( c < n ) && ( grid[r][c] == val ) )
+    {
+        //decrements grid[r][c] to mark it as not visited
+        grid[r][c] -= 1;
+        //update distance to the building
+        dist[r][c] = d + 1;
+        //accumulate the distance
+        total[r][c] += ( dist[r][c] - 1 );
+        //update the minimum so far
+        ans = ( min )( ans, total[r][c] );
+        //add this cell to the queue
+        q.push( r * n + c );
+    }
+}
+\end{lstlisting}

@@ -101,3 +101,33 @@ bool wordPattern( string pattern, string str )
 }
 \end{lstlisting}
 
+\subsection{Two Hashmap}
+Map each string in given string and each letter in give pattern with the corresponding index in pattern (starting from 1). 
+
+\begin{lstlisting}[style=customc, caption={Two Hashmaps}]
+bool wordPattern( string pattern, string str )
+{
+    unordered_map<char, size_t> mp;
+    unordered_map<string, size_t> ms;
+    istringstream iss( str );
+    size_t pi = 0;
+    for( string word; iss >> word; ++pi )
+    {
+        if( ( pi == pattern.size() ) || ( mp[pattern[pi]] != ms[word] ) )
+        {
+            //either we have matched all patterns
+            //or current letter is not corresponding to the word
+            return false;
+        }
+        mp[pattern[pi]] = pi + 1;
+        ms[word] = pi + 1;
+    }
+    return pi == pattern.size();
+}
+\end{lstlisting}
+
+\paragraph{Related Problems}
+\begin{itemize}
+\item \textbf{205. Isomorphic Strings}
+\item \textbf{291. Word Pattern II}
+\end{itemize}

@@ -1,0 +1,57 @@
+\section{313 --- Super Ugly Number}
+
+\textbf{Medium}
+
+Write a program to find the $n$th super ugly number.
+
+Super ugly numbers are positive numbers whose all prime factors are in the given prime list primes of size $k$.
+
+\paragraph{Example:}
+
+\begin{flushleft}
+\textbf{Input}: $ n = 12 $, \fcj{primes = [2,7,13,19]}
+
+\textbf{Output}: 32 
+
+\textbf{Explanation}: 
+
+\fcj{[1,2,4,7,8,13,14,16,19,26,28,32]} is the sequence of the first 12 super ugly numbers given \fcj{primes = [2,7,13,19]} of size 4.
+\end{flushleft}
+
+\paragraph{Note:}
+
+\begin{itemize}
+\item 1 is a super ugly number for any given primes.
+\item The given numbers in primes are in ascending order.
+\item $0 < k \leq 100$, $0 < n \leq 10^6$, \fcj{0 < primes[i] < 1000}.
+\item The $n$th super ugly number is guaranteed to fit in a 32-bit signed integer.
+\end{itemize}
+
+\subsection{DP}
+Essential same as \textbf{264. Ugly Number II}. We need an array to save the counts for each prime number.
+
+\setcounter{lstlisting}{0}
+\begin{lstlisting}[style=customc, caption={DP}]
+int nthSuperUglyNumber( int n, vector<int>& primes )
+{
+    vector<int> dp( n, 1 ), idx( primes.size(), 0 );
+    for( int i = 1; i < n; ++i )
+    {
+        dp[i] = INT_MAX;
+        //find next ugly number
+        for( int j = 0; j < primes.size(); ++j )
+        {
+            dp[i] = min( dp[i], dp[idx[j]] * primes[j] );
+        }
+        //increments count of matched prime number
+        for( int j = 0; j < primes.size(); ++j )
+        {
+            if( dp[i] == dp[idx[j]] * primes[j] )
+            {
+                ++idx[j];
+            }
+        }
+    }
+    return dp.back();
+}
+\end{lstlisting}

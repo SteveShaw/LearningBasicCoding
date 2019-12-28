@@ -1,160 +1,140 @@
-\section{488 --- Zuma Game}
-Think about Zuma Game. You have a row of balls on the table, colored red($ R $), yellow($ Y $), blue($ B $), green($ G $), and white($ W $). You also have several balls in your hand.
+\section{489 --- Robot Room Cleaner}
 
-Each time, you may choose a ball in your hand, and insert it into the row (including the leftmost place and rightmost place). Then, if there is a group of 3 or more balls in the same color touching, remove these balls. Keep doing this until no more balls can be removed.
+\textbf{Hard}
 
-Find the minimal balls you have to insert to remove all the balls on the table. If you cannot remove all the balls, output $-1$.
+Given a robot cleaner in a room modeled as a grid.
 
-\paragraph{Examples:}
+Each cell in the grid can be empty or blocked.
+
+The robot cleaner with 4 given APIs can move forward, turn left or turn right. Each turn it made is 90 degrees.
+
+When it tries to move into a blocked cell, its bumper sensor detects the obstacle and it stays on the current cell.
+
+Design an algorithm to clean the entire room using only the 4 given APIs shown below.
+
+\begin{lstlisting}[style=customc]
+interface Robot {
+  // returns true if next cell is open and robot moves into the cell.
+  // returns false if next cell is obstacle and robot stays on the current cell.
+  boolean move();
+
+  // Robot will stay on the same cell after calling turnLeft/turnRight.
+  // Each turn will be 90 degrees.
+  void turnLeft();
+  void turnRight();
+
+  // Clean the current cell.
+  void clean();
+}
+\end{lstlisting}
+
+\paragraph{Example:}
+
+\textbf{Input}:
 
 \begin{flushleft}
 
-\textbf{Input}: \texttt{WRRBBW}, \texttt{RB}
+\[
+\begin{bmatrix}
+1 & 1 & 1 & 1 & 1 & 0 & 1 & 1\\ 
+1 & 1 & 1 & 1 & 1 & 0 & 1 & 1\\ 
+1 & 0 & 1 & 1 & 1 & 1 & 1 & 1\\ 
+0 & 0 & 0 & 1 & 0 & 0 & 0 & 0\\ 
+1 & 1 & 1 & 1 & 1 & 1 & 1 & 1
+\end{bmatrix}
+\]
 
-\textbf{Output}: -1
+\fcj{row = 1},
 
-\textbf{Explanation}: \texttt{WRRBBW} $\rightarrow$ \texttt{WRR[R]BBW} $\rightarrow$ \texttt{WBBW} $ \rightarrow $ \texttt{WBB[B]W} $ \rightarrow $ \texttt{WW}
-
-\textbf{Input}: \texttt{WWRRBBWW}, \texttt{WRBRW}
-
-\textbf{Output}: 2
-
-\textbf{Explanation}: \texttt{WWRRBBWW} $\longrightarrow$ \texttt{WWRR[R]BBWW} $\longrightarrow$ \texttt{WWBBWW} $\longrightarrow$ \texttt{WWBB[B]WW} $\longrightarrow$ \texttt{WWWW} $\longrightarrow$ empty
-
-\textbf{Input}:\texttt{G}, \texttt{GGGGG}
-
-\textbf{Output}: 2
-
-\textbf{Explanation}: \texttt{G} $\longrightarrow$ \texttt{G[G]} $\longrightarrow$ \texttt{GG[G]} $\longrightarrow$ $\emptyset$
+\fcj{col = 3}
 
 
-\textbf{Input}: \texttt{RBYYBBRRB}, \texttt{YRBGB}
+\textbf{Explanation}:
 
-\textbf{Output}: 3
+All grids in the room are marked by either 0 or 1.
 
-\textbf{Explanation}: \texttt{RBYYBBRRB} $\longrightarrow$ \texttt{RBYY[Y]BBRRB} $\longrightarrow$ \texttt{RBBBRRB} $\longrightarrow$ \texttt{RRRB} $\longrightarrow$ \texttt{B} $\longrightarrow$ \texttt{B[B]} $\longrightarrow$ \texttt{BB[B]} $\longrightarrow \emptyset$
+0 means the cell is blocked, while 1 means the cell is accessible.
+The robot initially starts at the position of \fcj{row=1}, \fcj{col=3}.
 
+From the top left corner, its position is one row below and three columns right.
 \end{flushleft}
 
-\paragraph{Note:}
+\paragraph{Notes:}
+
 \begin{itemize}
-\item You may assume that the initial row of balls on the table won’t have any 3 or more consecutive balls with the same color.
-\item The number of balls on the table won't exceed 20, and the string represents these balls is called board in the input.
-\item The number of balls in your hand won't exceed 5, and the string represents these balls is called hand in the input.
-\item Both input strings will be non-empty and only contain characters $ R $, $ Y $, $ B $, $ G $, $ W $.
+\item The input is only given to initialize the room and the robot's position internally. You must solve this problem \fcj{"blindfolded"}. In other words, you must control the robot using only the mentioned 4 APIs, without knowing the room layout and the initial robot's position.
+\item The robot's initial position will always be in an accessible cell.
+\item The initial direction of the robot will be facing up.
+\item All accessible cells are connected, which means the all cells marked as 1 will be accessible by the robot.
+\item Assume all four edges of the grid are all surrounded by wall.
 \end{itemize}
 
-\subsection{Recursion}
+\subsection{Spiral Backtracking}
+This solution is based on the same idea as maze solving algorithm called \textbf{right-hand rule}. 
+
+Go forward, cleaning and marking all the cells on the way as visited. At the obstacle \textbf{turn right}, again go forward, etc. \textbf{Always turn right} at the obstacles and then \textbf{go forward}. Consider already visited cells as virtual obstacles.
 
 \begin{itemize}
-\item 遍历所有可能的情况来找出最优解，
-\item 用hash map来统计hand中每种球的个数，
-\item 然后遍历board，找连续相同球的个数，在没有可以消除的情况下，连续的个数只能是1个或2个，然后用3减去连续个数，就是需要补充的球数以使其可以被消除，
-\item 那么在hash map中看该类型的球够不够，如果enough就表示可以消除，在哈希表中减去需要使用掉的球数，然后将消掉的球移除，对新的字符串调用递归，如果可以成功消除，会返回一个结果，该结果加上之前需要的球数用来更新结果，
-\item 调用完递归要恢复hash map。
-\item 另外在刚进入递归函数时，需要去除当前字符串中连续3个相同球的情况。
+\item What to do if after the right turn there is an obstacle just in front? Turn right again.
+\item How to explore the alternative paths from the cell? Go back to that cell and then turn right from your last explored direction.
+\item When to stop? \textbf{Stop} when you explored all possible paths, i.e. all 4 directions (up, right, down, and left) for each visited cell. 
+\end{itemize}
+
+To implement the algorithm for the backtrack function \fcj{backtrack(cell = (0, 0), direction = 0)}.
+
+\begin{itemize}
+\item Mark the cell as visited and clean it up.
+\item Explore 4 directions: up, right, down, and left (the order is important since the idea is always to turn right):
+\begin{enumerate}
+\item Check the next cell in the chosen direction: 
+\begin{itemize}
+\item if it is not visited, and there is no obstacle: Move forward, explore next cells (\fcj{backtrack(new_cell, new_direction)}), and then backtrack (go back to the previous cell)
+\item Otherwise, \textbf{turn} right because now there is an obstacle (or a virtual obstacle) just in front.
+\end{itemize}
+\end{enumerate}
 \end{itemize}
 
 \setcounter{lstlisting}{0}
 \begin{lstlisting}[style=customc, caption={DFS}]
-int findMinStep( string board, string hand )
+void cleanRoom( Robot& robot )
 {
-    //create a hash map for hand
-    unordered_map<char, int> m;
-    m['R'] = 0;
-    m['Y'] = 0;
-    m['B'] = 0;
-    m['G'] = 0;
-    m['W'] = 0;
-    for( auto c : hand )
-    {
-        m[c] += 1;
-    }
-
-    //push back a special character
-    //to make sure the process can be
-    //triggered even if board last segments are
-    //consecutive characters
-    board.push_back( '#' );
-
-    int count = 10; //notice hand can only have 5 balls
-
-    count = dfs( board, m );
-
-    return count == 10 ? -1 : count;
+    unordered_set<int> seen;
+    backtrack( 0, 0, 0, seen, robot );
 }
-
-int dfs( string board, unordered_map<char, int>& m )
+void backtrack( int r, int c, int dir, unordered_set<int>& seen, Robot& robot )
 {
-    //remove the adjacent more than 2 balls
-    board = play( board );
-    if( board[0] == '#' )
+    seen.insert( r * 16061 + c );
+    robot.clean();
+
+    int dr[4] = {-1, 0, 1, 0};
+    int dc[4] = {0, 1, 0, -1};
+    //check 4 directions
+    for( int i = 0; i < 4; ++i )
     {
-        //no any ball is needed
-        return 0;
+        int next_dir = ( dir + i ) % 4;
+        int nr = r + dr[next_dir];
+        int nc = c + dc[next_dir];
+        if( seen.find( nr * 16061 + nc ) == seen.end() )
+        {
+            if( robot.move() )
+            {
+                //recursively clean the room
+                backtrack( nr, nc, next_dir, seen, robot );
+                //go back to previous cell
+                robot.turnRight();
+                robot.turnRight();
+                robot.move();
+                robot.turnRight();
+                robot.turnRight();
+            }
+        }
+        //turn to next direction
+        robot.turnRight();
     }
-
-    int L = static_cast<int>( board.size() );
-    int count = 10;
-
-    for( int left = 0, right = 0; right < L; ++right )
-    {
-        if( board[left] == board[right] )
-        {
-            continue;
-        }
-
-        //now board[right] != board[left]
-        //but board[right-1] = board[left]
-        //so the balls with same colors from left
-        //are (right - left)
-        int balls_needed = 3 - ( right - left );
-
-        if( m[board[left]] >= balls_needed )
-        {
-            m[board[left]] -= balls_needed;
-
-            auto next = board.substr( 0, left );
-            next += board.substr( right );
-
-            int next_count = balls_needed + dfs( next, m );
-
-            count = ( min )( count, next_count );
-
-            //restore m[board[left]] for next time
-
-            m[board[left]] += balls_needed;
-        }
-
-        //update start index of next color ball
-        left = right;
-    }
-
-    return count;
-}
-//remove adjacent same balls
-string play( string board )
-{
-    for( size_t left = 0, right = 0; right < board.size(); ++right )
-    {
-        if( board[left] == board[right] )
-        {
-            continue;
-        }
-
-        if( right - left >= 3 )
-        {
-            //remove the same balls
-            auto next = board.substr( 0, left );
-            next += board.substr( right );
-
-            return play( next );
-        }
-
-        //update the start of next color ball
-        left = right;
-    }
-
-    return board;
 }
 \end{lstlisting}
+
+\paragraph{Related Problems}
+\begin{itemize}
+\item \textbf{286. Walls and Gates}
+\end{itemize}

@@ -125,3 +125,102 @@ bool sequenceReconstruction( vector<int>& org, vector<vector<int>>& seqs )
     return count == L - 1;
 }
 \end{lstlisting}
+
+\subsection{Topological Sort}
+We can build an ordered graph based on given \fcj{seq}. Then perform typical topological sort on the graph. The problem is asking for only one ordered output, which means in any time, there is no more than 1 element in the queue. 
+
+We know \fcj{org} is an array of a permutation of the integers from 1 to $n$. Thus, if we find any element in given \fcj{seqs} is outside of range $[1,n]$, we can directly return \fcj{false}.
+
+During the BFS in topological sort, we will compare the result sequence against \fcj{org}.
+
+\begin{lstlisting}[style=customc, caption={Topological Sort}]
+bool sequenceReconstruction( vector<int>& org, vector<vector<int>>& seqs )
+{
+    int n = ( int )( org.size() );
+    vector<unordered_set<int>> g( n + 1 );
+    vector<int> indeg( n + 1, 0 );
+    //build the graph
+    //empty_graph is used to check if seqs is empty
+    bool empty_graph = true;
+    for( const auto& seq : seqs )
+    {
+        if( !seq.empty() )
+        {
+            empty_graph = false;
+        }
+        auto len = ( long )( seq.size() );
+        if( len == 1 )
+        {
+            if( ( seq[0] > n ) || ( seq[0] < 1 ) )
+            {
+                //make sure the element is inside [1,n]
+                return false;
+            }
+        }
+        for( long i = 0l; i < len - 1; ++i )
+        {
+            //make sure the elements in seq is inside [1,n]
+            if( ( seq[i] > n ) || ( seq[i + 1] > n ) || ( seq[i] < 1 ) || ( seq[i + 1] < 1 ) )
+            {
+                return false;
+            }
+            //build adjacent nodes graph
+            auto& adjs = g[seq[i]];
+            auto it = adjs.find( seq[i + 1] );
+            if( it == adjs.end() )
+            {
+                //since we may have repeat elements in different seq
+                //we have to make sure for the same pair
+                //the in degrees of the node only increments once
+                adjs.insert( seq[i + 1] );
+                indeg[seq[i + 1]] += 1;
+            }
+        }
+    }
+    //this is a empty seqs
+    if( empty_graph )
+    {
+        return false;
+    }
+    //topological sort
+    //starting from nodes with in degrees are zeros
+    queue<int> q;
+    for( int i = 1; i <= n; ++i )
+    {
+        if( indeg[i] == 0 )
+        {
+            q.push( i );
+        }
+    }
+    //the index in org
+    int org_idx = 0;
+    while( !q.empty() )
+    {
+        //anytime, we can only have one
+        //number in the queue
+        if( q.size() > 1 )
+        {
+            return false;
+        }
+        auto x = q.front();
+        q.pop();
+        //check current element with org
+        if( x != org[org_idx] )
+        {
+            return false;
+        }
+        ++org_idx;
+        //check adjacent numbers
+        for( int adj : g[x] )
+        {
+            indeg[adj] -= 1;
+            if( indeg[adj] == 0 )
+            {
+                q.push( adj );
+            }
+        }
+    }
+    //make sure org is completely matched.
+    return org_idx == ( int )( org.size() );
+}
+\end{lstlisting}

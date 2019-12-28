@@ -1,18 +1,18 @@
 \section{284 --- Peeking Iterator}
-Given an Iterator class interface with methods: \texttt{next}() and \texttt{hasNext}(), design and implement a \textbf{PeekingIterator} that support the \texttt{peek}() operation --- it essentially \texttt{peek}() at the element that will be returned by the next call to \texttt{next}().
+Given an Iterator class interface with methods: \fcj{next()} and \fcj{hasNext()}, design and implement a \textit{PeekingIterator} that support the \fcj{peek()} operation -- it essentially \fcj{peek()} at the element that will be returned by the next call to \fcj{next()}.
 
 \paragraph{Example:}
 
 \begin{flushleft}
-Assume that the iterator is initialized to the beginning of the list: $[1,2,3]$.
-\\
-Call \texttt{next}() gets you 1, the first element in the list.
-\\
-Now you call \texttt{peek}() and it returns 2, the next element. Calling \texttt{next}() after that still return 2. 
-\\
-You call \texttt{next}() the final time and it returns 3, the last element. 
-\\
-Calling \texttt{hasNext}() after that should return \texttt{false}.
+Assume that the iterator is initialized to the beginning of the list: \fcj{[1,2,3]}.
+
+Call \fcj{next()} gets you 1, the first element in the list.
+
+Now you call \fcj{peek()} and it returns 2, the next element. Calling next() after that \textbf{still} return 2. 
+
+You call \fcj{next()} the final time and it returns 3, the last element. 
+
+Calling \fcj{hasNext()} after that should return false.
 \end{flushleft}
 
 \paragraph{Follow up:} 
@@ -20,8 +20,11 @@ Calling \texttt{hasNext}() after that should return \texttt{false}.
 \item How would you extend your design to be generic and work with all types, not just integer?
 \end{itemize}
 
+\subsection{Flag}
+We can use a flag to indicate if next value is saved or not.
+
 \setcounter{lstlisting}{0}
-\begin{lstlisting}[style=customc,caption={TODO}]
+\begin{lstlisting}[style=customc,caption={Flag}]
 // Below is the interface for Iterator, which is already defined for you.
 // **DO NOT** modify the interface for Iterator.
 class Iterator
@@ -37,8 +40,6 @@ public:
     // Returns true if the iteration has more elements.
     bool hasNext() const;
 };
-
-
 class PeekingIterator : public Iterator
 {
 public:
@@ -47,23 +48,98 @@ public:
         // Initialize any member here.
         // **DO NOT** save a copy of nums and manipulate it directly.
         // You should only use the Iterator interface methods.
-
+        flag_peek = false;
     }
-
     // Returns the next element in the iteration without advancing the iterator.
     int peek()
     {
+        if( !flag_peek )
+        {
+            //if we have not called peek before
+            //get next value
+            next_val = Iterator::next();
+            //set flag of peek
+            flag_peek = true;
+        }
+        return next_val;
     }
-
     // hasNext() and next() should behave the same as in the Iterator interface.
     // Override them if needed.
     int next()
     {
+        if( !flag_peek )
+        {
+            //if peek is not used
+            //we can directly return next value
+            return Iterator::next();
+        }
+        //clear peek flag
+        flag_peek = false;
+        return next_val;
     }
-
     bool hasNext() const
     {
+        //either we have called peek
+        //and get the next value
+        //or use hasNext() of base class
+        return flag_peek || Iterator::hasNext();
+    }
+    bool flag_peek;
+    int next_val;
+};
+\end{lstlisting}
 
+\subsection{Copy Constructor}
+Since base class \fcj{Iterator} has copy constructor, we can directly build a new iterator object in peek and call its \fcj{next()} function.
+
+
+\begin{lstlisting}[style=customc, caption={Copy Constructor}]
+// Below is the interface for Iterator, which is already defined for you.
+// **DO NOT** modify the interface for Iterator.
+class Iterator
+{
+    struct Data;
+    Data* data;
+public:
+    Iterator( const vector<int>& nums );
+    Iterator( const Iterator& iter );
+    virtual ~Iterator();
+    // Returns the next element in the iteration.
+    int next();
+    // Returns true if the iteration has more elements.
+    bool hasNext() const;
+};
+class PeekingIterator : public Iterator
+{
+public:
+    PeekingIterator( const vector<int>& nums ) : Iterator( nums )
+    {
+        // Initialize any member here.
+        // **DO NOT** save a copy of nums and manipulate it directly.
+        // You should only use the Iterator interface methods.
+    }
+    // Returns the next element in the iteration without advancing the iterator.
+    int peek()
+    {
+        Iterator cc( *this );
+        return cc.next();
+    }
+    // hasNext() and next() should behave the same as in the Iterator interface.
+    // Override them if needed.
+    int next()
+    {
+        return Iterator::next();
+    }
+    bool hasNext() const
+    {
+        return Iterator::hasNext();
     }
 };
 \end{lstlisting}
+
+\paragraph{Related Problems}
+\begin{itemize}
+\item \textbf{173. Binary Search Tree Iterator}
+\item \textbf{251. Flatten 2D Vector}
+\item \textbf{281. Zigzag Iterator}
+\end{itemize}

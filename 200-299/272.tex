@@ -34,47 +34,7 @@ Given a non-empty binary search tree and a target value $T$, find $k$ values in 
 \item 比较$A[0]$而不是$A$其他的元素，是因为$A[0]$是$A$中最小的number。如果当前节点值比$A[0]$更靠近$T$，那么由于当前节点值比$A$中所有的number都要大，所以除了$A[0]$外的其他number肯定都要比$A[0]$更接近$T$。而我们需要得到$k$个更接近$T$的值，因此只需要移除掉$A[0]$。
 \item 如果当前节点值与$T$的差的绝对值比$A[0]$的更大，这时候就不用再继续遍历了，因为后面的节点值与$T$的差的绝对值更大。
 \end{itemize}
-\setcounter{algorithm}{0}
-\begin{algorithm}[H]
-\caption{In-order Traverse}
-\begin{algorithmic}[1]
-\Procedure{ClosestKValues}{$R, T, k$}
-\State $\star$ Create the result array $A$
-\State \Call{InOrder}{$S=R, T, A, K=k$} \Comment Call function \texttt{InOrder}
-\State \Return $A$
-\EndProcedure
-\end{algorithmic}
-\end{algorithm}
-Function \texttt{InOrder} traverse the BST tree start from node $S$.
 
-\begin{algorithm}[H]
-\caption{Helper Function For In-order Traverse}
-\begin{algorithmic}[1]
-\Procedure{InOrder}{$S, T, A, K$}
-\If{$S$ is null node}
-\State \Return
-\EndIf
-\State $\star$ Call \texttt{InOrder} on left subtree of $S$
-\If{size of $A$ is less than $K$}
-\State $\star$ 将$S$的节点值加到$A$的末尾
-\Else
-\If{$S$的节点值与$K$的差的绝对值小于$\lvert K-A[0]\rvert$}
-\State $\star$ Remove $A[0]$ from $A$
-\State $\star$ 将$S$的节点值加到$A$的末尾
-\Else
-\State \Return \Comment 后面遍历到的节点值会更偏离$T$
-\algstore{272algo}
-\end{algorithmic}
-\end{algorithm}
-\begin{algorithm}[H]
-\begin{algorithmic}[1]
-\algrestore{272algo}
-\EndIf
-\EndIf
-\State $\star$ Call \texttt{InOrder} on right subtree of $S$
-\EndProcedure
-\end{algorithmic}
-\end{algorithm}
 \setcounter{lstlisting}{0}
 \begin{lstlisting}[style=customc,caption={In-order Traverse}]
 vector<int> closestKValues( TreeNode* root, double target, int k )
@@ -135,75 +95,6 @@ void inorder( TreeNode* node, double T, vector<int>& A, size_t k )
 \item 如果$P$的栈顶node的value更close to $T$，将这个栈顶node的value输出到结果序列$A$中并从$P$中删除该node。接下来借助函数\texttt{getPredecessor}寻找the next smaller node to this node。在BST中，这个next \textbf{smaller} node是该节点的\textbf{左子树的最右节点}如果该节点的左子树存在。在寻找的过程中，把路径上的所有节点都push到$P$中。
 \item 如果$S$的栈顶node的value更close to $T$，将这个栈顶node的value输出到结果序列$A$中并从$S$中删除该node。接下来借助函数\texttt{getSuccessor}寻找the next \textbf{larger} node to this node。在BST中，这个next \textbf{larger} node是该节点的\textbf{右子树的最左节点}如果该节点的右子树存在。在寻找的过程中，把路径上的所有节点都push到$S$中。
 \end{itemize}
-\begin{algorithm}[H]
-\caption{Find Next Larger And Next Smaller Node}
-\begin{algorithmic}[1]
-\Procedure{ClosestKValues}{$R, T, k$}
-\State $\star$ Create two stacks $P$ and $S$
-\State $\ast$ Push nodes whose values less than $T$ to $P$. Otherwise, push to $S$
-\State $x:=R$
-\While{$x$ is not null node}
-\If{value of $x$ is less than $T$}
-\State $\star$ Push $x$ to $P$
-\State $\star$ Update $x$ to its left child node
-\Else
-\State $\star$ Push $x$ to $S$
-\State $\star$ Update $x$ to its right child node
-\EndIf
-\EndWhile
-\State $\delta:=0$ \Comment The counter of loops
-\State $\star$ Create an array $A$ as the result array
-\While{$\delta < k$}
-\If{$S$ is empty \textbf{or} top node's value of $P$ is closer to $T$}
-\State $\star$ Add $P$'s top node's value to $A$
-\State $\star$ Call \texttt{GetPredecessor} to find next smaller nodes to $P$'s top node
-\Else
-\State $\star$ Add $S$'s top node's value to $A$
-\State $\star$ Call \texttt{GetSuccessor} to find next larger nodes to $S$'s top node
-\EndIf
-\State $\delta\gets\delta+1$ \Comment Increments the counter of loops
-\EndWhile
-\State \Return $A$
-\EndProcedure
-\end{algorithmic}
-\end{algorithm}
-Function \texttt{GetPredecessor}寻找the next smaller node to $P$'s top node。同时把路径上的节点都push到$P$中。
-\begin{algorithm}[H]
-\caption{Get Next Smaller Node}
-\begin{algorithmic}[1]
-\Procedure{GetPredecessor}{$P$}
-\State $\star$ Set $t$ as $P$'s top node
-\State $\star$ Pop $P$'s top node
-\If{$t$'s left child node is not null}
-\State $\star$ Push $t$'s \textbf{left} child node to $P$
-\State $\star$ Update $t$ as its left child node
-\While{$t$'s \textbf{right} child node is not null}
-\State $\star$ Push $t$'s \textbf{right} child node to $P$
-\State $\star$ Update $t$ as its \textbf{right} child node
-\EndWhile
-\EndIf
-\EndProcedure
-\end{algorithmic}
-\end{algorithm}
-Function \texttt{GetSuccessor}寻找the next larger node to $S$'s top node。同时把路径上的节点都push到$S$中。
-
-\begin{algorithm}[H]
-\caption{Get Next Larger Node}
-\begin{algorithmic}[1]
-\Procedure{GetSuccessor}{$S$}
-\State $\star$ Set $t$ as $S$'s top node
-\State $\star$ Pop $S$'s top node
-\If{$t$'s right child node is not null}
-\State $\star$ Push $t$'s \textbf{right} child node to $S$
-\State $\star$ Update $t$ as its right child node
-\While{$t$'s \textbf{left} child node is not null}
-\State $\star$ Push $t$'s \textbf{left} child node to $S$
-\State $\star$ Update $t$ as its \textbf{left} child node
-\EndWhile
-\EndIf
-\EndProcedure
-\end{algorithmic}
-\end{algorithm}
 \begin{lstlisting}[style=customc, caption={Find Next Larger And Next Smaller Node}]
 vector<int> closestKValues( TreeNode* root, double target, int k )
 {

@@ -1,0 +1,64 @@
+\section{320 --- Generalized Abbreviation}
+
+\textbf{Medium}
+
+Write a function to generate the generalized abbreviations of a word. 
+
+Note: The order of the output does not matter.
+
+\textbf{Example:}
+
+\begin{flushleft}
+\textbf{Input}: \fcj{"word"}
+
+\textbf{Output}:
+
+\begin{lstlisting}[style=customc]
+["word", "1ord", "w1rd", "wo1d", "wor1", "2rd", "w2d", "wo2", "1o1d", "1or1", "w1r1", "1o2", "2r1", "3d", "w3", "4"]
+\end{lstlisting}
+\end{flushleft}
+
+\subsection{Backtracking}
+
+In this problem, the partial candidates in backtracking are incomplete abbreviations that can be extended by one of the two choices:
+
+\begin{enumerate}
+\item keep the next character;
+\item abbreviate the next character.
+\end{enumerate}
+
+\setcounter{lstlisting}{0}
+\begin{lstlisting}[style=customc, caption={Backtracking}]
+vector<string> generateAbbreviations( string word )
+{
+
+    vector<string> ans;
+    dfs( word, 0, 0, "", ans );
+    return ans;
+}
+//k: the count of consecutive abbreviated characters
+//start: the current index in w
+void dfs( string_view w, size_t start, int k, string cur, vector<string>& ans )
+{
+    if( start == w.size() )
+    {
+        if( k > 0 )
+        {
+            //append last k if it is nonzero
+            cur += to_string( k );
+        }
+        ans.emplace_back( cur );
+        return;
+    }
+    //the branch that w[i] is abbreviated
+    dfs( w, start + 1, k + 1, cur, ans );
+    if( k > 0 )
+    {
+        cur += to_string( k );
+    }
+    cur.push_back( w[start] );
+    // the branch that w[i] is kept
+    // in this case, k is zero
+    dfs( w, start + 1, 0, cur, ans );
+}
+\end{lstlisting}

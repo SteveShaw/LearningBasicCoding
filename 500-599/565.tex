@@ -1,0 +1,82 @@
+\section{565 --- Array Nesting}
+
+\textbf{Medium}
+
+A zero-indexed array $A$ of length $N$ contains all integers from 0 to $N-1$. Find and return the longest length of set $S$, where $S[i] = {A[i], A[A[i]], A[A[A[i]]], \ldots }$ subjected to the rule below.
+
+Suppose the first element in $S$ starts with the selection of element $A[i]$ of index $i$, the next element in $S$ should be $A[A[i]]$, and then $A[A[A[i]]]$, $\ldots$. By that analogy, we stop adding right before a duplicate element occurs in $S$.
+
+ 
+
+\paragraph{Example 1:}
+
+\begin{flushleft}
+\textbf{Input}: \fcj{A = [5,4,0,3,1,6,2]}
+
+\textbf{Output}: 4
+
+\textbf{Explanation}: 
+
+A[0] = 5, A[1] = 4, A[2] = 0, A[3] = 3, A[4] = 1, A[5] = 6, A[6] = 2.
+
+One of the longest \fcj{S[K]}:
+
+\fcj{S[0] = {A[0], A[5], A[6], A[2]} = {5, 6, 2, 0}}
+\end{flushleft}
+ 
+
+\paragraph{Note:}
+
+\begin{itemize}
+\item $N$ is an integer within the range \fcj{[1, 20,000]}.
+
+\item The elements of A are all distinct.
+
+\item Each element of A is an integer within the range \fcj{[0, N-1]}.
+\end{itemize}
+
+\subsection{Using Visited Array}
+We will notice a fact that we will always reach a point where the current element becomes equal to the element \fcj{nums[i]} with which we started the nestings in the first place. 
+
+Thus, after this, the new indices generated will be just the repetitions of the previously generated ones, and thus would not lead to an increase in the size of the current set.
+
+Thus, this condition of the current number being equal to the starting number acts as the terminating condition for a particular index.
+
+Instead of making use of a separate array to keep track of the same, we can mark the visited elements in the original array as a special value.
+
+\setcounter{lstlisting}{0}
+\begin{lstlisting}[style=customc, caption={Visited Array}]
+int arrayNesting( vector<int>& nums )
+{
+    int N = ( int )( nums.size() );
+    int ans = 1;
+    for( size_t i = 0; i < nums.size(); ++i )
+    {
+        if( nums[i] != N + 100 )
+        {
+            //nums[i] is not visisted
+            int start = nums[i];
+            int count = 0;
+            while( nums[start] != N + 100 )
+            {
+                //proceed in the loop
+                int tmp = start;
+                start = nums[start];
+                ++count;
+                //mark nums[tmp] as visited
+                nums[tmp] = N + 100;
+            }
+            //update maximum count so far
+            ans = ( max )( ans, count );
+        }
+    }
+    return ans;
+}
+\end{lstlisting}
+
+\paragraph{Related Problems}
+\begin{itemize}
+\item \textbf{339. Nested List Weight Sum}
+\item \textbf{341. Flatten Nested List Iterator}
+\item \textbf{364. Nested List Weight Sum II}
+\end{itemize}

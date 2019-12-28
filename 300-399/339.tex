@@ -1,0 +1,73 @@
+\section{339 --- Nested List Weight Sum}
+
+\textbf{Easy}
+
+Given a nested list of integers, return the sum of all integers in the list weighted by their depth.
+
+Each element is either an integer, or a list -- whose elements may also be integers or other lists.
+
+\paragraph{Example 1:}
+
+\begin{flushleft}
+\textbf{Input}: \fcj{[[1,1],2,[1,1]]}
+
+\textbf{Output}: 10 
+
+\textbf{Explanation}: Four 1's at depth 2, one 2 at depth 1.
+\end{flushleft}
+
+\paragraph{Example 2:}
+
+\begin{flushleft}
+\textbf{Input}: \fcj{[1,[4,[6]]]}
+
+\textbf{Output}: 27 
+
+\textbf{Explanation}: 
+
+One 1 at depth 1, one 4 at depth 2, and one 6 at depth 3; $1 + 4\times 2 + 6\times 3 = 27$.
+\end{flushleft}
+
+\subsection{DFS}
+Because the input is nested, it is natural to think about the problem in a recursive way. 
+
+We go through the list of nested integers one by one, keeping track of the current depth $d$. 
+
+If a nested integer is an integer $n$, we calculate its sum as $n\times d$. 
+
+If the nested integer is a list, we calculate the sum of this list recursively using the same process but with depth $d+1$.
+
+\setcounter{lstlisting}{0}
+\begin{lstlisting}[style=customc, caption={DFS}]
+int depthSum( vector<NestedInteger>& nestedList )
+{
+    int sum = 0;
+    for( const auto& ni : nestedList )
+    {
+        sum += dfs( ni, 1 );
+    }
+    return sum;
+}
+//get the sum recurisvely with level
+int dfs( const NestedInteger& ni, int level )
+{
+    if( ni.isInteger() )
+    {
+        return ni.getInteger() * level;
+    }
+    //for list, recurisvely get the sum
+    int sum = 0;
+    for( const auto& child : ni.getList() )
+    {
+        sum += dfs( child, level + 1 );
+    }
+    return sum;
+}
+\end{lstlisting}
+
+\paragraph{Related Problems}
+\begin{itemize}
+\item \textbf{364. Nested List Weight Sum II}
+\item \textbf{565. Array Nesting}
+\item \textbf{690. Employee Importance}
+\end{itemize}

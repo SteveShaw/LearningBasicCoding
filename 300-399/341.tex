@@ -1,0 +1,112 @@
+\section{341 --- Flatten Nested List Iterator}
+
+\textbf{Medium}
+
+Given a nested list of integers, implement an iterator to flatten it.
+
+Each element is either an integer, or a list -- whose elements may also be integers or other lists.
+
+\paragraph{Example 1:}
+
+\begin{flushleft}
+\textbf{Input}: \fcj{[[1,1],2,[1,1]]}
+
+\textbf{Output}: \fcj{[1,1,2,1,1]}
+
+\textbf{Explanation}: 
+
+By calling next repeatedly until \fcj{hasNext} returns \fcc{false}, the order of elements returned by next should be: \fcj{[1,1,2,1,1]}.
+\end{flushleft}
+
+\paragraph{Example 2:}
+
+\begin{flushleft}
+\textbf{Input}: \fcj{[1,[4,[6]]]}
+
+\textbf{Output}: \fcj{[1,4,6]}
+
+\textbf{Explanation}: 
+
+By calling next repeatedly until \fcj{hasNext} returns \fcc{false}, the order of elements returned by next should be: \fcj{[1,4,6]}.
+
+\end{flushleft}
+
+\subsection{Stack}
+Use a stack to save the result of unpacking each NestedInteger until a integer appear
+
+\setcounter{lstlisting}{0}
+\begin{lstlisting}[style=customc, caption={Stack}]
+/**
+ * // This is the interface that allows for creating nested lists.
+ * // You should not implement it, or speculate about its implementation
+ * class NestedInteger {
+ *   public:
+ *     // Return true if this NestedInteger holds a single integer, rather than a nested list.
+ *     bool isInteger() const;
+ *
+ *     // Return the single integer that this NestedInteger holds, if it holds a single integer
+ *     // The result is undefined if this NestedInteger holds a nested list
+ *     int getInteger() const;
+ *
+ *     // Return the nested list that this NestedInteger holds, if it holds a nested list
+ *     // The result is undefined if this NestedInteger holds a single integer
+ *     const vector<NestedInteger> &getList() const;
+ * };
+ */
+class NestedIterator
+{
+public:
+    NestedIterator( vector<NestedInteger> &nestedList )
+    {
+        //add all NestedInteger into the stack from end to begin
+        for( auto it = nestedList.rbegin(); it != nestedList.rend(); ++it )
+        {
+            stk.push( it );
+        }
+    }
+    int next()
+    {
+        //get integer from top of stack
+        auto t = stk.top();
+        stk.pop();
+        return t->getInteger();
+    }
+
+    bool hasNext()
+    {
+        while( !stk.empty() )
+        {
+            auto t = stk.top();
+            if( t->isInteger() )
+            {
+                //this is integer
+                return true;
+            }
+            stk.pop();
+            //unpack the non integer list
+            auto& l = t->getList();
+            for( auto it = rbegin( l ); it != rend( l ); ++it )
+            {
+                stk.push( it );
+            }
+        }
+        return false;
+    }
+    //we need reverse_iterator type
+    using IterT = vector<NestedInteger>::reverse_iterator;
+    stack<IterT> stk;
+};
+/**
+ * Your NestedIterator object will be instantiated and called as such:
+ * NestedIterator i(nestedList);
+ * while (i.hasNext()) cout << i.next();
+ */
+\end{lstlisting}
+
+\paragraph{Related Problems}
+\begin{itemize}
+\item \textbf{251. Flatten 2D Vector}
+\item \textbf{281. Zigzag Iterator}
+\item \textbf{385. Mini Parser}
+\item \textbf{565. Array Nesting}
+\end{itemize}

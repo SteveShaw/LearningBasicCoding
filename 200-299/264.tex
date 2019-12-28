@@ -27,33 +27,48 @@ Ugly numbers are positive numbers whose prime factors only include 2, 3, 5.
 \item 接下来 $A[2] = \min(A[1]\times2, A[0]\times 3, A[0]\times 5)$。显然是$A[0]\times 3$最小，因此increment对应3的计数器$y$。
 \item 以此类推，如果遇到相同的情况，比如6，那么对应的2和3的计数器都要increment。
 \end{itemize}
-\setcounter{algorithm}{0}
-\begin{algorithm}[H]
-\caption{Dynamic Programming}
-\begin{algorithmic}[1]
-\Procedure{NthUglyNumber}{$n$}
-\State $\star$ 创建一个size为$n$的array$A$
-\State $\star$ 初始化$x$, $y$, $z$为0，分别代表2,3和5的次数
-\State $A[0]\gets 1$ \Comment The first ugly number is 1
-\For{$i:=1$ \textbf{to} n-1}
-\State $A[i]\gets \min(A[x]\times 2, A[y]\times 3, A[z]\times 5)$
-\EndFor
-\algstore{264algo}
-\end{algorithmic}
-\end{algorithm}
-\begin{algorithm}[H]
-\begin{algorithmic}[1]
-\algrestore{264algo}
-\If{$A[i]=A[x]\times 2$}
-\State $x\gets x+1$ \Comment Increments the count of 2
-\EndIf
-\If{$A[i]=A[y]\times 3$}
-\State $y\gets y+1$ \Comment Increments the count of 3
-\EndIf
-\If{$A[i]=A[z]\times 5$}
-\State $z\gets z+1$ \Comment Increments the count of 5
-\EndIf
-\State \Return $A[n-1]$ \Comment The last element in $A$ is the nth ugly number
-\EndProcedure
-\end{algorithmic}
-\end{algorithm}
+
+
+\setcounter{lstlisting}{0}
+\begin{lstlisting}[style=customc, caption={Dynamic Programming}]
+int nthUglyNumber( int n )
+{
+    vector<int> A( n, 0 );
+    A[0] = 1;
+    int id2 = 0;
+    int id3 = 0;
+    int id5 = 0;
+    for( int i = 1; i < n; ++i )
+    {
+        //find next ugly number
+        int n2 = A[id2] * 2;
+        int n3 = A[id3] * 3;
+        int n5 = A[id5] * 5;
+        A[i] = ( min )( n2, n3 );
+        A[i] = ( min )( A[i], n5 );
+        //check index increment for 2, 3, 5
+        //we should check all 3 numbers
+        //so no "else if" here
+        if( A[i] == n2 )
+        {
+            ++id2;
+        }
+        if( A[i] == n3 )
+        {
+            ++id3;
+        }
+        if( A[i] == n5 )
+        {
+            ++id5;
+        }
+    }
+    return A.back();
+}
+\end{lstlisting}
+
+\paragraph{Related Problems}
+\begin{itemize}
+\item \textbf{279. Perfect Squares}
+\item \textbf{313. Super Ugly Number}
+\item \textbf{1201. Ugly Number III}
+\end{itemize}

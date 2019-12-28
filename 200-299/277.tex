@@ -2,18 +2,8 @@
 Suppose you are at a party with $n$ people (labeled from 0 to $n-1$) and among them, there may exist one celebrity. The definition of a celebrity is that all the other $n-1$ people know him/her but he/she does not know any of them.
 \par
 Now you want to find out who the celebrity is or verify that there is not one. The only thing you are allowed to do is to ask questions like: ``Hi, A. Do you know B?'' to get information of whether $A$ knows $B$. You need to find out the celebrity (or verify there is not one) by asking as few questions as possible (in the asymptotic sense).
-\par
-You are given a helper function 
-\setcounter{lstlisting}{0}
-\begin{lstlisting}[style=customc]
-bool knows(a, b)
-\end{lstlisting}
-which tells you whether $A$ knows $B$. Implement a function
-\setcounter{lstlisting}{0}
-\begin{lstlisting}[style=customc]
-int findCelebrity(n)
-\end{lstlisting}
-your function should minimize the number of calls to \texttt{knows}.
+
+You are given a helper function \fcj{bool knows(a, b)} which tells you whether A knows B. Implement a function int \fcj{findCelebrity(n)}. There will be exactly one celebrity if he/she is in the party. Return the celebrity's label if there is a celebrity in the party. If there is no celebrity, return $-1$.
 
 \paragraph{Note:} 
 \begin{itemize}
@@ -33,7 +23,7 @@ your function should minimize the number of calls to \texttt{knows}.
 \begin{algorithmic}[1]
 \Procedure{FindCelebrity}{$n$}
 \State $x:=0$
-\State $ast$ 找到可能的celebrity。
+\State $\ast$ 找到可能的celebrity。
 \For{$i:=1$ \textbf{to} $n-1$}
 \If{\Call{knows}{$x,i$} is \texttt{true}} \Comment $x$ knows $i$ so $x$ cannot be celebrity
 \State $x\gets i$ \Comment Update $x$ to $i$ because $i$ is the possible celebrity
@@ -81,3 +71,8 @@ int findCelebrity( int n )
     return x;
 }
 \end{lstlisting}
+
+\paragraph{Related Problems }
+\begin{itemize}
+\item \textbf{997. Find the Town Judge}
+\end{itemize}

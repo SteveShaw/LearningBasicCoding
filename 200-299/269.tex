@@ -54,51 +54,16 @@ There is a new alien language which uses the latin alphabet. However, the order 
 \item If the order is invalid, return an empty string.
 \item There may be multiple valid order of letters, return any one of them is fine.
 \end{itemize}
-\subsection{BFS}
+\subsection{Toplogical Sort}
 这其实是build a directed graph, calculate each node's in-degree and output them according to in-degree.
 \begin{itemize}
 \item 构建出相邻的word在相同的位置上的letter形成的edges所构成的graph。
 \item 同时用一个hash set保存所有words中的letters。
 \item 边界情况：例如\texttt{baac}出现在\texttt{baa}之前，这种情况下不是valid order。
+\item 根据BFS为基础的topological sort, starting with nodes with zero in-degree. 
+\item Finally, need to make sure there is no circle in the graph. We need to check if the generated string size is equal to the number of unique letters.
 \end{itemize}
-\setcounter{algorithm}{0}
-\begin{algorithm}[H]
-\caption{BFS}
-\begin{algorithmic}[1]
-\Procedure{AlienOrder}{$W, L$}
-\State $\star$ 初始化一个hash set $C$
-\State $\ast$ 构建出directed grap $G$
-\For{$i:=0$ \textbf{to} $L-1$}
-\State $\star$ All all characters of $W[i]$ to $C$
-\State $\star$ 得到$W[i]$和$W[i+1]$的最小length $\ell$
-\If{$W[i][0\ldots\ell-1]$ is equal to $W[i+1][0\ldots\ell-1]$ }
-\If{$W[i]$'s length is larger than $W[i+1]$'s length}
-\State \Return $\emptyset$ \Comment 这是invalid order
-\EndIf
-\EndIf
-\State $\star$ Add edge ($W[i][j], W[i][j]$) to $g$ for the first $j$ where $W[i][j]\neq W[i+1][j]$: 
-\State $\star$ while iterating $j$ from 0 to $\ell-1$
-\EndFor
-\State $\star$ Add all characters of $W[L-1]$ to $C$ \Comment 上述循环没有处理$W[L-1]$
-\algstore{269algo}
-\end{algorithmic}
-\end{algorithm}
-\begin{algorithm}[H]
-\begin{algorithmic}[1]
-\algrestore{269algo}
-\State $\star$ 遍历$g$的每个edge，计算其中每个edge的终止点的in-degree。
-\State $\star$ 将$g$所有in-degree为零的节点加入queue $q$中。同时输出到结果序列$S$中。
-\While{$q\neq\emptyset$}
-\State $\star$ 弹出$q$的\texttt{front} $x$
-\State $\star$ 在$g$中找到所有与$x$的相连的nodes,decrements their in-degrees
-\State $\star$ 如果某个node的in-degree变为零, push it into $q$.同时输出该节点到结果序列$S$中。
-\EndWhile
-\State $\star$ 检查$S$中的节点个数是否与$C$中的节点个数相等: 
-\State $\star$ 如果不相等，说明$g$中存在cycle，显然是invalid order，因此返回空序列。
-\State $\star$ 如果相等，则返回$S$
-\EndProcedure
-\end{algorithmic}
-\end{algorithm}
+
 \setcounter{lstlisting}{0}
 \begin{lstlisting}[style=customc, caption={BFS}]
 string alienOrder( vector<string>& words )
@@ -205,7 +170,7 @@ string alienOrder( vector<string>& words )
 \par
 另外采用这种结构就不需要用额外的hash set去存储所有words中的letter，只需要将$g[i][i]=\texttt{true}$。
 \par
-DFS需要对已经访问的节点进行mark，但可以从任何一个node开始进行深度搜索。由于题目中所有的words中只包含了lowercase letter，因此可以逐个递归粗粒26个lowercase letter。
+DFS需要对已经访问的节点进行mark，但可以从任何一个node开始进行深度搜索。由于题目中所有的words中只包含了lowercase letter，因此可以逐个递归26个lowercase letter。
 \par
 在递归中
 \begin{itemize}
@@ -318,3 +283,8 @@ bool dfs( int x, vector<vector<unsigned char>>&g, vector<unsigned char>& seen, s
     return true;
 }
 \end{lstlisting}
+
+\paragraph{Related Questions}
+\begin{itemize}
+\item \textbf{210. Course Schedule II}
+\end{itemize}

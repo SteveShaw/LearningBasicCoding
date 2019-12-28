@@ -55,7 +55,8 @@ You can assume that no duplicate edges will appear in edges. Since all edges are
 \item According to the definition of tree on Wikipedia: \texttt{a tree is an undirected graph in which any two vertices are connected by \textit{exactly} one path. In other words, any connected graph without simple cycles is a tree}.
 \item The height of a rooted tree is the number of edges on the longest downward path between the root and a leaf.
 \end{itemize}
-\subsection{Breadth First Search}
+\subsection{Topological Sort}
+We do topological sort starting from leaf node which has only one edge until there are no larger than two nodes in the queue. 
 \begin{itemize}
 \item 首先建立adjacent list的graph，然后创建一个queue，将所有只有degree为1即只有一个edge的节点放入队列中
 \item 然后依次从queue中弹出节点$x$，将该节点从与之相连的节点$y$的adjacent list中删除。如果$y$的degree也变为了1，将$y$放入queue中。

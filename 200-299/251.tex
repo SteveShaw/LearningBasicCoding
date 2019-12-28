@@ -73,3 +73,72 @@ private:
     vector<int>::iterator y;
 };
 \end{lstlisting}
+
+Another way using iterator: we define two iterator pairs: \fcj{outer} and \fcj{inner}.
+
+\begin{itemize}
+\item \fcj{outer} is used to traverse type \fcc{vector<vector<int>>}.
+\item \fcj{inner} is used to traverse inner vector
+\end{itemize}
+
+\begin{lstlisting}[style=customc, caption={Two Iterators}]
+class Vector2D
+{
+public:
+    Vector2D( vector<vector<int>>& v )
+    {
+        auto& [out_b, out_e] = outer;
+        out_b = v.begin();
+        out_e = v.end();
+        if( out_b != out_e )
+        {
+            //only when v is not empty
+            //we will get the first vector's begin and end
+            auto& [in_b, in_e] = inner;
+            in_b = out_b->begin();
+            in_e = out_b->end();
+        }
+    }
+    int next()
+    {
+        //call hasNext() to move
+        //inner to the first non empty
+        //child vector
+        hasNext();
+        int x =  *inner.first;
+        ++inner.first;
+        return x;
+
+    }
+    bool hasNext()
+    {
+        if( outer.first == outer.second )
+        {
+            //we reached end of v
+            return false;
+        }
+        //go to next non empty inner vector
+        while( inner.first == inner.second )
+        {
+            ++outer.first;
+            if( outer.first != outer.second )
+            {
+                //set inner as the first non empty inner vector
+                //begin and end
+                inner.first = outer.first->begin();
+                inner.second = outer.first->end();
+            }
+            else
+            {
+                //we reach the end of v
+                return false;
+            }
+        }
+        return true;
+    }
+    using InnerIterT = vector<int>::iterator;
+    using OuterIterT = vector<vector<int>>::iterator;
+    pair<InnerIterT, InnerIterT> inner;
+    pair<OuterIterT, OuterIterT> outer;
+};
+\end{lstlisting}

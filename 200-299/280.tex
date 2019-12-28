@@ -26,27 +26,7 @@ swap $A[i+1]$和$A[i+2]$，仍然有$A[i]\leq A[i+1]$，而$A[i+1]\geq A[i+2]$
 $A[i]>A[i+1]<A[i+2]$，即even index和odd index上大小关系都不满足，这时候先swap $A[i]$和$A[i+1]$，然后下次循环到$i+1$时，又会比较$A[i+1]$和$A[i+2]$，建立正确的大小关系。
 \end{itemize}
 综上所述，按照之前描述的操作，就能建立符合条件的wiggle sort数组。
-\setcounter{algorithm}{0}
-\begin{algorithm}[H]
-\caption{Swap Inline}
-\begin{algorithmic}[1]
-\Procedure{WiggleSort}{$A, L$}
-\For{$i:=0$ \textbf{to} $L-1$}
-\algstore{280algo}
-\end{algorithmic}
-\end{algorithm}
-\begin{algorithm}[H]
-\begin{algorithmic}[1]
-\algrestore{280algo}
-\If{$i$ is odd \textbf{and} $A[i]< A[i+1]$} \Comment $A[i]\geq A[i+1]$ on odd index $i$ is not satisfied
-\State $\star$ Swap $A[i]$ and $A[i+1]$
-\ElsIf{$i$ is even \textbf{and} $A[i]>A[i+1]$} \Comment $A[i]\leq A[i+1]$ on even index $i$ is not satisfied
-\State $\star$ Swap $A[i]$ and $A[i+1]$
-\EndIf
-\EndFor
-\EndProcedure
-\end{algorithmic}
-\end{algorithm}
+
 \setcounter{lstlisting}{0}
 \begin{lstlisting}[style=customc, caption={Swap Inline}]
 void wiggleSort( vector<int> &nums )

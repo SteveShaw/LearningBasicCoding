@@ -34,7 +34,7 @@ There are 5 ways to assign symbols to make the sum of $A$ be target 3.
 \item Your output answer is guaranteed to be fitted in a 32-bit integer.
 \end{itemize}
 
-\paragraph{0-1 Kapsnack}
+\subsection{0-1 Kapsnack}
 \begin{itemize}
 \item Suppose the sum of all positive integers is $S_0$ and sum of all negative integers is $S_1$
 \item We have $S_0 + S_1=S$, then we have $S_0 = S- S_1 \to S_0 \times 2 = S - S_1+S_0$. Since $S_0-S_1=\sum\limits_{i=0}^{n-1}a_i$, we have $S_0\times 2 = S + \sum\limits_{i=0}^{n-1}a_i$.
@@ -88,3 +88,8 @@ int findTargetSumWays( vector<int>& nums, int S )
 }
 
 \end{lstlisting}
+
+\paragraph{Related Problems}
+\begin{itemize}
+\item \textbf{282. Expression Add Operators}
+\end{itemize}

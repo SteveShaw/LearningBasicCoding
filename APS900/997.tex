@@ -1,0 +1,78 @@
+\section{997 --- Find the Town Judge}
+
+\textbf{Easy}
+
+In a town, there are $N$ people labeled from 1 to $N$.  There is a rumor that one of these people is secretly the town judge.
+
+If the town judge exists, then:
+
+
+
+\begin{enumerate}
+\item The town judge trusts nobody.
+\item Everybody (except for the town judge) trusts the town judge.
+There is exactly one person that satisfies properties 1 and 2.
+\item You are given trust, an array of pairs \fcj{trust[i] = [a, b]} representing that the person labeled $a$ trusts the person labeled $b$.
+\end{enumerate}
+
+If the town judge exists and can be identified, return the label of the town judge.  Otherwise, return $-1$.
+
+ 
+
+\paragraph{Example 1:}
+
+\begin{flushleft}
+\textbf{Input}: N = 2, trust = [[1,2]]
+
+\textbf{Output}: 2
+
+
+\end{flushleft}
+
+
+\paragraph{Example 2:}
+
+\begin{flushleft}
+\textbf{Input}: N = 3, trust = [[1,3],[2,3]]
+
+\textbf{Output}: 3
+\end{flushleft}
+
+\paragraph{Example 3:}
+
+\begin{flushleft}
+\textbf{Input}: N = 3, trust = [[1,3],[2,3],[3,1]]
+
+\textbf{Output}: -1
+\end{flushleft}
+
+\paragraph{Example 4:}
+
+\begin{flushleft}
+\textbf{Input}: N = 3, trust = [[1,2],[2,3]]
+
+\textbf{Output}: -1
+\end{flushleft}
+
+\paragraph{Example 5:}
+\begin{flushleft}
+
+
+\textbf{Input}: N = 4, trust = [[1,3],[1,4],[2,3],[2,4],[4,3]]
+
+\textbf{Output}: 3
+
+\subsection{In Degree}
+
+\end{flushleft}
+ 
+
+\paragraph{Note:}
+
+\begin{itemize}
+\item $1 \leq N \leq 1000$
+\item \fcj{trust.length <= 10000}
+\item \fcj{trust[i]} are all different
+\item \fcj{trust[i][0] != trust[i][1]}
+\item \fcj{1 <= trust[i][0], trust[i][1] <= N}
+\end{itemize}

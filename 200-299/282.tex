@@ -56,137 +56,49 @@ Given a string $S$ that contains only digits 0--9 and a target value $T$, return
 \item 对于乘法，如果build出的上一个表达式是$10+2$，现在要乘以4，即要获得$10+2\times 4$的值，这时候上一个表达式右边的数字是2，所以用表达式的值12减去2得到10即表达式左边的数字，然后用这个2乘以4，即$12-2+(2\times 4)$这时候在进入下一个递归时，上一个表达式右边的数字就是$8=2\times 4$。而如果在遇到乘法比如$10+2\times4\times3$，仍然是用表达式$10+2\times4$的值减去记录的数字8得到10，然后用8再乘以3，最终得到$10+2\times4\times3=24$了。
 \end{itemize}
 \end{enumerate}
-\setcounter{algorithm}{0}
-\begin{algorithm}[H]
-\caption{Backtracking}
-\begin{algorithmic}[1]
-\Procedure{AddOperators}{$S, L, T$}
-\State $\star$ Create an array $A$ to save the results
-\If{$S$ is empty}
-\State \Return $\emptyset$
-\EndIf
-\State \Call{DFS}{$S, L, T, p=0, x=0, y=0, E=\emptyset, A$} \Comment Start backtracking
-\EndProcedure
-\end{algorithmic}
-\end{algorithm}
-Function \texttt{DFS}的输入参数如下
-\begin{itemize}
-\item $S$，$L$和$T$如题
-\item $p$ --- 递归的起始index
-\item $x$ --- 上一个表达式右边的值
-\item $y$ --- 当前表达式的值
-\item $E$ --- 当前表达式字符串
-\item $A$ --- 结果数组
-\end{itemize}
-\begin{algorithm}[H]
-\caption{Backtracking辅助函数}
-\begin{algorithmic}[1]
-\Procedure{DFS}{$S, L, T, p, x, y, E, A$}
-\If{$p = L$} \Comment 已经完成了$S$的全部处理
-\If{$y=T$} \Comment 表达式的值等于目标值
-\State $\star$ 将获得的表达式字符串$E$加入$A$
-\EndIf
-\State \Return
-\EndIf
-\For{$i:=p$ \textbf{to} $L-1$}
-\State $\ast$ 处理最开头的数字为零的情况，如果此时$S[p,i]$长度大于1，直接返回
-\If{$S[p]$ is 0 \textbf{and} $S[p,i]$ has length larger than 1}
-\State \Return 
-\EndIf
-\State $\star$ 得到$S[p, i]$对应的数字$z$
-\algstore{282algo}
-\end{algorithmic}
-\end{algorithm}
-\begin{algorithm}[H]
-\begin{algorithmic}[1]
-\algrestore{282algo}
-\If{$p=0$}
-\State $\star$ 这时候$E$其实是空字符串，因此其实就是将$S[0,i]$转换成数字
-\State \Call{DFS}{$S,L,T,p=i+1,x=z,y=z,E=E+S[p,i], A$}
-\Else
-\State $\ast$ 插入加号，即$E=E$+`$+$'+$S[p,i]$
-\State \Call{DFS}{$S,L,T,p=i+1,x=z,y=y+z,E, A$}
-\State $\ast$ 插入减号，即$E=E$+`$-$'+$S[p,i]$
-\State \Call{DFS}{$S,L,T,p=i+1,x=-z,y=y-z,E, A$}
-\State $\ast$ 插入乘号，即$E=E$+`$\times$'+$S[p,i]$
-\State $\ast$ 如上所述，此处$y$要先减去上一个表达式右边的数$x$，再加上$x\times z$。
-\State \Call{DFS}{$S,L,T,p=i+1,x=x\times z,y=y-x+x\times z,E, A$} \Comment 
-\EndIf
-\EndFor
-\EndProcedure
-\end{algorithmic}
-\end{algorithm}
+
 下述代码中，将目标值放入一个成员变量中。同时为了避免在计算过程中发生overflow，中间结果都用\texttt{long long}的类型。
 \setcounter{lstlisting}{0}
 \begin{lstlisting}[style=customc, caption={Backtracking}]
-class Solution
+vector<string> addOperators( string num, int target )
 {
-public:
-    vector<string> addOperators( string num, int target )
+    vector<string> ans;
+    dfs( num, target, 0ll, 0ll, "", ans );
+    return ans;
+}
+void dfs( string_view s, int t, long long last_operand, long long cur, string expr, vector<string>& ans )
+{
+    if( s.empty() && ( cur == t ) )
     {
-        vector<string> ans;
-
-        if( num.empty() )
-        {
-            return ans;
-        }
-
-        T = target;
-
-        dfs( num, 0, "", 0, 0, ans );
-
-        return ans;
+        ans.emplace_back( expr );
+        return;
     }
-
-    void dfs( const string& S,
-              size_t pos,
-              string expr,
-              long long last,
-              long long cur,
-              vector<string>& ans )
+    for( size_t i = 1; i <= s.size(); ++i )
     {
-        if( pos == S.size() )
+        auto left = s.substr( 0, i );
+        if( ( left.size() > 1 ) && ( left[0] == '0' ) )
         {
-            if( cur == T )
-            {
-                ans.emplace_back( expr );
-            }
-
             return;
         }
-
-        long long val = 0;
-
-        for( size_t i = pos; i < S.size(); ++i )
+        auto right = s.substr( i );
+        long long l;
+        std::from_chars( left.data(), left.data() + left.size(), l );
+        if( !expr.empty() )
         {
-            val = val * 10 + ( S[i] - '0' );
-
-            if( S[pos] == '0' && ( i > pos ) )
-            {
-                break;
-            }
-
-            auto left = S.substr( pos, i - pos + 1 );
-
-            if( pos == 0 )
-            {
-                //expr is actually an empty string
-                dfs( S, i + 1, expr + left, val, val, ans );
-            }
-            else
-            {
-                //Add +, last=val for next recursion
-                dfs( S, i + 1, expr + "+" + left, val, cur + val, ans );
-                //Add -, last=-val for next recursion
-                dfs( S, i + 1, expr + "-" + left, -val, cur - val, ans );
-                //Add *, last = val * last for next recursion
-                dfs( S, i + 1, expr + "*" + left, val * last, cur - last + val * last, ans );
-            }
+            //current number = cur + l, last right hand = l;
+            dfs( right, t, l, cur + l, expr + "+" + string( left.begin(), left.end() ), ans );
+            //current number = cur - l, last right hand = -l;
+            dfs( right, t, -l, cur - l, expr + "-" + string( left.begin(), left.end() ), ans );
+            //current number = cur - last + last * l, last right hand = last * l;
+            dfs( right, t, last_operand * l, cur - last_operand + ( last_operand * l ), expr + "*" + string( left.begin(), left.end() ), ans );
+        }
+        else
+        {
+            //in this case, only one number which is l
+            dfs( right, t, l, l, string( left.begin(), left.end() ), ans );
         }
     }
-
-    int T;
-};
+}
 \end{lstlisting}
 为了提高效率，表达式字符串可以实现分配好，然后在递归函数中，增加一个参数用于track表达式字符串目前的长度。
 \begin{lstlisting}[style=customc, caption={More Efficient Implementation}]
@@ -281,3 +193,12 @@ public:
     int T;
 };
 \end{lstlisting}
+
+\paragraph{Related Problems}
+\begin{itemize}
+\item \textbf{150. Evaluate Reverse Polish Notation}
+\item \textbf{224. Basic Calculator}
+\item \textbf{227. Basic Calculator II}
+\item \textbf{241. Different Ways to Add Parentheses}
+\item \textbf{494. Target Sum}
+\end{itemize}

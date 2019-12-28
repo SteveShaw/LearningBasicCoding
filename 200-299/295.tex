@@ -267,4 +267,60 @@ private:
     multiset<int>::iterator l;
     multiset<int>::iterator h;
 };
+
+//only one iterator
+class MedianFinder
+{
+public:
+    /** initialize your data structure here. */
+    MedianFinder()
+    {
+    }
+    void addNum( int num )
+    {
+        auto sz = store.empty() ? 0ull : store.size();
+        store.insert( num );
+        if( sz == 0 )
+        {
+            mid = store.begin();
+        }
+        else
+        {
+            //we always keep mid as the
+            //bigger one in middle
+            if( num < *mid )
+            {
+                //a smaller than current median number is added
+                //the real mid will move backward
+                mid = ( sz & 1 ) ? mid : prev( mid );
+            }
+            else
+            {
+                //if sz is odd, now it has even number of items
+                //we always keep mid as the bigger one in the
+                //possible two middles
+                mid = ( sz & 1 ) ? next( mid ) : mid;
+            }
+        }
+    }
+    double findMedian()
+    {
+        auto sz = store.size();
+        if( sz & 1 )
+        {
+            return *mid;
+        }
+        //even number of items in the store
+        //need two items
+        return 0.5 * ( double )( *mid + *prev( mid ) );
+    }
+
+    multiset<int> store;
+    multiset<int>::iterator mid;
+};
 \end{lstlisting}
+
+\paragraph{Related Problems}
+\begin{itemize}
+\item \textbf{480. Sliding Window Median}
+\end{itemize}

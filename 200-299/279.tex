@@ -19,8 +19,7 @@ Given a positive integer $n$, find the least number of perfect square numbers (f
 \textbf{Explanation}: $13 = 4 + 9$.
 \end{flushleft}
 \subsection{Dynamic Programming}
-\paragraph{TODO: Description}
-%Algo
+
 \setcounter{algorithm}{0}
 \begin{algorithm}[H]
 \caption{Dynamic Programming}
@@ -41,4 +40,22 @@ Given a positive integer $n$, find the least number of perfect square numbers (f
 \EndProcedure
 \end{algorithmic}
 \end{algorithm}
-\paragraph{TODO: Souce Code}
+
+\setcounter{lstlisting}{0}
+\begin{lstlisting}[style=customc, caption={DP}]
+int numSquares( int n )
+{
+    vector<int> F( n + 1, 100000 );
+    F[0] = 0;
+    for( int i = 1; i <= n; ++i )
+    {
+        int k = 1;
+        while( k * k <= i )
+        {
+            F[i] = ( min )( F[i - k * k] + 1, F[i] );
+            ++k;
+        }
+    }
+    return F.back();
+}
+\end{lstlisting}

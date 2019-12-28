@@ -1,0 +1,130 @@
+\section{994 --- Rotting Oranges}
+
+\textbf{Easy}
+
+In a given grid, each cell can have one of three values:
+
+\begin{itemize}
+\item the value 0 representing an empty cell;
+\item the value 1 representing a fresh orange;
+\item the value 2 representing a rotten orange.
+\end{itemize}
+
+Every minute, any fresh orange that is adjacent (4-directionally) to a rotten orange becomes rotten.
+
+Return the minimum number of minutes that must elapse until no cell has a fresh orange.  If this is impossible, return $-1$ instead.
+
+
+\paragraph{Example 1:}
+
+
+
+\begin{flushleft}
+\textbf{Input}: \fcj{[[2,1,1],[1,1,0],[0,1,1]]}
+
+\textbf{Output}: 4
+\end{flushleft}
+
+\paragraph{Example 2:}
+
+\begin{flushleft}
+\textbf{Input}: \fcj{[[2,1,1],[0,1,1],[1,0,1]]}
+
+\textbf{Output}: $-1$
+
+\textbf{Explanation}:  
+
+The orange in the bottom left corner (row 2, column 0) is never rotten, because rotting only happens 4-directionally.
+\end{flushleft}
+
+\paragraph{Example 3:}
+
+\begin{flushleft}
+\textbf{Input}: \fcj{[[0,2]]}
+
+\textbf{Output}: 0
+
+\textbf{Explanation}:  Since there are already no fresh oranges at minute 0, the answer is just 0.
+\end{flushleft}
+ 
+
+\paragraph{Note:}
+
+\begin{itemize}
+\item \fcj{1 <= grid.length <= 10}
+\item \fcj{1 <= grid[0].length <= 10}
+\item \fcj{grid[i][j]} is only 0, 1, or 2.
+\end{itemize}
+
+\subsection{BFS}
+Every turn, the rotting spreads from each rotting orange to other adjacent oranges. 
+
+Initially, the rotten oranges have depth 0, and every time they rot a neighbor, the neighbors have 1 more depth. We want to know the largest possible depth.
+
+We can use a breadth-first search to model this process. Because we always explore nodes (oranges) with the smallest depth first, we're guaranteed that each orange that becomes rotten does so with the lowest possible depth number.
+
+We should also check that at the end, there are no fresh oranges left.
+
+\setcounter{lstlisting}{0}
+\begin{lstlisting}[style=customc, caption={BFS}]
+int orangesRotting( vector<vector<int>>& grid )
+{
+    int m = ( int )( grid.size() );
+    int n = ( int )( grid[0].size() );
+    //add current rotten oranges into the queue
+    queue<int> q;
+    for( int r = 0; r < m; ++r )
+    {
+        for( int c = 0; c < n; ++c )
+        {
+            if( grid[r][c] == 2 )
+            {
+                q.push( r * n + c );
+            }
+        }
+    }
+    int ans = 0;
+    //helper function to spread rotting
+    auto process = [ &grid, &q, m, n ]( int r, int c )
+    {
+        if( ( r >= 0 ) && ( r < m ) && ( c >= 0 ) && ( c < n ) && ( grid[r][c] == 1 ) )
+        {
+            //set this orange at (r,c) as rotten
+            grid[r][c] = 2;
+            //push into the queue
+            q.push( r * n + c );
+        }
+    };
+    //model the process
+    while( !q.empty() )
+    {
+        auto sz = q.size();
+        //we use level based BFS
+        for( size_t i = 0ull; i < sz; ++i )
+        {
+            int t = q.front();
+            q.pop();
+            int r = t / n;
+            int c = t - n * r;
+            process( r - 1, c );
+            process( r + 1, c );
+            process( r, c - 1 );
+            process( r, c + 1 );
+        }
+        ++ans;
+    }
+    //check if there is still a fresh orange
+    for( int r = 0; r < m; ++r )
+    {
+        for( int c = 0; c < n; ++c )
+        {
+            if( grid[r][c] == 1 )
+            {
+                return -1;
+            }
+        }
+    }
+    //ans-1 is the answer
+    return ( max )( 0, ans - 1 );
+}
+\end{lstlisting}

@@ -34,32 +34,7 @@ Since the researcher has 3 papers with at least 3 citations each and the remaini
 \item 之所以要从$n$往前遍历，是因为题目要求在存在几个可能的H-index的情况下，取最大的。
 \end{enumerate}
 \end{itemize}
-\setcounter{algorithm}{0}
-\begin{algorithm}[H]
-\caption{Bucket Sort}
-\begin{algorithmic}[1]
-\Procedure{HIndex}{$A, L$}
-\State $\star$ Create an array $B$ with size $L+1$ as buckets. Each bucket is initialized to zero
-\State $\ast$ 将$A$中每个number放入$B$中
-\For{$i:=0$ \textbf{to} $L-1$}
-\If{$A[i]> L$}
-\State $B[L]\gets B[L]+1$ \Comment Put into the end of Bucket
-\Else
-\State $B[A[i]]\gets B[A[i]] + 1$ \Comment Put into the bucket where index equal to $A[i]$
-\EndIf
-\State $\ast$ 从$n$开始往前遍历buckets
-\State $\delta:=0$ \Comment The total count of papers
-\For{$i:=L$ \textbf{to} 0}
-\State $\delta\gets\delta+B[i]$
-\If{$\delta \geq i$} \Comment Total count of papers larger than the bucket index
-\State \Return $i$ \Comment $i$ 就是H-index
-\EndIf
-\EndFor
-\EndFor
-\State \Return $-1$ \Comment 实际不会到达这一行
-\EndProcedure
-\end{algorithmic}
-\end{algorithm}
+
 \setcounter{lstlisting}{0}
 \begin{lstlisting}[style=customc, caption={Bucket Sort}]
 int hIndex( vector<int>& citations )

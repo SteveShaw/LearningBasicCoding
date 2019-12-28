@@ -30,39 +30,12 @@ Given a particular $n \geq 1$, find out how much money you need to have to guara
 \subsection{MinMax Algorithm}
 \begin{itemize}
 \item 建立一个二维的数组$F$用于Dynamic Programming，其中$F[i][j]$表示从数字$i$到$j$之间猜中任意一个数字最少需要花费的钱数。
-\item 需要遍历每一段可能的区间$[x, y]$，用$t$表示全局最小值，然后遍历$ [x,y] $的中每一个数字$k$，猜中$k$所需要花费的money $u_k = k + \max(F[x][k - 1], F[k + 1][i])$，也就是是将区间$ [x,y] $在每一个位置$k$都分为两段，然后取当前位置的花费加上左右两段中较大的花费之和。
+\item 需要遍历每一段可能的区间$[x, y]$，用$t$表示全局最小值，然后遍历$ [x,y] $的中每一个数字$k$，猜中$k$所需要花费的money $u_k = k + \max(F[x][k - 1], F[k + 1][y])$，也就是是将区间$ [x,y] $在每一个位置$k$都分为两段，然后取当前位置的花费加上左右两段中较大的花费之和。
 \item 取两者之间的较大值的原因是在MinMax中，需要从最坏的情况下获得最佳值。
 \item 最后取$\underbrace{\min}_{x< k < y}u_k$作为$F[x][y]$。
 \item 如果$y=x+1$，很显然$F[x][y]=x$。
 \end{itemize}
 
-\setcounter{algorithm}{0}
-\begin{algorithm}[H]
-\caption{Dynamic Programming}
-\begin{algorithmic}[1]
-\Procedure{GetMoneyAmount}{$n$}
-\State $\star$ 创建二维数组$F$作为递推数组，大小为$n\times n$
-\State $ \star $We use $[0,n-1]$ to represent integers in $[1,n]$
-\For{$i:=0$ \textbf{to} $n-1$}
-\State $F[i][i]=0$ \Comment Since $i$ is the guess number, so no money is needed
-\EndFor
-\For{$i:=0$ \textbf{to} $n-2$}
-\State $F[i][i+1]=i+1$ \Comment We try to guess the smaller number $i+1$ to put less money $i+1$
-\EndFor
-\For{$\ell:=3$ \textbf{to} $n$}  \label{375note1}
-\For{$x:=0$ \textbf{to} $n-\ell$} \label{375note2}
-\State $y:=x+\ell-1$ \Comment range $[x,y]$
-\State $F[x][y] \gets +\infty$
-\For{$k:=x+1$ \textbf{to} $y-1$} \label{375note3}
-\State $u := k+1+\max(F[x][k-1], F[k+1][y])$ \Comment The money needed to guess number $k+1$
-\State $F[x][y]\gets \min(F[x][y], u)$ \Comment Update the money to guess number in range $[x,y]$
-\EndFor \Comment End loop[\ref{375note3}]
-\EndFor \Comment End loop[\ref{375note2}]
-\EndFor \Comment End loop[\ref{375note1}]
-\State \Return $F[0][n-1]$
-\EndProcedure
-\end{algorithmic}
-\end{algorithm}
 
 \setcounter{lstlisting}{0}
 \begin{lstlisting}[style=customc, caption={Dynamic Programming}]
@@ -105,5 +78,75 @@ int getMoneyAmount( int n )
     }
 
     return F[0][n - 1];
+}
+//more clearer one
+int getMoneyAmount( int n )
+{
+    //DP array: we only care from 1 to n
+    vector<vector<int>> F( n + 1, vector<int>( n + 1, INT_MAX ) );
+    for( int i = 1; i < n; ++i )
+    {
+        //for (i, i+1), the optimal strategy
+        //is place i
+        F[i][i + 1] = i;
+        //guess correct i don't need money
+        F[i][i] = 0;
+    }
+    //don't forget the last one
+    F[n][n] = 0;
+    //three level loops to check each possible range [start,end]
+    for( int l = 3; l <= n + 1; ++l )
+    {
+        for( int start = 1; start + l <= n + 1; ++start )
+        {
+            int end = start + l - 1;
+            //test each number inside [start,end]
+            for( int k = start + 1; k < end; ++k )
+            {
+                //maximum first
+                int u = k + ( max )( F[start][k - 1], F[k + 1][end] );
+                //minimum second
+                F[start][end] = ( min )( F[start][end], u );
+            }
+        }
+    }
+    return F[1][n];
+}
+\end{lstlisting}
+
+\subsection{Recursive With Memorize}
+We can also use memorize with recursion to solve this problem. Essentially is the same idea with DP
+
+\begin{lstlisting}[style=customc, caption={Memorization}]
+int getMoneyAmount( int n )
+{
+    vector<vector<int>> memo( n + 1, vector<int>( n + 1, 0 ) );
+    return dfs( 1, n, memo );
+}
+int dfs( int start, int end, vector<vector<int>>& memo )
+{
+    if( start >= end )
+    {
+        return 0;
+    }
+
+    if( memo[start][end] > 0 )
+    {
+        return memo[start][end];
+    }
+
+    int res = INT_MAX;
+    //we must loop from start to end
+    //not start+1 to end-1
+    //otherwise, we will ignore the edge corner case
+    for( int k = start; k <= end; ++k )
+    {
+        int l = dfs( start, k - 1, memo );
+        int r = dfs( k + 1, end, memo );
+        int u = k + ( max )( l, r );
+        res = ( min )( res, u );
+    }
+    memo[start][end] = res;
+    return res;
 }
 \end{lstlisting}

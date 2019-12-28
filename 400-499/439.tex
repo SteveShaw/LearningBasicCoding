@@ -1,7 +1,8 @@
 \section{439 --- Ternary Expression Parser}
-\textcolor{red}{LOCKED} 
 
-Given a string representing arbitrarily nested ternary expressions, calculate the result of the expression. You can always assume that the given expression is valid and only consists of digits 0--9, ?, :, $T$ and $F$ ($T$ and $F$r epresent \texttt{True} and \texttt{False} respectively).
+\textbf{Medium}
+
+Given a string representing arbitrarily nested ternary expressions, calculate the result of the expression. You can always assume that the given expression is valid and only consists of digits 0-9, \fcj{?}, \fcj{:}, \fcj{T} and \fcj{F} (\fcj{T} and \fcj{F} represent \fcj{True} and \fcj{False} respectively).
 
 \paragraph{Note:}
 
@@ -10,53 +11,51 @@ Given a string representing arbitrarily nested ternary expressions, calculate th
 \item Each number will contain only one digit.
 \item The conditional expressions group right-to-left (as usual in most languages).
 \item The condition will always be either \texttt{T} or \texttt{F}. That is, the condition will never be a digit.
-\item The result of the expression will always evaluate to either a digit 0--9, \texttt{T} or \texttt{F}.
+\item The result of the expression will always evaluate to either a digit 0--9, \fcj{T} or \fcj{F}.
 \end{itemize}
  
 
 \paragraph{Example 1:}
 
 \begin{flushleft}
-\textbf{Input}: $T?2:3$
+\textbf{Input}: \fcj{"T?2:3"}
 
-\textbf{Output}: 2
+\textbf{Output}: \fcj{"2"}
 
-\textbf{Explanation}: If \texttt{true}, then result is 2; otherwise result is 3.
+\textbf{Explanation}: If \fcc{true}, then result is 2; otherwise result is 3.
 \end{flushleft}
  
 
 \paragraph{Example 2:}
 
 \begin{flushleft}
-\textbf{Input}: $F?1:T?4:5$
+\textbf{Input}: \fcj{"F?1:T?4:5"}
 
-\textbf{Output}: 4
+\textbf{Output}: \fcj{"4"}
 
 \textbf{Explanation}: The conditional expressions group right-to-left. Using parenthesis, it is read/evaluated as:
 
-$(F ? 1 : (T ? 4 : 5)) \longrightarrow (F ? 1 : 4) \longrightarrow 4$
+\fcj{"(F ? 1 : (T ? 4 : 5))" -> "(F ? 1 : 4)" -> "4"}
 
-or
+or 
 
-$(F ? 1 : (T ? 4 : 5)) \longrightarrow (T ? 4 : 5) \longrightarrow 4$
- 
+\fcj{"F ? 1 : (T ? 4 : 5))" -> "(T ? 4 : 5)" -> "4"}
 \end{flushleft}
 
 
 \paragraph{Example 3:}
 
 \begin{flushleft}
-\textbf{Input}: $T?T?F:5:3$
+\textbf{Input}: \fcj{"T?T?F:5:3"}
 
-\textbf{Output}: $F$
-
+\textbf{Output}: \fcj{"F"}
 \textbf{Explanation}: The conditional expressions group right-to-left. Using parenthesis, it is read/evaluated as:
 
-$(T ? (T ? F : 5) : 3) \longrightarrow (T ? F : 3) \longrightarrow F$
+\fcj{"(T ? (T ? F : 5) : 3)" -> "T ? F : 3)" -> "F"}
 
 or
 
-$(T ? (T ? F : 5) : 3) \longrightarrow (T ? F : 5) \longrightarrow F$
+\fcj{"(T ? (T ? F : 5) : 3)" -> "(T ? F : 5)" -> "F"}
 \end{flushleft}
 
 \subsection{Stack}
@@ -72,48 +71,43 @@ $(T ? (T ? F : 5) : 3) \longrightarrow (T ? F : 5) \longrightarrow F$
 string parseTernary( string expression )
 {
     stack<size_t> stk;
-
-    //push each ?'s index into stack
-    for( size_t i = 0; i < expression.size(); ++i )
+    //add each position of symbol ? into the stack
+    size_t idx = 0;
+    for( auto c : expression )
     {
-        if( expression[i] == '?' )
+        if( c == '?' )
         {
-            stk.push( i );
+            stk.push( idx );
         }
+        ++idx;
     }
-
     while( !stk.empty() )
     {
-        //evaluate expression based on current position p
-        //expression[p-1] is T/F
-        //expression[p+1...p+3] is the ternary expression
-        auto p = stk.top();
+        auto idx = stk.top();
         stk.pop();
-
-        char x = expression[p - 1];
-        char y = expression[p + 1];
-        if( x == 'F' )
+        //get condition
+        auto c_cond = expression[idx - 1];
+        //get value per c_cond
+        auto c_val = expression[idx + 1];
+        if( c_cond == 'F' )
         {
-            y = expression[p + 3];
+            c_val = expression[idx + 3];
         }
-
-        //compress the string
-        //remove from s[p...p+3]
-        //set s[p-1] to the result
-        expression[p - 1] = y;
-
-        //move expression[p+4...] backward by 4 positions
-        for( size_t i = p + 4; i < expression.size(); ++i )
+        expression[idx - 1] = c_val;
+        //compress expression
+        for( auto i = idx + 4; i < expression.size(); ++i )
         {
             expression[i - 4] = expression[i];
         }
-
-        //remove unnecessary parts
-        expression.resize( expression.size() - 3 );
+        expression.resize( expression.size() - 4 );
     }
-
-    string ans;
-    ans.push_back( expression[0] );
-    return ans;
+    return expression;
 }
 \end{lstlisting}
+
+\subsection{Related Problems}
+\begin{itemize}
+\item \textbf{385. Mini Parser}
+\item \textbf{722. Remove Comments}
+\item \textbf{736. Parse Lisp Expression}
+\end{itemize}

@@ -101,30 +101,7 @@ int findDuplicate( vector<int>& nums )
 \item 循环结束后 $l$就是那个duplicate number。
 \end{enumerate}
 \end{itemize}
-\begin{algorithm}[H]
-\caption{Binary Search}
-\begin{algorithmic}[1]
-\Procedure{FindDuplicate}{$A,L$}
-\State $l:=1$, $r:=L-1$ \Comment Binary Search on $[1,n]$ not on $A$ and $L=n+1$
-\State $\ast$ Rightmost Binary Search
-\While{$l < r$}
-\State $x:=(l+r)/2$ \Comment Mid-point
-\State $z:=0$
-\For{Each number $t$ in $A$}
-\If{$t \leq x$}
-\State $z\gets z+1$
-\EndIf
-\EndFor
-\If{$z\leq x$}
-\State $l\gets x+1$
-\Else
-\State $r\gets x$
-\EndIf
-\EndWhile
-\State \Return $l$
-\EndProcedure
-\end{algorithmic}
-\end{algorithm}
+
 \begin{lstlisting}[style=customc, caption={Binary Search}]
 int findDuplicate( vector<int>& nums )
 {
@@ -208,3 +185,12 @@ int findDuplicate( vector<int>& nums )
     return ans;
 }
 \end{lstlisting}
+
+\paragraph{Related Problems}
+\begin{itemize}
+\item \textbf{41. First Missing Positive}
+\item \textbf{136. Single Number}
+\item \textbf{142. Linked List Cycle II}
+\item \textbf{268. Missing Number}
+\item \textbf{645. Set Mismatch}
+\end{itemize}

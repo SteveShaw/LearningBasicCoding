@@ -33,136 +33,54 @@ Given a string $s$, return all the palindromic permutations (without duplicates)
 vector<string> generatePalindromes( string s )
 {
     unordered_map<char, int> m;
-
     for( auto c : s )
     {
-        auto it = m.find( c );
-
-        if( it == m.end() )
-        {
-            m.emplace( c, 1 );
-        }
-        else
-        {
-            ++it->second;
-        }
+        m[c] += 1;
     }
-
-    int odd_counts = 0;
-    char odd_char = 0;
-
-    string base;
-    base.reserve( s.size() );
-
-    //generate base i.e. half string for
-    //permutation string generation
-    for( const auto& p : m )
+    string prefix;
+    string mid;
+    //generate prefix and middle character
+    for( auto [c, count] : m )
     {
-        int count = p.second;
-
         if( count & 1 )
         {
-            ++odd_counts ;
-            odd_char = p.first;
+            mid.push_back( c );
         }
-        base.append( count / 2, p.first );
-    }
-
-
-    //Check if s can form palindrome permutation
-    if( s.size() & 1 )
-    {
-        if( odd_counts != 1 )
+        prefix.append( count / 2, c );
+        if( mid.size() > 1ull )
         {
+            //cannot form palindrome
+            //we have two letter with odd counts
             return {};
         }
     }
-    else
-    {
-        if( odd_counts > 0 )
-        {
-            return {};
-        }
-    }
-
     unordered_set<string> ss;
-
-    auto next = s;
-
-
-    size_t righthalf_start = next.size() / 2;
-    if( odd_counts != 0 )
-    {
-        //we set middle character as the odd count's char
-        next[righthalf_start] = odd_char;
-        ++righthalf_start;
-    }
-
-    while( true )
-    {
-        //use copy to avoid large amount of memory operation
-        copy( base.begin(), base.end(), next.begin() );
-
-        size_t start = righthalf_start;
-
-        for( size_t i = 0; i < base.size(); ++i )
-        {
-            auto j = base.size() - i - 1;
-            next[start] = base[j];
-            ++start;
-        }
-
-        if( ss.find( next ) != ss.end() )
-        {
-            break;
-        }
-
-        ss.emplace( next );
-
-
-        next_permutation( base );
-    }
-
+    //generate permutation of string
+    dfs( prefix, mid, 0, ss );
     return { ss.begin(), ss.end() };
 }
-
-//next permutation method
-void next_permutation( string& s )
+//generate permutation of prefix
+void dfs( string& prefix, const string& mid, size_t start, unordered_set<string>& ss )
 {
-    auto L = s.size();
-
-    auto x = L;
-
-    for( size_t i = L - 1; i >= 1; --i )
+    if( start >= prefix.size() )
     {
-        if( s[i] > s[i - 1] )
-        {
-            x = i;
-            break;
-        }
-    }
-
-    if( x == L )
-    {
-        reverse( s.begin(), s.end() );
+        auto tmp( prefix );
+        tmp += mid;
+        tmp.append( rbegin( prefix ), rend( prefix ) );
+        ss.emplace( tmp );
         return;
     }
-
-    auto y = x;
-
-    for( size_t j = x; j < L; ++j )
+    for( size_t i = start; i < prefix.size(); ++i )
     {
-        if( s[j] <= s[x - 1] )
+        if( ( i != start ) && ( prefix[i] == prefix[start] ) )
         {
-            break;
+            continue;
         }
-
-        y = j;
+        swap( prefix[i], prefix[start] );
+        //continue recursion from start+1, not i+1
+        dfs( prefix, mid, start + 1, ss );
+        //backtracking
+        swap( prefix[i], prefix[start] );
     }
-
-    swap( s[y], s[x - 1] );
-
-    reverse( s.begin() + x, s.end() );
 }
-
 \end{lstlisting}

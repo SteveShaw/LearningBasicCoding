@@ -1,0 +1,119 @@
+\section{1201 --- Ugly Number III}
+\textbf{Medium}
+
+Write a program to find the $n$-th ugly number.
+
+Ugly numbers are \textbf{positive integers} which are divisible by $a$ \textbf{or} $b$ \textbf{or} $c$.
+
+ 
+\paragraph{Example 1:}
+
+\begin{flushleft}
+\textbf{Input}: $ n = 3 $, $ a = 2 $, $ b = 3 $, $ c = 5 $
+
+\textbf{Output}: 4
+
+\textbf{Explanation}: The ugly numbers are 2, 3, 4, 5, 6, 8, 9, 10... The 3rd is 4.
+\end{flushleft}
+
+\paragraph{Example 2:}
+
+\begin{flushleft}
+\textbf{Input}: $ n = 4 $, $ a = 2 $, $ b = 3 $, $ c = 4 $
+
+\textbf{Output}: 6
+
+\textbf{Explanation}: The ugly numbers are 2, 3, 4, 6, 8, 9, 10, 12... The 4th is 6.
+\end{flushleft}
+
+\paragraph{Example 3:}
+
+\begin{flushleft}
+\textbf{Input}: $  n = 5 $, $ a = 2 $, $ b = 11 $, $ c = 13 $
+
+\textbf{Output}: 10
+
+\textbf{Explanation}: The ugly numbers are 2, 4, 6, 8, 10, 11, 12, 13... The 5th is 10.
+\end{flushleft}
+
+\paragraph{Example 4:}
+
+\begin{flushleft}
+\textbf{Input}: $ n = 1000000000 $, $ a = 2 $, $ b = 217983653 $, $ c = 336916467 $
+
+\textbf{Output}: 1999999984
+\end{flushleft}
+
+ 
+
+\paragraph{Constraints:}
+
+\begin{itemize}
+\item $1 \leq n, a, b, c \leq 10^9$
+\item $1 \leq a \times b \times c \leq 10^{18}$
+\item It's guaranteed that the result will be in range $[1, 2 \times 10^9]$
+\end{itemize}
+
+\subsection{Binary Search}
+Notice, this problem is different from previous ugly number problems. In this problem, the number only check if it can be divisible by the given factors. In previous related problem, the number only include given factors. 
+
+ 
+This problem can easily solved by binary-search by defining the predicate: \textbf{Given $N$, how many numbers upto $N$ are divisible by $A$ or $B$ or $C$}
+
+For every integer $N$,
+
+\fcj{F(N) = (total number of positive integers <= N which are divisible by a or b or c.)}.
+
+According to set theory, 
+$F(N)$ is 
+\begin{enumerate}
+\item the number of positive integers that are divided by $a$. 
+\item plus the number of positive integers that are divided by $b$.
+\item plus the number of positive integers that are divided by $c$.
+\item minus the number of positive integers that are divided by both $a$ and $b$.
+\item minus the number of positive integers that are divided by both $a$ and $c$.
+\item minus the number of positive integers that are divided by both $b$ and $c$.
+\item plus the number of positive integers that are divided by $a$, $b$ and $c$.
+\end{enumerate}
+
+Thus 
+
+$F(N) = N/a+N/b+N/c- N /l(a, b) - N /l(a,c) - N /l(a,c) + N/l(a,b,c)$  
+
+Where $l$ is the least common multiple of the numbers.
+
+So we will find the least integer $N$ such that $F(N)\geq n$.
+
+\setcounter{lstlisting}{0}
+\begin{lstlisting}[style=customc, caption={Binary Search}]
+int nthUglyNumber( int n, int a, int b, int c )
+{
+    //get lcm of (a,b), (a,c), (b,c) and (a,b,c)
+    long la = ( long )( a );
+    long lb = ( long )( b );
+    long lc = ( long )( c );
+    long lcm_ab = ( la * lb ) / gcd( la, lb );
+    long lcm_ac = ( la * lc ) / gcd( la, lc );
+    long lcm_bc = ( lb * lc ) / gcd( lb, lc );
+    long lcm_abc = ( la * lcm_bc ) / gcd( a, lcm_bc );
+    //binary search to find nth ugly number
+    //which is the smallest number that can have count >= n
+    //so this is the lower_bound algorithm
+    long lo = 1;
+    long hi = 2000000000;
+    while( lo < hi )
+    {
+        auto mid = lo + ( hi - lo ) / 2;
+        int count = mid / la + mid / lb + mid / lc - mid / lcm_ab - mid / lcm_ac - mid / lcm_bc + mid / lcm_abc;
+        if( count < n )
+        {
+            lo = mid + 1;
+        }
+        else
+        {
+            hi = mid;
+        }
+    }
+    return lo;
+}
+\end{lstlisting}
