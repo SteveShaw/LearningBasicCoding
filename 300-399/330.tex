@@ -54,27 +54,6 @@ So we only need 1 patch.
 \item  $A$再下一个数10小于15，加上这个扩展range为$[0, 25]$。已经能够覆盖$[0,20]$了。
 \end{itemize}
 
-\setcounter{algorithm}{0}
-\begin{algorithm}[H]
-\caption{Dynamic Programming}
-\begin{algorithmic}[1]
-\Procedure{MinPatches}{$A, L, n$}
-\State $x:=1$ \Comment We have built range $ [0\ldots x-1] $
-\State $\alpha:=0$ \Comment The number of patches
-\State $i:=0$ \Comment The index in $A$
-\While{$ x \leq  n $}
-\If{$i<L$ \textbf{and} $ A[i] \leq x $}
-\State $x\gets x+A[i]$ \Comment Extend the range to $[0\ldots x-1+A[i]]$
-\State $i\gets i+1$
-\Else
-\State $x\gets x$ \Comment Add a patch number $x$ to extend range to $[0\ldots x-1+x]$
-\State $\alpha\gets \alpha+1$ \Comment Increments the number of patches
-\EndIf
-\EndWhile
-\State \Return $\alpha$
-\EndProcedure
-\end{algorithmic}
-\end{algorithm}
 
 \setcounter{lstlisting}{0}
 \begin{lstlisting}[style=customc, caption={Dynamic Programming}]

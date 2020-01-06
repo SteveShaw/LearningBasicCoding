@@ -1,0 +1,84 @@
+\section{311 --- Sparse Matrix Multiplication}
+
+\textbf{Medium}
+
+Given two sparse matrices $A$ and $B$, return the result of $AB$.
+
+You may assume that $A$'s column number is equal to $B$'s row number.
+
+\paragraph{Example:}
+
+\begin{flushleft}
+\[
+A = \begin{bmatrix}
+1 & 0 & 0 \\
+-1 & 0 & 3 \\
+\end{bmatrix}
+\]
+
+\[
+B = \begin{bmatrix}
+7 & 0 & 0 \\
+0 & 0 & 0 \\
+0 & 0 & 1 \\
+\end{bmatrix}
+\]
+
+\textbf{Output}:
+
+\[
+AB = \begin{bmatrix}
+1 & 0 & 0 \\
+-1 & 0 & 3 \\
+\end{bmatrix} \times \begin{bmatrix}
+7 & 0 & 0 \\
+0 & 0 & 0 \\
+0 & 0 & 1 \\
+\end{bmatrix}
+=\begin{bmatrix}
+7 & 0 & 0 \\
+-7 & 0 & 3 \\
+\end{bmatrix}
+\]
+
+
+\end{flushleft}
+
+\subsection{Skip Zero}
+For matrix multiplication result $C$, 
+
+\[
+C[i]][j] = A[i][0]\times B[0][j] + A[i][1]\times B[1][j] + \ldots + A[i][k]\times B[k][j]
+\]
+
+Thus if $A[i][k]$ is zero, we can skip. Then we iterate over $k$th row of $B$. 
+
+\setcounter{lstlisting}{0}
+\begin{lstlisting}[style=customc, caption={Skip Zero}]
+vector<vector<int>> multiply( vector<vector<int>>& A, vector<vector<int>>& B )
+{
+    vector<vector<int>> ans( A.size(), vector<int>( B[0].size(), 0 ) );
+    for( size_t i = 0; i < A.size(); ++i )
+    {
+        for( size_t k = 0; k < A[i].size(); ++k )
+        {
+            if( A[i][k] )
+            {
+                for( size_t j = 0; j < B[0].size(); ++j )
+                {
+                    if( B[k][j] )
+                    {
+                        ans[i][j] += A[i][k] * B[k][j];
+                    }
+                }
+            }
+        }
+    }
+    return ans;
+}
+\end{lstlisting}
+
+\paragraph{Related Problems}
+\begin{itemize}
+\item \textbf{264. Ugly Number II}
+\end{itemize}

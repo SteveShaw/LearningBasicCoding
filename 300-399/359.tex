@@ -1,0 +1,97 @@
+\section{359 --- Logger Rate Limiter}
+
+\textbf{Easy}
+
+Design a logger system that receive stream of messages along with its timestamps, each message should be printed if and only if it is \textbf{not printed in the last 10 seconds}.
+
+Given a message and a timestamp (in seconds granularity), return \fcc{true} if the message should be printed in the given timestamp, otherwise returns \fcc{false}.
+
+It is possible that several messages arrive roughly at the same time.
+
+\paragraph{Example:}
+
+\begin{flushleft}
+\fcj{Logger logger = new Logger();}
+
+\fcj{// logging string "foo" at timestamp 1}
+
+\fcj{logger.shouldPrintMessage(1, "foo"); returns true; }
+
+\fcj{// logging string "bar" at timestamp 2}
+
+\fcj{logger.shouldPrintMessage(2,"bar"); returns true;}
+
+\fcj{// logging string "foo" at timestamp 3}
+
+\fcj{logger.shouldPrintMessage(3,"foo"); returns false;}
+
+\fcj{// logging string "bar" at timestamp 8}
+
+\fcj{logger.shouldPrintMessage(8,"bar"); returns false;}
+
+\fcj{// logging string "foo" at timestamp 10}
+
+\fcj{logger.shouldPrintMessage(10,"foo"); returns false;}
+
+\fcj{// logging string "foo" at timestamp 11}
+
+\fcj{logger.shouldPrintMessage(11,"foo"); returns true;}
+\end{flushleft}
+
+\subsection{Queue And Set}
+We keep the incoming messages in a \textbf{queue}. In addition, to accelerate the check of duplicates, we use a \textbf{set} data structure to index the messages.
+
+First of all, we use a queue as sliding window to keep all the printable messages in certain time frame (10 seconds).
+
+At the arrival of each incoming message, it comes with a timestamp. which indicates the evolution of the sliding windows. Therefore, we should first invalidate those expired messages in our queue.
+
+To sync the queue and the set,  we would also remove those expired messages from the set.
+
+After the updates of the message queue and set, we then simply check if there is any duplicate for the new incoming message. If not, we add the message to the queue as well as the set.
+
+\setcounter{lstlisting}{0}
+\begin{lstlisting}[style=customc, caption={Sliding Window}]
+class Logger
+{
+public:
+    /** Initialize your data structure here. */
+    Logger()
+    {
+    }
+    /** Returns true if the message should be printed in the given timestamp, otherwise returns false.
+        If this method returns false, the message will not be printed.
+        The timestamp is in seconds granularity. */
+    bool shouldPrintMessage( int timestamp, string message )
+    {
+        //remove expired messages
+        while( !msg_q.empty() )
+        {
+            if( timestamp - msg_q.front().first >= 10 )
+            {
+                msg_s.erase( msg_q.front().second );
+                msg_q.pop();
+            }
+            else
+            {
+                break;
+            }
+        }
+        //check if the message exists inside the window
+        if( msg_s.find( message ) == msg_s.end() )
+        {
+            msg_q.emplace( timestamp, message );
+            msg_s.emplace( message );
+            return true;
+        }
+        return false;
+    }
+    queue<pair<int, string>> msg_q;
+    unordered_set<string> msg_s;
+};
+\end{lstlisting}
+
+\paragraph{Similar Problems}
+\begin{itemize}
+\item \textbf{362. Design Hit Counter}
+\end{itemize}
+

@@ -24,3 +24,50 @@ Given a non-empty array of integers $ A $, return the $ k $ most frequent elemen
 \item Your algorithm's time complexity must be better than $O(n \log n)$, where $ n $ is the array's size.
 \end{itemize}
 
+\subsection{Hash Map And Heap}
+First build the hash map for each number and its count. Then we make use of a heap to sort the count. 
+
+\setcounter{lstlisting}{0}
+\begin{lstlisting}[style=customc, caption={Heap}]
+vector<int> topKFrequent( vector<int>& nums, int k )
+{
+    unordered_map<int, int> m;
+    priority_queue<pair<int, int>, vector<pair<int, int>>, greater<pair<int, int>>> q;
+    vector<int> res;
+    for( auto a : nums )
+    {
+        ++m[a];
+    }
+    //add to heap
+    for( auto it : m )
+    {
+        q.push( {it.second, it.first} );
+        if( ( int )q.size() > k )
+        {
+            q.pop();
+        }
+    }
+    //output first k largest
+    for( int i = 0; i < k; ++i )
+    {
+        res.push_back( q.top().second );
+        q.pop();
+    }
+    //notice the heap is max heap, which means
+    //minimum value is at the top
+    //thus we need to reverse the result
+    reverse( begin( res ), end( res ) );
+    return res;
+}
+\end{lstlisting}
+
+\paragraph{Related Problems}
+\begin{itemize}
+\item \textbf{192. Word Frequency}
+\item \textbf{215. Kth Largest Element in an Array}
+\item \textbf{451. Sort Characters By Frequency}
+\item \textbf{659. Split Array into Consecutive Subsequences}
+\item \textbf{692. Top K Frequent Words}
+\item \textbf{973. K Closest Points to Origin}
+\end{itemize}
+

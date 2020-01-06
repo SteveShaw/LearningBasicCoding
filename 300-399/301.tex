@@ -43,75 +43,10 @@ Remove the minimum number of invalid parentheses in order to make the input stri
 			\item 如果$S[p]$是右括号，这时候要判断$y$和$x$的关系，如果$y>x$，即右括号个数大于左括号个数，这时候就不用继续递归了，因为这时候一定不是valid expression。否则，继续递归，$y$ increments，其余状态不变。
 		\end{itemize}
 	\end{enumerate}
-\item 当$p$equal to $S$的length时，如果$x$和$y$相等，表示expression是valid string。但这时候需要比较$z$是否比之前获得的最少的count of characters removed，如果相等，加入最终的结果中，如果$z$还要小，那么$z$最新的global minimum count，这时候要把结果清空，然后加入当前的expression。
+\item 当$p$ equal to $S$的length时，如果$x$和$y$相等，表示expression是valid string。但这时候需要比较$z$是否比之前获得的最少的count of characters removed，如果相等，加入最终的结果中，如果$z$还要小，那么$z$最新的global minimum count，这时候要把结果清空，然后加入当前的expression。
 \item 为了避免重复的string，用一个hash set来存放expression。
 \end{itemize}
-\begin{algorithm}[H]
-	\caption{Recursion}
-	\begin{algorithmic}[1]
-		\Procedure{RemoveInvalidParentheses}{$S, L$}
-		\State $\star$ Create an empty hash set $A$ to store the valid expressions
-		\State $\star$ Create an empty string $E$ to store current valid expression
-		\State $z_0:=0$ \Comment Global minimum count of characters removed from $S$
-		\State \Call{DFS}{$S, L, p = 0, x = 0, y = 0, E, A, 0, \hat{z}=z_0$}
-		\EndProcedure
-	\end{algorithmic}
-\end{algorithm}
-Function \texttt{DFS}递归生成所有valid parentheses expressions。递归的状态包括
-\begin{itemize}
-	\item $p$ --- Current index in $S$
-	\item $x$, $y$ --- The count of left parentheses and right parentheses
-	\item $E$ --- 当前生成的valid expression
-	\item $A$ --- 保存所有生成的具有最小count of removed characters的valid expression的hash set
-\end{itemize}
-\begin{algorithm}[H]
-	\caption{Recursion Helper Function}
-	\begin{algorithmic}[1]
-		\Function{DFS}{$S,L,p,x,y,E,A,z,\hat{z}$}
-		\State $\ast$ 递归结束的处理
-		\If{$p=L$}
-		\If{$x=y$} \Comment 只有当前左括号个数与右括号个数相等时，才是合法的expression
-		\If{$z = \hat{z}$} \Comment Removed character个数与当前的global
-		 minimum相等
-		\algstore{301algo}
-		\end{algorithmic}
-	\end{algorithm}
-\begin{algorithm}[H]
-	\begin{algorithmic}[1]
-		\algrestore{301algo}
-				 \State $\star$ 把$E$加入$A$中
-		\ElsIf{$z<\hat{z}$} \Comment Removed character个数比当前的global minmum还要少
-		\State $\star$ Clear $A$ 因为$A$中的所有expression比起$E$来更短
-		\State $\hat{z}\gets z$ \Comment Update Global minimum count
-		\State $\star$ 把$E$加入$A$中
-		\EndIf
-		\EndIf
-		\State \Return 
-		\EndIf
-		
-				\If{$S[p]$既不是左括号也不是右括号}
-		\State $\star$ Add $S[p]$ to $E$
-		\State $\ast$ 继续下一层递归
-		
-				\State \Call{DFS}{$S, L, p+1, x, y, E, A, z, \hat{z}$}
-		\State $\star$ 上述递归结束后，把$S[p]$从$E$中移除
-		
-				\Else
-		\State $\ast$ 首先选择不把$S[p]$加入$E$中，然后继续下一层递归
-		\State \Call{DFS}{$S, L, p+1, x, y, E, A, z+1, \hat{z}$} \Comment 这时候$z$要increments
-		\State $\star$ $S[p]$加入$E$中
-		\If{$S[p]$是左括号}
-		\State $\ast$ 继续下一层递归，这时候$E$中多了一个左括号，因此$x\gets x+1$
-		\State \Call{DFS}{$S, L, p+1, x+1, y, E, A, z, \hat{z}$}
-		\ElsIf{$x>y$} \Comment 右括号情况下，只有左括号的个数大于右括号个数才能加入这个右括号
-		\State $\ast$ 继续下一层递归，这时候$E$中多了一个右括号，因此$y\gets y+1$
-		\State \Call{DFS}{$S, L, p+1, x, y+1, E, A, z, \hat{z}$}
-		\EndIf
-		\State $\star$ 结束后，把$S[p]$从$E$中移除
-		\EndIf
-		\EndFunction
-	\end{algorithmic}
-\end{algorithm}
+
 \setcounter{lstlisting}{0}
 \begin{lstlisting}[style=customc, caption={Recursive Method 1}]
 vector<string> removeInvalidParentheses( string s )
@@ -204,94 +139,7 @@ void DFS( const string& S, size_t p, int x, int y, string& expr, unordered_set<s
 \item 当选择不加入当前的左括号或者右括号时，需要检查$\alpha$或者$\beta$是否为零，如果是零，表示不能再remove了，因此也就不能继续进行递归了。
 \end{enumerate}
 \end{itemize}
-\begin{algorithm}[H]
-	\caption{Recursion Method 2: More Efficient}
-	\begin{algorithmic}[1]
-		\Procedure{RemoveInvalidParentheses}{$S, L$}
-		\State $\star$ Create an empty hash set $A$ to store the valid expressions
-		\State $\star$ Create an empty string $E$ to store current valid expression
-		\State $\ast$ Preprocess $S$ to get number of misplaced left and right parentheses
-				\algstore{301algo}
-				\end{algorithmic}
-			\end{algorithm}
-		\begin{algorithm}[H]
-			\begin{algorithmic}[1]
-				\algrestore{301algo}
-		\State $\alpha:=0$ and $\beta:=0$
-		\For{Each character $c$ in $S$}
-		\If{$c$ is left parenthesis}
-		\State $\alpha\gets\alpha+1$
-		\ElsIf{$c$ is right parenthesis}
-		\If{$\alpha=0$}
-		\State $\beta\gets\beta+1$ \Comment 不能再找到匹配的左括号
-		\Else
-		\State $\alpha\gets\alpha-1$ \Comment 有匹配的左括号，decrements $\alpha$
-		\EndIf
-		\EndIf
-		\EndFor
-		\State \Call{DFS}{$S, L, p = 0, x = 0, y = 0, \alpha, \beta, E, A$}
-		\EndProcedure
-	\end{algorithmic}
-\end{algorithm}
-Function \texttt{DFS}递归生成所有valid parentheses expressions。递归的状态包括
-\begin{itemize}
-	\item $p$ --- Current index in $S$
-	\item $x$, $y$ --- The count of left parentheses and right parentheses
-	\item $\alpha$, $\beta$ --- The misplaced number of left and right parentheses
-	\item $E$ --- 当前生成的valid expression
-	\item $A$ --- 保存所有生成的具有最小count of removed characters的valid expression的hash set
-\end{itemize}
-\begin{algorithm}[H]
-	\caption{Recursion Helper Function}
-	\begin{algorithmic}[1]
-		\Function{DFS}{$S,L,p,x,y,E,A,z,\hat{z}$}
-		\State $\ast$ 递归结束的处理
-		\If{$p=L$}
-		\If{$\alpha=0$ \textbf{and} $\beta=0$} \Comment No more misplaced parentheses
-		\State $\star$ 把$E$加入$A$中
-		\EndIf
-		\State \Return
-		\EndIf
-		\algstore{301algo}
-		\end{algorithmic}
-	\end{algorithm}
-\begin{algorithm}[H]
-	\begin{algorithmic}[1]
-		\algrestore{301algo}	
-				\If{$S[p]$既不是左括号也不是右括号}
-		\State $\star$ Add $S[p]$ to $E$
-		\State $\ast$ 继续下一层递归
-		
-				\State \Call{DFS}{$S, L, p+1, x, y, \alpha, \beta, E, A$}
-		\State $\star$ 上述递归结束后，把$S[p]$从$E$中移除
-		
-				\Else
-		\State $\ast$ 首先选择不把$S[p]$加入$E$中，然后继续下一层递归
-		\If{$S[p]$ is left parenthesis}
-		\If{$\alpha > 0$}
-		\State $\ast$只有当剩下的misplaced left parenthesis 大于零
-		\State $\ast$才可以忽略当前的左括号进入下一层递归
-		\State  \Call{DFS}{$S, L, p+1, x, y, \alpha-1, \beta, E, A$}
-		\EndIf
-		\State $\star$ $S[p]$加入$E$中
-		\State $\ast$ 继续下一层递归，这时候$E$中多了一个左括号，因此$x\gets x+1$
-		\State \Call{DFS}{$S, L, p+1, x+1, y, \alpha, \beta, E, A$}
-		\State $\star$ 结束后，把$S[p]$从$E$中移除
-		\Else
-				\State $\ast$只有当剩下的misplaced right parenthesis 大于零时，
-				\State $\ast$ 才可以忽略当前的右括号进入下一层递归
-				\State  \Call{DFS}{$S, L, p+1, x, y, \alpha, \beta-1, E, A$}
-				\EndIf
-				\If{$x>y$} \Comment 右括号情况下，只有左括号的个数大于右括号个数才能加入这个右括号
-					\State $\star$ $S[p]$加入$E$中
-					\State $\ast$ 继续下一层递归，这时候$E$中多了一个右括号，因此$y\gets y+1$
-					\State \Call{DFS}{$S, L, p+1, x, y+1, \alpha, \beta, E, A$}
-					\State $\star$ 结束后，把$S[p]$从$E$中移除
-				\EndIf	
-		\EndIf
-		\EndFunction
-	\end{algorithmic}
-\end{algorithm}
+
 \begin{lstlisting}[style=customc, caption={Recursive Method 1}]
 vector<string> removeInvalidParentheses( string s )
 {

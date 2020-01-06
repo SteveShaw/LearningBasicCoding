@@ -1,0 +1,197 @@
+
+\section{305 --- Number of Islands II}
+
+\textbf{Hard}
+
+A 2d grid map of $m$ rows and $n$ columns is initially filled with water. We may perform an \fcj{addLand} operation which turns the water at position \fcj{(row, col)} into a land. Given a list of positions to operate, count the number of islands after each \fcj{addLand} operation. An island is surrounded by water and is formed by connecting adjacent lands horizontally or vertically. You may assume all four edges of the grid are all surrounded by water.
+
+\paragraph{Example:}
+
+\begin{flushleft}
+\textbf{Input}: $m = 3$, $n = 3$, \fcj{positions = [[0,0], [0,1], [1,2], [2,1]]}
+
+\textbf{Output}: \fcj{[1,1,2,3]}
+
+\textbf{Explanation}:
+
+Initially, the 2d grid grid is filled with water. (Assume 0 represents water and 1 represents land).
+
+\[
+\begin{bmatrix}
+0 & 0 & 0\\
+0 & 0 & 0\\
+0 & 0 & 0
+\end{bmatrix}
+\]
+
+
+Operation 1: \fcj{addLand(0, 0)} turns the water at \fcj{grid[0][0]} into a land.
+
+\[
+\begin{bmatrix}
+1 & 0 & 0\\
+0 & 0 & 0\\
+0 & 0 & 0
+\end{bmatrix}
+\]
+
+Number of islands:  1
+
+Operation 2: \fcj{addLand(0, 1)} turns the water at \fcj{grid[0][1]} into a land.
+
+\[
+\begin{bmatrix}
+1 & 1 & 0\\
+0 & 0 & 0\\
+0 & 0 & 0
+\end{bmatrix}
+\]
+
+Number of islands: 1
+
+Operation 3: \fcj{addLand(1, 2)} turns the water at \fcj{grid[1][2]} into a land.
+
+\[
+\begin{bmatrix}
+1 & 1 & 0\\
+0 & 0 & 1\\
+0 & 0 & 0
+\end{bmatrix}
+\]
+
+Number of islands: 2
+
+Operation 4: \fcj{addLand(2, 1)} turns the water at \fcj{grid[2][1]} into a land.
+
+\[
+\begin{bmatrix}
+1 & 1 & 0\\
+0 & 0 & 1\\
+0 & 1 & 0
+\end{bmatrix}
+\]
+
+Number of islands: 3
+\end{flushleft}
+
+\paragraph{Follow up:}
+
+\begin{itemize}
+\item Can you do it in time complexity $O(k \log mn)$, where $k$ is the length of the \fcj{positions}?
+\end{itemize}
+
+\subsection{Union Find}
+Treat the 2d grid map as an undirected graph (formatted as adjacency matrix) and there is an edge between two horizontally or vertically adjacent nodes of value 1, then the problem reduces to finding the number of connected components in the graph after each \fcj{addLand} operation.
+
+Make use of a \textbf{Union Find} data structure of size $m\times n$ to store all the nodes in the graph and initially each node's parent value is set to $-1$ to represent an empty graph. 
+
+For each \fcj{addLand} operation at position \fcj{(row, col)}, union it with its adjacent neighbors if they are islands added before. 
+
+\setcounter{lstlisting}{0}
+\begin{lstlisting}[style=customc, caption={Union Find}]
+vector<int> numIslands2( int m, int n, vector<vector<int>>& positions )
+{
+    int N = m * n;
+    vector<int> parents( N, -1 );
+    vector<int> ranks( N, 0 );
+    //helper lambda to check if (m,n) is an island
+    auto is_land = [&parents, m, n]( int r, int c )
+    {
+        int x = r * n + c;
+        return parents[x] >= 0;
+    };
+    int num_islands = 0;
+    vector<int> ans;
+    for( const auto& pos : positions )
+    {
+        int r = pos[0];
+        int c = pos[1];
+        int x = r * n + c;
+        if( parents[x] >= 0 )
+        {
+            //check if we have already add island at (r,c)
+            ans.push_back( ans.back() );
+            continue;
+        }
+        //this is a new land
+        //set parent as itself
+        parents[x] = x;
+        //increments the number of islands
+        ++num_islands;
+        if( ( r - 1 >= 0 ) && ( is_land( r - 1, c ) ) )
+        {
+            if( set_union( x, ( r - 1 ) * n + c, parents, ranks ) )
+            {
+                //if they are different parents
+                //union them
+                //and decrements the number of islands
+                --num_islands;
+            }
+        }
+        if( ( r + 1 < m ) && ( is_land( r + 1, c ) ) )
+        {
+            if( set_union( x, ( r + 1 ) * n + c, parents, ranks ) )
+            {
+                --num_islands;
+            }
+
+        }
+        if( ( c - 1 >= 0 ) && ( is_land( r, c - 1 ) ) )
+        {
+            if( set_union( x, r * n + c - 1, parents, ranks ) )
+            {
+                --num_islands;
+            }
+
+        }
+        if( ( c + 1 < n ) && ( is_land( r, c + 1 ) ) )
+        {
+            if( set_union( x, r * n + c + 1, parents, ranks ) )
+            {
+                --num_islands;
+            }
+
+        }
+        ans.push_back( num_islands );
+    }
+    return ans;
+}
+//find parent of x
+int find( int x, vector<int>& parents )
+{
+    while( x != parents[x] )
+    {
+        x = parents[x];
+    }
+
+    return x;
+}
+//union x and y
+bool set_union( int x, int y, vector<int>& parents, vector<int>& ranks )
+{
+    auto px = find( x, parents );
+    auto py = find( y, parents );
+    if( px != py )
+    {
+        //only when their parents
+        //are different
+        //union them
+        if( ranks[px] < ranks[py] )
+        {
+            swap( px, py );
+        }
+        else if( ranks[px] == ranks[py] )
+        {
+            ranks[px] = ranks[py] + 1;
+        }
+        parents[py] = px;
+        return true;
+    }
+    return false;
+}
+\end{lstlisting}
+
+\paragraph{Related Problems}
+\begin{itemize}
+\item \textbf{200. Number of Islands}
+\end{itemize}

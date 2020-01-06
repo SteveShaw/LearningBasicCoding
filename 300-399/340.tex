@@ -1,0 +1,73 @@
+\section{340 --- Longest Substring with At Most K Distinct Characters}
+
+\textbf{Hard}
+
+Given a string, find the length of the longest substring T that contains at most $k$ distinct characters.
+
+\paragraph{Example 1:}
+
+\begin{flushleft}
+\textbf{Input}: \fcj{s = "eceba"}, $k = 2$
+
+\textbf{Output}: 3
+
+Explanation: T is \fcj{"ece"} which its length is 3.
+\end{flushleft}
+
+\paragraph{Example 2:}
+
+\begin{flushleft}
+\textbf{Input}: \fcj{s = "aa"}, $k = 1$
+
+\textbf{Output}: 2
+
+\textbf{Explanation}: T is \fcj{"aa"} which its length is 2.
+\end{flushleft}
+
+\subsection{Sliding Window}
+The idea is to set both pointers in the position 0 and then move right pointer to the right while the window contains not more than $k$ distinct characters. 
+
+If at some point we've got $k + 1$ distinct characters, we move left pointer to keep not more than $k + 1$ distinct characters in the window.
+
+When the input string contains $n$ distinct characters, at each step one uses $O(k)$ time to find a minimum value in the hashmap with $k$ elements and so the overall time complexity is $O(Nk)$.
+
+\setcounter{lstlisting}{0}
+\begin{lstlisting}[style=customc, caption={Sliding Window With Hash Map}]
+int lengthOfLongestSubstringKDistinct( string s, int k )
+{
+    if( s.empty() || ( k == 0 ) )
+    {
+        return 0;
+    }
+    size_t left = 0;
+    unordered_map<char, int> fly;
+    int ans = 0;
+    for( size_t right = 0; right < s.size(); ++right )
+    {
+        fly[s[right]] += 1;
+        int sz = ( int )fly.size();
+        while( ( left < right ) && ( sz > k ) )
+        {
+            //shrink the window to make sure
+            //no larger than k distinct letters
+            //are there
+            auto it = fly.find( s[left] );
+            if( it->second == 1 )
+            {
+                //s[left] is completely removed
+                //so erase it from fly
+                fly.erase( s[left] );
+            }
+            else
+            {
+                --it->second;
+            }
+            sz = ( int )fly.size();
+            ++left;
+        }
+        ans = ( max )( ans, ( int )right - ( int )left + 1 );
+    }
+    return ans;
+}
+\end{lstlisting}
+

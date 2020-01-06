@@ -1,33 +1,33 @@
 \section{318 --- Maximum Product of Word Lengths}
-Given a string array $ W $, find the maximum value of $ \lvert W[i]\rvert\times \lvert W[j]\rvert $ where the two strings do not share common letters. You may assume that each string will contain only lower case letters. If no such two words exist, return 0.
+Given a string array words, find the maximum value of \fcj{length(word[i]) * length(word[j])} where the two words do not share common letters. You may assume that each word will contain only lower case letters. If no such two words exist, return 0.
 
 \paragraph{Example 1:}
 
 \begin{flushleft}
-\textbf{Input}: [\texttt{abcw}, \texttt{baz}, \texttt{foo}, \texttt{bar}, \texttt{xtfn}, \texttt{abcdef}]
-\\
+\textbf{Input}: \fcj{["abcw","baz","foo","bar","xtfn","abcdef"]}
+
 \textbf{Output}: 16
-\\
-\textbf{Explanation}: The two words can be \texttt{abcw}, \texttt{xtfn}.
+
+\textbf{Explanation}: The two words can be \fcj{"abcw"}, \fcj{"xtfn"}.
 \end{flushleft}
 
 \paragraph{Example 2:}
 
 \begin{flushleft}
-\textbf{Input}: [\texttt{a}, \texttt{ab}, \texttt{abc}, \texttt{d}, \texttt{cd}, \texttt{bcd}, \texttt{abcd}]
+\textbf{Input}: \fcj{["a","ab","abc","d","cd","bcd","abcd"]}
 \\
 \textbf{Output}: 4 
 \\
-\textbf{Explanation}: The two words can be \texttt{ab}, \texttt{cd}.
+\textbf{Explanation}: The two words can be \fcj{"ab"}, \fcj{"cd"}.
 \end{flushleft}
 
 \paragraph{Example 3:}
 
 \begin{flushleft}
-\textbf{Input}: [\texttt{a}, \texttt{aa}, \texttt{aaa}, \texttt{aaaa}]
-\\
+\textbf{Input}: \fcj{["a","aa","aaa","aaaa"]}
+
 \textbf{Output}: 0 
-\\
+
 \textbf{Explanation}: No such pair of words.
 \end{flushleft}
 \subsection{Bit Mask}

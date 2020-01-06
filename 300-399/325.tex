@@ -1,0 +1,87 @@
+\section{325 --- Maximum Size Subarray Sum Equals k}
+
+\textbf{Medium}
+
+Given an array \fcj{nums} and a target value $k$, find the maximum length of a subarray that sums to $k$. If there isn't one, return 0 instead.
+
+\paragraph{Note:}
+
+\begin{itemize}
+\item The sum of the entire \fcj{nums} array is guaranteed to fit within the 32-bit signed integer range.
+\end{itemize}
+
+\paragraph{Example 1:}
+
+\begin{flushleft}
+\textbf{Input}: \fcj{nums = [1, -1, 5, -2, 3]}, $ k = 3 $
+
+\textbf{Output}: 4 
+
+\textbf{Explanation}: 
+
+The subarray \fcj{[1, -1, 5, -2]} sums to 3 and is the longest.
+\end{flushleft}
+
+\paragraph{Example 2:}
+
+\begin{flushleft}
+\textbf{Input}: \fcj{nums = [-2, -1, 2, 1]}, $k = 1$
+
+\textbf{Output}: 2 
+
+\textbf{Explanation}: 
+
+The subarray \fcj{[-1, 2]} sums to 1 and is the longest.
+
+\end{flushleft}
+
+\paragraph{Follow Up:}
+\begin{itemize}
+\item Can you do it in $O(n)$ time?
+\end{itemize}
+
+\subsection{Hash Map}
+We make use of a hash map to record the first position of any prefix sum.
+
+\setcounter{lstlisting}{0}
+\begin{lstlisting}[style=customc, caption={Hash Map}]
+int maxSubArrayLen( vector<int>& nums, int k )
+{
+    unordered_map<int, int> m;
+    int total = 0;
+    int L = ( int )nums.size();
+    int best = 0;
+    for( int i = 0; i < L; ++i )
+    {
+        total += nums[i];
+        if( total == k )
+        {
+            //this must be the maximum length so far
+            best = i + 1;
+        }
+        else
+        {
+            //otherwise, we need to find
+            //if there were total-k appear before
+            auto it = m.find( total - k );
+            if( it != m.end() )
+            {
+                best = ( max )( best, i - it->second );
+            }
+        }
+        //try to emplace into map
+        //this will not insert into the map
+        //if the key exists
+        m.try_emplace( total, i );
+    }
+    return best;
+}
+\end{lstlisting}
+
+\paragraph{Related Problems}
+\begin{itemize}
+\item \textbf{209. Minimum Size Subarray Sum}
+\item \textbf{303. Range Sum Query - Immutable}
+\item \textbf{525. Contiguous Array}
+\item \textbf{713. Subarray Product Less Than K}
+\end{itemize}

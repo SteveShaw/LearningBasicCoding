@@ -29,35 +29,7 @@ Given a string which contains only lowercase letters, remove duplicate letters s
 \item 否则，和当前的存储结果的字符串$y$的last letter进行比较，如果当前letter比$y$的最后一个letter小，并且$y$的last letter的count不为零(即这个letter之后还会出现)，那么将$y$的last letter从$ y $中删除，同时将其标记为未用过。
 \item 以此类推直至遍历完整个字符串
 \end{itemize}
-\setcounter{algorithm}{0}
-\begin{algorithm}[H]
-\caption{Hash Map}
-\begin{algorithmic}[1]
-\Procedure{RemoveDuplicateLetters}{$S, L$}
-\State $\star$ Create an array $A$ to store the counts of each letter in $S$
-\State $\star$ Create an array $ x $ to indicate if a letter is contained in the result string
-\State $y:=\emptyset$ \Comment The result string
-\State $\ast$ Count the frequencies of each letter in $S$
-\For{Each $ c $ in $S$}
-\State $A[c]\gets A[c] + 1$
-\EndFor
-\State $\ast$ Process $S$
-\For{Each $c$ in $S$}
-\State $A[c]\gets A[c]-1$ \Comment Decrements the frequencies of letter $ c $
-\If{$x[c]=1$} \Comment letter $ c $ is contained in the result string $ y $
-\State \texttt{continue} \Comment Skip to next letter
-\EndIf
-\While{$y$ is empty \textbf{and} $ y $'s last letter $t$ is larger than $ c $ \textbf{and} $ A[t]>0 $}
-\State $\star$ Remove $t$ from $y$
-\State $x[t]\gets 0$ \Comment indicate letter $t$ is not contained in the result string $ y $
-\EndWhile
-\State $y\gets y+c$ \Comment Append $ c $ to $ y $
-\State $x[c]\gets 1$ \Comment indicate letter $t$ is contained in the result string $ y $
-\EndFor
-\State \Return $ y $
-\EndProcedure
-\end{algorithmic}
-\end{algorithm}
+
 \setcounter{lstlisting}{0}
 \begin{lstlisting}[style=customc, caption={Hash Map}]
 string removeDuplicateLetters( string s )

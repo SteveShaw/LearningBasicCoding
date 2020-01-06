@@ -1,0 +1,103 @@
+\section{360 --- Sort Transformed Array}
+
+\textbf{Medium}
+
+Given a sorted array of integers \fcj{nums} and integer values $a$, $b$ and $c$. Apply a quadratic function of the form $f(x) = ax^2 + bx + c$ to each element $x$ in the array.
+
+The returned array must be in sorted order.
+
+Expected time complexity: $O(n)$
+
+\paragraph{Example 1:}
+
+\begin{flushleft}
+\textbf{Input}: \fcj{nums = [-4,-2,2,4]}, $a = 1$, $b = 3$, $c = 5$
+
+\textbf{Output}: \fcj{[3,9,15,33]}
+\end{flushleft}
+
+\paragraph{Example 2:}
+
+\begin{flushleft}
+\textbf{Input}: \fcj{nums = [-4,-2,2,4]}, $ a = -1 $, $ b = 3 $, $ c = 5 $
+
+\textbf{Output}: \fcj{[-23,-5,1,7]}
+\end{flushleft}
+
+\subsection{Two Pointers}
+From math, we know 
+
+if $a \geq 0$, $f(x)$ reaches minimum in the middle, so we fill the result array from back to front. 
+
+if $a < 0$, $f(x)$ reaches maximum value in the middle, so we go with opposite way.
+
+We make use of two pointers to point to front and back of input array, 
+
+when $a\geq 0$, we compare the value of $f$ and put the greater one at current position in the result array.
+
+Otherwise, we put the smaller one at current position in the result array.
+
+\setcounter{lstlisting}{0}
+\begin{lstlisting}[style=customc, caption={Two Pointers}]
+vector<int> sortTransformedArray( vector<int>& nums, int a, int b, int c )
+{
+    //a >=0 : fill from back to front
+    //a < 0 : fill from front to back
+    size_t fill = ( a >= 0 ) ? nums.size() - 1 : 0;
+    //two pointers: l and r
+    size_t l{};
+    size_t r = nums.size() - 1;
+    auto f = [a, b, c]( int x )
+    {
+        return a * x * x + b * x + c;
+    };
+    vector<int> ans( nums.size() );
+    if( a >= 0 )
+    {
+        while( l <= r )
+        {
+            int fl = f( nums[l] );
+            int fr = f( nums[r] );
+            //put greater one in current position
+            if( fl >= fr )
+            {
+                ans[fill] = fl;
+                ++l;
+            }
+            else
+            {
+                ans[fill] = fr;
+                --r;
+            }
+
+            --fill;
+        }
+    }
+    else
+    {
+        while( l <= r )
+        {
+            int fl = f( nums[l] );
+            int fr = f( nums[r] );
+            //put smaller one in current position
+            if( fl <= fr )
+            {
+                ans[fill] = fl;
+                ++l;
+            }
+            else
+            {
+                ans[fill] = fr;
+                --r;
+            }
+            ++fill;
+        }
+    }
+    return ans;
+}
+\end{lstlisting}
+
+\paragraph{Similar Problems}
+\begin{itemize}
+\item \textbf{977. Squares of a Sorted Array}
+\end{itemize}

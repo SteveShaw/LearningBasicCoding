@@ -1,0 +1,88 @@
+\section{323 --- Number of Connected Components in an Undirected Graph}
+
+\textbf{Medium}
+
+Given $n$ nodes labeled from 0 to $n - 1$ and a list of undirected edges (each edge is a pair of nodes), write a function to find the number of connected components in an undirected graph.
+
+\paragraph{Example 1:}
+
+\begin{flushleft}
+\textbf{Input}: $n = 5$ and \fcj{edges = [[0, 1], [1, 2], [3, 4]]}
+
+\textbf{Output}: 2
+\end{flushleft}
+
+\paragraph{Example 2:}
+
+\begin{flushleft}
+\textbf{Input}: $ n = 5 $ and \fcj{edges = [[0, 1], [1, 2], [2, 3], [3, 4]]}
+
+\textbf{Output}:  1
+\end{flushleft}
+
+\paragraph{Note:}
+\begin{itemize}
+\item You can assume that no duplicate edges will appear in edges. Since all edges are \textbf{undirected}, \fcj{[0, 1]} is the same as \fcj{[1, 0]} and thus will not appear together in \fcj{edges}.
+\end{itemize}
+
+\subsection{Union Find}
+A typical Union Find problem.
+
+\setcounter{lstlisting}{0}
+\begin{lstlisting}[style=customc, caption={Union Find}]
+int countComponents( int n, vector<vector<int>>& edges )
+{
+    vector<int> parents( n, -1 );
+    for( int i = 0; i < n; ++i )
+    {
+        parents[i] = i;
+    }
+    vector<int> ranks( n, 1 );
+    int ans = n;
+    for( const auto& edge : edges )
+    {
+        //get the parent of
+        //two vertices of edge
+        int px = find( edge[0], parents );
+        int py = find( edge[1], parents );
+        if( px != py )
+        {
+            //union them and reduce the
+            //number of unconnected parts
+            --ans;
+            set_union( px, py, parents, ranks );
+        }
+    }
+    return ans;
+}
+//find parent of x
+int find( int x, vector<int>& parents )
+{
+    while( x != parents[x] )
+    {
+        x = parents[x];
+    }
+    return x;
+}
+//union x and y with path compression
+void set_union( int x, int y, vector<int>& parents, vector<int>& ranks )
+{
+    if( ranks[x] > ranks[y] )
+    {
+        //make sure x rank is smaller
+        swap( x, y );
+    }
+    else if( ranks[x] == ranks[y] )
+    {
+        ranks[x]++;
+    }
+    parents[y] = x;
+}
+\end{lstlisting}
+
+\paragraph{Related Problems}
+\begin{itemize}
+\item \textbf{200. Number of Islands}
+\item \textbf{261. Graph Valid Tree}
+\item \textbf{547. Friend Circles}
+\end{itemize}

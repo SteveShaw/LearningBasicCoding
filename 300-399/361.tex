@@ -1,0 +1,33 @@
+\section{361 --- Bomb Enemy}
+
+\textbf{Medium}
+
+Given a 2D grid, each cell is either a wall \fcj{'W'}, an enemy \fcj{'E'} or empty \fcj{'0'} (the number zero), return the maximum enemies you can kill using one bomb.
+
+The bomb kills all the enemies in the same row and column from the planted point until it hits the wall since the wall is too strong to be destroyed.
+
+\paragraph{Note:} 
+
+\begin{itemize}
+\item You can only put the bomb at an empty cell.
+\end{itemize}
+
+\paragraph{Example:}
+
+\begin{flushleft}
+\textbf{Input}: \fcj{[["0","E","0","0"],["E","0","W","E"],["0","E","0","0"]]}
+
+\textbf{Output}: 3 
+
+\textbf{Explanation}: For the given grid,
+
+\begin{table}[H]
+\begin{tabular}{llll}
+0 & E & 0 & 0 \\
+E & 0 & W & E \\
+0 & E & 0 & 0
+\end{tabular}
+\end{table}
+
+Placing a bomb at \fcj{(1,1)} kills 3 enemies.
+\end{flushleft}

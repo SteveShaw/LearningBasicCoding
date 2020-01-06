@@ -1,9 +1,9 @@
 \section{332 --- Reconstruct Itinerary}
-Given a list of airline tickets represented by pairs of departure and arrival airports $[d, a]$, reconstruct the itinerary in order. All of the tickets belong to a man who departs from JFK. Thus, the itinerary must begin with JFK.
+Given a list of airline tickets represented by pairs of departure and arrival airports \fcj{[from, to]}, reconstruct the itinerary in order. All of the tickets belong to a man who departs from JFK. Thus, the itinerary must begin with JFK.
 
 \paragraph{Note:}
 \begin{itemize}
-\item If there are multiple valid itineraries, you should return the itinerary that has the smallest lexical order when read as a single string. For example, the itinerary [\texttt{JFK}, \texttt{LGA}] has a smaller lexical order than [\texttt{JFK}, \texttt{LGB}].
+\item  there are multiple valid itineraries, you should return the itinerary that has the smallest lexical order when read as a single string. For example, the itinerary \fcj{["JFK", "LGA"]} has a smaller lexical order than \fcj{["JFK", "LGB"]}.
 \item All airports are represented by three capital letters (IATA code).
 \item You may assume all tickets form at least one valid itinerary.
 \end{itemize}
@@ -11,22 +11,22 @@ Given a list of airline tickets represented by pairs of departure and arrival ai
 \paragraph{Example 1:}
 
 \begin{flushleft}
-\textbf{Input}: ( [\texttt{MUC}, \texttt{LHR}], [\texttt{JFK}, \texttt{MUC}], [\texttt{SFO}, \texttt{SJC}], [\texttt{LHR}, \texttt{SFO}] )
+\textbf{Input}:  \fcj{[["MUC", "LHR"], ["JFK", "MUC"], ["SFO", "SJC"], ["LHR", "SFO"]]}
 \\
-\textbf{Output}: [\texttt{JFK}, \texttt{MUC}, \texttt{LHR}, \texttt{SFO}, \texttt{SJC}]
+\textbf{Output}: \fcj{["JFK", "MUC", "LHR", "SFO", "SJC"]}
 
 \end{flushleft}
 
 \paragraph{Example 2:}
 
 \begin{flushleft}
-\textbf{Input}: ( [\texttt{JFK},\texttt{SFO}],[\texttt{JFK},\texttt{ATL}],[\texttt{SFO},\texttt{ATL}],[\texttt{ATL},\texttt{JFK}],[\texttt{ATL},\texttt{SFO}] )
-\\
-\textbf{Output}: [\texttt{JFK},\texttt{ATL},\texttt{JFK},\texttt{SFO},\texttt{ATL},\texttt{SFO}]
+\textbf{Input}: \fcj{[["JFK","SFO"],["JFK","ATL"],["SFO","ATL"],["ATL","JFK"],["ATL","SFO"]]}
+
+\textbf{Output}: \fcj{["JFK","ATL","JFK","SFO","ATL","SFO"]}
 \\
 \textbf{Explanation}: 
-\\
-Another possible reconstruction is: \texttt{JFK},\texttt{SFO},\texttt{ATL},\texttt{JFK},\texttt{ATL},\texttt{SFO}]. But it is larger in lexical order.
+
+Another possible reconstruction is: \fcj{["JFK","SFO","ATL","JFK","ATL","SFO"]}. But it is larger in lexical order.
 \end{flushleft}
 \subsection{Depth First Search}
 \begin{itemize}

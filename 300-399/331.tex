@@ -40,21 +40,68 @@ You may assume that the input format is always valid, for example it could never
 
 \paragraph{Example 1:}
 \begin{flushleft}
-\textbf{Input}: $9,3,4,\star,\star,1,\star,\star,2,\star,6,\star,\star$
-\\
-\textbf{Output}: \texttt{true}
+\textbf{Input}: \fcj{"9,3,4,#,#,1,#,#,2,#,6,#,#"}
+
+\textbf{Output}: \fcc{true}
 \end{flushleft}
 
 \paragraph{Example 2:}
 \begin{flushleft}
-\textbf{Input}: $1,\star$
-\\
-\textbf{Output}: \texttt{false}
+\textbf{Input}: \fcj{"1,#"}
+
+\textbf{Output}: \fcc{false}
 \end{flushleft}
 
 \paragraph{Example 3:}
 \begin{flushleft}
-\textbf{Input}: $9,\star,\star,1$
-\\
-\textbf{Output}: \texttt{false}
+\textbf{Input}: \fcj{"9,#,#,1"}
+
+\textbf{Output}: \fcc{false}
 \end{flushleft}
+
+\subsection{Iteration}
+Binary tree could be considered as a number of slots to fulfill. 
+
+At the start there is just one slot available for a number or null node. Both number and null node take one slot to be placed. 
+
+For the \fcj{null} node the story ends up here, whereas the number will add into the tree two slots for the child nodes. Each child node could be, again, a number or a \fcj{null}.
+
+The idea is straightforward : take the nodes one by one from \textit{preorder} traversal, and compute the number of available slots. If at the end all available slots are used up, the \textit{preorder} traversal represents the valid serialization.
+
+\setcounter{lstlisting}{0}
+\begin{lstlisting}[style=customc, caption={Iteration}]
+bool isValidSerialization( string preorder )
+{
+    // number of available slots
+    int slots = 1;
+    for( size_t i = 0; i < preorder.size(); ++i )
+    {
+        if( preorder[i] == ',' )
+        {
+            // one node takes one slot
+            --slots;
+            // no more slots available
+            if( slots < 0 )
+            {
+                return false;
+            }
+            // non-empty node creates two children slots
+            if( ( i > 0 ) && ( preorder[i - 1] != '#' ) )
+            {
+                slots += 2;
+            }
+        }
+    }
+    //for the last node
+    //since there is no comma, we only add or subtract one
+    if( preorder.back() == '#' )
+    {
+        slots -= 1;
+    }
+    else
+    {
+        ++slots;
+    }
+    return slots == 0;
+}
+\end{lstlisting}

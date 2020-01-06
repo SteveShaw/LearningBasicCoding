@@ -1,0 +1,91 @@
+\section{362 --- Design Hit Counter}
+
+\textbf{Medium}
+
+Design a hit counter which counts the number of hits received in the past 5 minutes.
+
+Each function accepts a timestamp parameter (in seconds granularity) and you may assume that calls are being made to the system in chronological order (ie, the timestamp is monotonically increasing). You may assume that the earliest timestamp starts at 1.
+
+It is possible that several hits arrive roughly at the same time.
+
+\paragraph{Example:}
+
+\begin{flushleft}
+\fcj{HitCounter counter = new HitCounter();}
+
+\fcj{// hit at timestamp 1.}
+
+\fcj{counter.hit(1);}
+
+\fcj{// hit at timestamp 2.}
+
+\fcj{counter.hit(2);}
+
+\fcj{// hit at timestamp 3.}
+
+\fcj{counter.hit(3);}
+
+\fcj{// get hits at timestamp 4, should return 3.}
+
+\fcj{counter.getHits(4);}
+
+\fcj{// hit at timestamp 300.}
+
+\fcj{counter.hit(300);}
+
+\fcj{// get hits at timestamp 300, should return 4.}
+
+\fcj{counter.getHits(300);}
+
+\fcj{// get hits at timestamp 301, should return 3.}
+
+\fcj{counter.getHits(301); }
+\end{flushleft}
+
+\paragraph{Follow up:}
+\begin{itemize}
+\item What if the number of hits per second could be very large? Does your design scale?
+\end{itemize}
+
+\subsection{Sliding Window}
+We use a queue to maintain a 300 seconds sliding window
+
+\setcounter{lstlisting}{0}
+\begin{lstlisting}[style=customc, caption={Sliding Window}]
+class HitCounter
+{
+public:
+    /** Initialize your data structure here. */
+    HitCounter()
+    {
+    }
+    /** Record a hit.
+        @param timestamp - The current timestamp (in seconds granularity). */
+    void hit( int timestamp )
+    {
+        q.push( timestamp );
+    }
+    /** Return the number of hits in the past 5 minutes.
+        @param timestamp - The current timestamp (in seconds granularity). */
+    int getHits( int timestamp )
+    {
+        while( !q.empty() )
+        {
+            if( timestamp - q.front() >= 300 )
+            {
+                q.pop();
+            }
+            else
+            {
+                break;
+            }
+        }
+        if( q.empty() )
+        {
+            return 0;
+        }
+        return ( int )q.size();
+    }
+    queue<int> q;
+};
+\end{lstlisting}

@@ -65,6 +65,47 @@ int dfs( const NestedInteger& ni, int level )
 }
 \end{lstlisting}
 
+\subsection{BFS}
+This problem can also be solved using BFS with level traverse
+
+\begin{lstlisting}[style=customc, caption={BFS}]
+int depthSum( vector<NestedInteger>& nestedList )
+{
+    //using reference_wrapper to avoid copy object
+    queue<reference_wrapper<const NestedInteger>> q;
+    int ans = 0;
+    for( const auto& ni : nestedList )
+    {
+        q.push( cref( ni ) );
+        int level = 1;
+        while( !q.empty() )
+        {
+            auto sz = q.size();
+            for( size_t i = 0; i < sz; ++i )
+            {
+                auto e = q.front();
+                q.pop();
+                if( e.get().isInteger() )
+                {
+                    ans += e.get().getInteger() * level;
+                }
+                else
+                {
+                    //if it is not integer
+                    //push into the queue
+                    for( const auto& next : e.get().getList() )
+                    {
+                        q.push( cref( next ) );
+                    }
+                }
+            }
+            ++level;
+        }
+    }
+    return ans;
+}
+\end{lstlisting}
+
 \paragraph{Related Problems}
 \begin{itemize}
 \item \textbf{364. Nested List Weight Sum II}

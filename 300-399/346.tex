@@ -1,0 +1,62 @@
+\section{346 --- Moving Average from Data Stream}
+
+\textbf{Easy}
+
+Given a stream of integers and a window size, calculate the moving average of all integers in the sliding window.
+
+\paragraph{Example:}
+
+\begin{flushleft}
+\fcj{MovingAverage m = new MovingAverage(3);}
+
+\fcj{m.next(1) = 1}
+
+\fcj{m.next(10) = (1 + 10) / 2}
+
+\fcj{m.next(3) = (1 + 10 + 3) / 3}
+
+\fcj{m.next(5) = (10 + 3 + 5) / 3}
+\end{flushleft}
+
+\subsection{Circular Queue}
+We could easily implement a circular queue with a fixed-size array. 
+
+The key to the implementation is the correlation between the index of \textbf{head} and \textbf{tail} elements, is:
+
+\fcj{tail = (head+1) \% size}
+
+In other words, the \textbf{tail} element is right next to the \textbf{head} element. Once we move the \textbf{head} forward, we would overwrite the previous \textbf{tail} element.
+
+\setcounter{lstlisting}{0}
+\begin{lstlisting}[style=customc, caption={Circular Queue}]
+class MovingAverage
+{
+public:
+    /** Initialize your data structure here. */
+    MovingAverage( int size )
+    {
+        vector<int> tmp( size );
+        swap( q, tmp );
+        head = 0;
+        sum = 0;
+        count = 0;
+    }
+    double next( int val )
+    {
+        ++count;
+        //get tail
+        auto tail = ( head + 1 ) % q.size();
+        //remove tail from the queue
+        sum = sum - q[tail] + val;
+        //move head to next slot
+        head = tail;
+        //write val to this slot
+        q[head] = val;
+        return ( double )sum / ( double )( ( min )( count, q.size() ) );
+    }
+    vector<int> q;
+    size_t head;
+    int sum;
+    size_t count;
+};
+\end{lstlisting}

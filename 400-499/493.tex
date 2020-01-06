@@ -116,6 +116,44 @@ int leftmost( vector<int>& A, int l, int r, long long target )
     return l;
 }
 
+//using iterator, more clear
+int reversePairs( vector<int>& nums )
+{
+    int ans = 0;
+    merge_sort( begin( nums ), end( nums ), ans );
+    return ans;
+}
+void merge_sort( vector<int>::iterator beg, vector<int>::iterator end, int& ans )
+{
+    auto dist = distance( beg, end );
+    if( dist <= 1 )
+    {
+        return;
+    }
+    auto mid = next( beg, dist / 2 );
+    merge_sort( beg, mid, ans );
+    merge_sort( mid, end, ans );
+
+    for( auto i = beg, j = mid; i != mid; ++i )
+    {
+        long long l = *i;
+        while( j != end )
+        {
+            long long r = *j;
+            if( l > 2 * r )
+            {
+                ++j;
+                //from i to mid, all are larger than 2r
+                ans += ( int )( distance( i, mid ) );
+            }
+            else
+            {
+                break;
+            }
+        }
+    }
+    inplace_merge( beg, mid, end );
+}
 \end{lstlisting}
 
 

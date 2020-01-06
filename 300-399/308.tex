@@ -67,49 +67,6 @@ sumRegion(2, 1, 4, 3); // 10
 \item 与1维的BIT类似, 2D BIT也是只能得到从$ (0,0) $到 $ (r,c) $的区间和，因此需要按照304中的分区域计算方法，分别计算出四个角的区域和。
 \item 如果$M$的dimension为$m\times n$，与1维的BIT类似，2维的BIT的dimension is equal to $ (m+1)\times (n+1) $
 \end{itemize}
-假设$M[r][c]$的值变化了$\delta$，那么BIT的update算法如下
-\setcounter{algorithm}{0}
-\begin{algorithm}[H]
-\caption{Update BIT}
-\begin{algorithmic}[1]
-\Procedure{UpdateBIT}{$M, m, n, B, r,c,\delta$}
-\State $x:=r+1$
-\While{$x \leq m$}
-\State $y:=c+1$ \Comment Note: y must be reset to $ c+1 $ at each iteration of $ x $
-\While{$ y \leq n $}
-\State $ B[x][y]\gets B[x][y] + \delta $
-\State $y\gets y + (y\land (-y))$ \Comment Move $y$ to its child node
-\EndWhile
-\State $x\gets x + (x\land (-x))$ \Comment Move $x$ to its child node
-\EndWhile
-\EndProcedure
-\end{algorithmic}
-\end{algorithm}
-计算range sum from $ (0,0) $ to $ (r,c) $的算法如下，算法中并不需要$M$。
-\begin{algorithm}[H]
-\caption{Get Range Sum From BIT}
-\begin{algorithmic}[1]
-\Procedure{GetSum}{$B, r, c$}
-\State $x:=r+1$
-\State $z:=0$ \Comment The total sum
-\While{$x>0$}
-\State $y:=c+1$ \Comment Note: y must be reset to $ c+1 $ at each iteration of $ x $
-\While{$ y>0 $}
-\State $z\gets z+B[x][y]$
-\State $y\gets y - (y\land (-y))$ \Comment Move $y$ to its parent node
-\algstore{308algo}
-\end{algorithmic}
-\end{algorithm}
-\begin{algorithm}[H]
-\begin{algorithmic}[1]
-\algrestore{308algo}
-\EndWhile
-\State $x\gets x - (x\land (-x))$ \Comment Move $x$ to its parent node
-\EndWhile
-\State \Return $ z $
-\EndProcedure
-\end{algorithmic}
-\end{algorithm}
 \setcounter{lstlisting}{0}
 \begin{lstlisting}[style=customc, caption={BIT}]
 class NumMatrix

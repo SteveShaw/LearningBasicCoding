@@ -1,6 +1,7 @@
 \section{327 --- Count of Range Sum}
-Given an integer array $ A $, return the number of range sums that lie in $ [l, u] $ inclusive.
-Range sum $ S(i, j) $ is defined as the sum of the elements in $ A $ between indices $ i $ and $ j $ ($ i \leq j $), inclusive.
+Given an integer array \fcj{nums}, return the number of range sums that lie in \fcj{[lower, upper]} inclusive.
+
+Range \fcj{sum S(i, j)} is defined as the sum of the elements in \fcj{nums} between indices $i$ and $j$ ($i \leq j$), inclusive.
 
 \paragraph{Note:}
 \begin{itemize}
@@ -10,13 +11,14 @@ Range sum $ S(i, j) $ is defined as the sum of the elements in $ A $ between ind
 \paragraph{Example:}
 
 \begin{flushleft}
-\textbf{Input}: $ A = [-2,5,-1] $, \quad $ l = -2 $, \quad $ u = 2 $
+\textbf{Input}: \fcj{nums = [-2,5,-1]}, \fcj{lower = -2}, \fcj{upper = 2},
 \\
 \textbf{Output}: 3 
 \\
 \textbf{Explanation}: 
-\\
-The three ranges are : $ [0,0] $, $ [2,2] $, $ [0,2] $ and their respective sums are:$  -2 $, $ -1 $, $ 2 $.
+
+The three ranges are : \fcj{[0,0]}, \fcj{[2,2]}, \fcj{[0,2]} and their respective sums are: $-2$, $-1$, $2$.
+
 \end{flushleft}
 \subsection{Prefix Sum}
 \begin{itemize}
@@ -78,6 +80,29 @@ int countRangeSum( vector<int>& nums, int lower, int upper )
         }
     }
 
+    return ans;
+}
+
+//using multiset
+int countRangeSum( vector<int>& nums, int lower, int upper )
+{
+    long long sum = 0;
+    multiset<long long> m;
+    m.insert( 0 );
+    int ans = 0;
+    for( int n : nums )
+    {
+        sum += n;
+        //find how many sums
+        //such that sum -s <=upper
+        //and sum - s > lower;
+        //i.e.  sum - upper <= s < sum-lower
+        auto hi = m.upper_bound( sum - lower );
+        auto lo = m.lower_bound( sum - upper );
+        ans += ( int )distance( lo, hi );
+        //add sum to m
+        m.insert( sum );
+    }
     return ans;
 }
 \end{lstlisting}
@@ -150,3 +175,53 @@ int countAndMergeSort( vector<long> &sums, int start, int end, int lower, int up
     return cnt;
 }
 \end{lstlisting}
+
+We can use STL function \fcc{inplace_merge} to simplify the code
+
+\begin{lstlisting}[style=customc, caption={STL Merge Sort}]
+using ll_t = long long;
+int countRangeSum( vector<int>& nums, int lower, int upper )
+{
+    vector<ll_t> psums( nums.size() + 1, 0 );
+    for( size_t i = 0; i < nums.size(); ++i )
+    {
+        psums[i + 1] = nums[i] + psums[i];
+    }
+    return merge_sort( begin( psums ), end( psums ), lower, upper );
+}
+//merge sort
+int merge_sort( vector<ll_t>::iterator beg, vector<ll_t>::iterator end, int lo, int hi )
+{
+    auto dist = distance( beg, end );
+    if( dist <= 1 )
+    {
+        return 0;
+    }
+    auto mid = next( beg, dist / 2 );
+    int count = merge_sort( beg, mid, lo, hi ) + merge_sort( mid, end, lo, hi );
+    //we need two iterators
+    //one records the beginning of number x that x - *i >=lo
+    //the other records the beginning of number y that y -*i >=hi
+    for( auto i = beg, j1 = mid, j2 = mid; i != mid; ++i )
+    {
+        while( ( j1 != end ) && ( *j1 - *i < lo ) )
+        {
+            ++j1;
+        }
+        while( ( j2 != end ) && ( *j2 - *i <= hi ) )
+        {
+            ++j2;
+        }
+        count += ( int )distance( j1, j2 );
+    }
+    inplace_merge( beg, mid, end );
+    return count;
+}
+\end{lstlisting}
+
+
+\paragraph{Related Problems}
+\begin{itemize}
+\item \textbf{315. Count of Smaller Numbers After Self}
+\item \textbf{493. Reverse Pairs}
+\end{itemize}

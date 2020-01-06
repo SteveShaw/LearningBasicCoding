@@ -35,3 +35,58 @@ The return value is the subtree's size, which is 3.
 \begin{itemize}
     \item Can you figure out ways to solve it with $O(n)$ time complexity?
 \end{itemize}
+
+对于每一个节点，都记录当前最大的 BST 的节点数，当做为左子树的最大值，和做为右子树的最小值，当每次遇到左子节点不存在或者当前节点值大于左子树的最大值，且右子树不存在或者当前节点值小于右子树的最小数时，说明 BST 的节点数又增加了一个，更新结果及其参数，如果当前节点不是 BST 的节点，那么更新 BST 的节点数 res 为左右子节点的各自的 BST 的节点数的较大值
+\subsection{DFS}
+To fulfill the $O(n)$ time complexity, we can only visit each node once. 
+
+For each node, we maintain the size of current maximum BST, the current maximum and minimum value of its left and right child. 
+
+If current node's value is between the maximum value of its left child and minimum value of its right child, then we found one more node of BST rooted in current node. 
+
+Otherwise, the larger size of BST in left and right child is the result.
+
+\setcounter{lstlisting}{0}
+\begin{lstlisting}[style=customc, caption={DFS}]
+int largestBSTSubtree( TreeNode* root )
+{
+    int ans = 0;
+    int min_n = INT_MIN;
+    int max_n = INT_MAX;
+    dfs( root, min_n, max_n, ans );
+    return ans;
+}
+void dfs( TreeNode* t, int& min_n, int& max_n, int& ans )
+{
+    if( !t )
+    {
+        return;
+    }
+
+    int l_bst = 0;
+    int r_bst = 0;
+    int min_l = INT_MIN;
+    int max_l = INT_MAX;
+    int min_r = INT_MIN;
+    int min_r = INT_MAX;
+    //recursive on left child
+    dfs( t->left, min_l, max_l, l_bst );
+    //recursive on right child
+    dfs( t->right, min_r, max_r, r_bst );
+
+    if( ( !t->left || ( max_l < t->val ) ) && ( !t->right || ( min_r > t->val ) ) )
+    {
+        //t is between [max_l, min_l]
+        //one more BST node is found
+        ans = l_bst + r_bst + 1;
+        min_n = t->left ? min_l : t->val;
+        max_n = t->right ? max_r : t->val;
+    }
+    else
+    {
+        //otherwise, choose larger BST
+        //from left and right child
+        ans = ( max )( l_bst, r_bst );
+    }
+}
+\end{lstlisting}

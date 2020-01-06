@@ -68,3 +68,42 @@ string reverseVowels( string s )
 }
 
 \end{lstlisting}
+
+We can also make use of STL function \fcc{find_first_of} and \fcc{find_last_of} to solve. 
+
+In \fcc{find_first_of}, there is a parameter \fcc{pos}, which means the search only happens in \fcc{s[pos, s.size())}.
+
+For \fcc{find_last_of}, the parameter \fcc{pos}, which means the search only happens in \fcc{s[0, pos]}
+
+\begin{lstlisting}[style=customc, caption={STL}]
+string reverseVowels( string s )
+{
+    size_t left = 0;
+    size_t right = s.size() - 1;
+    string vowels = "aeiouAEIOU";
+    while( left < right )
+    {
+        //search in [left, size())
+        left = s.find_first_of( vowels, left );
+        //search in [0, right]
+        right = s.find_last_of( vowels, right );
+        if( left < right )
+        {
+            swap( s[left], s[right] );
+            ++left;
+            --right;
+        }
+        else
+        {
+            break;
+        }
+    }
+    return s;
+}
+\end{lstlisting}
+
+\paragraph{Related Problems}
+\begin{itemize}
+\item \textbf{344. Reverse String}
+\item \textbf{1119. Remove Vowels from a String}
+\end{itemize}

@@ -1,0 +1,60 @@
+\section{338 --- Counting Bits}
+
+\textbf{Medium}
+
+Given a non negative integer number $n$. For every numbers $i$ in the range $0 \leq i \leq n$ calculate the number of 1's in their binary representation and return them as an array.
+
+\paragraph{Example 1:}
+
+\begin{flushleft}
+\textbf{Input}: 2
+
+\textbf{Output}: \fcj{[0,1,1]}
+\end{flushleft}
+
+\paragraph{Example 2:}
+
+\begin{flushleft}
+\textbf{Input}: 5
+
+\textbf{Output}: \fcj{[0,1,1,2,1,2]}
+\end{flushleft}
+
+\paragraph{Follow up:}
+
+\begin{itemize}
+\item It is very easy to come up with a solution with run time \fcj{O(n*sizeof(int))}. But can you do it in linear time $O(n)$ /possibly in a single pass?
+\item Space complexity should be $O(n)$.
+\item Can you do it like a boss? Do it without using any builtin function like\fcc{ __builtin_popcount} in \fcc{c++} or in any other language.
+\end{itemize}
+
+\subsection{Dynamic Programming}
+
+Suppose we have an integer:
+\[
+x = (1001011101)_2 = (605)_{10}
+\]
+
+and we already calculated and stored all the results of 0 to $x - 1$.
+
+Then we know that $x$ is differ by rightmost bit with a number we already calculated:
+
+\[
+\hat{x} = (1001011100)_2 = (604)_{10}
+\]
+
+\setcounter{lstlisting}{0}
+\begin{lstlisting}[style=customc, caption={DP}]
+vector<int> countBits( int num )
+{
+    vector<int> F( num + 1, 0 );
+    for( int i = 1; i <= num; ++i )
+    {
+        //find the number that is differ with
+        //i by rightmost bit 1
+        F[i] = F[i & ( i - 1 )] + 1;
+    }
+    return F;
+}
+\end{lstlisting}
+

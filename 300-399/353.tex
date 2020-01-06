@@ -1,0 +1,187 @@
+\section{353 --- Design Snake Game}
+
+\textbf{Medium}
+
+Design a Snake game that is played on a device with screen size equal to width $\times$ height. 
+
+The snake is initially positioned at the top left corner \fcj{(0,0)} with length equal to 1 unit.
+
+You are given a list of food's positions in row-column order. When a snake eats the food, its length and the game's score both increase by 1.
+
+Each food appears one by one on the screen. For example, the second food will not appear until the first food was eaten by the snake.
+
+When a food does appear on the screen, it is guaranteed that it will not appear on a block occupied by the snake.
+
+\paragraph{Example:}
+\begin{flushleft}
+
+Given \fcj{width = 3}, \fcj{height = 2}, and \fcj{food = [[1,2],[0,1]]}.
+
+\fcj{Snake snake = new Snake(width, height, food);}
+
+Initially the snake appears at position (0,0) and the food at (1,2).
+
+\begin{table}[H]
+\begin{tabular}{|l|l|l|}
+S &  &   \\
+  &  & F
+\end{tabular}
+\end{table}
+
+\fcc{snake.move("R"); -> Returns 0}
+
+\begin{table}[H]
+\begin{tabular}{|l|l|l|}
+ & S &   \\
+  &  & F
+\end{tabular}
+\end{table}
+
+\fcj{snake.move("D"); -> Returns 0}
+
+\begin{table}[H]
+\begin{tabular}{|l|l|l|}
+ &  &   \\
+  & S & F
+\end{tabular}
+\end{table}
+
+\fcj{snake.move("R"); -> Returns 1} (Snake eats the first food and right after that, the second food appears at \fcj{(0,1)} )
+
+\begin{table}[H]
+\begin{tabular}{|l|l|l|}
+ & F &   \\
+  & S & S
+\end{tabular}
+\end{table}
+
+\fcj{snake.move("U"); -> Returns 1}
+
+\begin{table}[H]
+\begin{tabular}{|l|l|l|}
+ & F & S   \\
+  &  & S
+\end{tabular}
+\end{table}
+
+\fcj{snake.move("L"); -> Returns 2} (Snake eats the second food)
+
+\begin{table}[H]
+\begin{tabular}{|l|l|l|}
+ & S & S  \\
+  &  & S
+\end{tabular}
+\end{table}
+
+\fcj{snake.move("U"); -> Returns -1} (Game over because snake collides with border)
+\end{flushleft}
+
+\subsection{Double End Queue}
+We can simulate the snake with a double end queue since we need to add head and remove tail at both ends.
+
+To check if the snake will eat itself or not, we can use a auxiliary hash map to get fast inspection.
+
+\setcounter{lstlisting}{0}
+\begin{lstlisting}[style=customc, caption={Queue}]
+class SnakeGame
+{
+public:
+    /** Initialize your data structure here.
+        @param width - screen width
+        @param height - screen height
+        @param food - A list of food positions
+        E.g food = [[1,1], [1,0]] means the first food is positioned at [1,1], the second is at [1,0]. */
+    SnakeGame( int width, int height, vector<vector<int>>& food )
+        : m( height )
+        , n( width )
+        , food_( food )
+        , fi{}
+    {
+        //we move head of snake into q
+        //at start, snake length is 1.
+        q.push_front( 0 );
+    }
+    /** Moves the snake.
+        @param direction - 'U' = Up, 'L' = Left, 'R' = Right, 'D' = Down
+        @return The game's score after the move. Return -1 if game over.
+        Game over when snake crosses the screen boundary or bites its body. */
+    int move( string direction )
+    {
+        //get the head of the snake
+        int head = q.front();
+        //get the tail of the snake
+        int tail = q.back();
+        //remove tail from the snake
+        q.pop_back();
+        body.erase( tail );
+        //get (r,c) of head
+        int r = head / n;
+        int c = head - n * r;
+        //get (r,c) of head after next move
+        switch( direction[0] )
+        {
+        case 'U':
+            r = r - 1;
+            break;
+        case 'D':
+            r = r + 1;
+            break;
+        case 'L':
+            c = c - 1;
+            break;
+        case 'R':
+            c = c + 1;
+            break;
+        }
+        int new_head = r * n + c;
+        //check if the snake touch the border
+        if( ( r >= 0 ) && ( r < m ) && ( c >= 0 ) && ( c < n ) )
+        {
+            //snake doesn't touch border
+            //check if it will eat itself
+            if( body.find( new_head ) != body.end() )
+            {
+                return -1;
+            }
+        }
+        else
+        {
+            return -1;
+        }
+        //add new position of snake head
+        q.push_front( new_head );
+        body.insert( new_head );
+        //check if the snake will eat food
+        if( fi < food_.size() )
+        {
+            if( ( r == food_[fi][0] ) && ( c == food_[fi][1] ) )
+            {
+                //snake eat the food
+                //we keep tail, add back to the end of queue
+                //and to the body
+                ++fi;
+                q.push_back( tail );
+                body.insert( tail );
+            }
+        }
+        //the score is the current length of snake minus 1
+        return ( int )q.size() - 1;
+    }
+private:
+    int m;
+    int n;
+    //food index
+    size_t fi;
+    vector<vector<int>>& food_;
+    //body has the all the coordinates of the snake's body
+    unordered_set<int> body;
+    //q is used to simulate the snake movement
+    deque<int> q;
+};
+
+/**
+ * Your SnakeGame object will be instantiated and called as such:
+ * SnakeGame* obj = new SnakeGame(width, height, food);
+ * int param_1 = obj->move(direction);
+ */
+\end{lstlisting} 

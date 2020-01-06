@@ -62,3 +62,61 @@ void dfs( string_view w, size_t start, int k, string cur, vector<string>& ans )
     dfs( w, start + 1, 0, cur, ans );
 }
 \end{lstlisting}
+
+\subsection{Bit Operation}
+If we use 0 to represent a character that is not abbreviated and 1 to represent one that is. Then each abbreviation is mapped to an nn bit binary number and vice versa.
+
+\begin{lstlisting}[style=customc, caption={Bit}]
+vector<string> generateAbbreviations( string word )
+{
+    auto l = word.size();
+    auto x = 1ull << l;
+    vector<string> ans;
+    for( auto i = 0ull; i < x; ++i )
+    {
+        ans.emplace_back( help( word, i ) );
+    }
+    return ans;
+}
+string help( string_view word, size_t t )
+{
+    int k = 0;
+    auto l = word.size();
+
+    string s;
+    for( size_t i = 0; i < l; ++i )
+    {
+        if( ( t & 1 ) == 0 )
+        {
+            if( k )
+            {
+                //add abbr to s
+                s += to_string( k );
+                //reset k
+                k = 0;
+            }
+            s.push_back( word[i] );
+        }
+        else
+        {
+            ++k;
+        }
+
+        t >>= 1;
+    }
+
+    if( k )
+    {
+        s += to_string( k );
+    }
+
+    return s;
+}
+\end{lstlisting}
+
+\paragraph{Related Problems}
+\begin{itemize}
+\item \textbf{78. Subsets}
+\item \textbf{288. Unique Word Abbreviation}
+\item \textbf{411. Minimum Unique Word Abbreviation}
+\end{itemize}

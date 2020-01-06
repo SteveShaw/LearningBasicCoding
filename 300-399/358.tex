@@ -1,0 +1,108 @@
+\section{358 --- Rearrange String k Distance Apart}
+
+\textbf{Hard}
+
+Given a non-empty string $s$ and an integer $k$, rearrange the string such that the same characters are at least distance $k$ from each other.
+
+All input strings are given in lowercase letters. If it is not possible to rearrange the string, return an empty string \fcj{""}.
+
+\paragraph{Example 1:}
+
+\begin{flushleft}
+\textbf{Input}: \fcj{s = "aabbcc"}, $k = 3$
+
+\textbf{Output}: \fcj{"abcabc"} 
+
+\textbf{Explanation}: The same letters are at least distance 3 from each other.
+\end{flushleft}
+
+\paragraph{Example 2:}
+
+\begin{flushleft}
+\textbf{Input}: \fcj{s = "aaabc"}, $k = 3$
+
+\textbf{Output}: \fcj{""} 
+
+\textbf{Explanation}: It is not possible to rearrange the string.
+\end{flushleft}
+
+\paragraph{Example 3:}
+
+\begin{flushleft}
+\textbf{Input}: \fcj{s = "aaadbbcc"}, $k = 2$
+
+\textbf{Output}: \fcj{"abacabcd"}
+
+\textbf{Explanation}: The same letters are at least distance 2 from each other.
+\end{flushleft}
+
+
+\subsection{Greedy}
+Each time, we select the letter with highest remaining count if possible (if it is not in the regular queue). We make use of priority queue for greedy, and a regular queue for previous used letter in the period of $k$.
+
+In each iteration, we add current letter to the regular queue and also pop front one into the priority queue. The impossible case happens when the priority queue is empty but there is still some letters in the regular queue.
+
+\setcounter{lstlisting}{0}
+\begin{lstlisting}[style=customc, caption={Greedy}]
+string rearrangeString( string s, int k )
+{
+    if( k == 0 )
+    {
+        //k=0: no need to rearrange
+        return s;
+    }
+    //get each letter's count
+    vector<int> m( 26, 0 );
+    for( auto c : s )
+    {
+        m[c - 'a'] += 1;
+    }
+    //add letter into a min queue
+    //where letter with maximum count is at the top
+    priority_queue<pair<int, char>, vector<pair<int, char>>, less<pair<int, char>>> pq;
+    for( int i = 0; i < 26; ++i )
+    {
+        if( m[i] != 0 )
+        {
+            pq.emplace( m[i], 'a' + i );
+        }
+    }
+    //this is used to save the letters by accumulating k letters
+    queue<pair<int, char>> q;
+    string ans;
+    ans.reserve( s.size() );
+    while( !pq.empty() )
+    {
+        auto t = pq.top();
+        pq.pop();
+        ans.push_back( t.second );
+        //since we use t.second
+        //decrement its usage which is t.first
+        //add to the queue for next round
+        q.emplace( t.first - 1, t.second );
+        if( ( int )q.size() == k )
+        {
+            //now we have k letters
+            //get the first one and push to
+            //the heap
+            t = q.front();
+            q.pop();
+            if( t.first > 0 )
+            {
+                //only add to heap when
+                //the letter is still can be used
+                pq.emplace( t.first, t.second );
+            }
+        }
+    }
+    //only the result string has equal length as s
+    //is possible
+    return ans.size() == s.size() ? ans : "";
+}
+\end{lstlisting}
+
+\paragraph{Similar Problems}
+\begin{itemize}
+\item \textbf{621. Task Scheduler}
+\item \textbf{767. Reorganize String}
+\end{itemize}

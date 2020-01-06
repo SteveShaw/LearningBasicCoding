@@ -1,0 +1,79 @@
+\section{356 --- Line Reflection}
+
+\textbf{Medium}
+
+Given $n$ points on a 2D plane, find if there is such a line parallel to $y$-axis that reflect the given points.
+
+\paragraph{Example 1:}
+
+\begin{flushleft}
+\textbf{Input}: \fcj{[[1,1],[-1,1]]}
+
+\textbf{Output}: \fcc{true}
+\end{flushleft}
+
+\paragraph{Example 2:}
+
+\begin{flushleft}
+\textbf{Input}: \fcj{[[1,1],[-1,-1]]}
+
+\textbf{Output}: \fcc{false}
+\end{flushleft}
+
+\paragraph{Follow up:}
+
+\begin{itemize}
+\item Could you do better than $O(n^2)$ ?
+\end{itemize}
+
+\subsection{Hash Table}
+We get the maximum and minimum of $x$ coordinate from the given points. The middle will be the $x$ coordinate of the reflect line.
+
+Then we iterate over the given points again, find the $x$ coordinate of reflected line and check if the $y$ coordinate is equal.
+
+\setcounter{lstlisting}{0}
+\begin{lstlisting}[style=customc, caption={Hash Map}]
+bool isReflected( vector<vector<int>>& points )
+{
+    if( points.empty() )
+    {
+        //no point is true
+        return true;
+    }
+    //map x to a set of y
+    unordered_map<int, unordered_set<int>> m;
+    int min_x = points[0][0];
+    int max_x = min_x;
+    for( const auto& pt : points )
+    {
+        m[pt[0]].insert( pt[1] );
+        min_x = ( min )( pt[0], min_x );
+        max_x = ( max )( pt[0], max_x );
+    }
+    int s = min_x + max_x;
+    for( const auto& pt : points )
+    {
+        int x = pt[0];
+        int y = pt[1];
+        //the refleced point's x coordinate
+        //is min(x)+max(x)-x
+        auto it = m.find( s - x );
+        if( it == m.end() )
+        {
+            return false;
+        }
+        //check if the y coordinate is equal
+        if( it->second.find( y ) == it->second.end() )
+        {
+            return false;
+        }
+    }
+    return true;
+}
+\end{lstlisting}
+
+\paragraph{Similar Problems}
+\begin{itemize}
+\item \textbf{149. Max Points on a Line}
+\item \textbf{447. Number of Boomerangs}
+\end{itemize}

@@ -41,30 +41,6 @@ After you sell your stock, you cannot buy stock on next day. (ie, cooldown 1 day
 \item 由于没有transaction，因此proift为0。
 \end{enumerate}
 在最后一天这四个option的最大值即为所能获得的最大profit。
-\setcounter{algorithm}{0}
-\begin{algorithm}[H]
-\caption{Dynamic Programming}
-\begin{algorithmic}[1]
-\Procedure{MaxProfit}{$A, L$}
-\State $\star$ 初始化四个变量$x_0$, $ x_1 $ and $ y_0 $, $ y_1 $
-\State $\star$ $ x_0 $ and $ x_1 $ represents the maximum profit on day $ i $ for option 1 and 2 respectively
-\State $\star$ $ y_0 $ and $ y_1 $ represents the maximum profit on day $ i $ for option 3 and 4 respectively
-\State $x_0:=0$, \quad $x_1:=-A[0]$ \Comment The initial profit for option 1 and 2
-\State $y_0:=-A[0]$, \quad $y_1:=0$ \Comment The initial profit for option 3 and 4
-\For{$i:=1$ \textbf{to} $ L-1 $}
-\State $\ast$ 保存当前的四个变量的值
-\State $\hat{x_0}:=x_0$, \quad $\hat{x_1}:=x_1$
-\State $\hat{y_0}:=y_0$, \quad $\hat{y_1}:=y_1$
-\State $\ast$ 进行递推计算
-\State $x_0\gets \max(\hat{x_1} + A[i], \hat{y_0} + A[i])$ \Comment option 1 on day $ i $ means either 2 or 3 on day $ i-1 $
-\State $x_1\gets \max(\hat{x_1}, \hat{y_0})$ \Comment option 2 on day $ i $ means either 2 or 3 on day $ i-1 $
-\State $y_0\gets \hat{y_1} - A[i]$ \Comment option 3 on day $ i $ means only 4 on day $ i-1 $
-\State $y_1\gets \max(\hat{x_0} + A[i], \hat{y_1})$ \Comment option 4 on day $ i $ means either 1 or 4 on day $ i-1 $
-\EndFor
-\State \Return $ \max(x_0, x_1, y_0, y_1) $ \Comment The maximum of these 4 variables is the maximum profit
-\EndProcedure
-\end{algorithmic}
-\end{algorithm}
 \setcounter{lstlisting}{0}
 \begin{lstlisting}[style=customc, caption={Dynamic Programming}]
 int maxProfit( vector<int>& prices )
@@ -108,3 +84,4 @@ int maxProfit( vector<int>& prices )
     return ans;
 }
 \end{lstlisting}
+

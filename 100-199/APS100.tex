@@ -1,18 +1,7 @@
 \documentclass[a4paper,12pt]{article}
 \usepackage{fontspec}
-\usepackage[slantfont, boldfont]{xeCJK}
+\usepackage{xeCJK}
 \setmainfont{Times New Roman}
-%\setmainfont{Microsoft YaHei}
-%\setsansfont{Comic Sans MS}
-%\setmonofont{Ubuntu Mono}
-%\setCJKmainfont{Microsoft YaHei}
-%\setCJKmonofont{Source Code Pro}
-%\setCJKsansfont{YouYuan}
-% correct line break for chinese
-\XeTeXlinebreaklocale "zh"
-\XeTeXlinebreakskip = 0pt plus 1pt
-%\setmainfont{Times New Roman}
-%\usepackage[english]{babel}
 \usepackage{amsmath}
 \usepackage{amsthm}
 \usepackage{amsfonts}
@@ -23,21 +12,18 @@
 \usepackage{textcomp}
 \usepackage{float}
 \usepackage{booktabs}
-
+\usepackage{url}
 \usepackage[left=1.50cm, right=1.50cm, top=1.20cm]{geometry}
 \linespread{1.5}
 \usepackage{algorithm}
 \usepackage{algpseudocode}
-
 \usepackage{tikz}
-\usepackage[tikz]{mdframed}
-\usetikzlibrary{matrix, positioning, fit, arrows, calc, intersections, shapes, shadings, patterns, decorations.markings, chains, scopes}
-
-\usepackage{tikzpeople}
-\usepackage{tikzsymbols}
+\usetikzlibrary{matrix, positioning, fit, calc, arrows, intersections, shapes, decorations.markings}
 \usepackage{upquote}
 \usepackage{listings}
-\lstset{upquote=true}
+\usepackage{color}
+\usepackage{subcaption}
+\usepackage[tikz]{mdframed}
 \lstdefinestyle{customc}{
   belowcaptionskip=1\baselineskip,
   breaklines=true,
@@ -45,6 +31,8 @@
   xleftmargin=\parindent,
   language=C++,
   tabsize=2,
+  %numbers=left,
+  %stepnumber=1,
   showstringspaces=false,
   basicstyle=\small\ttfamily,
   keywordstyle=\bfseries\color{green!40!black},
@@ -54,9 +42,10 @@
 }
 \mdfdefinestyle{mymdf}{leftmargin=1cm,rightmargin=2cm,%
 innerleftmargin=1cm,innerrightmargin=1cm,roundcorner=10pt,backgroundcolor=lg}
-\title{Algorithm Problem Set \\ \large No. 100 --- 200}
+\definecolor{lg}{RGB}{247,249,250}
+\title{Algorithm Problem Set \\ \large No. 100 --- 199}
 \author{SS}
-\date{November 2018}
+
 
 \begin{document}
 \renewcommand{\thelstlisting}{\thesection.\arabic{lstlisting}}

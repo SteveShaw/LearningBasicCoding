@@ -1,6 +1,5 @@
 \section{354 --- Russian Doll Envelopes}
 You have a number of envelopes $A$ with widths and heights given as a pair of integers $(w, h)$. One envelope can fit into another if and only if both the width and height of one envelope is greater than the width and height of the other envelope.
-\par
 
 What is the maximum number of envelopes can you Russian doll? (put one inside other)
 
@@ -25,34 +24,6 @@ What is the maximum number of envelopes can you Russian doll? (put one inside ot
 \item 对输入的数组进行排序，首先按照width从小打到大排序，如果width相等，则按照height从大到小排序。由于width是从小到大的，所以实际上是寻找height的LIS。
 \item 之所以要在width相同的时候要把大的height放前面，用一个例子来说明： 例如两个doll分别为$[3, 4]$和$[3, 3]$，如果把$[3,3]$放在$[3,4]$前，那么在计算LIS时，会把$[3,3]$也计算进去，但是$[3,4]$不能包含$[3,3]$。
 \end{itemize}
-
-\setcounter{algorithm}{0}
-\begin{algorithm}[H]
-\caption{LIS}
-\begin{algorithmic}[1]
-\Procedure{MaxEnvelopes}{$A, L$}
-\State $\star$ Sort $A$ by ascending widths and descending heights for equal widths
-\State $\ast$ Find LIS for heights
-\State $\star$ Create an empty array $F$ 
-\State $\star$ Add $A[0]_h$ to $F$
-\For{$i:=1$ \textbf{to} $ L-1 $}
-\State $\star$ leftmost binary search first index $p$ so that $F[p]\geq A[i]_h$
-\If{$p:=\lvert F\rvert$}
-\State $\star$ Add $A[i]_h$ to $F$ \Comment Cannot find such $p$
-\algstore{354algo}
-\end{algorithmic}
-\end{algorithm}
-\begin{algorithm}[H]
-\begin{algorithmic}[1]
-\algrestore{354algo}
-\Else
-\State $F[p]\gets A[i]$ \Comment $p$ exists, update $F[p]$ to $ A[i]_h $
-\EndIf
-\EndFor
-\State \Return $ \lvert F\rvert $ \Comment return size of $F$
-\EndProcedure
-\end{algorithmic}
-\end{algorithm}
 
 \setcounter{lstlisting}{0}
 \begin{lstlisting}[style=customc, caption={LIS}]

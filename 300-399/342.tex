@@ -1,0 +1,61 @@
+\section{342 --- Power of Four}
+
+\textbf{Easy}
+
+Given an integer (signed 32 bits), write a function to check whether it is a power of 4.
+
+\paragraph{Example 1:}
+
+\begin{flushleft}
+\textbf{Input}: 16
+
+\textbf{Output}: \fcc{true}
+\end{flushleft}
+
+\paragraph{Example 2:}
+
+\begin{flushleft}
+\textbf{Input}: 5
+
+\textbf{Output}: \fcc{false}
+\end{flushleft}
+
+\paragraph{Follow up:}
+\begin{itemize}
+\item Could you solve it without loops/recursion?
+\end{itemize}
+
+\subsection{Bit Operation}
+We know how to check if a number is a power of 2.
+
+Now the problem is to distinguish between even powers of two (when $x$ is a power of four) and odd powers of two (when $x$ is not a power of four). 
+
+In binary representation both cases are single 1-bit followed by zeros.
+
+What is the difference? In the first case (power of four), 1-bit is at even position: bit 0, bit 2, bit 4, etc. In the second case, at odd position.
+
+Hence power of four would make a zero in a bitwise AND with number $(101010\ldots 10)_2$
+
+How long should be $(101010\ldots 10)_2$ if $x$ is a signed integer? Answer is 32 bits. 
+
+It's common to use hexadecimal representation: $(101010\ldots 10)_2 = (aaaaaaaa)_{16}$
+
+\setcounter{lstlisting}{0}
+\begin{lstlisting}[style=customc, caption={Bit Operation}]
+bool isPowerOfFour( int num )
+{
+    if( ( num > 0 ) && ( ( num & ( num - 1 ) ) == 0 ) )
+    {
+        //num is power of 2
+        //check if it is even power of 2
+        return ( num & 0xaaaaaaaa ) == 0;
+    }
+    return false;
+}
+\end{lstlisting}
+
+\paragraph{Related Problems}
+\begin{itemize}
+\item \textbf{231. Power of Two}
+\item \textbf{326. Power of Three}
+\end{itemize}
