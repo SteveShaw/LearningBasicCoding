@@ -1,8 +1,7 @@
 \section{365 --- Water and Jug Problem}
 You are given two jugs with capacities $ x $ and $ y $ litres. There is an infinite amount of water supply available. You need to determine whether it is possible to measure exactly $ z $ litres using these two jugs.
-\par
+
 If $ z $ liters of water is measurable, you must have $ z $ liters of water contained within one or both buckets by the end.
-\par
 
 Operations allowed:
 
@@ -30,11 +29,11 @@ Operations allowed:
 
 \subsection{Number Theory}
 The basic idea is to use the property of B\'{e}zout's identity and check if $ z $ is a multiple of greatest common divisor of $ x $ and $ y $。  B\'{e}zout's identity (also called  B\'{e}zout's lemma) is a theorem in the elementary theory of numbers:
-\par
+
 let $ a $ and $ b $ be \textbf{nonzero} integers and let $ d $ be their greatest common divisor. Then there exist integers $ x $ and $ y $ such that $ ax+by=d $
-\par
+
 In addition, the greatest common divisor $ d $ is the smallest positive integer that can be written as $ ax + by $
-\par
+
 every integer of the form $ ax + by $ is a multiple of the greatest common divisor $ d $.
 \begin{enumerate}
 \item 注意，上述定理中$ a $和$ b $都是非零整数。

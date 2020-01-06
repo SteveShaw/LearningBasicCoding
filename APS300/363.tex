@@ -35,38 +35,11 @@ is 2, and 2 is the max number no larger than $ k $ ($ k = 2 $).
 \subsection{2D kadane}
 \begin{enumerate}
 \item 将$ M $按照行拆成多个一维数组，然后利用一维数组的累加和来找符合要求的数字。具体做法是iterate over columns。对于current column $ x $，从$x$遍历到$n-1$($ n $ is the number of columns)，然后在$[x,n-1]$中的每一个column $y$，计算每一行的累加和，放入一个大小为$m$的数组$z$中($ m $ is the number of rows)。即对于current row $ r $， $z[r]=\sum\limits_{i=x}^{y}M[r][i]$。
+\item After getting the sum of each row, we apply 1D kadane first to see if we can reach a maximum sum which is no larger than $k$. If the maximum sum is larger than $k$, we will go to next.
 \item 然后在$z$中计算prefix sum，并寻找两个row $u$和$v$使得$z[u]-z[v]\leq k$ 并且$z[u]-z[v]$又是目前最大的difference。这样在column $y$就找到了一个具有最大sum的rectange区域，左上角位$(u, x)$，右下角index为$(v, y)$。
 \item 为了能够快速定位，将$z$的prefix sum放入一个tree set $s$中，然后对于对于当前的prefix sum $t$，在$s$中binary search到$p$，使得$t\leq k+p$，即leftmost binary search。
 \item 最开始$s$需要放入一个零，这样，当然prefix sum和$k$相等时，即得到以第一行开始的prefix sum。而这也是符合条件的。
 \end{enumerate}
-
-\setcounter{algorithm}{0}
-\begin{algorithm}[H]
-\caption{2D Kadane}
-\begin{algorithmic}[1]
-\Procedure{MaxSumSubmatrix}{$M, m, n$}
-\State $\sigma:=-\infty$ \Comment $\sigma$ is the maximum sum
-\For{$c:=0$ \textbf{to} $n-1$}
-\State $ \ast $ 得到每行的的累加和
-\State $\star$ Create an array $z$ with size $m$ and all elements are zero initially
-\For{$x:=c$ \textbf{to} $n-1$} \label{363note1}
-\For{$r:=0$ \textbf{to} $m-1$} \label{363note2}
-\State $z[r]\gets z[r] + M[r][x]$
-\EndFor \Comment End for[\ref{363note2}]
-\State $\star$ Create an empty tree set $s$, and insert 0 into $s$
-\State $t:=0$ \Comment $t$ is the prefix sum for $z$
-\For{$r:=0$ \textbf{to} $m-1$}
-\State $t\gets t+z[r]$
-\State $\star$ leftmost binary search the first item $g$ in $z$ such that $g\geq t-k$
-\State $\sigma\gets\max(\sigma, t-g)$
-\State $\star$ insert $t$ into $s$
-\EndFor
-\EndFor \Comment End for[\ref{363note1}]
-\EndFor
-\State \Return $\sigma$
-\EndProcedure
-\end{algorithmic}
-\end{algorithm}
 
 \setcounter{lstlisting}{0}
 \begin{lstlisting}[style=customc, caption={2D Kadane}]
