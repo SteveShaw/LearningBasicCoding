@@ -92,33 +92,6 @@ int fromRight( int n )
 \item We also maintain a variable $\delta$ as the elimination step. $\delta$ will be double each time since we eliminate every other number. Initially, $\delta=1$.
 \end{itemize}
 
-
-\begin{algorithm}[H]
-\caption{Iterative}
-\begin{algorithmic}[1]
-\Procedure{LastRemaining}{$n$}
-\State $x:=1$ \Comment The first number after each round
-\State $\delta:=1$ \Comment The step by which the first number will move
-\State $b:=0$ \Comment Indicate if current round is from left (0=left, 1=right)
-\algstore{390algo}
-\end{algorithmic}
-\end{algorithm}
-\begin{algorithm}[H]
-\begin{algorithmic}[1]
-\algrestore{390algo}
-\While{$n>1$}
-\If{$b=0$ \textbf{or} $n\bmod 2=1$}
-\State $x\gets x+\delta$ \Comment The first number will be changed
-\EndIf
-\State $\delta\gets \delta * 2$ \Comment Double the step
-\State $y\gets y/2$ \Comment Half the count of remaining numbers
-\State $b=1-b$ \Comment Change to another direction
-\EndWhile
-\State \Return $x$
-\EndProcedure
-\end{algorithmic}
-\end{algorithm}
-
 \begin{lstlisting}[style=customc, caption={Iterative}]
 int lastRemaining( int n )
 {

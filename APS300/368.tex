@@ -6,17 +6,17 @@ If there are multiple solutions, return any subset is fine.
 \paragraph{Example 1:}
 
 \begin{flushleft}
-\textbf{Input}: $ [1,2,3] $
+\textbf{Input}: \fcj{[1,2,3]}
 \\
-\textbf{Output}: $ [1,2] $ (of course, $ [1,3] $ will also be ok)
+\textbf{Output}: \fcj{[1,2]} (of course, \fcj{[1,3]} will also be ok)
 \end{flushleft}
 
 \paragraph{Example 2:}
 
 \begin{flushleft}
-\textbf{Input}: $ [1,2,4,8] $
+\textbf{Input}: \fcj{[1,2,4,8]}
 \\
-\textbf{Output}: $ [1,2,4,8] $
+\textbf{Output}: \fcj{[1,2,4,8]}
 \end{flushleft}
 
 \subsection{Dynamic Programming}
@@ -24,48 +24,10 @@ If there are multiple solutions, return any subset is fine.
 \item 和LIS解法相类似，不过这里返回的不是长度，而是构成最佳结果的elements。
 \item 首先需要排序数组，这样只要用后面的数是否能整除前面的数来判断这两个数能不能加入到一个subset中。 
 \item 同样用一个array $F$来作为Dynamic Programming的递推数组，其中$F[i]$表示到index $i$所得到的最大的subset的元素个数。和LIS解法一样，对于当前index $i$，都需要从0遍历到$i-1$逐个进行测试
-\item 另外用一个array $P$来记录上述过程中以$A[i]$为最后一个元素所能得到的最大subset中上一个$A[i]$能整除的数的index。
+\item 另外用一个array $P$来记录上述过程中以$A[i]$为最后一个元素所能得到的最大subset中上一个$A[i]$能整除的数的index。We will use this array in the end to get the chain of numbers in the subset.
 \item 用两个变量$\ell$和$t$分别记录当前全局最大的subset的元素个数，以及产生这个最大subset的最大数所在的index。
 \item 最后根据数组$P$以及所记录的全局最大subset中的最大数的index，反推出构成全局最大subset的所有elements，加入到输出数组中。
 \end{itemize}
-
-\setcounter{algorithm}{0}
-\begin{algorithm}[H]
-\caption{Dynamic Programming}
-\begin{algorithmic}[1]
-\Procedure{LargestDivisibleSubset}{$A, L$}
-\State $\star$ Sort $A$ by ascending order
-\State $\star$ Create an array $F$ with size $L$ and set all elements to $1$ initially
-\State $\star$ $F[i]$ is the number elements in the largest subset ending with number $A[i]$. 
-\State $\star$ Create an array $P$ with size $L$ and set all element to $+\infty$ initially
-\State $\star$ $P[i]$ is the index of last number by which $A[i]$ can be divided in that subset
-\State $\ell:=1$ \Comment The number of global largest subset
-\State $t:=0$ \Comment The index of largest number in the global largest subset
-\For{$i:=1$ to $ L-1 $}
-\For{$j:=0$ \textbf{to} $i-1$} \label{368note1}
-\If{$ A[i] \bmod A[j] = 0 $}
-\If{$F[i] < F[j]+1$} \label{368note2}
-\State $F[i]\gets F[j]+1$
-\State $P[i]\gets j$
-\EndIf  \Comment End If[\ref{368note2}]
-\EndIf
-\EndFor   \Comment End for loop[\ref{368note1}]
-\If{$\ell < F[i]$} \Comment Compare to global value
-\State $\ell\gets F[i]$
-\State $t\gets i$
-\EndIf
-\EndFor
-\State $\ast$ Get the elements by starting from $t$ and loop through array $P$
-\State $s:=\emptyset$ \Comment The result set
-\State $\ast$ Add $A[t]$ to $s$
-\While{$P[t]\neq +\infty$}
-\State $t\gets P[t]$
-\State $\ast$ Add $A[t]$ to $s$
-\EndWhile
-\State \Return $s$
-\EndProcedure
-\end{algorithmic}
-\end{algorithm}
 
 \setcounter{lstlisting}{0}
 \begin{lstlisting}[style=customc, caption={Dynamic Programming}]
@@ -75,57 +37,46 @@ vector<int> largestDivisibleSubset( vector<int>& nums )
     {
         return {};
     }
-
-    sort( nums.begin(), nums.end() );
-
-    //the number of elements in the largest subset ending in nums[i]
+    //sort nums first
+    sort( begin( nums ), end( nums ) );
+    //the size of largest divisible subset ending at nums[i]
     vector<int> F( nums.size(), 1 );
-
-    //the index of last number can divide nums[i]
-    vector<size_t> pre( nums.size(), nums.size() );
-
-    //global maximum
-    int best = 0;
-    //nums[best_i] is the largest number in the largest subset
-    size_t best_i = 0;
-
-    for( size_t i = 1; i < nums.size(); ++i )
+    //parents[i]: the largest index which is less than i
+    //and nums[i] can be divided by nums[parents[i]]
+    vector<size_t> parents( nums.size(), nums.size() + 1 );
+    int max_count = 1;
+    size_t max_ending = 0;
+    for( size_t i = 1ull; i < nums.size(); ++i )
     {
-        for( size_t j = 0; j < i; ++j )
+        for( size_t j{}; j < i; ++j )
         {
             if( ( nums[i] % nums[j] ) == 0 )
             {
                 if( F[i] < F[j] + 1 )
                 {
-                    //found a larger one
+                    //update F[i]
                     F[i] = F[j] + 1;
-                    //update the index of last number
-                    pre[i] = j;
+                    //update parents[i]
+                    parents[i] = j;
                 }
             }
         }
-
-        //compare to global value
-        if( F[i] > best )
+        if( F[i] > max_count )
         {
-            best = F[i];
-            best_i = i;
+            //update global maximum count
+            max_count = F[i];
+            //update larget index in the largest subset so far
+            max_ending = i;
         }
     }
-
-    auto x = best_i;
-
     vector<int> ans;
-
-    //get elements by loop through array pre
-    do
+    for( int i = 0; i < max_count; ++i )
     {
-        ans.push_back( nums[x] );
-        x = pre[x];
+        //get the chain of numbers
+        //by parents array
+        ans.push_back( nums[max_ending] );
+        max_ending = parents[max_ending];
     }
-    while( x < nums.size() );
-
     return ans;
-
 }
 \end{lstlisting}

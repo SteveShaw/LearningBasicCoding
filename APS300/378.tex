@@ -38,55 +38,6 @@ Note that it is the $k$th smallest element in the sorted order, not the $k$th di
 \end{enumerate}
 可以看到上面的过程其实就是leftmost binary search，只不过Search Space是range，不是index。需要在range中找到第一个数，使得range中小于等于这个数的count为$k$。
 
-\setcounter{algorithm}{0}
-\begin{algorithm}[H]
-\caption{Binary Search}
-\begin{algorithmic}[1]
-\Procedure{KthSmallest}{$M, n$}
-\State $l:=M[0][0]$ \Comment The left boundary of the range
-\State $r:=M[n-1][n-1]$ \Comment The right boundary of the range
-\State $\ast$ Find the first number $x$ in range $[l,r]$ that the count of numbers in $M$ no larger than $x$ is $k$
-\While{$l < r$}
-\State $x:=(l+r)/2$ \Comment The middle number in the range $[l, r]$
-\State $\delta:=$\Call{F}{$ M, n, x $} \Comment Get the count of numbers no larger than $x$ in $M$
-\If{$\delta < k$}
-\State $l\gets x+1$
-\Else
-\State $r\gets x$
-\EndIf
-\EndWhile
-\State \Return $l$
-\EndProcedure
-\end{algorithmic}
-\end{algorithm}
-
-Function $F$则在$M$中找到不大于于目标值$T$的元素的个数。
-\begin{algorithm}[H]
-\caption{Find counts of elements no larger than $T$}
-\begin{algorithmic}[1]
-\Procedure{F}{$M, n, T$}
-\State $\ast$ Start from $M[n-1][0]$, i.e the bottom left of $M$
-\State $r:=n-1$
-\State $c:=0$
-\State $\delta:=0$
-\While{$r\geq 0 $ \textbf{and} $c < n$}
-\algstore{378algo}
-\end{algorithmic}
-\end{algorithm}
-\begin{algorithm}[H]
-\begin{algorithmic}[1]
-\algrestore{378algo}
-\If{$M[r][c] \leq T$}
-\State $\delta\gets \delta + (r+1)$ \Comment $r+1$ numbers are no larger than $T$ for sure
-\State $c\gets c+1$ \Comment Move right
-\Else
-\State $l\gets l-1$ \Comment Move up
-\EndIf
-\EndWhile
-\State \Return $\delta$
-\EndProcedure
-\end{algorithmic}
-\end{algorithm}
 
 \setcounter{lstlisting}{0}
 \begin{lstlisting}[style=customc, caption={Binary Search}]
@@ -142,3 +93,64 @@ int get_numbers( vector<vector<int>>& matrix, int target )
     return count;
 }
 \end{lstlisting}
+
+We can use iterator to simplify some code
+
+\begin{lstlisting}[style=customc, caption={STL Iterator}]
+int kthSmallest( vector<vector<int>>& matrix, int k )
+{
+    //the search space is [lo, hi]
+    int lo = matrix[0][0];
+    int hi = matrix.back().back();
+    //get count of elements inside matrix
+    //which is less than x
+    auto less_count = [ &matrix ]( int x )
+    {
+        int count = 0;
+        auto rp = rbegin( matrix );
+        size_t col{};
+        while( ( rp != matrix.rend() ) && ( col < matrix[0].size() ) )
+        {
+            if( ( *rp )[col] <= x )
+            {
+                //from first row to current row
+                //the element at this column
+                //are all no larger than x
+                //notice, we want to get count of rows from 0 to current row
+                //matrix.rend() is the row before 0, and rp is current row
+                //so distance( rp, matrix.rend() ) give the number of rows
+                count += ( int ) distance( rp, matrix.rend() );
+                ++col;
+            }
+            else
+            {
+                ++rp;
+            }
+        }
+        return count;
+    };
+    //leftmost binary search
+    while( lo < hi )
+    {
+        auto mid = lo + ( hi - lo ) / 2;
+        auto count = less_count( mid );
+        if( count < k )
+        {
+            lo = mid + 1;
+        }
+        else
+        {
+            hi = mid;
+        }
+    }
+    return lo;
+}
+\end{lstlisting}
+
+\paragraph{Similar Problems}
+\begin{itemize}
+\item \textbf{373. Find K Pairs with Smallest Sums}
+\item \textbf{668. Kth Smallest Number in Multiplication Table}
+\item \textbf{719. Find K-th Smallest Pair Distance}
+\item \textbf{786. K-th Smallest Prime Fraction}
+\end{itemize}

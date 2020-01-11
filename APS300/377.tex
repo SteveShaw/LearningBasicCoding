@@ -23,11 +23,76 @@ Given an integer array $A$ with all positive numbers and no duplicates, find the
 Note that different sequences are counted as \textbf{different} combinations.
 \end{flushleft}
 
- 
-
 \paragraph{Follow up:}
 \begin{itemize}
 \item What if negative numbers are allowed in the given array?
 \item How does it change the problem?
 \item What limitation we need to add to the question to allow negative numbers?
 \end{itemize}
+
+\subsection{Dynamic Programming}
+We need a DP array $F$, where $F[i]$ means the count of possible combinations add up to $i$.
+
+\setcounter{lstlisting}{0}
+\begin{lstlisting}[style=customc, caption={DP}]
+int combinationSum4( vector<int>& nums, int target )
+{
+    //we need a slove space of [0, target];
+    vector<int> F( target + 1, 0 );
+    //Base case: we have only one way to achieve target zero
+    //i.e. select nothing from nums
+    F[0] = 1;
+    //for each element in the solve space
+    //try possible number from input array
+    for( int i = 1; i <= target; ++i )
+    {
+        for( int n : nums )
+        {
+            if( i >= n )
+            {
+                F[i] += F[i - n];
+            }
+        }
+    }
+    return F.back();
+}
+\end{lstlisting}
+
+However, in some cases, if we use \fcc{int} type, the result will be datatype overflow. We need to skip impossible target with recursion and memorization
+
+\begin{lstlisting}[style=customc, caption={DP With Memo}]
+int combinationSum4( vector<int>& nums, int target )
+{
+    unordered_map<int, int> m;
+    return dfs( target, nums, m );
+}
+//recursion helper function
+int dfs( int t, vector<int>& nums, unordered_map<int, int>& m )
+{
+    if( t < 0 )
+    {
+        return 0;
+    }
+    if( t == 0 )
+    {
+        return 1;
+    }
+    auto it = m.find( t );
+    if( it != m.end() )
+    {
+        return it->second;
+    }
+    int count = 0;
+    //test each number of input array
+    for( int n :  nums )
+    {
+        //accumulate the result for each target (t-n)
+        count += dfs( t - n, nums, m );
+    }
+    m.emplace( t, count );
+    return count;
+}
+\end{lstlisting}
+ 
+\subsection{Follow Up}
+If negative numbers exist in input array, then the combinations could be infinite length. If we limit the length of the combination sequence, the problem will have a finite solution.

@@ -1,0 +1,74 @@
+\section{370 --- Range Addition}
+
+\textbf{Medium}
+
+Assume you have an array of length $n$ initialized with all 0's and are given $k$ update operations.
+
+Each operation is represented as a triplet: \fcj{[startIndex, endIndex, inc]} which increments each element of subarray \fcj{A[startIndex ... endIndex]} (\fcj{startIndex} and \fcj{endIndex} inclusive) with \fcj{inc}.
+
+Return the modified array after all $k$ operations were executed.
+
+\paragraph{Example:}
+
+\begin{flushleft}
+\textbf{Input}: \fcj{length = 5}, \fcj{updates = [[1,3,2],[2,4,3],[0,2,-2]]}
+
+\textbf{Output}: \fcj{[-2,0,3,5,3]}
+
+\textbf{Explanation}:
+
+Initial state:
+
+\fcj{[0,0,0,0,0]}
+
+After applying operation \fcj{[1,3,2]}:
+
+\fcj{[0,2,2,2,0]}
+
+After applying operation \fcj{[2,4,3]}:
+
+\fcj{[0,2,5,5,3]}
+
+After applying operation \fcj{[0,2,-2]}:
+
+\fcj{[-2,0,3,5,3]}
+\end{flushleft}
+
+\subsection{Prefix Sum}
+Apply update \fcj{[start, end]} with value $n$, we can update \fcj{[start, length-1]} with value $n$ and then update \fcj{[end+1, length-1]} with value $-n$.
+
+There is only one read query on the entire range, and it occurs at the end of all update queries. Additionally, the order of processing update queries is irrelevant.
+
+Cumulative sums operations apply the effects of past elements to the future elements in the sequence.
+
+\setcounter{lstlisting}{0}
+\begin{lstlisting}[style=customc, caption={Prefix Sum}]
+vector<int> getModifiedArray( int length, vector<vector<int>>& updates )
+{
+    vector<int> ans( length, 0 );
+    for( const auto& update : updates )
+    {
+        //set arr[start] = arr[start] + n
+        ans[update[0]] += update[2];
+        //set arr[end+1] = arr[end+1]-n
+        if( update[1] < length - 1 )
+        {
+            ans[update[1] + 1] -= update[2];
+        }
+    }
+    //apply cumulative sum
+    // partial_sum applies the following operation (by default) for the parameters {x[0], x[n], y[0]}:
+    // y[0] = x[0]
+    // y[1] = y[0] + x[1]
+    // y[2] = y[1] + x[2]
+    // ...  ...  ...
+    // y[n] = y[n-1] + x[n]
+    partial_sum( begin( ans ), end( ans ), begin( ans ) );
+    return ans;
+}
+\end{lstlisting}
+
+\paragraph{Similar Problems}
+\begin{itemize}
+\item \textbf{598. Range Addition II}
+\end{itemize}

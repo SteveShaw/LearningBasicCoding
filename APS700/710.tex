@@ -140,6 +140,35 @@ public:
 };
 \end{lstlisting}
 
+Another one with STL
+
+\begin{lstlisting}[style=customc, caption={STL}]
+class Solution
+{
+public:
+    Solution( int N, vector<int>& blacklist ): B( blacklist )
+    {
+        sort( begin( B ), end( B ) );
+        for( size_t i = 0; i < B.size(); ++i )
+        {
+            //get number of whitelist numbers
+            //that are less than B[i]
+            B[i] -= i;
+        }
+        n = N;
+    }
+    int pick()
+    {
+        int k = ( rand() % ( n - ( int )B.size() ) );
+        //get first B[i] that is B[i] - i > k
+        auto it = upper_bound( begin( B ), end( B ), k );
+        return k + distance( B.begin(), it );
+    }
+    vector<int>& B;
+    int n;
+};
+\end{lstlisting}
+
 \subsection{Virtual Whitelist}
 We can re-map all blacklist numbers in $[0,N−\lvert B\rvert-1]$ to whitelist numbers such that when we randomly pick a number from $[0,N−\lvert B\rvert-1]$, we actually randomly pick amongst all whitelist numbers.
 

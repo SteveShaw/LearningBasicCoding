@@ -31,50 +31,12 @@ Given a string $S$, find the first non-repeating character in it and return it's
 \item After $S$ is completely scanned, iterate over $M$. Check the smallest slot which has value no less than zero.
 \end{itemize}
 
-\begin{algorithm}[H]
-\caption{Counter}
-\begin{algorithmic}[1]
-\Procedure{FirstUniqChar}{$S, L$}
-\State $\star$ Create a counter array $M$ with size 26 and all elements are $-1$
-\For{$i:=0$ \textbf{to} $L-1$}
-\State $\ast$ Process $S$
-\State $c:=S[i]$
-\algstore{387algo}
-\end{algorithmic}
-\end{algorithm}
-\begin{algorithm}[H]
-\begin{algorithmic}[1]
-\algrestore{387algo}
-\If{$M[c] = -1$}
-\State $M[c]\gets i$ \Comment We have not met $c$
-\Else
-\State $M[c]\gets -2$ \Comment $c$ appear before
-\EndIf
-\EndFor
-\State $\ast$ Check $M$
-\State $x:=-1$ \Comment The index of first unique letter
-\For{$c:=a$ \textbf{to} $z$}
-\If{$M[c]\geq 0$} \Comment $c$ is a unique letter
-\If{$x<0$}
-\State $x\gets M[c]$ \Comment First time to assign value to $x$
-\Else
-\State $x\gets\min(x, M[c])$ \Comment Get minimum for $x$
-\EndIf
-\EndIf
-\EndFor
-\State \Return $x$
-\EndProcedure
-\end{algorithmic}
-\end{algorithm}
-
 \setcounter{lstlisting}{0}
 \begin{lstlisting}[style=customc, caption={Counter}]
 int firstUniqChar( string s )
 {
     vector<int> m( 26, -1 );
-
     int l = static_cast<int>( s.size() );
-
     for( int i = 0; i < l; ++i )
     {
         if( m[s[i] - 'a'] == -1 )
@@ -88,9 +50,7 @@ int firstUniqChar( string s )
             m[s[i] - 'a'] = -2;
         }
     }
-
     int ans = -1;
-
     for( int i = 0; i < 26; ++i )
     {
         if( m[i] >= 0 )
@@ -107,8 +67,6 @@ int firstUniqChar( string s )
             }
         }
     }
-
     return ans;
-
 }
 \end{lstlisting}

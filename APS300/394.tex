@@ -10,7 +10,59 @@ Furthermore, you may assume that the original data does not contain any digits a
 \paragraph{Examples:}
 
 \begin{itemize}
-\item $S = 3[a]2[bc]$, return \texttt{aaabcbc}.
-\item $S = 3[a2[c]]$, return \texttt{accaccacc}.
-\item $S = 2[abc]3[cd]ef$, return \texttt{abcabccdcdcdef}.
+\item \fcj{s = "3[a]2[bc]"}, return \fcj{"aaabcbc"}.
+\item \fcj{s = "3[a2[c]]"}, return \fcj{"accaccacc"}.
+\item \fcj{s = "2[abc]3[cd]ef"}, return \fcj{"abcabccdcdcdef"}.
 \end{itemize}
+
+
+\subsection{Stack}
+We need two stacks: one to push a string and another for repeated times.
+
+\setcounter{lstlisting}{0}
+\begin{lstlisting}[style=customc, caption={Iterative}]
+string decodeString( string s )
+{
+    stack<string> ss;
+    stack<int> si;
+    int count = 0;
+    //add empty string and count 1
+    //to facilitate further processing
+    ss.emplace( "" );
+    si.push( 1 );
+    int num = 0;
+    for( auto c : s )
+    {
+        if( c == '[' )
+        {
+            //add last count
+            si.emplace( num );
+            //add an empty string
+            ss.emplace( "" );
+            num = 0;
+        }
+        else if( c == ']' )
+        {
+            auto t = ss.top();
+            ss.pop();
+            auto count = si.top();
+            si.pop();
+            for( int i = 0; i < count; ++i )
+            {
+                ss.top() += t;
+            }
+        }
+        else if( ( c >= '0' ) && ( c <= '9' ) )
+        {
+            num = num * 10 + ( c - '0' );
+        }
+        else
+        {
+            //lowercase letter
+            ss.top().push_back( c );
+        }
+    }
+    return ss.top();
+}
+\end{lstlisting}
+

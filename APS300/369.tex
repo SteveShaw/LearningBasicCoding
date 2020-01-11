@@ -1,0 +1,67 @@
+\section{369 --- Plus One Linked List}
+
+\textbf{Medium}
+
+Given a non-negative integer represented as non-empty a singly linked list of digits, plus one to the integer.
+
+You may assume the integer do not contain any leading zero, except the number 0 itself.
+
+The digits are stored such that the most significant digit is at the head of the list.
+
+\paragraph{Example:}
+
+\begin{flushleft}
+\textbf{Input}: \fcj{[1,2,3]}
+
+\textbf{Output}: \fcj{[1,2,4]}
+\end{flushleft}
+
+\subsection{Find Rightmost Non Nine Node}
+We will find the right most non nine node, and change the values of all the nodes after it to zero
+
+\setcounter{lstlisting}{0}
+\begin{lstlisting}[style=customc, caption={Sentinel Node}]
+ListNode* plusOne( ListNode* head )
+{
+    auto p = head;
+    //find rightmost node which
+    //is not 9
+    ListNode* non_9 = nullptr;
+    while( p )
+    {
+        if( p->val != 9 )
+        {
+            non_9 = p;
+        }
+        p = p->next;
+    }
+    if( !non_9 )
+    {
+        //if no such node exists
+        //all nodes have value 9
+        //thus create a new node before head
+        auto new_head = new ListNode( 0 );
+        new_head->next = head;
+        head = new_head;
+        non_9 = head;
+    }
+    //increments the value of this rightmost
+    //non nine node
+    non_9->val += 1;
+    //change the values of nodes after it
+    //to zero
+    p = non_9->next;
+    while( p )
+    {
+        p->val = 0;
+        p = p->next;
+    }
+    return head;
+}
+\end{lstlisting}
+
+\paragraph{Similar Problems}
+\begin{itemize}
+\item \textbf{66. Plus One}
+\end{itemize}
+

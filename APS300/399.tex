@@ -1,0 +1,91 @@
+\section{399 --- Evaluate Division}
+
+\textbf{Medium}
+
+Equations are given in the format $A / B = k$, where $A$ and $B$ are variables represented as strings, and $k$ is a real number (floating point number). Given some queries, return the answers. If the answer does not exist, return $-1.0$.
+
+\paragraph{Example:}
+
+\textbf{Input}:
+
+\begin{flushleft}
+\fcj{equations = [ ["a", "b"], ["b", "c"] ]},
+
+\fcj{values = [2.0, 3.0]},
+
+\fcj{queries = [ ["a", "c"], ["b", "a"], ["a", "e"], ["a", "a"], ["x", "x"] ]}. 
+
+\textbf{Ouput}: \fcj{[6.0, 0.5, -1.0, 1.0, -1.0 ]}
+
+\end{flushleft} 
+
+The input is always valid. You may assume that evaluating the queries will result in no division by zero and there is no contradiction.
+
+\subsection{BFS}
+We can treat the numerator and denumerator as the nodes in a graph, and the weight is the divide value. Based on the graph, we can use BFS or DFS to find the path for the given query.
+
+\setcounter{lstlisting}{0}
+\begin{lstlisting}[style=customc, caption={DFS}]
+vector<double> calcEquation( vector<vector<string>>& equations, vector<double>& values, vector<vector<string>>& queries )
+{
+    //create graph
+    //g: [numerator, denumberator] --> value
+    map<pair<string_view, string_view>, double> g;
+    //nodes: [numerator]-> list of denumerators
+    unordered_map<string_view, vector<string_view>> nodes;
+    size_t i{};
+    for( const auto& eq : equations )
+    {
+        string_view x( eq[0].c_str(), eq[0].size() );
+        string_view y( eq[1].c_str(), eq[1].size() );
+        auto p = make_pair( x, y );
+        g[p] = values[i];
+        p = make_pair( y, x );
+        g[p] = 1.0 / values[i];
+        ++i;
+        nodes[x].push_back( y );
+        nodes[y].push_back( x );
+    }
+    vector<double> ans( queries.size(), -1.0 );
+    i = {};
+    //BFS to find the weight of path
+    //from query[0] to query[1]
+    for( const auto& query : queries )
+    {
+        string_view start( query[0].c_str(), query[0].size() );
+        string_view dest( query[1].c_str(), query[1].size() );
+        if( !nodes.count( start ) || !nodes.count( dest ) )
+        {
+            ++i;
+            continue;
+        }
+        queue<pair<string_view, double>> q;
+        q.emplace( start, 1.0 );
+        //use seen to avoid infinite loop
+        unordered_set<string_view> seen;
+        while( !q.empty() )
+        {
+            auto [k, v] = q.front();
+            q.pop();
+            if( k == dest )
+            {
+                ans[i] = v;
+                break;
+            }
+            seen.emplace( k );
+            for( auto next : nodes[k] )
+            {
+                if( seen.count( next ) )
+                {
+                    continue;
+                }
+                auto key = make_pair( k, next );
+                auto w = g[key];
+                q.emplace( next, w * v );
+            }
+        }
+        ++i;
+    }
+    return ans;
+}
+\end{lstlisting}

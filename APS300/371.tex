@@ -17,3 +17,25 @@ Calculate the sum of two integers $ a $ and $ b $, but you are not allowed to us
 \textbf{Output}: 1
 \end{flushleft}
 
+\subsection{Bit Operation}
+Get carry with \fcj{a & b}
+Get XOR result with \fcj{a ^ b}.
+Set \fcj{b} as \fcj{carry} left shift 1.
+
+Notice: in some compilers, we cannot left shift $-1$. A way to bypass this issue is to get carry with \fcj{a & b & 0x7fffffff} to clear the highest bit.
+
+\setcounter{lstlisting}{0}
+\begin{lstlisting}[style=customc, caption={Bit Operation}]
+int getSum( int a, int b )
+{
+    while( b )
+    {
+        //some compiler do not support left shift -1
+        //we need to clear highest bit with 0x7fffffff
+        int carry = ( ( a & b ) & 0x7fffffff );
+        a = a ^ b;
+        b = ( carry << 1 );
+    }
+    return a;
+}
+\end{lstlisting}

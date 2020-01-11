@@ -42,54 +42,61 @@ Find the $ k $ pairs $ (u_1,v_1),\; (u_2,v_2), \; \ldots,\;  (u_k,v_k) $ with th
 \subsection{Priority Queue}
 \begin{enumerate}
 \item 创建一个minimum priority queue $ Q $，其元素为$A$和$B$中的index pair $ (i,j) $，然后能产生最小的$A[i]+B[j]$的index pair在栈顶。
-\item 接着向$Q$中加入$(0,0)$，$ (1,0) $，$\ldots$直到$(\min(k, L_A),0)$。相当于把$A$中前$\min(k, L_A)$个数与$B[0]$加入到了$Q$中，由于$B[0]$是$B$中最小的，因此这样就把$B$中元素与$A$中元素之和的最小的$\min(k, L_A)$放入$ Q $中。
+\item 接着向$Q$中加入$(0,0)$，$ (1,0) $，$\ldots$直到$(\min(k, L_A),0)$。相当于把$A$中前$\min(k, L_A)$个数与$B[0]$加入到了$Q$中，由于$B[0]$是$B$中最小的，因此这样就把$B$中元素与$A$中元素之和的$\min(k, L_A)$个最小的放入$ Q $中。
 \item 然后开始逐步将$Q$中的元素弹出，加入到输出结果数组中，在弹出的元素中，将对应$B$的index increment，然后重新加入$Q$中排序，重复这个过程直到$k$为零或者$Q$为empty。
 \end{enumerate}
 
 \setcounter{lstlisting}{0}
 \begin{lstlisting}[style=customc, caption={Priority Queue}]
-vector<pair<int, int>> kSmallestPairs( vector<int>& nums1, vector<int>& nums2, int k )
+vector<vector<int>> kSmallestPairs( vector<int>& nums1, vector<int>& nums2, int k )
 {
+    if( nums1.empty() || nums2.empty() || ( k == 0 ) )
+    {
+        return {};
+    }
     //define comparison functino to sort when push into queue
     auto cmp = [&nums1, &nums2]( const pair<int, int>& p1, const pair<int, int>& p2 )
     {
         return nums1[p1.first] + nums2[p1.second] >
                nums1[p2.first] + nums2[p2.second];
     };
-
     priority_queue<pair<int, int>, vector<pair<int, int>>, decltype( cmp )> pq( cmp );
-
-    vector<pair<int, int>> ans;
-
-    int l1 = static_cast<int>( nums1.size() );
-    int l2 = static_cast<int>( nums2.size() );
-
+    vector<vector<int>> ans( k, vector<int>( 2 ) );
+    int l1 = (int)nums1.size();
+    int l2 = (int)nums2.size();
     int max_i = ( min )( l1, k );
-
     //add max_i index in A and 0 index in B to the queue
     for( int i = 0; i < max_i; ++i )
     {
         pq.emplace( i, 0 );
     }
-
-    while( k && !pq.empty() )
+    int ki = 0;
+    while( ( ki < k ) && !pq.empty() )
     {
-        auto t = pq.top();
+        auto i1 = pq.top().first;
+        auto i2 = pq.top().second;
         pq.pop();
-
-        ans.emplace_back( nums1[t.first], nums2[t.second] );
-
+        ans[ki][0] = nums1[i1];
+        ans[ki][1] = nums2[i2];
+        ++ki;
         //increment index in B
         //so that we can get possible smaller sum from
         //other elements in B
-        if( t.second + 1 < l2 )
+        if( i2 + 1 < l2 )
         {
-            pq.emplace( t.first, t.second + 1 );
+            pq.emplace( i1, i2 + 1 );
         }
-
-        --k;
     }
-
+    if( ki < k )
+    {
+        ans.resize( ki );
+    }
     return ans;
 }
 \end{lstlisting}
+
+\paragraph{Similar Problems}
+\begin{itemize}
+\item \textbf{378. Kth Smallest Element in a Sorted Matrix}
+\item \textbf{719. Find K-th Smallest Pair Distance}
+\end{itemize}

@@ -1,5 +1,5 @@
 \section{386 --- Lexicographical Numbers}
-Given an integer $n$, return 1 --- $n$ in lexicographical order.
+Given an integer $n$, return 1 - - $n$ in lexicographical order.
 \par
 For example, given 13, return: $[1,\;10,\;11,\;12,\;13,\;2,\;3,\;4,\;5,\;6,\;7,\;8,\;9]$.
 \par
@@ -17,42 +17,6 @@ Just repeatedly try from 1 to 9, $1 \to 10 \to 100$ first, and then plus 1 to th
 \item $\ldots$
 \item $9\to 90$, then we stop
 \end{itemize}
-
-\setcounter{algorithm}{0}
-\begin{algorithm}[H]
-\caption{DFS}
-\begin{algorithmic}[1]
-\Procedure{LexicalOrder}{$n$}
-\State $\star$ Create an array $A$ to store the results
-\State \Call{DFS}{$1, n, A$} \Comment Call helper function
-\State \Return $A$
-\EndProcedure
-\end{algorithmic}
-\end{algorithm}
-
-Function \texttt{DFS} generate the sequence with lexical order from number $x$ to $n$ and save the results to $A$
-
-\begin{algorithm}[H]
-\caption{Helper Function}
-\begin{algorithmic}[1]
-\Function{DFS}{$x, n, A$}
-\If{$x > n$}
-\State \Return
-\EndIf
-\algstore{386algo}
-\end{algorithmic}
-\end{algorithm}
-\begin{algorithm}[H]
-\begin{algorithmic}[1]
-\algrestore{386algo}
-\State $A\gets A+n$ \Comment Add current number to $A$
-\State \Call{DFS}{$x\times 10, n, A$} \Comment try ten times,i.e. add zero
-\If{$x\bmod 10 \neq 9$} \Comment $x$ is not end with number 9
-\State \Call{DFS}{$x+1, n, A$} \Comment try plus 1
-\EndIf
-\EndFunction
-\end{algorithmic}
-\end{algorithm}
 
 \setcounter{lstlisting}{0}
 \begin{lstlisting}[style=customc, caption={DFS}]

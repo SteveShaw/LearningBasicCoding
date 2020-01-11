@@ -63,49 +63,6 @@ is not the longest file path, if there is another path
 \item If a path element is a file (contains dot symbol), check from the start of $A$ the length of the absolute path to this file. Also, update the maximum length so far.
 \end{itemize}
 
-\setcounter{algorithm}{0}
-\begin{algorithm}[H]
-\caption{Tree Structure}
-\begin{algorithmic}[1]
-\Procedure{LengthLongestPath}{$S, L$}
-\State $\star$ Create a empty array $A$.
-\State $l:=0$ \Comment the level for each path element
-\State $x:=0$ \Comment The start index of a path element
-\State $z:=0$ \Comment The maximum length of path
-\For{$i:=0$ \textbf{to} $ L-1 $}
-\If{$S[i]$ is end line symbol \path{\n}}
-\State $\ast$ We know we reach end of a path element
-\algstore{388algo}
-\end{algorithmic}
-\end{algorithm}
-\begin{algorithm}[H]
-\begin{algorithmic}[1]
-\algrestore{388algo}
-\If{$l < \lvert A\rvert$} \Comment the level this path element is less than maximum level
-\State $A[l]\gets S[x,i-1]$ \Comment Put the substring $S[x,i-1]$ into slot $l$ in $A$
-\Else \Comment This path element has maximum level so far
-\State $A\gets A + S[x,i-1]$ \Comment Add the substring $S[x,i-1]$ to end of $A$
-\EndIf 
-\If{$S[x,i-1]$ is a file name}
-\State $\star$ Get total size $\omega$ of all path elements from $0$ to $l$ in $A$ with the number of slashes.
-\State $z\gets \max(z,\omega)$ \Comment Update $z$ to maximum size
-\EndIf
-\State $j:=i+1$
-\State $\ast$ skip tab symbols (\path{\t})
-\While{$j < L$ \textbf{and} $S[j] $ is \path{\t}}
-\State $j\gets j+1$
-\EndWhile
-\State $\ast$ Now we are at a letter which is the start of a new path element
-\State $l\gets j-i-1$ \Comment The number of tab symbols is the level
-\State $x\gets j$ \Comment Update the first index of next path element
-\State $i\gets j-1$ \Comment Since $i$ will be incremented next round, decrement it first.
-\EndIf
-\EndFor
-\State \Return $z$
-\EndProcedure
-\end{algorithmic}
-\end{algorithm}
-
 \setcounter{lstlisting}{0}
 \begin{lstlisting}[style=customc, caption={Tree}]
 int lengthLongestPath( string input )
@@ -177,5 +134,40 @@ int lengthLongestPath( string input )
     }
 
     return static_cast<int>( best );
+}
+\end{lstlisting}
+
+we can make use of \fcc{istringstream} to make code concise. We also make use of a hash map to map between the number of letter until last \fcc{'\t'} and the number of letters after the last \fcc{'\t'}
+
+\begin{lstlisting}[style=customc, caption={STL}]
+int lengthLongestPath( string input )
+{
+    istringstream iss( input );
+    string line;
+    size_t ans = 0;
+    unordered_map<size_t, size_t>m;
+    //add (0,0) to faciliate the process
+    m.emplace( 0, 0 );
+    while( getline( iss, line ) )
+    {
+        //find the index of last '\t'
+        auto pos = line.find_last_of( '\t' ) + 1;
+        //the number of letters after last '\t'
+        auto len_name = line.size() - pos;
+        if( line.find( '.' ) != string::npos )
+        {
+            //if the part after last '\t' is a filename
+            //update the result
+            ans = ( max )( ans, len_name + m[pos] );
+        }
+        else
+        {
+            //otherwise, update the hash map
+            //with the length of part before last '\t'
+            //and the total length of part
+            m[pos + 1] = len_name + 1 + m[pos];
+        }
+    }
+    return ( int )ans;
 }
 \end{lstlisting}

@@ -23,3 +23,75 @@ A subsequence of a string is a new string which is formed from the original stri
 \begin{itemize}
 \item If there are lots of incoming $ S $, say $S_1, S_2, \ldots , S_k$ where $k \geq 10^9$, and you want to check one by one to see if $T$ has its subsequence. In this scenario, how would you change your code?
 \end{itemize}
+
+\subsection{Two Pointers}
+We make use of two pointers with one point to $s$ and the other to $t$.
+
+When matched a letter between $s$ and $t$, advance the pointer to $s$.
+
+\setcounter{lstlisting}{0}
+\begin{lstlisting}[style=customc, caption={Two Pointers}]
+bool isSubsequence( string s, string t )
+{
+    if( s.empty() )
+    {
+        return true;
+    }
+    size_t si{};
+    for( size_t ti = 0; ti < t.size(); ++ti )
+    {
+        if( s[si] == t[ti] )
+        {
+            //increments index in s
+            ++si;
+            if( si == s.size() )
+            {
+                //whole s is matched
+                return true;
+            }
+        }
+    }
+    return false;
+}
+\end{lstlisting}
+
+\subsection{Binary Search}
+In the follow up scenario, we can build a hash map for each letter in $t$ with related indices, then do binary search for each letter in each $S_i$.
+
+\begin{lstlisting}[style=customc, caption={Binary Search}]
+bool isSubsequence( string s, string t )
+{
+    //get each letter's positions in t
+    unordered_map<char, vector<size_t>> m;
+    for( size_t i {}; i < t.size(); ++i )
+    {
+        m[t[i]].push_back( i );
+    }
+    //pre is the position in t of last matched letter of s
+    size_t pre = t.size();
+    for( auto c : s )
+    {
+        auto it = m.find( c );
+        if( it == m.end() )
+        {
+            return false;
+        }
+        const auto& a = it->second;
+        if( pre == t.size() )
+        {
+            pre = a[0];
+        }
+        else
+        {
+            auto p = upper_bound( begin( a ), end( a ), pre );
+            if( p == a.end() )
+            {
+                return false;
+            }
+            //update last matched position
+            pre = *p;
+        }
+    }
+    return true;
+}
+\end{lstlisting}

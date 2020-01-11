@@ -1,10 +1,10 @@
 \section{691 --- Stickers to Spell Word}
 We are given $N$ different types of \textbf{stickers}. Each sticker has a \textbf{lowercase} English word on it.
-\par
+
 You would like to spell out the given \textbf{target} string $T$ by cutting individual letters from your collection of stickers and rearranging them.
-\par
+
 You can use each sticker more than once if you want, and you have infinite quantities of each sticker.
-\par
+
 What is the minimum number of stickers that you need to spell out the target? If the task is impossible, return -1.
 \paragraph{Example 1:}
 \begin{flushleft}
@@ -55,15 +55,6 @@ For each state $s$, we look at what happens to it after applying a sticker. For 
 Thus, we make use of an array $F$. For each state $s$, $F[s]$ gives the minimum number of stickers such that: for each set bit $i$ in $s$, $T[i]$ can be spelled by the stickers. 
 
 We starting from zero state. For each current state $s$, we apply a sticker and will get next state $s_1$. Then $F[s_1]=\min(F[s_1], F[s]+1)$. After checking all $2^L$ states, $F[2^L-1]$ is the answer.
-
-\subsubsection{Algorithm}
-The inputs of the following procedure are
-\begin{itemize}
-    \item $S$ --- The input sticker array
-    \item $N$ --- The length of $S$
-    \item $T$ --- The target string
-    \item $L$ --- The length of $T$
-\end{itemize}
 
 \setcounter{lstlisting}{0}
 \begin{lstlisting}[style=customc, caption={Dynamic Progamming}]

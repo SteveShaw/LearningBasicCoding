@@ -1,0 +1,103 @@
+\section{379 --- Design Phone Directory}
+
+\textbf{Medium}
+
+Design a Phone Directory which supports the following operations:
+
+\begin{itemize}
+\item \fcc{get}: Provide a number which is not assigned to anyone.
+
+\item \fcc{check}: Check if a number is available or not.
+
+\item \fcc{release}: Recycle or release a number.
+\end{itemize}
+
+\paragraph{Example:}
+
+\begin{flushleft}
+\fcc{// Init a phone directory containing a total of 3 numbers: 0, 1, and 2.}
+
+\fcc{PhoneDirectory directory = new PhoneDirectory(3);}
+
+\fcc{// It can return any available phone number. Here we assume it returns 0.}
+
+\fcc{directory.get();}
+
+\fcc{// Assume it returns 1.}
+
+\fcc{directory.get();}
+
+\fcc{// The number 2 is available, so return true.}
+
+\fcc{directory.check(2);}
+
+\fcc{// It returns 2, the only number that is left.}
+
+\fcc{directory.get();}
+
+\fcc{// The number 2 is no longer available, so return false.}
+
+\fcc{directory.check(2);}
+
+\fcc{// Release number 2 back to the pool.}
+
+\fcc{directory.release(2);}
+
+\fcc{// Number 2 is available again, return true.}
+
+\fcc{directory.check(2);}
+\end{flushleft}
+
+\subsection{Queue With Hash Set}
+In order to achieve average $O(1)$ time complexity for each operation, we have to push each number into the queue.
+
+\setcounter{lstlisting}{0}
+\begin{lstlisting}[style=customc, caption={Queue}]
+class PhoneDirectory
+{
+public:
+    /** Initialize your data structure here
+        @param maxNumbers - The maximum numbers that can be stored in the phone directory. */
+    PhoneDirectory( int maxNumbers )
+    {
+        //add all numbers into the queue
+        for( int i = 0; i < maxNumbers; ++i )
+        {
+            q.push( i );
+        }
+    }
+    /** Provide a number which is not assigned to anyone.
+        @return - Return an available number. Return -1 if none is available. */
+    int get()
+    {
+        if( q.empty() )
+        {
+            //we have used all numbers
+            return -1;
+        }
+        int num = q.front();
+        q.pop();
+        used.insert( num );
+        return num;
+    }
+    /** Check if a number is available or not. */
+    bool check( int number )
+    {
+        return used.find( number ) == used.end();
+    }
+    /** Recycle or release a number. */
+    void release( int number )
+    {
+        if( used.find( number ) == used.end() )
+        {
+            //this number is not used
+            //no need to recycle
+            return;
+        }
+        q.push( number );
+        used.erase( number );
+    }
+    queue<int> q;
+    unordered_set<int> used;
+};
+\end{lstlisting} 

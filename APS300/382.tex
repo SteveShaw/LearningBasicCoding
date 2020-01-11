@@ -59,7 +59,7 @@ Suppose we see a sequence of items, one at a time. We want to keep ten items in 
 
 \begin{itemize}
 \item Keep the first 10 items in memory.
-\item When the $i$-th item arrives (for i > 10):
+\item When the $i$-th item arrives (for $i > 10$):
 \begin{enumerate}
 \item with probability $ 10 / i $, keep the new item (discard an old one, selecting which to replace at random, each with chance 1/10)
 \item with probability $1 − 10 / i$, keep the old items (ignore the new one)
@@ -263,3 +263,8 @@ public:
     ListNode* m_head;
 };
 \end{lstlisting}
+
+\paragraph{Similar Problems}
+\begin{itemize}
+\item \textbf{398. Random Pick Index}
+\end{itemize}
