@@ -1,0 +1,33 @@
+\section{821 --- Shortest Distance to a Character}
+
+\textbf{Easy}
+
+Given a string $S$ and a character $C$, return an array of integers representing the shortest distance from the character $C$ in the string.
+
+\paragraph{Example 1:}
+
+\begin{flushleft}
+\textbf{Input}: \fcj{S = "loveleetcode"}, \fcj{C = 'e'}
+
+\textbf{Output}: \fcj{[3, 2, 1, 0, 1, 0, 0, 1, 2, 2, 1, 0]}
+\end{flushleft}
+
+\paragraph{Note:}
+
+\begin{itemize}
+\item $S$ string length is in \fcj{[1, 10000]}.
+\item $C$ is a single character, and guaranteed to be in string $S$.
+\item All letters in $S$ and $C$ are lowercase.
+\end{itemize}
+
+\subsection{Two Pass}
+For each \fcj{S[i]}, we find the distance to the next character $C$ going left, and going right. The answer is the minimum of these two values.
+
+When going left to right, we'll remember the index \fcj{prev} of the last character $C$ we've seen. Then the answer is \fcj{i - prev}.
+
+When going right to left, we'll remember the index \fcj{prev} of the last character $C$ we've seen. Then the answer is \fcj{prev - i}.
+
+We take the minimum of these two answers to create our final answer.
+
+\setcounter{lstlisting}{0}
+\lstinputlisting[style=customc, caption={Remove Suffix}]{821.cpp}

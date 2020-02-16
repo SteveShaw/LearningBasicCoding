@@ -34,6 +34,7 @@ This is the highest among any shorthand color.
 
 \subsection{Brute Force}
 Each digit in the shorthand \fcj{"#RGB"} could be from 0 to 15. This leads to a color of 
+
 \fcj{17 * R * (1 << 16) + 17 * G * (1 << 8) + 17 * B}. 
 
 The reason for the 17 is because a hexadecimal value of \fcj{0x22} is equal to \fcj{2 * 16 + 2 * 1} which is \fcj{2 * (17)}. The other values for red and green work similarly, just shifted up by 8 or 16 bits.

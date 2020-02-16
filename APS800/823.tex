@@ -1,0 +1,64 @@
+\section{823 --- Binary Trees With Factors}
+
+\textbf{Medium}
+
+Given an array of unique integers, each integer is strictly greater than 1.
+
+We make a binary tree using these integers and each number may be used for any number of times.
+
+Each non-leaf node's value should be equal to the product of the values of it's children.
+
+How many binary trees can we make?  Return the answer modulo $10^9 + 7$.
+
+\paragraph{Example 1:}
+
+\begin{flushleft}
+\textbf{Input}: \fcj{A = [2, 4]}
+
+\textbf{Output}: 3
+
+\textbf{Explanation}: We can make these trees: \fcj{[2]}, \fcj{[4]}, \fcj{[4, 2, 2]}
+\end{flushleft}
+
+\paragraph{Example 2:}
+
+\begin{flushleft}
+\textbf{Input}: \fcj{A = [2, 4, 5, 10]}
+
+\textbf{Output}: 7
+
+\textbf{Explanation}: 
+
+We can make these trees: 
+
+\fcj{[2], [4], [5], [10], [4, 2, 2], [10, 2, 5], [10, 5, 2]}.
+\end{flushleft}
+
+ 
+
+\paragraph{Note:}
+
+\begin{itemize}
+\item \fcj{1 <= A.length <= 1000}.
+\item $2 \leq A[i] \leq 10^9$.
+
+\end{itemize}
+
+\subsection{Dynamic Programming}
+The largest value $v$ used must be the root node in the tree. 
+
+Suppose $F(v)$ is the number of ways to make a tree with root node $v$.
+
+If the root node of the tree (with value $v$) has children with values $x$ and $y$ (and $x \times y = v$), then there are $F(x) \times F(y)$ ways to make this tree.
+
+In total, there are $\sum_{\substack{x \times y = v}} F(x) \times F(y)$ ways to make a tree with root node $v$.
+
+
+To turn above idea into algorithm, we need to sort $A$ first.
+
+For some root value $A[i]$, we try to find candidates for the children with values $A[j]$ and $A[i] / A[j]$. We may use a hash map to speed the lookup of index for $A[i]/A[j]$.
+
+Then, we add all possible $F[j] * F[k]$ (with $j < i$ and $k < i$) to $F[i]$. 
+
+\setcounter{lstlisting}{0}
+\lstinputlisting[style=customc, caption={DP}]{823.cpp}

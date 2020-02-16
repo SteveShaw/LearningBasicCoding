@@ -1,0 +1,73 @@
+\section{825 --- Friends Of Appropriate Ages}
+
+\textbf{Medium}
+
+Some people will make friend requests. The list of their ages is given and \fcj{ages[i]} is the age of the $i$-th person. 
+
+Person $A$ will NOT friend request person $B$ ($B \neq A$) if any of the following conditions are true:
+
+\begin{itemize}
+\item \fcj{age[B] <= 0.5 * age[A] + 7}
+\item \fcc{age[B] > age[A]}
+\item \fcj{age[B] > 100 && age[A] < 100}
+\end{itemize}
+
+Otherwise, A will friend request B.
+
+Note that if A requests B, B does not necessarily request A.  Also, people will not friend request themselves.
+
+How many total friend requests are made?
+
+\paragraph{Example 1:}
+
+\begin{flushleft}
+\textbf{Input}: \fcj{[16,16]}
+
+\textbf{Output}: 2
+
+\textbf{Explanation}: 2 people friend request each other.
+
+\end{flushleft}
+
+\paragraph{Example 2:}
+
+\begin{flushleft}
+\textbf{Input}: \fcj{[16,17,18]}
+
+\textbf{Output}: 2
+
+\textbf{Explanation}: Friend requests are made \fcj{17 -> 16}, \fcj{18 -> 17}.
+\end{flushleft}
+
+\paragraph{Example 3:}
+
+\begin{flushleft}
+Input: \fcj{[20,30,100,110,120]}
+
+\textbf{Output}: 3
+
+\textbf{Explanation}: Friend requests are made \fcj{110 -> 100}, \fcj{120 -> 110}, \fcj{120 -> 100}.
+\end{flushleft}
+
+ 
+
+\paragraph{Notes:}
+
+\begin{itemize}
+\item $1 \leq \lvert \text{ages}\rvert \leq 20000$.
+\item $1 \leq \text{ages}[i] \leq 120$.
+\end{itemize}
+
+\subsection{Counting}
+We can count number of people who are at the same age. Since there are only 120 possible ages, this is a much faster loop.
+
+For each pair \fcj{(ageA, countA)}, \fcj{(ageB, countB)}, if the conditions are satisfied with respect to age, then \fcj{countA * countB} pairs of people made friend requests.
+
+If \fcj{ageA == ageB}, then we overcounted: we should have \fcj{countA * (countA - 1)} pairs of people making friend requests instead, as we cannot friend request yourself.
+
+\setcounter{lstlisting}{0}
+\lstinputlisting[style=customc, caption={Counting}]{825.cpp}
+
+
+
+

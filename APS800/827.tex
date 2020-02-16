@@ -1,0 +1,52 @@
+\section{827 --- Making A Large Island}
+
+\textbf{Hard}
+
+In a 2D grid of 0s and 1s, we change at most one 0 to a 1.
+
+After, what is the size of the largest island? (An island is a 4-directionally connected group of 1s).
+
+\paragraph{Example 1:}
+
+\begin{flushleft}
+\textbf{Input}: \fcj{[[1, 0], [0, 1]]}
+
+\textbf{Output}: 3
+
+\textbf{Explanation}: Change one 0 to 1 and connect two 1s, then we get an island with \fcj{area = 3}.
+\end{flushleft}
+
+\paragraph{Example 2:}
+
+\begin{flushleft}
+\textbf{Input}: \fcj{[[1, 1], [1, 0]]}
+
+\textbf{Output}: 4
+
+\textbf{Explanation}: Change the 0 to 1 and make the island bigger, only one island with \fcj{area = 4}.
+\end{flushleft}
+
+\paragraph{Example 3:}
+
+\begin{flushleft}
+\textbf{Input}: \fcj{[[1, 1], [1, 1]]}
+
+\textbf{Output}: 4
+
+\textbf{Explanation}: Can't change any 0 to 1, only one island with \fcj{area = 4}.
+\end{flushleft}
+
+ 
+
+\paragraph{Notes:}
+
+\begin{itemize}
+\item $1 \leq \texttt{grid.length = grid[0].length} \leq 50$.
+\item $0 \leq \texttt{grid[i][j]} \leq 1$.
+\end{itemize}
+
+\subsection{Depth First Search}
+To avoid calculate each connected component repeatedly, we can mark each component with a unique color, add the size of this component into an array and associate the index with the color. In this way, we can easily find if two cells with value 1 belong to same group.
+
+\setcounter{lstlisting}{0}
+\lstinputlisting[style=customc, caption={DFS}]{827.cpp}
