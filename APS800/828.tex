@@ -1,0 +1,51 @@
+\section{828 --- Unique Letter String}
+
+\textbf{Hard}
+
+A character is unique in string $S$ if it occurs exactly once in it.
+
+For example, in string \fcj{S = "LETTER"}, the only unique characters are \fcj{"L"} and \fcj{"R"}.
+
+Let's define \fcj{UNIQ(S)} as the number of unique characters in string $S$.
+
+For example, \fcj{UNIQ("LETTER") =  2}.
+
+Given a string $S$ with only uppercases, calculate the sum of \fcj{UNIQ(substring)} over all non-empty substrings of $S$.
+
+If there are two or more equal substrings at different positions in $S$, we consider them different.
+
+Since the answer can be very large, return the answer modulo $10 ^ 9 + 7$.
+
+ 
+
+\paragraph{Example 1:}
+
+\begin{flushleft}
+\textbf{Input}: \fcj{"ABC"}
+
+\textbf{Output}: 10
+
+\textbf{Explanation}: All possible substrings are: \fcj{"A"},\fcj{"B"},\fcj{"C"},\fcj{"AB"},\fcj{"BC"} and \fcj{"ABC"}.
+
+Evey substring is composed with only unique letters.
+
+Sum of lengths of all substring is $1 + 1 + 1 + 2 + 2 + 3 = 10$
+\end{flushleft}
+
+\paragraph{Example 2:}
+
+\begin{flushleft}
+\textbf{Input}: \fcj{"ABA"}
+
+\textbf{Output}: 8
+
+Explanation: The same as example 1, except \fcj{uni("ABA") = 1}.
+\end{flushleft}
+
+ 
+
+\paragraph{Note:} 
+
+\begin{itemize}
+\item $0 \leq \texttt{S.length} \leq 10000$.
+\end{itemize}
