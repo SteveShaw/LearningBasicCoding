@@ -49,3 +49,20 @@ Explanation: The same as example 1, except \fcj{uni("ABA") = 1}.
 \begin{itemize}
 \item $0 \leq \texttt{S.length} \leq 10000$.
 \end{itemize}
+
+\subsection{Dynamic Programming}
+Take a string \fcj{"XAXAXXAX"} as the example. If we want to find out the substring that contains the second \fcj{"A"} as a unique character, we can take put parenthesis into as \fcj{"XA(XAXX)AX"}. Then the parts inside the parenthesis is one of substrings that we want to find.
+
+What we need to do are
+\begin{itemize}
+\item insert \fcj{"("} somewhere between the 1st and 2nd \texttt{A}. We have \fcj{"A(XA"} and \fcj{"AX(A"}, 2 ways.
+\item insert \fcj{")"} somewhere between the 2nd and 3rd \texttt{A}. We have \fcj{"A)XXA"}, \fcj{"AX)XA"} and \fcj{"AXX)A"}, 3 ways.
+\end{itemize}
+
+So there are $2 \times 3 = 6$ ways to make the 2nd \texttt{A} a unique character in a substring. In other words, there are only 6 substring, in which A is a unique letter.
+
+We can count how many ways to to make every letter in S as a unique letter inside a substring. The final result will be the sum of these counts.
+
+
+\setcounter{lstlisting}{0}
+\lstinputlisting[style=customc, caption={DP}]{828.cpp}

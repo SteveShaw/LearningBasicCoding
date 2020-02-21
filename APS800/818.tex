@@ -1,0 +1,128 @@
+\section{818 --- Race Car}
+
+\textbf{Hard}
+
+Your car starts at position 0 and speed $+1$ on an infinite number line.  (Your car can go into negative positions.)
+
+Your car drives automatically according to a sequence of instructions A (accelerate) and R (reverse).
+
+When you get an instruction \fcj{"A"}, your car does the following: \fcj{position += speed}, \fcj{speed *= 2}.
+
+When you get an instruction \fcj{"R"}, your car does the following: if your speed is positive then speed is changed to $-1$ , otherwise \fcj{speed = 1}.  (Your position stays the same.)
+
+For example, after commands \fcj{"AAR"}, your car goes to positions \fcj{0->1->3->3}, and your speed goes to \fcj{1->2->4->-1}.
+
+Now for some target position, say the length of the shortest sequence of instructions to get there.
+
+\paragraph{Example 1:}
+
+\begin{flushleft}
+\textbf{Input}: 
+
+\fcj{target = 3}
+
+\textbf{Output}: 2
+
+\textbf{Explanation}: 
+
+The shortest instruction sequence is \fcj{"AA"}.
+
+Your position goes from \fcj{0->1->3}.
+\end{flushleft}
+
+\paragraph{Example 2:}
+
+\begin{flushleft}
+\textbf{Input}: 
+
+\fcj{target = 6}
+
+\textbf{Output}: 5
+
+\textbf{Explanation}: 
+
+The shortest instruction sequence is \fcj{"AAARA"}.
+
+Your position goes from \fcj{0->1->3->7->7->6}.
+\end{flushleft}
+ 
+
+\paragraph{Note:}
+
+\begin{itemize}
+\item \fcj{1 <= target <= 10000}.
+\end{itemize}
+
+\subsection{Dynamic Programming}
+If the target $t$ is between $[2^{k-1}, 2^k)$, we can build a dp array for other target $u$ which is less than $t$.
+
+We may have two ways to reach $t$:
+
+\begin{itemize}
+\item Go pass $t$, stop and turn back.
+
+If we take $k$ commands $A$, we will reach 
+
+\[
+1 + 2 + 4 + \ldots + 2 ^{k-1} = 2^ k -1
+\]
+
+and take one command $R$.
+
+\item Go as far as possible before pass target, stop and turn back.
+
+In this case, We take $k$ commands $A$, and one command $R$. Then we back with $i$ commands $A$ to go back.
+\end{itemize}
+
+\setcounter{lstlisting}{0}
+\begin{lstlisting}[style=customc, caption={DP}]
+int racecar( int target )
+{
+    vector<int> F( target + 1, 1000000 );
+    F[0] = 0;
+    F[1] = 1;
+    if( target > 1 )
+    {
+        F[2] = 4;
+    }
+    //get the k such that
+    //2^(k-1) <= x < 2^k
+    //we use gcc builtin function __builtin_clz
+    //get leading zeros of x.
+    //then k = 32 - leading zeros;
+    auto get_k = []( unsigned int x )
+    {
+        return 32 - __builtin_clz( x );
+    };
+    for( int t = 3; t <= target; ++t )
+    {
+        int k = get_k( t );
+        auto lo = ( 1 << ( k - 1 ) );
+        auto hi = ( 1 << k ) - 1;
+        if( t == hi )
+        {
+            //we can reach t by taking (k-1) A commands
+            //and one R command
+            F[t] = k;
+        }
+        else
+        {
+            for( int i = 0; i < k - 1; ++i )
+            {
+                //we can start from position (t-2^(k-1) + 2^i)
+                //take (k-1) commands A, one command R
+                //then go back by (i) commands A, and one command R
+                F[t] = ( min )( F[t - lo + ( 1 << i )] + ( k - 1 ) + i + 2, F[t] );
+            }
+
+            if( hi - t - 1 < t )
+            {
+                //we can take k commands A to 2^k-1
+                //then back to t with number of commands F[hi-t]
+                F[t] = ( min )( F[t], F[hi - t] + k + 1 );
+            }
+        }
+    }
+    return F[target];
+}
+\end{lstlisting}
