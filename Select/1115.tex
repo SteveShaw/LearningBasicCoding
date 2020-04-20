@@ -90,3 +90,39 @@ public:
     }
 };
 \end{lstlisting}
+
+\begin{lstlisting}[style=customc, caption={1117}]
+class H2O
+{
+    mutex m;
+    condition_variable cv;
+    int c = 1;
+public:
+    H2O()
+    {
+    }
+    void hydrogen( function<void()> releaseHydrogen )
+    {
+        unique_lock<mutex> lk( m );
+        cv.wait( lk, [this] {return ( c % 3 != 0 );} );
+        // releaseHydrogen() outputs "H". Do not change or remove this line.
+        releaseHydrogen();
+        ++c;
+        if( !( c % 3 ) )
+        {
+            lk.unlock();
+            cv.notify_all();
+        }
+    }
+    void oxygen( function<void()> releaseOxygen )
+    {
+        unique_lock<mutex> lk( m );
+        cv.wait( lk, [this] {return ( c % 3 == 0 );} );
+        // releaseOxygen() outputs "O". Do not change or remove this line.
+        releaseOxygen();
+        ++c;
+        lk.unlock();
+        cv.notify_one();
+    }
+};
+\end{lstlisting}
