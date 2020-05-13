@@ -1,0 +1,64 @@
+\section{845 --- Longest Mountain in Array}
+
+\textbf{Medium}
+
+Let's call any (contiguous) subarray $B$ (of $A$) a \textit{mountain} if the following properties hold:
+
+\begin{itemize}
+\item \fcj{B.length >= 3}
+\item There exists some $0 < i < \texttt{B.length} - 1$ such that $B[0] < B[1] < \ldots < B[i-1] < B[i] > B[i+1] > ... > B[\texttt{B.length} - 1]$
+
+\end{itemize}
+
+(Note that $B$ could be any subarray of $A$, including the entire array $A$.)
+
+Given an array $A$ of integers, return the length of the longest mountain. 
+
+Return 0 if there is no mountain.
+
+\paragraph{Example 1:}
+
+\begin{flushleft}
+\textbf{Input}: \fcj{[2,1,4,7,3,2,5]}
+
+\textbf{Output}: 5
+
+\textbf{Explanation}: The largest mountain is \fcj{[1,4,7,3,2]} which has length 5.
+\end{flushleft}
+
+\paragraph{Example 2:}
+
+\begin{flushleft}
+\textbf{Input}: \fcj{[2,2,2]}
+
+\textbf{Output}: 0
+
+\textbf{Explanation}: There is no mountain.
+\end{flushleft}
+
+\paragraph{Note:}
+
+\begin{itemize}
+\item \fcj{0 <= A.length <= 10000}
+    
+\item \fcj{0 <= A[i] <= 10000}
+\end{itemize}
+
+\paragraph{Follow up:}
+
+\begin{itemize}
+\item Can you solve it using only one pass?
+\item Can you solve it in \fcj{O(1)} space?
+\end{itemize}
+
+\subsection{One Pass}
+
+We maintain two lengths: the length of up and down. 
+
+When $A[i]==A[i-1]$. Both length will be reset to zero.
+
+Also, when $A[i] > A[i-1]$ and we have non-zero down length, both up and down length also are reset to zero.
+
+\setcounter{lstlisting}{0}
+\lstinputlisting[style=customc, caption={One Pass}]{845.cpp}
+

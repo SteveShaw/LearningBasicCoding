@@ -1,0 +1,33 @@
+\section{839 --- Similar String Groups}
+
+\textbf{Hard}
+
+Two strings $X$ and $Y$ are similar if we can swap two letters (in different positions) of $X$, so that it equals $Y$. Also two strings $X$ and $Y$ are similar if they are equal.
+
+For example, \fcj{"tars"} and \fcj{"rats"} are similar (swapping at positions 0 and 2), and \fcj{"rats"} and \fcj{"arts"} are similar, but \fcj{"star"} is not similar to \fcj{"tars"}, \fcj{"rats"}, or \fcj{"arts"}.
+
+Together, these form two connected groups by similarity: \fcj{("tars", "rats", "arts")} and \fcj{("star")}.  Notice that \fcj{"tars"} and \fcj{"arts"} are in the same group even though they are not similar.  Formally, each group is such that a word is in the group if and only if it is similar to at least one other word in the group.
+
+We are given a list $A$ of strings.  Every string in $A$ is an anagram of every other string in A.  How many groups are there?
+
+ 
+
+\paragraph{Example 1:}
+
+\begin{flushleft}
+\textbf{Input}: \fcj{A = ["tars","rats","arts","star"]}
+
+\textbf{Output}: 2
+\end{flushleft}
+ 
+
+\paragraph{Constraints:}
+
+\begin{itemize}
+\item $1 \leq \texttt{A.length} \leq 2000$
+\item $ 1 \leq \texttt{A[i].length} \leq 1000 $
+\item $\texttt{A.length} \ast \texttt{A[i].length} \leq 20000$
+\item All words in $A$ consist of lowercase letters only.
+\item All words in $ A $ have the same length and are anagrams of each other.
+\item The judging time limit has been increased for this question.
+\end{itemize}

@@ -1,0 +1,45 @@
+\section{846 --- Hand of Straights}
+
+\textbf{Medium}
+
+Alice has a hand of cards, given as an array of integers.
+
+Now she wants to rearrange the cards into groups so that each group is size $W$, and consists of $W$ consecutive cards.
+
+Return \fcj{true} if and only if she can.
+
+\paragraph{Example 1:}
+\begin{flushleft}
+\textbf{Input}: \fcj{hand = [1,2,3,6,2,3,4,7,8]}, $W = 3$
+
+\textbf{Output}: \fcj{true}
+
+\textbf{Explanation}: Alice's hand can be rearranged as \fcj{[1,2,3]},\fcj{[2,3,4]},\fcj{[6,7,8]}.
+\end{flushleft}
+
+\paragraph{Example 2:}
+\begin{flushleft}
+\textbf{Input}: \fcj{hand = [1,2,3,4,5]}, $W = 4$
+
+\textbf{Output}: \fcj{false}
+
+\textbf{Explanation}: Alice's hand can't be rearranged into groups of 4.
+\end{flushleft}{}
+ 
+\paragraph{Note:}
+\begin{itemize}
+\item $1 \leq \texttt{hand.length} \leq 10000$
+\item $0 \leq \texttt{hand[i]} \leq 10^9 $
+\item $2 \leq W \leq \texttt{hand.length}$
+\end{itemize}
+
+\subsection{Brute Force}
+\begin{enumerate}
+\item Count number of different cards to a tree map.
+\item Loop from the smallest card number.
+\item Everytime we meet a new card $i$, we check if there are enough cards to form from $i$ to $i+W-1$.
+\end{enumerate}
+
+
+\setcounter{lstlisting}{0}
+\lstinputlisting[style=customc, caption={Brute Force}]{846.cpp}

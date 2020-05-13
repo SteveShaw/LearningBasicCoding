@@ -1,0 +1,58 @@
+\section{849 --- Maximize Distance to Closest Person}
+
+\textbf{Easy}
+
+In a row of \fcj{seats}, 1 represents a person sitting in that seat, and 0 represents that the seat is empty. 
+
+There is at least one empty seat, and at least one person sitting.
+
+Alex wants to sit in the seat such that the distance between him and the closest person to him is maximized. 
+
+Return that maximum distance to closest person.
+
+\paragraph{Example 1:}
+
+\begin{flushleft}
+\textbf{Input}: $ [1,0,0,0,1,0,1] $
+
+\textbf{Output}: 2
+
+\textbf{Explanation}: 
+
+If Alex sits in the second open seat (\fcj{seats[2]}), then the closest person has distance 2.
+
+If Alex sits in any other open seat, the closest person has distance 1.
+
+Thus, the maximum distance to the closest person is 2.
+\end{flushleft}
+
+\paragraph{Example 2:}
+
+\begin{flushleft}
+\textbf{Input}: $ [1,0,0,0] $
+
+\textbf{Output}: 3
+
+\textbf{Explanation}:
+ 
+If Alex sits in the last seat, the closest person is 3 seats away.
+
+This is the maximum distance possible, so the answer is 3.
+\end{flushleft}
+
+\paragraph{Note:}
+
+\begin{itemize}
+\item $1 \leq \texttt{seats.length} \leq 20000$
+\item \fcj{seats} contains only 0s or 1s, at least one 0, and at least one 1.
+\end{itemize}
+
+\subsection{One Pass}
+We maintain the index of last seated seat.
+
+Then loop on all seats. If a seat is occupied, we count the distance from the index of last occupied seat
+.
+The final result will be maximum of distance at the beginning, half of distance in the middle and distance at the end.
+
+\setcounter{lstlisting}{0}
+\lstinputlisting[style=customc, caption={One Pass}]{849.cpp}

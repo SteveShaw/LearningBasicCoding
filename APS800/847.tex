@@ -1,0 +1,59 @@
+\section{847 --- Shortest Path Visiting All Nodes}
+
+\textbf{Hard}
+
+An undirected, connected graph of $N$ nodes (labeled 0, 1, 2, $\ldots$, $N-1$) is given as graph.
+
+\fcj{graph.length = N}, and $j \neq i$ is in the list \fcj{graph[i]} exactly once, if and only if nodes $i$ and $j$ are connected.
+
+Return the length of the shortest path that visits every node. You may start and stop at any node, you may revisit nodes multiple times, and you may reuse edges.
+
+ 
+\paragraph{Example 1:}
+
+\begin{flushleft}
+\textbf{Input}: \fcj{[[1,2,3],[0],[0],[0]]}
+
+\textbf{Output}: 4
+
+\textbf{Explanation}: One possible path is \fcj{[1,0,2,0,3]}
+\end{flushleft}
+
+\paragraph{Example 2:}
+
+\begin{flushleft}
+\textbf{Input}: \fcj{[[1],[0,2,4],[1,3,4],[2],[1,2]]}
+
+\textbf{Output}: 4
+
+\textbf{Explanation}: One possible path is \fcj{[0,1,4,2,3]}
+
+\end{flushleft}
+ 
+
+\paragraph{Note:}
+
+\begin{itemize}
+\item $ 1 \leq \texttt{graph.length} \leq 12 $
+\item $ 0 \leq \texttt{graph[i].length} < \texttt{graph.length} $
+\end{itemize}
+
+\subsection{BFS}
+The number of nodes are less than 13, so we can use a bit mask to represent the visit status of each node starting from one node.
+
+starting from each node, we can store the visited nodes on the path into a state variable. If we visit a node labeled $k$, we set the $k$th bit of state associated with the starting node as 1.
+
+During the BFS process, if we find a state with all bits are set, we know the shorted path length is found
+
+\setcounter{lstlisting}{0}
+\lstinputlisting[style=customc, caption={BFS}]{847_BFS.cpp}
+
+\subsection{Dynamic Programming}
+Similar to \textbf{Bellman-Ford} algorithm. 
+
+In this approach, we iterate all states and update the distance by selecting each node as the start of a path. 
+
+Care must be taken to when a next state is found to be equal to current state. In this scenario, we need to run the above iteration loop again because a minimum state might only be achieved through multiple steps through some path. 
+
+\setcounter{lstlisting}{0}
+\lstinputlisting[style=customc, caption={DP}]{847_DP.cpp}

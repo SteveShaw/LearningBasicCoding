@@ -1,0 +1,44 @@
+\section{848 --- Shifting Letters}
+
+\textbf{Medium}
+
+We have a string $S$ of lowercase letters, and an integer array shifts.
+
+Call the shift of a letter, the next letter in the alphabet, (wrapping around so that \fcj{'z'} becomes \fcj{'a'}). 
+
+For example, \fcj{shift('a') = 'b'}, \fcj{shift('t') = 'u'}, and \fcj{shift('z') = 'a'}.
+
+Now for each \fcj{shifts[i] = x}, we want to shift the first $i+1$ letters of $S$, $x$ times.
+
+Return the final string after all such shifts to $S$ are applied.
+
+\paragraph{Example 1:}
+
+\begin{flushleft}
+\textbf{Input}: \fcj{S = "abc"}, \fcj{shifts = [3,5,9]}
+
+\textbf{Output}: \fcj{"rpl"}
+
+\textbf{Explanation}: 
+
+We start with \fcj{"abc"}.
+
+After shifting the first 1 letters of $S$ by 3, we have \fcj{"dbc"}.
+
+After shifting the first 2 letters of $S$ by 5, we have \fcj{"igc"}.
+
+After shifting the first 3 letters of $S$ by 9, we have \fcj{"rpl"}, the answer.
+\end{flushleft}
+
+\paragraph{Note:}
+
+\begin{itemize}
+\item $1 \leq \texttt{S.length = shifts.length} \leq 20000$
+\item $0 \leq \texttt{shifts[i]} \leq 10 ^ 9$
+\end{itemize}
+
+\subsection{Prefix Sum}
+The $i$th character is shifted $\texttt{shifts}[i] + \texttt{shifts}[i+1] + ... + \texttt{shifts}[\texttt{shifts.length} - 1]$ times. That's because only operations at the $i$th operation and after, affect the $i$th character.
+
+\setcounter{lstlisting}{0}
+\lstinputlisting[style=customc, caption={Prefix Sum}]{848.cpp}

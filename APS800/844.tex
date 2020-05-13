@@ -1,0 +1,66 @@
+\section{844 --- Backspace String Compare}
+
+\textbf{Easy}
+
+Given two strings $S$ and $T$, return if they are equal when both are typed into empty text editors. \# means a backspace character.
+
+Note that after backspacing an empty text, the text will continue empty.
+
+\paragraph{Example 1:}
+
+\begin{flushleft}
+Input: \fcj{S = "ab#c"}, \fcj{T = "ad#c"}
+
+Output: \fcj{true}
+
+Explanation: Both $S$ and $T$ become \fcj{"ac"}.
+\end{flushleft}
+
+\paragraph{Example 2:}
+
+\begin{flushleft}
+\textbf{Input}: \fcj{S = "ab##"}, \fcj{T = "c#d#"}
+
+\textbf{Output}: \fcj{true}
+
+\textbf{Explanation}: Both $S$ and $T$ become \fcj{""}.
+\end{flushleft}
+
+\paragraph{Example 3:}
+
+\begin{flushleft}
+\textbf{Input}: \fcj{S = "a##c"}, \fcj{T = "#a#c"}
+
+\textbf{Output}: \fcj{true}
+
+\textbf{Explanation}: Both $S$ and $T$ become \fcj{"c"}.
+\end{flushleft}
+
+\paragraph{Example 4:}
+
+\begin{flushleft}
+\textbf{Input}: \fcj{S = "a#c"}, \fcj{T = "b"}
+
+\textbf{Output}: \textbf{false}
+
+\textbf{Explanation}: $S$ becomes \fcj{"c"} while $T$ becomes \fcj{"b"}.
+\end{flushleft}
+
+\paragraph{Note:}
+
+\begin{itemize}
+\item $1 \leq \texttt{S.length} \leq 200$
+\item $1 \leq \texttt{T.length} \leq 200$
+\item $S$ and $T$ only contain lowercase letters and \fcj{'#'} characters.
+\end{itemize}
+
+\paragraph{Follow up:}
+
+\begin{itemize}
+\item Can you solve it in $ O(N) $ time and $ O(1) $ space?
+\end{itemize}
+
+\subsection{Two Pointers}
+
+Iterate through the string in reverse. If we see a backspace character, the next non-backspace character is skipped. If a character isn't skipped, it is part of the final answer.
+
